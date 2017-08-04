@@ -1,0 +1,10 @@
+exportPattern("^[[:alpha:]]+")
+import("FITSio")
+import("magicaxis")
+import("data.table")
+import("celestial")
+import("stats")
+import("graphics")
+import("grDevices")
+
+importFrom("utils", "relist")
