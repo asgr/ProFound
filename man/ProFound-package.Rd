@@ -1,5 +1,6 @@
 \name{ProFound-package}
 \alias{ProFound-package}
+\alias{ProFound}
 \docType{package}
 \title{
 \packageTitle{ProFound}

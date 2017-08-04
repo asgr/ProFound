@@ -1,9 +1,6 @@
 \name{ProFound}
 \alias{profoundProFound}
-\alias{ProFound}
 \alias{profound}
-\alias{proFound}
-\alias{Profound}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 ProFound Source Detection
