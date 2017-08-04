@@ -1,4 +1,4 @@
-profitSegimNear=function(segim, offset=1){
+profoundSegimNear=function(segim, offset=1){
   
   if(length(segim)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){

@@ -36,6 +36,6 @@ Robotham A.S.G., et al., 2017, MNRAS, 466, 1513
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))
 
-profound=profitProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
+profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
 
 }

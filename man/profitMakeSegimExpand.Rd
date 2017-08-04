@@ -1,19 +1,19 @@
-\name{profitMakeSegimExpand}
-\alias{profitMakeSegimExpand}
-\alias{profitMakeSegimDilate}
+\name{profoundMakeSegimExpand}
+\alias{profoundMakeSegimExpand}
+\alias{profoundMakeSegimDilate}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Segmentation Map Expansion and Dilation
 }
 \description{
-A high level utility to achieve decent quality image segmentation based on the expansion of a pre-existing segmentation map. It uses smoothing and local flux weighted comparisons to grow the current segmentation map so as to better identify distinct objects for use in, e.g., \code{\link{profitSetupData}}.
+A high level utility to achieve decent quality image segmentation based on the expansion of a pre-existing segmentation map. It uses smoothing and local flux weighted comparisons to grow the current segmentation map so as to better identify distinct objects for use in, e.g., \code{profitSetupData}.
 }
 \usage{
-profitMakeSegimExpand(image, segim, mask, objects, skycut = 1, SBlim, magzero = 0, gain,
+profoundMakeSegimExpand(image, segim, mask, objects, skycut = 1, SBlim, magzero = 0, gain,
 pixscale = 1, sigma = 1, smooth = TRUE, expandsigma = 5, expand = "all", sky, skyRMS,
 header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 offset = 1, sortcol = "segID", decreasing = FALSE, ...)
-profitMakeSegimDilate(image, segim, mask, size = 9, shape = "disc", expand = "all",
+profoundMakeSegimDilate(image, segim, mask, size = 9, shape = "disc", expand = "all",
 magzero = 0, gain, pixscale = 1, sky = 0, skyRMS = 0, header, verbose = FALSE,
 plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats =FALSE, offset = 1,
 sortcol = "segID", decreasing = FALSE, ...)
@@ -33,7 +33,7 @@ Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
   \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Since we are restricted to expanding out pre-existing segmentation regions we can usually afford to make this value lower than the equivalent in \code{\link{profitMakeSegim}}.
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Since we are restricted to expanding out pre-existing segmentation regions we can usually afford to make this value lower than the equivalent in \code{\link{profoundMakeSegim}}.
 }
   \item{SBlim}{
 Numeric scalar; the magnitude/arcsec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used.
@@ -66,10 +66,10 @@ Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels.
 Character scalar; the shape of the dilation kernel. See \code{makeBrush}.
 }
   \item{sky}{
-User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profitSkyEst}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{skyRMS}{
-User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profitSkyEst}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{header}{
 Full FITS header in table or vector format. If this is provided then the segmentations statistics table will gain \option{RAcen} and \option{Decen} coordinate outputs. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. Missing header keywords are printed out and other header option arguments are used in these cases. See \code{\link{magWCSxy2radec}}.
@@ -90,7 +90,7 @@ Logical; if TRUE then the \option{asymm}, \option{flux_reflect} and \option{mag_
 Logical; if TRUE then various pixel boundary statistics are computed (\option{Nedge}, \option{Nsky}, \option{Nobject}, \option{Nborder}, \option{edge_frac}, \option{edge_excess} and \option{FlagBorder}). If FALSE these return NA instead (saving computation time).
 }
   \item{offset}{
-Integer scalar; the distance to offset when searching for nearby segments (used in \code{\link{profitSegimStats}}).
+Integer scalar; the distance to offset when searching for nearby segments (used in \code{\link{profoundSegimStats}}).
 }
   \item{sortcol}{
 Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
@@ -103,27 +103,27 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 }
 }
 \details{
-The basic behaviour of \code{profitMakeSegimExpand} and  \code{profitMakeSegimDilate} is to intelligently expand out image segments already identified by, e.g., \code{\link{profitMakeSegim}}.
+The basic behaviour of \code{profoundMakeSegimExpand} and  \code{profoundMakeSegimDilate} is to intelligently expand out image segments already identified by, e.g., \code{\link{profoundMakeSegim}}.
 
-The \code{profitMakeSegimExpand} defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{dim}, \option{expandsigma}, \option{sigma}.
+The \code{profoundMakeSegimExpand} defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{dim}, \option{expandsigma}, \option{sigma}.
 
-\code{profitMakeSegimDilate} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{\link{profitProFound}} is not trivially replicated by other astronomy tools.
+\code{profoundMakeSegimDilate} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{\link{profoundProFound}} is not trivially replicated by other astronomy tools.
 
-The main difference between \code{profitMakeSegimExpand} and  \code{profitMakeSegimDilate} is the former grows the expansion a bit more organically, whereas the latter always gives new pixels to the brighter object if in doubt. That said, \code{profitMakeSegimDilate} often gives very similar solutions and runs about 10+ times faster, so might be the only option for larger images.
+The main difference between \code{profoundMakeSegimExpand} and  \code{profoundMakeSegimDilate} is the former grows the expansion a bit more organically, whereas the latter always gives new pixels to the brighter object if in doubt. That said, \code{profoundMakeSegimDilate} often gives very similar solutions and runs about 10+ times faster, so might be the only option for larger images.
 }
 \value{
 A list containing:
 
   \item{segim}{Integer matrix; the segmentation map matched pixel by pixel to \option{image}.}
   \item{objects}{Logical matrix; the object map matched pixel by pixel to \option{image}. 1 means there is an object at this pixel, 0 means it is a sky pixel. Can be used as a mask in various other functions that require objects to be masked out.}
-  \item{sky}{The estimated sky level of the \option{image}. \code{profitMakeSegimExpand} only).}
-  \item{skyRMS}{The estimated sky RMS of the \option{image}. \code{profitMakeSegimExpand} only).}
+  \item{sky}{The estimated sky level of the \option{image}. \code{profoundMakeSegimExpand} only).}
+  \item{skyRMS}{The estimated sky RMS of the \option{image}. \code{profoundMakeSegimExpand} only).}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
   \item{header}{The header provided, if missing this is NULL.}
-  \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profitMakeSegimExpand} only.}
+  \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
   \item{call}{The original function call.}
   
-If \option{stats}=TRUE then the function \code{\link{profitSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
+If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
   \item{uniqueID}{Unique ID, which is fairly static and based on the xcen and ycen position}
@@ -182,25 +182,25 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profitMakeSegim}}, \code{\link{profitProFound}}, \code{\link{profitSegimStats}}, \code{\link{profitSegimPlot}}
+\code{\link{profoundMakeSegim}}, \code{\link{profoundProFound}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
 }
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
-segim=profitMakeSegim(image, plot=TRUE, skycut=2)
-profitMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=1)
-profitMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=0)
-profitMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=-Inf, sigma=3)
+segim=profoundMakeSegim(image, plot=TRUE, skycut=2)
+profoundMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=1)
+profoundMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=0)
+profoundMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=-Inf, sigma=3)
 
-profitMakeSegimDilate(image, segim$segim, plot=TRUE)
-profitMakeSegimDilate(image, segim$segim, plot=TRUE, size = 15)
-profitMakeSegimDilate(image, segim$segim, plot=TRUE, size = 21)
+profoundMakeSegimDilate(image, segim$segim, plot=TRUE)
+profoundMakeSegimDilate(image, segim$segim, plot=TRUE, size = 15)
+profoundMakeSegimDilate(image, segim$segim, plot=TRUE, size = 21)
 
 #This expansion process is a *much* better idea then simply setting the original skycut
 #to a low value like 1/0:
-profitMakeSegim(image, plot=TRUE, skycut = 1)
-profitMakeSegim(image, plot=TRUE, skycut = 0)
+profoundMakeSegim(image, plot=TRUE, skycut = 1)
+profoundMakeSegim(image, plot=TRUE, skycut = 0)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

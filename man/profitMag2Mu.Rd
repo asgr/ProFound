@@ -1,6 +1,6 @@
-\name{profitMag2Mu}
-\alias{profitMag2Mu}
-\alias{profitMu2Mag}
+\name{profoundMag2Mu}
+\alias{profoundMag2Mu}
+\alias{profoundMu2Mag}
 \title{
 Magnitude to Surface Brightness Conversions
 }
@@ -8,8 +8,8 @@ Magnitude to Surface Brightness Conversions
 Functions to convert total magnitudes to surface brightness and vica-versa. These are provided to allow models to be either specified by total magnitude or mean surface brightness within Re. The latter is a useful way of specifying a disk model since surface brightness does not span a huge range.
 }
 \usage{
-profitMag2Mu(mag = 15, re = 1, axrat = 1, pixscale = 1)
-profitMu2Mag(mu = 17, re = 1, axrat = 1, pixscale = 1)
+profoundMag2Mu(mag = 15, re = 1, axrat = 1, pixscale = 1)
+profoundMu2Mag(mu = 17, re = 1, axrat = 1, pixscale = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,19 +30,19 @@ The pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1, then 
 }
 }
 \value{
-profitMag2Mu returns the mean surface brightness within Re of the 2D Sersic profile.
+profoundMag2Mu returns the mean surface brightness within Re of the 2D Sersic profile.
 
-profitMag2Mu returns total magnitude of the 2D Sersic profile.
+profoundMag2Mu returns total magnitude of the 2D Sersic profile.
 }
 \author{
 Aaron Robotham
 }
 \seealso{
-\code{\link{profitMakeModel}}
+\code{\link{profoundSegimStats}}
 }
 \examples{
-profitMag2Mu(mag=22, re=10, axrat=0.5)
-profitMu2Mag(mu=28, re=10, axrat=0.5)
+profoundMag2Mu(mag=22, re=10, axrat=0.5)
+profoundMu2Mag(mu=28, re=10, axrat=0.5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

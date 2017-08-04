@@ -40,7 +40,7 @@
     return = temp
 }
 
-profitSkyEst=function(image, objects, mask, cutlo=cuthi/2, cuthi=sqrt(sum((dim(image)/2)^2)), skycut='auto', clipiters=5, radweight=0, plot=FALSE, ...){
+profoundSkyEst=function(image, objects, mask, cutlo=cuthi/2, cuthi=sqrt(sum((dim(image)/2)^2)), skycut='auto', clipiters=5, radweight=0, plot=FALSE, ...){
   radweight=-radweight
   xlen=dim(image)[1]
   ylen=dim(image)[2]
@@ -101,7 +101,7 @@ profitSkyEst=function(image, objects, mask, cutlo=cuthi/2, cuthi=sqrt(sum((dim(i
   return=list(sky=sky,skyerr=skyerr,skyRMS=skyRMS,Nnearsky=Nnearsky,radrun=tempmedian)
 }
 
-profitSkyEstLoc=function(image, objects, mask, loc=dim(image)/2, box=c(100,100), skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE, plot=FALSE, ...){
+profoundSkyEstLoc=function(image, objects, mask, loc=dim(image)/2, box=c(100,100), skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE, plot=FALSE, ...){
   if(!missing(objects) | !missing(mask)){
     if(!missing(objects)){
       tempobj=magcutout(image=objects, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0
@@ -166,13 +166,13 @@ profitSkyEstLoc=function(image, objects, mask, loc=dim(image)/2, box=c(100,100),
   return=list(val=c(skyloc, skyRMSloc), clip=clip)
 }
 
-profitMakeSkyMap=function(image, objects, mask, box=c(100,100), grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE){
+profoundMakeSkyMap=function(image, objects, mask, box=c(100,100), grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE){
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
   tempsky=matrix(0,dim(tempgrid)[1],2)
   for(i in 1:dim(tempgrid)[1]){
-    tempsky[i,]=profitSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
+    tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
   }
   tempmat_sky=matrix(tempsky[,1],length(xseq))
   tempmat_skyRMS=matrix(tempsky[,2],length(xseq))
@@ -181,7 +181,7 @@ profitMakeSkyMap=function(image, objects, mask, box=c(100,100), grid=box, skytyp
   return=list(sky=list(x=xseq, y=yseq, z=tempmat_sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))
 }
 
-profitMakeSkyGrid=function(image, objects, mask, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE){
+profoundMakeSkyGrid=function(image, objects, mask, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE){
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
     invisible(gc())
@@ -196,7 +196,7 @@ profitMakeSkyGrid=function(image, objects, mask, box=c(100,100), grid=box, type=
   tempgrid=expand.grid(xseq, yseq)
   tempsky=matrix(0,dim(tempgrid)[1],2)
   for(i in 1:dim(tempgrid)[1]){
-    tempsky[i,]=profitSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
+    tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
   }
   tempmat_sky=matrix(tempsky[,1],length(xseq))
   tempmat_skyRMS=matrix(tempsky[,2],length(xseq))

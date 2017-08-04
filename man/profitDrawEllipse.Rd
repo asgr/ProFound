@@ -1,5 +1,5 @@
-\name{profitDrawEllipse}
-\alias{profitDrawEllipse}
+\name{profoundDrawEllipse}
+\alias{profoundDrawEllipse}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Draw Ellipse
@@ -8,7 +8,7 @@ Draw Ellipse
 Calculates the \option{x} and \option{y} location of an ellipse, allowing for the presence of boxiness.
 }
 \usage{
-profitDrawEllipse(xcen = 0, ycen = 0, rad = 1, axrat = 1, ang = 0, box = 0, ...)
+profoundDrawEllipse(xcen = 0, ycen = 0, rad = 1, axrat = 1, ang = 0, box = 0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,10 +25,10 @@ Numeric vector; the major axis extent of the ellipse/s.
 Numeric vector; the axial ratio of the ellipse/s as given by \option{radlo}/\option{radhi}.
 }
   \item{ang}{
-Numeric vector; the angle of the ellipse/s in the usual ProFit sense, see \code{\link{profitMakeModel}}.
+Numeric vector; the angle of the ellipse/s in the usual ProFit sense, see \code{profitMakeModel}.
 }
   \item{box}{
-Numeric vector; the boxiness of the ellipse/s in the usual ProFit sense, see \code{\link{profitMakeModel}}.
+Numeric vector; the boxiness of the ellipse/s in the usual ProFit sense, see \code{profitMakeModel}.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{lines}} to draw the ellipse/s.
@@ -45,7 +45,7 @@ No value is returned, this function is run purely for the side effect of drawing
 Aaron Robotham
 }
 \seealso{
-\code{\link{profitGetEllipsesPlot}}, \code{\link{profitGetEllipses}}, \code{\link{profitGetEllipse}}
+\code{\link{profoundGetEllipsesPlot}}, \code{\link{profoundGetEllipses}}, \code{\link{profoundGetEllipse}}
 }
 \examples{
 \dontrun{
@@ -64,10 +64,10 @@ model = list(
  )
 )
 
-image=profitMakeModel(model)$z
+image=profoundMakeModel(model)$z
 temp=magimage(image)
 contour(temp, col='red', drawlabels=FALSE, add=TRUE)
-profitDrawEllipse(model$sersic$xcen, model$sersic$ycen, rad=26, axrat=model$sersic$axrat,
+profoundDrawEllipse(model$sersic$xcen, model$sersic$ycen, rad=26, axrat=model$sersic$axrat,
 ang=model$sersic$ang, box=model$sersic$box, col='blue', lty=2)
 
 model = list(
@@ -83,10 +83,10 @@ model = list(
  )
 )
 
-image=profitMakeModel(model)$z
+image=profoundMakeModel(model)$z
 temp=magimage(image)
 contour(temp, col='red', drawlabels=FALSE, add=TRUE)
-profitDrawEllipse(model$sersic$xcen, model$sersic$ycen, rad=30, axrat=model$sersic$axrat,
+profoundDrawEllipse(model$sersic$xcen, model$sersic$ycen, rad=30, axrat=model$sersic$axrat,
 ang=model$sersic$ang, box=model$sersic$box, col='blue', lty=2)
 }
 }

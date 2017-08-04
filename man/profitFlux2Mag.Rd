@@ -1,8 +1,8 @@
-\name{profitFlux2Mag}
-\alias{profitFlux2Mag}
-\alias{profitMag2Flux}
-\alias{profitFlux2SB}
-\alias{profitSB2Flux}
+\name{profoundFlux2Mag}
+\alias{profoundFlux2Mag}
+\alias{profoundMag2Flux}
+\alias{profoundFlux2SB}
+\alias{profoundSB2Flux}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Convert between fluxes and magnitudes.
@@ -11,10 +11,10 @@ Convert between fluxes and magnitudes.
 Simple functions to concert between magnitudes and flux given a certain magnitude zero-point.
 }
 \usage{
-profitFlux2Mag(flux = 1, magzero = 0)
-profitMag2Flux(mag = 0, magzero = 0)
-profitFlux2SB(flux = 1, magzero = 0, pixscale = 1)
-profitSB2Flux(SB = 0, magzero = 0, pixscale = 1)
+profoundFlux2Mag(flux = 1, magzero = 0)
+profoundMag2Flux(mag = 0, magzero = 0)
+profoundFlux2SB(flux = 1, magzero = 0, pixscale = 1)
+profoundSB2Flux(SB = 0, magzero = 0, pixscale = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,19 +38,19 @@ Numeric scalar/vector; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SD
 These functions are here to prevent silly mistakes, but the conversion is almost trivial.
 }
 \value{
-  \item{profitFlux2Mag}{Returns the magnitude, where \option{mag} = -2.5 * log10(\option{flux}) + \option{magzero})}
-  \item{profitMag2Flux}{Returns the flux, where \option{flux} = 10^(-0.4 * (\option{mag} - \option{magzero}))}
+  \item{profoundFlux2Mag}{Returns the magnitude, where \option{mag} = -2.5 * log10(\option{flux}) + \option{magzero})}
+  \item{profoundMag2Flux}{Returns the flux, where \option{flux} = 10^(-0.4 * (\option{mag} - \option{magzero}))}
   HERE!!!
 }
 \author{
 Aaron Robotham
 }
 \seealso{
-\code{\link{profitGainConvert}}
+\code{\link{profoundGainConvert}}
 }
 \examples{
-profitFlux2Mag(1e5, 30)
-profitMag2Flux(17.5, 30)
+profoundFlux2Mag(1e5, 30)
+profoundMag2Flux(17.5, 30)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -73,13 +73,13 @@
   return(which( outer(tab1[,1], tab2[,1], "==") & outer(tab1[,2], tab2[,2], "=="), arr.ind=TRUE))
 }
 
-profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smooth=TRUE, pixcut=5, skycut=2, SBlim, magzero=0, gain=NULL, pixscale=1, sky, skyRMS, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
+profoundMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smooth=TRUE, pixcut=5, skycut=2, SBlim, magzero=0, gain=NULL, pixscale=1, sky, skyRMS, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
     invisible(gc())
   }
   call=match.call()
-  if(verbose){message(' - Running profitMakeSegim:')}
+  if(verbose){message(' - Running profoundMakeSegim:')}
   timestart = proc.time()[3]
   if(!requireNamespace("imager", quietly = TRUE)){
     stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
@@ -100,7 +100,7 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profitGetPixScale(header)
+    pixscale=profoundGetPixScale(header)
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -111,7 +111,7 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
-    sky=profitSkyEst(image=image, mask=mask, objects=objects, plot=FALSE)$sky
+    sky=profoundSkyEst(image=image, mask=mask, objects=objects, plot=FALSE)$sky
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky - User provided sky")}
   }
@@ -120,7 +120,7 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
   
   if(hasskyRMS==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
-    skyRMS=profitSkyEst(image=profitImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
+    skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky RMS - User provided sky RMS")}
   }
@@ -137,7 +137,7 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
   xlen=dim(image)[1]
   ylen=dim(image)[2]
   if(!missing(SBlim) & !missing(magzero)){
-    image[image<skycut | image_sky<profitSB2Flux(SBlim, magzero, pixscale)]=0
+    image[image<skycut | image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
   }else{
     image[image<skycut]=0
   }
@@ -156,7 +156,7 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
 
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}
-    profitSegimPlot(image=image_orig, segim=segim, mask=mask, sky=sky, ...)
+    profoundSegimPlot(image=image_orig, segim=segim, mask=mask, sky=sky, ...)
   }else{
     if(verbose){message(" - Skipping segmentation plot - plot set to FALSE")}
   }
@@ -166,7 +166,7 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making final local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
-    sky=profitSkyEst(image=image_orig, mask=mask, objects=objects, plot=FALSE)$sky
+    sky=profoundSkyEst(image=image_orig, mask=mask, objects=objects, plot=FALSE)$sky
   }else{
     if(verbose){message(" - Skipping making final local estimate of the sky - User provided sky")}
   }
@@ -175,37 +175,37 @@ profitMakeSegim=function(image, mask, objects, tolerance=4, ext=2, sigma=1, smoo
   
   if(hasskyRMS==FALSE){
     if(verbose){message(paste(" - Making final local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
-    skyRMS=profitSkyEst(image=profitImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
+    skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky RMS - User provided sky RMS")}
   }
   
   if(stats & any(image>0)){
     if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-    segstats=profitSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    segstats=profoundSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
   }else{
     if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE or no segments")}
     segstats=NULL
   }
   
   if(!missing(SBlim) & !missing(magzero)){
-    SBlim=min(SBlim, profitFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
+    SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
   }else if(missing(SBlim) & !missing(magzero) & skycut>0){
-    SBlim=profitFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
+    SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
   }else{
     SBlim=NULL
   }
   
   if(missing(header)){header=NULL}
   
-  if(verbose){message(paste(" - profitMakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
+  if(verbose){message(paste(" - profoundMakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
   return=list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)
 }
 
-profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky, skyRMS, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
+profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky, skyRMS, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
   
-  if(verbose){message(' - Running profitMakeSegimExpand:')}
+  if(verbose){message(' - Running profoundMakeSegimExpand:')}
   timestart = proc.time()[3]
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
@@ -231,7 +231,7 @@ profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, mag
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profitGetPixScale(header)
+    pixscale=profoundGetPixScale(header)
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -242,14 +242,14 @@ profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, mag
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
-    sky=profitSkyEst(image=image, mask=mask, objects=objects, plot=FALSE)$sky
+    sky=profoundSkyEst(image=image, mask=mask, objects=objects, plot=FALSE)$sky
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky - User provided sky")}
   }
   image_sky=image-sky
   if(hasskyRMS==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
-    skyRMS=profitSkyEst(image=profitImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
+    skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky RMS - User provided sky RMS")}
   }
@@ -265,14 +265,14 @@ profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, mag
   xlen=dim(image)[1]
   ylen=dim(image)[2]
   if(!missing(SBlim) & !missing(magzero)){
-    image[image<skycut | image_sky<profitSB2Flux(SBlim, magzero, pixscale)]=0
+    image[image<skycut | image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
   }else{
     image[image<skycut]=0
   }
   if(!missing(mask)){
     image[mask!=0]=0
   }
-  #kernel=profitMakeGaussianPSF(fwhm = expandsigma, dim=dim)
+  #kernel=profoundMakeGaussianPSF(fwhm = expandsigma, dim=dim)
   maxmat=matrix(min(image, na.rm=TRUE), xlen, ylen)
   segim_new=matrix(0,xlen,ylen)
   segvec=which(tabulate(segim)>0)
@@ -284,8 +284,8 @@ profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, mag
     segtemp[segim==i]=1
     segtemp[segim!=i]=0
     if(i %in% expand){
-      #temp=profitConvolvePSF(segtemp, kernel)
-      temp=profitImBlur(segtemp, expandsigma)
+      #temp=profoundConvolvePSF(segtemp, kernel)
+      temp=profoundImBlur(segtemp, expandsigma)
     }else{
       temp=segtemp
     }
@@ -300,14 +300,14 @@ profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, mag
   
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}
-    profitSegimPlot(image=image_orig, segim=segim_new, mask=mask, sky=sky, ...)
+    profoundSegimPlot(image=image_orig, segim=segim_new, mask=mask, sky=sky, ...)
   }else{
     if(verbose){message(" - Skipping segmentation plot - plot set to FALSE")}
   }
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making final local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
-    sky=profitSkyEst(image=image_orig, mask=mask, objects=objects, plot=FALSE)$sky
+    sky=profoundSkyEst(image=image_orig, mask=mask, objects=objects, plot=FALSE)$sky
   }else{
     if(verbose){message(" - Skipping making final local estimate of the sky - User provided sky")}
   }
@@ -316,37 +316,37 @@ profitMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, mag
   
   if(hasskyRMS==FALSE){
     if(verbose){message(paste(" - Making final local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
-    skyRMS=profitSkyEst(image=profitImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
+    skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
   }else{
     if(verbose){message(" - Skipping making final local estimate of the sky RMS - User provided sky")}
   }
   
   if(stats){
     if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-    segstats=profitSegimStats(image=image_orig, segim=segim_new, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    segstats=profoundSegimStats(image=image_orig, segim=segim_new, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
   }else{
     if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
     segstats=NULL
   }
   
   if(!missing(SBlim) & !missing(magzero)){
-    SBlim=min(SBlim, profitFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
+    SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
   }else if(missing(SBlim) & !missing(magzero) & skycut>0){
-    SBlim=profitFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
+    SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
   }else{
     SBlim=NULL
   }
   
   if(missing(header)){header=NULL}
   
-  if(verbose){message(paste(" - profitMakeSegimExpand is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
+  if(verbose){message(paste(" - profoundMakeSegimExpand is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
   return=list(segim=segim_new, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)
 }
 
-profitMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, skyRMS=0, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
+profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, skyRMS=0, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
 
-  if(verbose){message(' - Running profitMakeSegimDilate:')}
+  if(verbose){message(' - Running profoundMakeSegimDilate:')}
   timestart = proc.time()[3]
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
@@ -372,7 +372,7 @@ profitMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expand=
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profitGetPixScale(header)
+    pixscale=profoundGetPixScale(header)
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -408,7 +408,7 @@ profitMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expand=
   
   if(stats & !missing(image)){
     if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-    segstats=profitSegimStats(image=image, segim=segim_new, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    segstats=profoundSegimStats(image=image, segim=segim_new, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
   }else{
     if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
     segstats=NULL
@@ -418,17 +418,17 @@ profitMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expand=
   objects[objects!=0]=1
   
   if(plot){
-    profitSegimPlot(image=image, segim=segim_new, mask=mask, sky=sky, ...)
+    profoundSegimPlot(image=image, segim=segim_new, mask=mask, sky=sky, ...)
   }
   
   if(missing(header)){header=NULL}
   
-  if(verbose){message(paste(" - profitMakeSegimDilate is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
+  if(verbose){message(paste(" - profoundMakeSegimDilate is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
   return=list(segim=segim_new, objects=objects, segstats=segstats, header=header, call=call)
 }
 
-profitSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=NULL, pixscale=1, header, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1){
+profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=NULL, pixscale=1, header, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1){
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
@@ -436,7 +436,7 @@ profitSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=N
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profitGetPixScale(header)
+    pixscale=profoundGetPixScale(header)
   }
   
   hassky=!missing(sky)
@@ -520,7 +520,7 @@ profitSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=N
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
   flux=tempDT[,sum(flux, na.rm=TRUE),by=segID]$V1
-  mag=profitFlux2Mag(flux=flux, magzero=magzero)
+  mag=profoundFlux2Mag(flux=flux, magzero=magzero)
   
   N50seg=tempDT[,length(which(cumsum(sort(flux))/sum(flux, na.rm=TRUE)>=0.5)),by=segID]$V1
   N90seg=tempDT[,length(which(cumsum(sort(flux))/sum(flux, na.rm=TRUE)>=0.1)),by=segID]$V1
@@ -581,7 +581,7 @@ profitSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=N
   if(rotstats){
     asymm=tempDT[,.asymm(x-0.5,y-0.5,flux),by=segID]$V1
     flux_reflect=tempDT[,.reflect(x-0.5,y-0.5,flux),by=segID]$V1
-    mag_reflect=profitFlux2Mag(flux=flux_reflect, magzero=magzero)
+    mag_reflect=profoundFlux2Mag(flux=flux_reflect, magzero=magzero)
   }else{
     asymm=NA
     flux_reflect=NA
@@ -602,9 +602,9 @@ profitSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=N
   
   con=R50seg/R90seg
 
-  SB_N50=profitFlux2SB(flux=flux*0.5/N50seg, magzero=magzero, pixscale=pixscale)
-  SB_N90=profitFlux2SB(flux=flux*0.9/N90seg, magzero=magzero, pixscale=pixscale)
-  SB_N100=profitFlux2SB(flux=flux/N100seg, magzero=magzero, pixscale=pixscale)
+  SB_N50=profoundFlux2SB(flux=flux*0.5/N50seg, magzero=magzero, pixscale=pixscale)
+  SB_N90=profoundFlux2SB(flux=flux*0.9/N90seg, magzero=magzero, pixscale=pixscale)
+  SB_N100=profoundFlux2SB(flux=flux/N100seg, magzero=magzero, pixscale=pixscale)
   
   if(!missing(header)){
     coord=magWCSxy2radec(xcen, ycen, header=header)
@@ -720,7 +720,7 @@ profitSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain=N
   return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
 }
 
-profitSegimPlot=function(image, segim, mask, sky=0, ...){
+profoundSegimPlot=function(image, segim, mask, sky=0, ...){
   image=image-sky
   temp=magimage(image, ...)
   if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}

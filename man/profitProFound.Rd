@@ -1,5 +1,5 @@
 \name{ProFound}
-\alias{profitProFound}
+\alias{profoundProFound}
 \alias{ProFound}
 \alias{profound}
 \alias{proFound}
@@ -12,7 +12,7 @@ ProFound Source Detection
 This is the highest level source detection function provided in \code{ProFit}, calculating both the initial segmentation map and reasonable estimates for the total flux apertures for each source in an automatic manner.
 }
 \usage{
-profitProFound(image, segim, objects, mask, tolerance = 4, ext = 2, sigma = 1,
+profoundProFound(image, segim, objects, mask, tolerance = 4, ext = 2, sigma = 1,
 smooth = TRUE, pixcut = 5, skycut = 2, SBlim, size = 5, shape = "disc", iters = 6,
 threshold = 1.05, converge = 'flux', magzero = 0, gain, pixscale = 1, sky, skyRMS,
 redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bilinear",
@@ -27,7 +27,7 @@ decreasing = FALSE, lowmemory=FALSE, ...)
 Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is parsed to \option{image} and the correct header part is parsed to \option{header}. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
-Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as image if supplied. If this is option is used then \code{profitProFound} will not compute its initial segmentation map using \code{\link{profitMakeSegim}}, which is then dilated. Instead it will use the one parsed through \option{segim}.
+Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as image if supplied. If this is option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one parsed through \option{segim}.
 }
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
@@ -36,40 +36,40 @@ Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provide
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
   \item{tolerance}{
-Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. Parsed to \code{\link{profitMakeSegim}}.
+Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{ext}{
-Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects. Parsed to \code{\link{profitMakeSegim}}.
+Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{sigma}{
-Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Parsed to \code{\link{profitMakeSegim}}.
+Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{smooth}{
-Logical; should smoothing be done on the target \option{image}? Parsed to \code{\link{profitMakeSegim}}.
+Logical; should smoothing be done on the target \option{image}? Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{pixcut}{
-Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profitMakeSegim}}.
+Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profitMakeSegim}}.
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{SBlim}{
-Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Parsed to \code{\link{profitMakeSegim}}.
+Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{size}{
-Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Parsed to \code{\link{profitMakeSegimDilate}}.
+Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Parsed to \code{\link{profoundMakeSegimDilate}}.
 }
   \item{shape}{
-Character scalar; the shape of the dilation kernel. See \code{makeBrush}. Parsed to \code{\link{profitMakeSegimDilate}}.
+Character scalar; the shape of the dilation kernel. See \code{makeBrush}. Parsed to \code{\link{profoundMakeSegimDilate}}.
 }
   \item{iters}{
-Integer scalar; the maximum number of curve of growth dilations should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profitProFound}. If this is set to zero then the initial \option{segim} image wither provided or computed internally via \code{\link{profitMakeSegim}} will be used instead.
+Integer scalar; the maximum number of curve of growth dilations should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to zero then the initial \option{segim} image wither provided or computed internally via \code{\link{profoundMakeSegim}} will be used instead.
 }
   \item{threshold}{
 Numeric scalar; After the curve of growth dilations, \option{threshold} is the relative change of the converging property (see \option{converge}) that flags convergence. If consecutive iterations have a relative difference within this ratio then the dilation is stopped, and this iteration is used to define the segmentation of the object. The effect of this is that different objects will be dilated for a different number of iterations. Usually fainter sources require more.
 }
   \item{converge}{
-Character scalar; the segmentation property to compare for relative convergence. The options are in principle any column that is output by \code{\link{profitSegimStats}}, but in practice it should be something that increases slowly with dilation and tends to converge when the total flux is being captured. Good options are therefore 'flux' (default), 'R50' and 'R90'.
+Character scalar; the segmentation property to compare for relative convergence. The options are in principle any column that is output by \code{\link{profoundSegimStats}}, but in practice it should be something that increases slowly with dilation and tends to converge when the total flux is being captured. Good options are therefore 'flux' (default), 'R50' and 'R90'.
 }
   \item{magzero}{
   Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
@@ -81,16 +81,16 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
   Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
   \item{sky}{
-User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profitMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profoundMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{skyRMS}{
-User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profitMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{redosky}{
-Logical; should the sky and sky RMS grids be re-computed using the final segmentation map? This uses \code{\link{profitMakeSkyGrid}} to compute the sky and sky RMS grids. If \option{redosky}=TRUE then the output will include the aggressively masked \option{objects_redo} image, if \option{redosky}=FALSE then \option{objects_redo} will be NA.
+Logical; should the sky and sky RMS grids be re-computed using the final segmentation map? This uses \code{\link{profoundMakeSkyGrid}} to compute the sky and sky RMS grids. If \option{redosky}=TRUE then the output will include the aggressively masked \option{objects_redo} image, if \option{redosky}=FALSE then \option{objects_redo} will be NA.
 }
   \item{redoskysize}{
-Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels to apply to the \option{object} mask before performing the initial and final aggressively masked sky estimates (the latter is only relevant if \option{redosky}=TRUE). Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Dilation is done by \code{\link{profitMakeSegimDilate}}. If \option{redosky}=TRUE, the final dilated \option{objects} mask is returned as \option{objects_redo}. As a rule of thumb you probably want ~50\% of your image pixels to be masked as objects, much more than this and you might not be able to sample enough sky pixels, much more less and the sky estimates might be biased by object flux in the wings.
+Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels to apply to the \option{object} mask before performing the initial and final aggressively masked sky estimates (the latter is only relevant if \option{redosky}=TRUE). Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Dilation is done by \code{\link{profoundMakeSegimDilate}}. If \option{redosky}=TRUE, the final dilated \option{objects} mask is returned as \option{objects_redo}. As a rule of thumb you probably want ~50\% of your image pixels to be masked as objects, much more than this and you might not be able to sample enough sky pixels, much more less and the sky estimates might be biased by object flux in the wings.
 }
   \item{box}{
 Integer vector; the dimensions of the box car filter to estimate the sky with.
@@ -102,10 +102,10 @@ Integer vector; the resolution of the background grid to estimate the sky with. 
 Character scalar; either "bilinear" for bilinear interpolation (default) or "bicubic" for bicubic interpolation. The former is safer, especially near edges where bicubic interpolation can go a bit crazy.  
 }
   \item{skytype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profitSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
+Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
 }
   \item{skyRMStype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profitSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
+Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
 }
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
@@ -138,10 +138,10 @@ Logical; if TRUE then the \option{asymm}, \option{flux_reflect} and \option{mag_
 Logical; if TRUE then various pixel boundary statistics are computed (\option{Nedge}, \option{Nsky}, \option{Nobject}, \option{Nborder}, \option{edge_frac}, \option{edge_excess} and \option{FlagBorder}). If FALSE these return NA instead (saving computation time).
 }
   \item{nearstats}{
-Logical; if TRUE then the IDs of nearby segments is calculated via \code{\link{profitSegimNear}} and output to the returned object \option{near}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want nearby object IDs returned.
+Logical; if TRUE then the IDs of nearby segments is calculated via \code{\link{profoundSegimNear}} and output to the returned object \option{near}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want nearby object IDs returned.
 }
   \item{offset}{
-Integer scalar; the distance to offset when searching for nearby segments (used in both \code{\link{profitSegimStats}} and \code{\link{profitSegimNear}}).  
+Integer scalar; the distance to offset when searching for nearby segments (used in both \code{\link{profoundSegimStats}} and \code{\link{profoundSegimNear}}).  
 }
   \item{sortcol}{
 Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
@@ -159,9 +159,9 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 \details{
 This high level function is both a source detection and a segmented aperture growing function. The latter is achieved through consecutive dilation and flux measurement operations. It is not super fast, but it is designed to be fairly robust and fast enough for most use cases.
 
-\code{profitProFound} initially makes a segmentation map using the \code{\link{profitMakeSegim}} function. It then makes repeated dilations and flux measurements of this segmentation map using \code{\link{profitMakeSegimDilate}}, and calculates the convergent flux segment for each source. These are combined to make a final segmentation map with associated source statistics (if requested).
+\code{profoundProFound} initially makes a segmentation map using the \code{\link{profoundMakeSegim}} function. It then makes repeated dilations and flux measurements of this segmentation map using \code{\link{profoundMakeSegimDilate}}, and calculates the convergent flux segment for each source. These are combined to make a final segmentation map with associated source statistics (if requested).
 
-\code{\link{profitMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profitProFound} is not trivially replicated by other astronomy tools.
+\code{\link{profoundMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profoundProFound} is not trivially replicated by other astronomy tools.
 }
 \value{
 A list containing:
@@ -172,15 +172,15 @@ A list containing:
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
-  \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profitSegimNear}}.}
+  \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
   \item{header}{The header provided, if missing this is NULL.}
-  \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profitMakeSegimExpand} only.}
+  \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
   \item{magzero}{The assumed magnitude zero point. This is relevant to various outputs returned by the segmentation statistics.}
   \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
   \item{pixscale}{The assumed pixel scale. This is relevant to various outputs returned by the segmentation statistics.}
   \item{call}{The original function call.}
   
-If \option{stats}=TRUE then the function \code{\link{profitSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
+If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
   \item{uniqueID}{Unique ID, which is fairly static and based on the xcen and ycen position}
@@ -233,19 +233,19 @@ If \option{stats}=TRUE then the function \code{\link{profitSegimStats}} is calle
   \item{edge_excess}{Ratio of the number of edge pixels to the expected number given the elliptical geometry measurements of the segment. If this is larger than 1 then it is a sign that the segment geometry is irregular, and is likely a flag for compromised photometry}
   \item{Flagborder}{A binary flag telling the user which \option{image} borders the segment touches. The bottom of the \option{image} is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9.}
   \item{iter}{The iteration number when the source was flagged as having convergent flux}
-  \item{origfrac}{The ratio between the final converged flux and the initial \code{\link{profitMakeSegim}} iso-contour estimate}
+  \item{origfrac}{The ratio between the final converged flux and the initial \code{\link{profoundMakeSegim}} iso-contour estimate}
 }
 \author{
 Aaron Robotham
 }
 \seealso{
-\code{\link{profitMakeSegim}}, \code{\link{profitMakeSegimDilate}}, \code{\link{profitMakeSegimExpand}}, \code{\link{profitSegimStats}}, \code{\link{profitSegimPlot}}
+\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
 }
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
-profound=profitProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
+profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
 
 #You can check to see if the final mask is aggressive enough. Notice the halos
 #surrounding bright sources when just using the objects mask.

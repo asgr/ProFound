@@ -1,5 +1,5 @@
-\name{profitSegimNear}
-\alias{profitSegimNear}
+\name{profoundSegimNear}
+\alias{profoundSegimNear}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Segment Neighbour IDs
@@ -8,7 +8,7 @@ Segment Neighbour IDs
 Returns a data.frame of all nearby (default is touching) segments surrounding every segment in a provided segim.
 }
 \usage{
-profitSegimNear(segim, offset = 1)
+profoundSegimNear(segim, offset = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,17 +38,17 @@ Due to the construction of the segmented curve-of-growth in ProFound you may hav
 }
 
 \seealso{
-\code{\link{profitProFound}}, \code{\link{profitMakeSegim}}, \code{\link{profitMakeSegimDilate}}, \code{\link{profitMakeSegimExpand}}, \code{\link{profitSegimStats}}, \code{\link{profitSegimPlot}}
+\code{\link{profoundProFound}}, \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
 }
 
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
-profound=profitProFound(image, skycut=1.5, magzero=30, verbose=TRUE)
+profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE)
 
 #Look for nearby (in this case touching) neighbours
 
-near=profitSegimNear(profound$segim)
+near=profoundSegimNear(profound$segim)
 
 #Look at the first few rows (segIDs 1:5):
 
@@ -60,7 +60,7 @@ unlist(near[3,2])
 
 #We can check to see which segments are touching segID number 3:
 
-profitSegimPlot(image$imDat, profound$segim)
+profoundSegimPlot(image$imDat, profound$segim)
 magimage(profound$segim==3, col=c(NA,'red'), add=TRUE)
 magimage(matrix(profound$segim %in% unlist(near[3,2]), dim(profound$segim)[1]),
 col=c(NA,'blue'), add=TRUE)

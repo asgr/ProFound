@@ -1,5 +1,5 @@
-\name{profitSkyEst}
-\alias{profitSkyEst}
+\name{profoundSkyEst}
+\alias{profoundSkyEst}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Local Sky Estimator
@@ -8,7 +8,7 @@ Local Sky Estimator
 A high level utility to estimate the sky properties of a supplied \option{image}. This is closely related to the equivalent routines available in the LAMBDAR R package.
 }
 \usage{
-profitSkyEst(image, objects, mask, cutlo = cuthi/2,
+profoundSkyEst(image, objects, mask, cutlo = cuthi/2,
 cuthi = sqrt(sum((dim(image)/2)^2)), skycut = 'auto', clipiters = 5, radweight = 0,
 plot = FALSE, ...)
 }
@@ -50,7 +50,7 @@ This function is closely modelled on the sky.estimate function in the LAMBDAR pa
 
 The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{cutlo}, \option{radweight}, \option{clipiters}.
 
-It is interesting to note that a better estimate of the sky RMS can be made by using the output of \code{\link{profitImDiff}} (see Examples).
+It is interesting to note that a better estimate of the sky RMS can be made by using the output of \code{\link{profoundImDiff}} (see Examples).
 }
 \value{
 Returns a list with 5 elements:
@@ -66,48 +66,48 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profitMakeSegim}}, \code{\link{profitMakeSegimExpand}}
+\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
 \dontrun{
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
 package="ProFound"))$imDat
-sky1 = profitSkyEst(image, plot=T)
+sky1 = profoundSkyEst(image, plot=T)
 image_sky = image-sky1$sky
-sky2 = profitSkyEst(profitImDiff(image_sky), plot=T)
+sky2 = profoundSkyEst(profoundImDiff(image_sky), plot=T)
 
 #You can check whether you are contaminated by the central objects by plotting the radrun
 #object in the list (it should be flat for a well behaved sky):
-sky = profitSkyEst(image, cutlo=0, plot=TRUE)
+sky = profoundSkyEst(image, cutlo=0, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
 #The above shows heavy contamination by the central object without. We can either mask
-#this out using the output of profitSegImWatershed, set cutlo to be larger or weight
+#this out using the output of profoundSegImWatershed, set cutlo to be larger or weight
 #the sky towards outer annuli.
 
-segim=profitSegImWatershed(image)
-sky = profitSkyEst(image, mask=segim$objects, cutlo=0, plot=TRUE)
+segim=profoundSegImWatershed(image)
+sky = profoundSkyEst(image, mask=segim$objects, cutlo=0, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
 #The above is better, but not great. A more aggressive segmentation helps:
 
-segim=profitSegImWatershed(image, skycut=0.5, sigma=3)
-sky = profitSkyEst(image, mask=segim$objects, cutlo=0, plot=TRUE)
+segim=profoundSegImWatershed(image, skycut=0.5, sigma=3)
+sky = profoundSkyEst(image, mask=segim$objects, cutlo=0, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
 #Or weighting the sky to outer radii
 
-segim=profitSegImWatershed(image)
-sky = profitSkyEst(image, mask=segim$objects, cutlo=0, radweight=1, plot=TRUE)
+segim=profoundSegImWatershed(image)
+sky = profoundSkyEst(image, mask=segim$objects, cutlo=0, radweight=1, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
 #Finally we can leave the central cutlo mask turned on:
 
-sky = profitSkyEst(image, mask=segim$objects, plot=TRUE)
+sky = profoundSkyEst(image, mask=segim$objects, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 }

@@ -1,5 +1,5 @@
-\name{profitInterp2d}
-\alias{profitInterp2d}
+\name{profoundInterp2d}
+\alias{profoundInterp2d}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 2D image interpolation
@@ -8,7 +8,7 @@
 A low level routine to interpolate a 2D image matrix at an arbitrary x/y pixel location. This function is unlikely to be used by the user, but it used internally to ensure that point sources defined by empirical point spread functions (PSFs) are accurately generated on an image.
 }
 \usage{
-profitInterp2d(x, y, image)
+profoundInterp2d(x, y, image)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,7 +23,7 @@ The image matrix to be used for the interpolation.
 }
 }
 \details{
-In practice this is a low level routine unlikely to be used by the user. \code{\link{profitMakePointSource}} should be used to generate point sources and PSFs.
+In practice this is a low level routine unlikely to be used by the user.
 
 For this function (and really, it is for user ease when interpolating a PSF) [0,0] is always the R image centre of the input \option{image}. This means it would be at the usual [1.5,2] position of a 3x4 image matrix.
 }
@@ -35,7 +35,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profitConvolvePSF}}, \code{\link{profitMakePointSource}}
+\code{\link{profoundMakeSkyMap}}, \code{\link{profoundMakeSkyGrid}}
 }
 \examples{
 # Nothing here

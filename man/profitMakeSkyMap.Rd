@@ -1,18 +1,18 @@
-\name{profitMakeSkyMap}
-\alias{profitMakeSkyMap}
-\alias{profitMakeSkyGrid}
+\name{profoundMakeSkyMap}
+\alias{profoundMakeSkyMap}
+\alias{profoundMakeSkyGrid}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Calculate Sky Maps
 }
 \description{
-The high level function computes the absolute sky and sky RMS level over an image at a scale defined locally by the \option{box} parameter. This coarse map can then be used to compute sky/skyRMS values for the local sky anywhere on an image. This function uses \code{\link{profitSkyEstLoc}} to calculate the sky statistics for the subset boxcar regions.
+The high level function computes the absolute sky and sky RMS level over an image at a scale defined locally by the \option{box} parameter. This coarse map can then be used to compute sky/skyRMS values for the local sky anywhere on an image. This function uses \code{\link{profoundSkyEstLoc}} to calculate the sky statistics for the subset boxcar regions.
 }
 \usage{
-profitMakeSkyMap(image, objects, mask, box = c(100,100), grid = box, skytype = "median",
+profoundMakeSkyMap(image, objects, mask, box = c(100,100), grid = box, skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=TRUE,
 paddim = TRUE)
-profitMakeSkyGrid(image, objects, mask, box = c(100,100), grid = box, type = 'bilinear',
+profoundMakeSkyGrid(image, objects, mask, box = c(100,100), grid = box, type = 'bilinear',
 skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=TRUE,
 paddim = TRUE)
 }
@@ -37,10 +37,10 @@ Integer vector; the resolution of the background grid to estimate the sky with. 
 Character scalar; either "bilinear" for bilinear interpolation (default) or "bicubic" for bicubic interpolation. The former is safer, especially near edges where bicubic interpolation can go a bit crazy.
 }
   \item{skytype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profitSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
+Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
 }
   \item{skyRMStype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profitSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
+Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
 }
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
@@ -59,43 +59,43 @@ Logical; should the cutout be padded with image data until it meets the desired 
 The matrix generated will have many fewer pixels than the original \option{image}, so it will need to be interpolated back onto the full grid by some mechanism in order to have 1-1 values for the sky and sky RMS.
 }
 \value{
-\code{profitMakeSkyMap} produces a list of two lists. The first (called sky) contains a list of x,y,z values for the absolute sky, and second (called skyRMS) contains a list of x,y,z values for the sky RMS. The grids returned are as coarse as the \option{box} option provided.
+\code{profoundMakeSkyMap} produces a list of two lists. The first (called sky) contains a list of x,y,z values for the absolute sky, and second (called skyRMS) contains a list of x,y,z values for the sky RMS. The grids returned are as coarse as the \option{box} option provided.
 
-\code{profitMakeSkyMap} produces a list of two lists. The first (called sky) is a matrix of values for the absolute sky. The second (called skyRMS) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
+\code{profoundMakeSkyMap} produces a list of two lists. The first (called sky) is a matrix of values for the absolute sky. The second (called skyRMS) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
 }
 \author{
 Aaron Robotham
 }
 
 \seealso{
-\code{\link{profitSkyEst}}, \code{\link{profitSkyEstLoc}}
+\code{\link{profoundSkyEst}}, \code{\link{profoundSkyEstLoc}}
 }
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 magimage(image)
-skymap = profitMakeSkyMap(image, box=c(89,89))
+skymap = profoundMakeSkyMap(image, box=c(89,89))
 magimage(skymap$sky)
 magimage(skymap$skyRMS)
 
 #Now again, masking out the known objects (will not help too much in this case):
-segim=profitMakeSegim(image, skycut=1.5, plot=TRUE)
-segim_ex=profitMakeSegimExpand(image, segim$segim, skycut=-Inf, plot=TRUE)
+segim=profoundMakeSegim(image, skycut=1.5, plot=TRUE)
+segim_ex=profoundMakeSegimExpand(image, segim$segim, skycut=-Inf, plot=TRUE)
 
-skymap=profitMakeSkyMap(image, objects=segim_ex$objects, box=c(89,89))
+skymap=profoundMakeSkyMap(image, objects=segim_ex$objects, box=c(89,89))
 magimage(skymap$sky, magmap=FALSE)
 magimage(skymap$skyRMS, magmap=FALSE)
 
 #We can bilinear interpolate this onto the full image grid:
 
-skybil = profitMakeSkyGrid(image, objects=segim_ex$objects, box=c(89,89))
+skybil = profoundMakeSkyGrid(image, objects=segim_ex$objects, box=c(89,89))
 magimage(skybil$sky, magmap=FALSE)
 magimage(skybil$skyRMS, magmap=FALSE)
 
 # Or we can bicubic interpolate this onto the full image grid:
 
-skybic = profitMakeSkyGrid(image, objects=segim_ex$objects, box=c(89,89), type='bicubic')
+skybic = profoundMakeSkyGrid(image, objects=segim_ex$objects, box=c(89,89), type='bicubic')
 magimage(skybic$sky, magmap=FALSE)
 magimage(skybic$skyRMS, magmap=FALSE)
 

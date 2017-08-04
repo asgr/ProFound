@@ -1,6 +1,6 @@
-\name{profitSegimInfo}
-\alias{profitSegimStats}
-\alias{profitSegimPlot}
+\name{profoundSegimInfo}
+\alias{profoundSegimStats}
+\alias{profoundSegimPlot}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Image Segmentation Statistics
@@ -9,10 +9,10 @@ Image Segmentation Statistics
 Basic summary statistics for image segments, e.g. aperture parameters, fluxes and surface brightness estimates. These might provide useful first guesses to ProFit fitting parameters (particularly \option{flux}, \option{axrat} and \option{ang}).
 }
 \usage{
-profitSegimStats(image, segim, mask, sky = 0, skyRMS = 0, magzero = 0, gain, pixscale = 1,
+profoundSegimStats(image, segim, mask, sky = 0, skyRMS = 0, magzero = 0, gain, pixscale = 1,
 header, sortcol = "segID", decreasing = FALSE, rotstats = FALSE, boundstats = FALSE,
 offset = 1)
-profitSegimPlot(image, segim, mask, sky = 0, ...)
+profoundSegimPlot(image, segim, mask, sky = 0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -63,11 +63,11 @@ Further arguments to be passed to \code{\link{magimage}}.
 }
 }
 \details{
-\code{profitSegimStats} provides summary statistics for the individual segments of the image, e.g. properties of the apertures, and the sum of the flux etc. This is used inside of \code{\link{profitMakeSegim}} and \code{\link{profitMakeSegimExpand}}, but it may be useful to use separately if manual modifications are made to the segmentation, or two segmentations (e.g. a hot and cold mode segmentation) need to be combined.
+\code{profoundSegimStats} provides summary statistics for the individual segments of the image, e.g. properties of the apertures, and the sum of the flux etc. This is used inside of \code{\link{profoundMakeSegim}} and \code{\link{profoundMakeSegimExpand}}, but it may be useful to use separately if manual modifications are made to the segmentation, or two segmentations (e.g. a hot and cold mode segmentation) need to be combined.
 
 The interpretation of some of these outputs will depend a lot on the data being analysed, so it is for the user to decide on sensible next steps (e.g. using the outputs to select stars etc). One output of interest might be \option{flux_reflect}. This attempts to correct for missing flux where segments start colliding. This probably returns an upper limit to the flux since in some regions it can even be double counted if the two sources that have colliding segmentation maps are very close together and similar in brightness, so somewhere between \option{flux} and \option{flux_reflect} the truth probably lies. If you want a better estimate of the flux division then you should really be using the profiling routine of \code{ProFit}.
 
-\code{profitSegimPlot} is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot!
+\code{profoundSegimPlot} is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot!
 }
 \value{
 A data.frame with columns:
@@ -123,19 +123,19 @@ A data.frame with columns:
   \item{edge_excess}{Ratio of the number of edge pixels to the expected number given the elliptical geometry measurements of the segment. If this is larger than 1 then it is a sign that the segment geometry is irregular, and is likely a flag for compromised photometry}
   \item{Flagborder}{A binary flag telling the user which \option{image} borders the segment touches. The bottom of the \option{image} is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9.}
   
-\code{profitSegimplot} is a simple function that overlays the image segments on the original \option{image}. This can be very slow for large numbers (1,000s) of segments because it uses the base \code{\link{contour}} function to draw the segments individually.
+\code{profoundSegimplot} is a simple function that overlays the image segments on the original \option{image}. This can be very slow for large numbers (1,000s) of segments because it uses the base \code{\link{contour}} function to draw the segments individually.
 }
 \author{
 Aaron Robotham
 }
 
 \seealso{
-\code{\link{profitProFound}}, \code{\link{profitMakeSegim}}, \code{\link{profitMakeSegimExpand}}
+\code{\link{profoundProFound}}, \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
-segim=profitMakeSegim(image$imDat, magzero=30, header=image$hdr, verbose=TRUE, plot=TRUE,
+segim=profoundMakeSegim(image$imDat, magzero=30, header=image$hdr, verbose=TRUE, plot=TRUE,
                       rotstats=TRUE)
 print(segim$segstats)
 
@@ -144,8 +144,8 @@ print(segim$segstats)
 #solution (~18.35) than the non-reflected flux (18.55).
 
 segim$segim[35:55, 80:100]=max(segim$segim)+1
-print(profitSegimStats(image$imDat, segim$segim, sky=segim$sky, header=image$hdr))
-profitSegimPlot(image$imDat, segim$segim)
+print(profoundSegimStats(image$imDat, segim$segim, sky=segim$sky, header=image$hdr))
+profoundSegimPlot(image$imDat, segim$segim)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

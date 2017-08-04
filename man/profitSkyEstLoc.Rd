@@ -1,14 +1,14 @@
-\name{profitSkyEstLoc}
-\alias{profitSkyEstLoc}
+\name{profoundSkyEstLoc}
+\alias{profoundSkyEstLoc}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Calculate Sky in Subest
 }
 \description{
-Calculate the sky and sky RMS for a subset region of a larger image, as used in \code{\link{profitMakeSkyMap}}.
+Calculate the sky and sky RMS for a subset region of a larger image, as used in \code{\link{profoundMakeSkyMap}}.
 }
 \usage{
-profitSkyEstLoc(image, objects, mask, loc = dim(image)/2, box = c(100, 100),
+profoundSkyEstLoc(image, objects, mask, loc = dim(image)/2, box = c(100, 100),
 skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=TRUE,
 paddim = TRUE, plot = FALSE, ...)
 }
@@ -73,14 +73,14 @@ A 2 component list containing:
 Aaron Robotham
 }
 \seealso{
-\code{\link{profitSkyEst}}, \code{\link{profitMakeSkyMap}}, \code{\link{profitMakeSkyGrid}}
+\code{\link{profoundSkyEst}}, \code{\link{profoundMakeSkyMap}}, \code{\link{profoundMakeSkyGrid}}
 }
 \examples{
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
 package="ProFound"))$imDat
-profitSkyEstLoc(image, loc=c(20,20), box=c(40,40), plot=TRUE)$val
-profitSkyEstLoc(image, loc=c(40,20), box=c(40,40), plot=TRUE)$val
-profitSkyEstLoc(image, loc=c(60,20), box=c(40,40), plot=TRUE)$val
+profoundSkyEstLoc(image, loc=c(20,20), box=c(40,40), plot=TRUE)$val
+profoundSkyEstLoc(image, loc=c(40,20), box=c(40,40), plot=TRUE)$val
+profoundSkyEstLoc(image, loc=c(60,20), box=c(40,40), plot=TRUE)$val
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

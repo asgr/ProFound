@@ -1,7 +1,7 @@
-\name{profitImBlur}
-\alias{profitImBlur}
-\alias{profitImGrad}
-\alias{profitImDiff}
+\name{profoundImBlur}
+\alias{profoundImBlur}
+\alias{profoundImGrad}
+\alias{profoundImDiff}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Image Transformations
@@ -10,9 +10,9 @@ Image Transformations
 Various image transformation functions that assist in exploring data.
 }
 \usage{
-profitImBlur(image, sigma = 1, plot = FALSE, ...)
-profitImGrad(image, sigma = 1, plot = FALSE, ...)
-profitImDiff(image, sigma = 1, plot = FALSE, ...)
+profoundImBlur(image, sigma = 1, plot = FALSE, ...)
+profoundImGrad(image, sigma = 1, plot = FALSE, ...)
+profoundImDiff(image, sigma = 1, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,26 +32,26 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 \value{
 Numeric matrix; a new image the same size as \option{image}, with the relevant transform applied.
 
-For \code{profitImBlur} the output is a smoothed version of the \option{image}.
+For \code{profoundImBlur} the output is a smoothed version of the \option{image}.
 
-For \code{profitImGrad} the output is the magnitude of the gradient of the smoothed version of the \option{image}.
+For \code{profoundImGrad} the output is the magnitude of the gradient of the smoothed version of the \option{image}.
 
-For \code{profitImDiff} the output is the original \option{image} minus the smoothed version of the \option{image}.
+For \code{profoundImDiff} the output is the original \option{image} minus the smoothed version of the \option{image}.
 }
 \author{
 Aaron Robotham
 }
 \seealso{
-\code{\link{profitMakeSegim}}, \code{\link{profitMakeSegimExpand}}
+\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
 \dontrun{
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
 package="ProFound"))$imDat
 magimage(image)
-profitImBlur(image, plot=TRUE)
-profitImGrad(image, plot=TRUE)
-profitImDiff(image, plot=TRUE)
+profoundImBlur(image, plot=TRUE)
+profoundImGrad(image, plot=TRUE)
+profoundImDiff(image, plot=TRUE)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

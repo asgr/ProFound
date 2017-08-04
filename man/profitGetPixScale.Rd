@@ -1,5 +1,5 @@
-\name{profitGetPixScale}
-\alias{profitGetPixScale}
+\name{profoundGetPixScale}
+\alias{profoundGetPixScale}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Get Pixel Scale
@@ -8,7 +8,7 @@ Get Pixel Scale
 Given a \code{FITSio} of \code{astro} header, calculate the image pixel scale.
 }
 \usage{
-profitGetPixScale(header, CD1_1 = 1, CD1_2 = 0, CD2_1 = 0, CD2_2 = 1)
+profoundGetPixScale(header, CD1_1 = 1, CD1_2 = 0, CD2_1 = 0, CD2_2 = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,10 +44,10 @@ Aaron Robotham
 
 #Using FITSio package
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFound"))
-profitGetPixScale(image$hdr)
+profoundGetPixScale(image$hdr)
 #Using astro package
 image = read.fits(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFound"))
-profitGetPixScale(image$hdr[[1]])
+profoundGetPixScale(image$hdr[[1]])
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

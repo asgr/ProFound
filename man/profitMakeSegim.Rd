@@ -1,14 +1,14 @@
-\name{profitMakeSegim}
-\alias{profitMakeSegim}
+\name{profoundMakeSegim}
+\alias{profoundMakeSegim}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Watershed Image Segmentation
 }
 \description{
-A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{\link{profitSetupData}} (where the \option{segim} list item output of \code{profitMakeSegim} would be parsed to the \option{segim} input of \code{\link{profitSetupData}}).
+A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be parsed to the \option{segim} input of \code{profitSetupData}).
 }
 \usage{
-profitMakeSegim(image, mask, objects, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE,
+profoundMakeSegim(image, mask, objects, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE,
 pixcut = 5, skycut = 2, SBlim, magzero = 0, gain, pixscale = 1, sky, skyRMS, header,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,  boundstats = FALSE,
 offset = 1, sortcol = "segID", decreasing = FALSE, ...)
@@ -55,10 +55,10 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
   Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
   \item{sky}{
-User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profitSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{skyRMS}{
-User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profitSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{header}{
 Full FITS header in table or vector format. If this is provided then the segmentations statistics table will gain \option{RAcen} and \option{Decen} coordinate outputs. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. Missing header keywords are printed out and other header option arguments are used in these cases. See \code{\link{magWCSxy2radec}}.
@@ -79,7 +79,7 @@ Logical; if TRUE then the \option{asymm}, \option{flux_reflect} and \option{mag_
 Logical; if TRUE then various pixel boundary statistics are computed (\option{Nedge}, \option{Nsky}, \option{Nobject}, \option{Nborder}, \option{edge_frac}, \option{edge_excess} and \option{FlagBorder}). If FALSE these return NA instead (saving computation time).
 }
   \item{offset}{
-Integer scalar; the distance to offset when searching for nearby segments (used in \code{\link{profitSegimStats}}).
+Integer scalar; the distance to offset when searching for nearby segments (used in \code{\link{profoundSegimStats}}).
 }
   \item{sortcol}{
 Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
@@ -100,7 +100,7 @@ To use this function you will need to have \code{EBImage} installed. Since this 
 
 Linux users might also need to install some non-standard graphics libraries (depending on your install). If you do not have them already, you should look to install **jpeg** and **tiff** libraries (these are apparently technically not entirely free, hence not coming by default on some strictly open source Linux variants).
 
-The \code{profitMakeSegim} function offers a high level internal to R interface for making quick segmentation maps. The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{tolerance}, \option{sigma}, \option{ext}, \option{skycut}, \option{pixcut}.
+The \code{profoundMakeSegim} function offers a high level internal to R interface for making quick segmentation maps. The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{tolerance}, \option{sigma}, \option{ext}, \option{skycut}, \option{pixcut}.
 }
 \value{
 A list containing:
@@ -114,7 +114,7 @@ A list containing:
   \item{SBlim}{The surface brightness limit of detected objects (requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL).}
   \item{call}{The original function call.}
   
-If \option{stats}=TRUE then the function \code{\link{profitSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
+If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
   \item{uniqueID}{Unique ID, which is fairly static and based on the xcen and ycen position}
@@ -175,21 +175,21 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profitMakeSegimExpand}}, \code{\link{profitProFound}}, \code{\link{profitSegimStats}}, \code{\link{profitSegimPlot}}
+\code{\link{profoundMakeSegimExpand}}, \code{\link{profoundProFound}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
 }
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
-segim=profitMakeSegim(image, plot=TRUE)
+segim=profoundMakeSegim(image, plot=TRUE)
 
 #Providing a mask entirely removes regions of the image for segmentation:
 mask=matrix(0,dim(image)[1],dim(image)[2])
 mask[1:80,]=1
-profitMakeSegim(image, mask=mask, plot=TRUE)
+profoundMakeSegim(image, mask=mask, plot=TRUE)
 
 #Providing a previously created object map can sometimes help with detection (not here):
-profitMakeSegim(image, mask=mask, object=segim$objects, plot=TRUE)
+profoundMakeSegim(image, mask=mask, object=segim$objects, plot=TRUE)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

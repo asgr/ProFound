@@ -19,8 +19,8 @@
   return=tempout
 }
 
-profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1, smooth=TRUE, pixcut=5, skycut=2, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, offset=1, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, ...){
-  if(verbose){message('Running profitProFound:')}
+profoundProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1, smooth=TRUE, pixcut=5, skycut=2, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, offset=1, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, ...){
+  if(verbose){message('Running profoundProFound:')}
   timestart=proc.time()[3]
   call=match.call()
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
@@ -69,7 +69,7 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
   #Get the pixel scale, if possible and not provided:
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profitGetPixScale(header)
+    pixscale=profoundGetPixScale(header)
     if(verbose){message(paste('Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -87,7 +87,7 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
   
   if((hassky==FALSE | hasskyRMS==FALSE) & iters>0){
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-    roughsky=profitMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
+    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
     if(hassky==FALSE){
       sky=roughsky$sky
     }
@@ -102,7 +102,7 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
   
   if(missing(segim)){
     if(verbose){message(paste('Making initial segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
-    segim=profitMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, plot=FALSE, stats=FALSE)
+    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, plot=FALSE, stats=FALSE)
     objects=segim$objects
     segim=segim$segim
   }else{
@@ -114,9 +114,9 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
   if(any(segim>0)){
     if((hassky==FALSE | hasskyRMS==FALSE) & iters>0){
       if(verbose){message(paste('Doing initial aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
-      objects_redo=profitMakeSegimDilate(image=image, segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+      objects_redo=profoundMakeSegimDilate(image=image, segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-      bettersky=profitMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
+      bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
       if(hassky==FALSE){
         sky=bettersky$sky
       }
@@ -129,7 +129,7 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
     
     if(iters>0){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      segstats=profitSegimStats(image=image, segim=segim, mask=mask, sky=sky)
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky)
       compmat=cbind(segstats[,converge])
       segim_array=array(0, dim=c(dim(segim),iters+1))
       segim_array[,,1]=segim
@@ -138,7 +138,7 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
       
       for(i in 1:iters){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profitMakeSegimDilate(image=image, segim=segim_array[,,i], mask=mask, size=size, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
+        segim=profoundMakeSegimDilate(image=image, segim=segim_array[,,i], mask=mask, size=size, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
         compmat=cbind(compmat, segim$segstats[,converge])
         segim_array[,,i+1]=segim$segim
       }
@@ -177,9 +177,9 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
     if(redosky){
       if(redoskysize %% 2 == 0){redoskysize=redoskysize+1}
       if(verbose){message(paste('Doing final aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
-      objects_redo=profitMakeSegimDilate(image=image, segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+      objects_redo=profoundMakeSegimDilate(image=image, segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-      sky=profitMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc = shiftloc, paddim = paddim)
+      sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc = shiftloc, paddim = paddim)
       skyRMS=sky$skyRMS
       sky=sky$sky
     }else{
@@ -210,7 +210,7 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
       if(verbose){message(paste(' - pixscale =', round(pixscale,3)))}
       if(verbose){message(paste(' - rotstats =', rotstats))}
       if(verbose){message(paste(' - boundstats =', boundstats))}
-      segstats=profitSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
       segstats=cbind(segstats, iter=selseg, origfrac=origfrac)
     }else{
       if(verbose){message("Skipping sementation statistics - segstats set to FALSE")}
@@ -218,32 +218,32 @@ profitProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1
     }
     
     if(nearstats){
-      near=profitSegimNear(segim=segim, offset=offset)
+      near=profoundSegimNear(segim=segim, offset=offset)
     }else{
       near=NULL
     }
     
     if(plot){
       if(verbose){message(paste('Plotting segments -',round(proc.time()[3]-timestart,3),'sec'))}
-      profitSegimPlot(image=image, segim=segim, mask=mask, sky=sky, ...)
+      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, ...)
     }else{
       if(verbose){message("Skipping segmentation plot - plot set to FALSE")}
     }
     
     if(!missing(SBlim) & !missing(magzero)){
-      SBlim=min(SBlim, profitFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
+      SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
     }else if(missing(SBlim) & skycut>0){
-      SBlim=profitFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
+      SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
     }else{
       SBlim=NULL
     }
     if(missing(header)){header=NULL}
-    if(verbose){message(paste('profitProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
+    if(verbose){message(paste('profoundProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     return=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, segstats=segstats, near=near, header=header, SBlim=SBlim, magzero=magzero, gain=gain, pixscale=pixscale, call=call)
   }else{
     if(missing(header)){header=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
-    if(verbose){message(paste('profitProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
+    if(verbose){message(paste('profoundProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     return=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, segstats=NULL, near=NULL, header=header, SBlim=NULL,  magzero=magzero, gain=gain, pixscale=pixscale, call=call)
   }
 }
