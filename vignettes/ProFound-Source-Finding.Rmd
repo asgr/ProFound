@@ -1,0 +1,274 @@
+---
+title: "ProFound-Source-Finding"
+author: "Aaron Robotham"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ProFound: Source Finding}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction to ProFound Functions
+
+The **ProFound** source finding and image utilites suite covers the following functions:
+
+### Very High Level
+
+- profoundProFound: Source finder and CoG growing utility (this is what we refer to as ProFound elsewhere, as a short-hand)
+
+### High Level
+
+- profoundMakeSegim: Watershed image segmentation
+- profoundMakeSkyGrid: Calculate smoothed (e.g. bicubic) sky maps
+- profoundSkyEst: Sky estimator using circular annuli (robust to bright sources)
+
+
+### Mid Level
+
+- profoundMakeSegimExpand: Segmentation map expansion
+- profoundMakeSegimDilate: Segmentation map dilation
+- profoundSegimStats: Image segmentation statistics (e.g. flux, apertures etc)
+- profoundSegimPlots: Image segmentation plots
+- profoundMakeSkyMap: Calculate coarse sky maps
+- profoundSkyEstLoc: Local sky estimator using source clipping
+- profoundGainEst: Estimate image gain
+- profoundSegimNear: Find the IDs of all segments near to other segments
+- profoundPixelCorrelation: Calculate pixel-to-pixel correlation and 2D image FFT
+
+### Low Level
+
+- profoundGainConvert: Update gain values when changing zero-points
+- profoundImBlur: Fast image blur
+- profoundImDiff: Fast image difference
+- profoundImGrad: Fast image gradients
+- profoundFlux2Mag: Convert from flux to magnitude
+- profoundMag2Flux: Convert from magnitude to flux
+- profoundFlux2SB: Convert from flux to surface brightness
+- profoundSB2Flux: Convert from surface brightness to flux
+- profoundMag2Mu: Convert from magnitude to central surface brightness
+- profoundMag2Mu: Convert from central surface brightness to magnitude
+- profoundInterp2d: Image interpolation
+
+## Basic ProFound Usage
+
+The **profoundProFound** function might be the only function many people need to use in order to extract photometry from a target image. In brief, in fully automatic mode using default option, the basic code flow of the source extraction is as follows:
+
+1. Make a rough sky map
+2. Using this rough sky map, make an initial segmentation map
+3. Using this segmentation map, make a better sky map
+4. Using this better sky map, extract basic photometric properties
+5. Using the current segmentation map, dilate segments and re-measure photometric properties for the new image segments (by default it iterates six times)
+6. Using the iterative dilation statistics, every object is checked for convergence (by default convergence of flux is used)
+7. Make final segmentation map by combining the segments when each source has converged in flux
+8. Make a conservative object mask by aggressively dilating the final segmentation map
+9. Using this conservative objects mask make a final sky map
+10. Using the final segmentation map and the final sky map compute the final comprehensive photometric properties
+11. Return a list containing the input image pixel-matched final segmentation map (called **segim**), the pre-dilation segmentation map (**segim_orig**) , the binary object/sky mask (**objects**), the conservatively dilated binary object/sky mask (**objects_redo**), the sky image (**sky**), the sky-RMS image (**skyRMS**) and the effective surface brightness limit image (**SBlim**)
+12. Return the data-frame of photometric properties for every detected source (**segstats**)
+
+Some other simple properties are passed through and included in the output of ProFound: the header (**header**) if it is attached to the input image, the magnitude zero point specified (**magzero**), the gain in electrons per astronomical data unit (**gain**), the pixel scale in arc-seconds per pixel (**pixscale**) and finally the full function call (**call**).
+
+Load some libraries:
+
+```{r}
+library(ProFound)
+```
+
+First read in some data.
+
+```{r}
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',package="ProFound"))
+```
+
+Give it a quick look:
+
+```{r, fig.width=6, fig.height=6}
+magimageWCS(image)
+```
+
+A basic example of the lower level **profoundMakeSegim** versus the higher level **profoundProFound**:
+
+```{r, fig.width=6, fig.height=6}
+out_segim=segim=profoundMakeSegim(image$imDat, magzero=30, pixscale=0.339, header=image$hdr, plot=TRUE)
+out_profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
+```
+
+Notice in the two outputs (the first being **profoundMakeSegim**, the second being **profoundProFound**) that some segment have converged quickly (i.e. not grown much) but others have expanded a lot in order to capture all the flux present. **profoundProFound** in default mode with modern survey imaging data tends to extract very close to a true total magnitude, without too much error introduced by sky noise (a consequence of over-growing apertures).
+
+Because it was run in verbose mode, the major **profoundProFound** steps mentioned above were printed out. For large images (a few thousand by a few thousand pixels plus) this is useful since it can take a few minutes to run with all the bells and whistles turned on, and it is nice to see it making progress. Note for more than a couple of hundred sources, you almost certainly do not want to plot the output, since this will be slow.
+
+
+Note because we parsed **profoundProFound** a header we have RA and Dec coordinates in the photometric properties data-frame. We also parsed the appropriate magnitude zero-point and pixel scale so the mag properties are correctly scaled, and R/R50/R90 are in arc-seconds rather than pixels. It is is worth checking the output:
+ 
+```{r}
+out_profound$segstats[1:10,]
+```
+
+Next we will check the before and after photometry for the brightest 40 sources (the lists differ a bit in detail due to the different sky estimation routines used):
+
+```{r, fig.width=6, fig.height=6}
+magplot(out_segim$segstats[1:40,c("R50", "SB_N90")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), log='x', xlim=c(0.4,5), ylim=c(22,25), grid=TRUE, xlab='R50 / asec', ylab='mag / asec^2')
+points(out_profound$segstats[1:40,c("R50", "SB_N90")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), pch=16)
+arrows(out_segim$segstats$R50[1:40], out_segim$segstats$SB_N90[1:40], out_profound$segstats$R50[1:40], out_profound$segstats$SB_N90[1:40], col='lightgrey', length=0)
+rect(0.9, 23.5, 1.3, 24.3)
+legend('bottomleft', legend=c('profoundProFound', 'profoundMakeSegim'), pch=c(16,1))
+magbar('topright', title='Axrat', titleshift=1)
+
+magplot(out_segim$segstats[1:40,c("R50", "con")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), log='x', xlim=c(0.4,5), ylim=c(0,1), grid=TRUE, xlab='R50 / asec', ylab='Concentration')
+points(out_profound$segstats[1:40,c("R50", "con")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), pch=16)
+arrows(out_segim$segstats$R50[1:40], out_segim$segstats$con[1:40], out_profound$segstats$R50[1:40], out_profound$segstats$con[1:40], col='lightgrey', length=0)
+rect(0.9, 0.4, 1.3, 0.6)
+legend('bottomleft', legend=c('profoundProFound', 'profoundMakeSegim'), pch=c(16,1))
+magbar('topright', title='Axrat', titleshift=1)
+
+magplot(out_segim$segstats[1:40,c("R50", "mag")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), log='x', xlim=c(0.4,5), ylim=c(17,24), grid=TRUE, xlab='R50 / asec', ylab='Mag')
+points(out_profound$segstats[1:40,c("R50", "mag")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), pch=16)
+arrows(out_segim$segstats$R50[1:40], out_segim$segstats$mag[1:40], out_profound$segstats$R50[1:40], out_profound$segstats$mag[1:40], col='lightgrey', length=0)
+rect(0.9, 20, 1.3, 22)
+legend('bottomleft', legend=c('profoundProFound', 'profoundMakeSegim'), pch=c(16,1))
+magbar('topright', title='Axrat', titleshift=1)
+```
+
+It is notable that low surface brightness objects are seen to systematically grow when processing the image with **profoundProFound**. The box represents the location of likely stars, where redder objects are more circular sources. It is clear that **profoundProFound** moves stars onto a more uniform value of R50 (remember for a Gaussian PSF FWHM=2*R50).
+
+The **profoundProFound** function also returns a sky and sky RMS image matched to the input image:
+
+```{r, fig.width=6, fig.height=5}
+maghist(out_profound$sky, xlab='Sky')
+maghist(out_profound$skyRMS, xlab='Sky RMS')
+```
+
+```{r, fig.width=6, fig.height=6}
+magimageWCS(image)
+magimageWCS(out_profound$sky, image$hdr)
+magimageWCS(out_profound$skyRMS, image$hdr)
+```
+
+The background mask we used here (the default 100x100 option) looks to be pretty good, with not much correlation between the image and the sky map. However, even with a slightly too small sky grid the photometric outputs should be mostly pretty robust- differing by at worst a couple of counts per pixel. This is much less than the typical sky RMS (roughly 9 throughout).
+
+```{r, fig.width=5, fig.height=4}
+maghist(out_profound$segstats[,'N100']/out_profound$segstats[,'flux'], xlab=' Worst case fraction error')
+```
+
+In summary, you probably want to use **profoundProFound**, unless you really know what you are doing and are feeling a bit adventurous!
+
+## ProFound Flags
+
+**ProFound** offers a few useful flags that will help extract high fidelity photometry. To access the boundary flags we have to set boundstats=TRUE when we run **ProFound**:
+
+```{r}
+out_profound=profoundProFound(image, magzero=30, verbose=TRUE, boundstats=TRUE)
+```
+
+The output we get is in segstats is useful, telling us whether or not an object is isolated:
+
+```{r}
+out_profound$segstats[1:10,c("Nedge", "Nsky", "Nobject", "Nborder", "edge_frac", "edge_excess", "Flagborder")]
+```
+
+The edge_frac column is simply Nsky/Nedge (the number of segment edge pixels purely touching sky divided by the number of pixels in the segment edge). Where it is 1 the segment must be well isolated, because none of its outer pixels are touching either an image boundary or another object.
+
+We can easily plot the isolated segments and the non-isolated segments:
+
+```{r, fig.width=6, fig.height=6}
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac==1,"segID"]), col=c(0,rainbow(100)))
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac!=1,"segID"]), col=c(0,rainbow(100)))
+```
+
+You might be more interested in removing segments touching an image edge:
+
+```{r, fig.width=6, fig.height=6}
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Nborder==0,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Isolated Segment')
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Nborder>0,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Non_Isolated Segment')
+```
+
+The edge_excess column tells us how elliptical or non-elliptical the segments are. Generally values less than 1 are probably fairly sensible looking segments (i.e. ellipses). Larger than this and the segments might have weird gemoetry:
+
+```{r, fig.width=6, fig.height=6}
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_excess<1,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Fairly Elliptical Segment')
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_excess>1,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Non-Elliptical Segment')
+```
+
+The Flagborder column tells us which border of the image the segment touches. The bottom of the image is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9. In our case we can see we should find segments touching the bottom, left and top of the image:
+
+```{r, fig.width=6, fig.height=6}
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==1,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Segment Borders Bottom')
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==2,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Segment Borders Left')
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==4,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Segment Borders Top')
+```
+
+Depending on your science requirements, users might want to make use of some or all of these useful flags. Practically the most useful flag is probably edge_frac, where values above 0.8 are usually a good cut off for fairly reliable photometry (i.e. the confused or missing flux is the sub-dominant form of error), but this cannot be treated as a guarantee!
+
+```{r, fig.width=6, fig.height=6}
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac>0.8,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Reliable Photometry Segments')
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac<0.8,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Unreliable Photometry Segments')
+```
+
+## Advanced ProFound Usage
+
+The way **ProFound** handles the various inputs allows for great flexibility and power. AS an example, it is fairly trivial to run it in a mode where you can extract multiband photometry in pixel matched data. AS a pseudo code example imagine you have 3 pixel matched 2k*2K J/H/K band images with the same magnitude zero points. You can use the objects detected in, say, the K band to extract photometry in the others:
+
+```R
+pro_det_K=profoundProFound(image=Kim)
+```
+
+### Total Photometry
+
+We can then extract matching photometry. Note that in practice pro_K_tot_fix = pro_det_K (since the K band was our detection band already), but we psuedo re-run it for clarity.
+
+```R
+pro_J_tot_fix=profoundProFound(image=Jim, segim=pro_det_K$segim, iters=0)
+pro_H_tot_fix=profoundProFound(image=Him, segim=pro_det_K$segim, iters=0)
+pro_K_tot_fix=profoundProFound(image=Kim, segim=pro_det_K$segim, iters=0)
+```
+
+A second option is to allow each target band to dynamically dilate based on the original segmentation map. The might help in situations where the target image PSFs are quite mismatched. The dynamic dilation will ensure close to total magnitudes regardless of the differing PSFs. Note that in practice pro_K_tot_dil = pro_det_K (since the K band was our detection band already), but we psuedo re-run it for clarity.
+
+```R
+pro_J_tot_dil=profoundProFound(image=Jim, segim=pro_det_K$segim_orig, objects=pro_det_K$objects)
+pro_H_tot_dil=profoundProFound(image=Him, segim=pro_det_K$segim_orig, objects=pro_det_K$objects)
+pro_K_tot_dil=profoundProFound(image=Kim, segim=pro_det_K$segim_orig, objects=pro_det_K$objects)
+```
+
+### Colour Photometry
+
+The above options would extract close to total photometry given the K-band detection segments. You often find better colours running with the high surface brightness non-dilated segmentation map, which is also returned by **ProFound**. In this case you would need to re-run the K too. Notice we also pass the **objects** matrix to ProFound. This ensures a better sky estimation, since we are now using the brighter inner part of detected objects to extract colour photometry, but we want to know the location of the full object to obtain a good sky estimate.
+
+```R
+pro_J_col_fix=profoundProFound(image=Jim, segim=pro_det_K$segim_orig, objects=pro_det_K$objects, iters=0)
+pro_H_col_fix=profoundProFound(image=Him, segim=pro_det_K$segim_orig, objects=pro_det_K$objects, iters=0)
+pro_K_col_fix=profoundProFound(image=Kim, segim=pro_det_K$segim_orig, objects=pro_det_K$objects, iters=0)
+```
+
+### Stacked Photometry
+
+Given these outputs a photometrically driven user can create a S/N stacked image weighted using the inverse of ${sky_{RMS}}^2$. The reason we weight it this way is you actually want to weight by exposure time, which correlates with inverse variance (traditional Source Extractor weight maps are inverse variance for this reason), which is $1/{sky_{RMS}}^2$. To convince yourself consider you have 8 exposures with sky RMS equal to 16 originally: 4 you combine, so the sky RMS becomes $\sqrt{\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}}=\sqrt{\frac{4}{16^2}}=8$. Now later on you want to combine the 5 images you have. Clearly the optimal weighting you can possibly get will be $\sqrt{\frac{8}{16^2}}=\frac{8}{\sqrt{2}}=5.65$ (the direct stack of the original 8 images). With our already stacked image added to our 4 others we can achieve the same S/N by weighting our stacks by the inverse variance: $\sqrt{\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{8^2}}=\sqrt{\frac{4}{16^2}+\frac{1}{8^2}}=\frac{8}{\sqrt{2}}=5.65$.
+
+Below we do this with our pseudo images, the only caveat being we divide by 3 to maintain our magnitude zero-point. Why? Well, consider what you would do if these 3 images were in the same band for the same exposure time and had the same measured sky RMS- our optimal stacking method is to just add them together, but this would increase the implied flux by a factor of 3, so dividing by 3 means we have the same magnitude zero-point but our stacked image now has a reduced sky RMS when we measure it.
+
+```R
+stack=matrix(0,2000,2000) #Since our images are assumed to be 2k*2k
+stack=stack+(Jim-pro_J_tot_dil$sky)/(pro_J_tot_dil$skyRMS^2)
+stack=stack+(Him-pro_H_tot_dil$sky)/(pro_H_tot_dil$skyRMS^2)
+stack=stack+(Kim-pro_K_tot_dil$sky)/(pro_K_tot_dil$skyRMS^2)
+sky_stack=(pro_J_tot_dil$skyRMS^2 + pro_H_tot_dil$skyRMS^2 + pro_K_tot_dil$skyRMS^2)/3
+stack=stack*sky_stack
+```
+
+We can now make a new detection based on the S/N stacked images!
+
+```R
+pro_det_stack=profoundProFound(stack)
+```
+
+We can now effectively re-run all the above, but using pro_det_stack where before we had pro_det_K.
