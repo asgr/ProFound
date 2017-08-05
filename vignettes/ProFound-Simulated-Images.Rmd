@@ -9,7 +9,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+Get the latest version of **ProFound** and **ProFit**:
 
+```{r, eval=FALSE}
+library(devtools)
+install_github('asgr/ProFound')
+install_github('ICRAR/ProFit')
+```
 
 First of all we load **ProFit** and**ProFound**. We also need to use **LaplacesDemon** because it gives us the Pareto (power-law) distribution that we will use to realistically sample our magnitude ranges later.
 

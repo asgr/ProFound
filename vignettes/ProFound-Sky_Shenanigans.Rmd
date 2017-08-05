@@ -9,6 +9,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+Get the latest version of **ProFound** and **ProFit**:
+
+```{r, eval=FALSE}
+library(devtools)
+install_github('asgr/ProFound')
+install_github('ICRAR/ProFit')
+```
+
 First load the libraries we need:
 
 ```{r}

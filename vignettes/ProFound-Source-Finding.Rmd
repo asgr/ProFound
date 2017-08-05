@@ -69,6 +69,13 @@ The **profoundProFound** function might be the only function many people need to
 
 Some other simple properties are passed through and included in the output of ProFound: the header (**header**) if it is attached to the input image, the magnitude zero point specified (**magzero**), the gain in electrons per astronomical data unit (**gain**), the pixel scale in arc-seconds per pixel (**pixscale**) and finally the full function call (**call**).
 
+Get the latest version of **ProFound** and **ProFit**:
+
+```{r, eval=FALSE}
+library(devtools)
+install_github('asgr/ProFound')
+```
+
 Load some libraries:
 
 ```{r}
@@ -261,8 +268,8 @@ stack=matrix(0,2000,2000) #Since our images are assumed to be 2k*2k
 stack=stack+(Jim-pro_J_tot_dil$sky)/(pro_J_tot_dil$skyRMS^2)
 stack=stack+(Him-pro_H_tot_dil$sky)/(pro_H_tot_dil$skyRMS^2)
 stack=stack+(Kim-pro_K_tot_dil$sky)/(pro_K_tot_dil$skyRMS^2)
-sky_stack=(pro_J_tot_dil$skyRMS^2 + pro_H_tot_dil$skyRMS^2 + pro_K_tot_dil$skyRMS^2)/3
-stack=stack*sky_stack
+inv_var=(1/pro_J_tot_dil$skyRMS^2 + 1/pro_H_tot_dil$skyRMS^2 + 1/pro_K_tot_dil$skyRMS^2)
+stack=stack/inv_var
 ```
 
 We can now make a new detection based on the S/N stacked images!
