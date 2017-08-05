@@ -1,4 +1,4 @@
-profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE, plot=FALSE){
+profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE, plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
   
   xlen=dim(image)[1]
   ylen=dim(image)[2]
@@ -6,6 +6,9 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
   lag=lag[lag<xlen & lag<ylen]
   
   image=(image-sky)/skyRMS
+  
+  flag_neg=image<0
+  flag_pos=image>0
   
   if(!missing(objects)){
     image[objects>0]=NA
@@ -15,16 +18,26 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
     image[mask>0]=NA
   }
   
-  corx={}; cory={}; relsdx={}; relsdy={}
+  image_neg=image
+  image_neg[flag_neg==FALSE]=NA #image is left with negative pixels only
+  image_pos=image
+  image_pos[flag_pos==FALSE]=NA #image is left with positive pixels only
+  
+  
+  corx={}; cory={}; corx_neg={}; cory_neg={}; corx_pos={}; cory_pos={}; relsdx={}; relsdy={}
   
   for(i in lag){
     corx=c(corx,cor(as.numeric(image[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="complete.obs"))
     cory=c(cory,cor(as.numeric(image[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="complete.obs"))
+    corx_neg=c(corx_neg,cor(as.numeric(image_neg[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="complete.obs"))
+    cory_neg=c(cory_neg,cor(as.numeric(image_neg[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="complete.obs"))
+    corx_pos=c(corx_pos,cor(as.numeric(image_pos[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="complete.obs"))
+    cory_pos=c(cory_pos,cor(as.numeric(image_pos[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="complete.obs"))
     relsdx=c(relsdx,sd(as.numeric(image[1:(xlen-i),])-as.numeric(image[1:(xlen-i)+i,]), na.rm=TRUE)/sqrt(2))
     relsdy=c(relsdy,sd(as.numeric(image[,1:(ylen-i)])-as.numeric(image[,1:(ylen-i)+i]), na.rm=TRUE)/sqrt(2))
   }
   
-  output_cortab=data.frame(lag=lag,corx=corx,cory=cory,relsdx=relsdx,relsdy=relsdy)
+  output_cortab=data.frame(lag=lag, corx=corx, cory=cory, corx_neg=corx_neg, cory_neg=cory_neg, corx_pos=corx_pos, cory_pos=cory_pos, corx_diff=corx_pos-corx_neg, cory_diff=cory_pos-cory_neg, relsdx=relsdx, relsdy=relsdy)
   
   if(fft){
     xlenpad=xlen+xlen%%2
@@ -46,11 +59,13 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
   }
   
   if(plot){
-    magplot(output_cortab[,c('lag','corx')], xlim=c(1,max(lag)), ylim=c(-1,1), xlab='Pixel Lag', ylab='Correlation', type='l', col='blue', log='x', grid=TRUE)
+    magplot(output_cortab[,c('lag','corx')], xlim=c(1,max(lag)), xlab='Pixel Lag', ylab='Correlation', type='l', col='blue', ylim=ylim, log=log, grid=grid, ...)
     lines(output_cortab[,c('lag','cory')], col='red')
-    lines(output_cortab[,c('lag','relsdx')], col='blue', lty=2)
-    lines(output_cortab[,c('lag','relsdy')], col='red', lty=2)
-    legend('bottomright', legend=c('x-cor','y-cor','x-rel-sd','y-rel-sd'), col=c('blue','red'), lty=c(1,1,2,2))
+    lines(output_cortab[,c('lag','corx_diff')], col='blue', lty=2)
+    lines(output_cortab[,c('lag','cory_diff')], col='red', lty=2)
+    lines(output_cortab[,c('lag','relsdx')], col='blue', lty=3)
+    lines(output_cortab[,c('lag','relsdy')], col='red', lty=3)
+    legend('topright', legend=c('x-cor','y-cor','x-cor-diff','y-cor-diff','x-rel-sd','y-rel-sd'), col=c('blue','red'), lty=c(1,1,2,2,3,3))
   }
   
   return=list(cortab=output_cortab, fft=output_FFT, image_sky=image)

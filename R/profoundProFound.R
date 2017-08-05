@@ -19,6 +19,8 @@
   return=tempout
 }
 
+profound=function(...){profoundProFound(...)}
+
 profoundProFound=function(image, segim, objects, mask, tolerance=4, ext=2, sigma=1, smooth=TRUE, pixcut=5, skycut=2, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = TRUE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, offset=1, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, ...){
   if(verbose){message('Running profoundProFound:')}
   timestart=proc.time()[3]

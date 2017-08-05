@@ -9,7 +9,8 @@ Returns the x and y dimension pixel-to-pixel correlation (often called covarianc
 }
 \usage{
 profoundPixelCorrelation(image, objects, mask, sky = 0, skyRMS = 1,
-lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE)
+lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
+ylim=c(-1,1), log='x', grid=TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,7 +36,19 @@ Interger verctor; the pixel lags to measure pixel-to-pixel correlation over the 
 Logical; if TRUE the 2D FFT is computed and the modulus image matrix is returned to \option{fft} and the (\option{image}-\option{sky})/\option{skyRMS} is return to \option{image_sky}, if FALSE the \option{fft} and \option{image_sky} objects are returned as NULL. \option{object} and \option{mask} pixels are used to identify pixels to replace as described below.
 }
   \item{plot}{
-Logical; should a diagnostic plot be generated?
+Logical; should a x/y correlation diagnostic plot be generated?
+}
+  \item{ylim}{
+Numeric vector; range of data to display (see \code{\link{magplot}} for details). Only relevant if \option{plot}=TRUE.
+}
+  \item{log}{
+Scalar character; log axis arguments to be passed to plot. E.g. use 'x', 'y', 'xy' or 'yx' as appropriate (see \code{\link{magplot}} for details). Only relevant if \option{plot}=TRUE.
+}
+  \item{grid}{
+Logical; indicates whether a background grid should be drawn onto the plotting area (see \code{\link{magplot}} for details). Only relevant if \option{plot}=TRUE.
+}
+  \item{\dots}{
+Further arguments to parse to \code{\link{magplot}}. Only relevant if \option{plot}=TRUE.
 }
 }
 \details{
@@ -50,9 +63,24 @@ The relative standard-deviations returned in \option{cortab} are calculated by t
 \value{
 A list containing three objects:
 
-\item{cortab}{A five column data.frame, containing the pixel lag (lag), the correlation in the x-dimension (corx), the correlation in the y-dimension (cory), the pixel lag implied relative standard-deviation in the x-dimension (relsdx) and the pixel lag implied relative standard-deviation in the y-dimension (relsdy).}
-\item{fft}{Numeric matrix; if \option{fft}=TRUE this object contains the modulus of the 2D FFT of the \option{image} with the same dimensions, if \option{fft}=FALSE it is NULL. The output is centred such that small scale structures are in the centre of the image matrix.}
-\item{image_sky}{Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.}
+\itemize{
+  \item cortab: A data.frame containing: 
+  \itemize{
+    \item lag: The pixel lag
+    \item corx: The correlation in the x-dimension
+    \item cory: The correlation in the y-dimension
+    \item corx_neg: The correlation of sub sky versus sky pixels in x
+    \item cory_neg: The correlation of sub sky sversus ky pixels in y
+    \item corx_pos: The correlation of excess sky versus sky pixels in x
+    \item cory_pos: The correlation of excess sky versus sky pixels in y
+    \item corx_diff: corx_pos - corx_neg
+    \item cory_diff: cory_pos - cory_neg
+    \item relsdx: The pixel lag implied relative standard-deviation in x
+    \item relsdy: The pixel lag implied relative standard-deviation in y
+  }
+  \item fft: Numeric matrix; if \option{fft}=TRUE this object contains the modulus of the 2D FFT of the \option{image} with the same dimensions, if \option{fft}=FALSE it is NULL. The output is centred such that small scale structures are in the centre of the image matrix.
+  \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
+}
 }
 \author{
 Aaron Robotham
