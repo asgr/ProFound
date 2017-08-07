@@ -27,7 +27,7 @@ library(LaplacesDemon)
 
 Next we generate a random image with 200 stars and 200 extended sources. The value used roughly correspoond to the source densities and magnitude distributions you might expect to find in a Z-band VIKING frame (this was used to derive the image statistics).
 
-```{r, fig.width=5, fig.height=5}
+```{r}
 set.seed(666)
 
 ExamplePSF=profitMakeGaussianPSF(fwhm=5)

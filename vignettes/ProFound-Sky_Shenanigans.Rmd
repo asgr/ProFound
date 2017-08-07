@@ -46,7 +46,7 @@ The sky is estimated mainly via the use of the **profoundMakeSkyMap** function. 
 
 We can easily create some toy sky with positive flux added in:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 set.seed(666)
 sky=c(rnorm(5e5,mean=0,sd=1),(rnorm(5e5,mean=0,sd=1)+runif(5e5,0,100)))
 maghist(sky, xlab='Pixel Value', ylab='Counts', grid=TRUE)
@@ -63,14 +63,14 @@ sky_clip_lo=magclip(sky, estimate='lo')
 
 Since we know the fake sources will have positive flux we would expect estimate=lo to work better:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magplot(density(sky_clip_both$x), col='red', grid=TRUE, xlab='Pixel Value', ylab='PDF')
 lines(density(sky_clip_lo$x), col='blue')
 ```
 
 Now we can check how good our sky using the lo estimate is, where the black density line is the true sky we want to get back:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magplot(density(sky_clip_lo$x), col='blue', grid=TRUE, xlab='Sky Pixel Value', ylab='PDF')
 lines(seq(-5,5,len=1e3), dnorm(seq(-5,5,len=1e3)), col='black', grid=TRUE)
 ```
@@ -115,7 +115,7 @@ profound=profoundProFound(image, skycut=1, magzero=30, plot=TRUE)
 
 From this we get a reasonable sky and sky-RMS map:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(profound$sky)
 magimage(profound$skyRMS)
 
@@ -127,7 +127,7 @@ You can see in the sky-RMS histograms that there are two distinct depths in the 
 
 We can now make a noise free simulated image with a mixture of stars and galaxies (the extraction found 67 sources, and we use **ProFound** properties where appropriate):
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 ExamplePSF=profitMakeGaussianPSF(fwhm=5)
 ExamplePSF=ExamplePSF/sum(ExamplePSF)
 
@@ -149,7 +149,7 @@ im_test<-profitMakeModel(modellist=model_test, psf=ExamplePSF, dim=c(356,356), m
 
 Let's take a look:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 ```
 
@@ -161,19 +161,19 @@ im_test_noise=im_test+rnorm(356^2, mean=profound$sky, sd=profound$skyRMS)
 
 Let's take a look:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test_noise)
 ```
 
 We can now run **ProFound** on this simualted data:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 profound_resim=profoundProFound(im_test_noise, skycut=1, magzero=30, plot=TRUE)
 ```
 
 So finally we can check our new sky estimates:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(profound$sky)
 magimage(profound$skyRMS)
 
@@ -186,7 +186,7 @@ magimage(profound$skyRMS-profound_resim$skyRMS)
 
 It is perhaps more useful to look at the histograms directly:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 maghist(profound$sky, xlab='Pixel Value', ylab='Counts', grid=TRUE)
 maghist(profound$skyRMS, xlab='Pixel Value', ylab='Counts', grid=TRUE)
 
@@ -233,7 +233,7 @@ for(i in 1:N){
 
 We can plot how this behaves:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magplot(1-output[,1]/(5e5+output[,1]),output[,2], log='y', grid=TRUE, xlab='Nsky/Ntotal', ylab='(Sky Estimate) - (Sky Input)', type='l', col='red')
 lines(1-output[,1]/(5e5+output[,1]),output[,4], col='blue')
 legend('topright', legend=c('Median','Mean'), lty=1, col=c('red','blue'))
@@ -281,7 +281,7 @@ profound_mode_noclip=profoundProFound(image, skycut=1.0, magzero=30, skytype='mo
 
 The difference between the clipped and non-clipped runs are tiny (meaning we have found pretty much all of the sources):
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 maghist(profound_median_clip$sky-profound_median_noclip$sky, grid=TRUE)
 maghist(profound_mean_clip$sky-profound_mean_noclip$sky, grid=TRUE)
 maghist(profound_mode_clip$sky-profound_mode_noclip$sky, grid=TRUE)
@@ -289,7 +289,7 @@ maghist(profound_mode_clip$sky-profound_mode_noclip$sky, grid=TRUE)
 
 The differences between the different estimators are larger:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6, dpi=40}
 maghist(profound_mean_clip$sky-profound_median_clip$sky, grid=TRUE)
 maghist(profound_mode_clip$sky-profound_median_clip$sky, grid=TRUE)
 maghist(profound_mean_clip$sky-profound_mode_clip$sky, grid=TRUE)

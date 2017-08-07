@@ -8,7 +8,8 @@ Stack Images
 Stacks multiple images based on their signal-to-noise.
 }
 \usage{
-profoundMakeStack(image_list, sky_list, skyRMS_list)
+profoundMakeStack(image_list, sky_list = NULL, skyRMS_list = NULL, magzero_in = 0,
+magzero_out = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,6 +21,12 @@ List; each list element is a numeric matrix representing the sky to be subtracte
 }
   \item{skyRMS_list}{
 List; each list element is a numeric matrix representing the sky-RMS to weight the stack with.
+}
+  \item{magzero_in}{
+Numeric vector; the input mag-zero points. If length 1 then it is assumed all input frames have the same mag-zero point.
+}
+  \item{magzero_out}{
+Numeric scalar; the output mag-zero point desired.
 }
 }
 \details{
@@ -37,6 +44,7 @@ stack=stack*sky_stack/(length(skyRMS_list)^2)
 A list containing:
   \item{image}{Numeric matrix; the variance weighted stacked image.}
   \item{skyRMS}{The sky RMS of the final stacked image}
+  \item{magzero}{The mag-zero point of the stacked image.}
 }
 \author{
 Aaron Robotham
@@ -53,5 +61,4 @@ stack$skyRMS
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ stack }% use one of  RShowDoc("KEYWORDS")

@@ -26,29 +26,36 @@ The **ProFound** source finding and image utilites suite covers the following fu
 
 ### Mid Level
 
-- profoundMakeSegimExpand: Segmentation map expansion
-- profoundMakeSegimDilate: Segmentation map dilation
-- profoundSegimStats: Image segmentation statistics (e.g. flux, apertures etc)
-- profoundSegimPlots: Image segmentation plots
-- profoundMakeSkyMap: Calculate coarse sky maps
-- profoundSkyEstLoc: Local sky estimator using source clipping
 - profoundGainEst: Estimate image gain
+- profoundGetEllipses: Calculate multiple annulus properties of iso-photal ellipses
+- profoundGetEllipsesPlot: Create diagnostic plot of estimated iso-photal ellipses
+- profoundMakeSegimDilate: Segmentation map dilation
+- profoundMakeSegimExpand: Segmentation map expansion
+- profoundMakeSigma: Make a Sigma Map
+- profoundMakeSkyMap: Calculate coarse sky maps
+- profoundMakeStack: Create a stacked image
 - profoundSegimNear: Find the IDs of all segments near to other segments
+- profoundSegimStats: Image segmentation statistics (e.g. flux, apertures etc)
+- profoundSegimPlot: Image segmentation plots
+- profoundSkyEstLoc: Local sky estimator using source clipping
 - profoundPixelCorrelation: Calculate pixel-to-pixel correlation and 2D image FFT
 
 ### Low Level
 
+- profoundDrawEllipse:	Draw Ellipse
+- profoundFlux2Mag: Convert from flux to magnitude
+- profoundFlux2SB: Convert from flux to surface brightness
 - profoundGainConvert: Update gain values when changing zero-points
+- profoundGetEllipse: Calculate single annulus properties of an iso-photal ellipse
+- profoundGetPixScale: Get Pixel Scale
 - profoundImBlur: Fast image blur
 - profoundImDiff: Fast image difference
 - profoundImGrad: Fast image gradients
-- profoundFlux2Mag: Convert from flux to magnitude
-- profoundMag2Flux: Convert from magnitude to flux
-- profoundFlux2SB: Convert from flux to surface brightness
-- profoundSB2Flux: Convert from surface brightness to flux
-- profoundMag2Mu: Convert from magnitude to central surface brightness
-- profoundMag2Mu: Convert from central surface brightness to magnitude
 - profoundInterp2d: Image interpolation
+- profoundMag2Flux: Convert from magnitude to flux
+- profoundMag2Mu: Convert from magnitude to central surface brightness
+- profoundMu2Mag: Convert from central surface brightness to magnitude
+- profoundSB2Flux: Convert from surface brightness to flux
 
 ## Basic ProFound Usage
 
@@ -90,13 +97,13 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',package="Pr
 
 Give it a quick look:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimageWCS(image)
 ```
 
 A basic example of the lower level **profoundMakeSegim** versus the higher level **profoundProFound**:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 out_segim=segim=profoundMakeSegim(image$imDat, magzero=30, pixscale=0.339, header=image$hdr, plot=TRUE)
 out_profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 ```
@@ -114,7 +121,7 @@ out_profound$segstats[1:10,]
 
 Next we will check the before and after photometry for the brightest 40 sources (the lists differ a bit in detail due to the different sky estimation routines used):
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magplot(out_segim$segstats[1:40,c("R50", "SB_N90")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), log='x', xlim=c(0.4,5), ylim=c(22,25), grid=TRUE, xlab='R50 / asec', ylab='mag / asec^2')
 points(out_profound$segstats[1:40,c("R50", "SB_N90")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), pch=16)
 arrows(out_segim$segstats$R50[1:40], out_segim$segstats$SB_N90[1:40], out_profound$segstats$R50[1:40], out_profound$segstats$SB_N90[1:40], col='lightgrey', length=0)
@@ -146,7 +153,7 @@ maghist(out_profound$sky, xlab='Sky')
 maghist(out_profound$skyRMS, xlab='Sky RMS')
 ```
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimageWCS(image)
 magimageWCS(out_profound$sky, image$hdr)
 magimageWCS(out_profound$skyRMS, image$hdr)
@@ -178,14 +185,14 @@ The edge_frac column is simply Nsky/Nedge (the number of segment edge pixels pur
 
 We can easily plot the isolated segments and the non-isolated segments:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac==1,"segID"]), col=c(0,rainbow(100)))
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac!=1,"segID"]), col=c(0,rainbow(100)))
 ```
 
 You might be more interested in removing segments touching an image edge:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Nborder==0,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Isolated Segment')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Nborder>0,"segID"]), col=c(0,rainbow(100)))
@@ -194,7 +201,7 @@ legend('topleft',legend='Non_Isolated Segment')
 
 The edge_excess column tells us how elliptical or non-elliptical the segments are. Generally values less than 1 are probably fairly sensible looking segments (i.e. ellipses). Larger than this and the segments might have weird gemoetry:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_excess<1,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Fairly Elliptical Segment')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_excess>1,"segID"]), col=c(0,rainbow(100)))
@@ -203,7 +210,7 @@ legend('topleft',legend='Non-Elliptical Segment')
 
 The Flagborder column tells us which border of the image the segment touches. The bottom of the image is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9. In our case we can see we should find segments touching the bottom, left and top of the image:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==1,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Segment Borders Bottom')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==2,"segID"]), col=c(0,rainbow(100)))
@@ -214,7 +221,7 @@ legend('topleft',legend='Segment Borders Top')
 
 Depending on your science requirements, users might want to make use of some or all of these useful flags. Practically the most useful flag is probably edge_frac, where values above 0.8 are usually a good cut off for fairly reliable photometry (i.e. the confused or missing flux is the sub-dominant form of error), but this cannot be treated as a guarantee!
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac>0.8,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Reliable Photometry Segments')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac<0.8,"segID"]), col=c(0,rainbow(100)))
@@ -256,26 +263,3 @@ pro_J_col_fix=profoundProFound(image=Jim, segim=pro_det_K$segim_orig, objects=pr
 pro_H_col_fix=profoundProFound(image=Him, segim=pro_det_K$segim_orig, objects=pro_det_K$objects, iters=0)
 pro_K_col_fix=profoundProFound(image=Kim, segim=pro_det_K$segim_orig, objects=pro_det_K$objects, iters=0)
 ```
-
-### Stacked Photometry
-
-Given these outputs a photometrically driven user can create a S/N stacked image weighted using the inverse of ${sky_{RMS}}^2$. The reason we weight it this way is you actually want to weight by exposure time, which correlates with inverse variance (traditional Source Extractor weight maps are inverse variance for this reason), which is $1/{sky_{RMS}}^2$. To convince yourself consider you have 8 exposures with sky RMS equal to 16 originally: 4 you combine, so the sky RMS becomes $\sqrt{\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}}=\sqrt{\frac{4}{16^2}}=8$. Now later on you want to combine the 5 images you have. Clearly the optimal weighting you can possibly get will be $\sqrt{\frac{8}{16^2}}=\frac{8}{\sqrt{2}}=5.65$ (the direct stack of the original 8 images). With our already stacked image added to our 4 others we can achieve the same S/N by weighting our stacks by the inverse variance: $\sqrt{\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{8^2}}=\sqrt{\frac{4}{16^2}+\frac{1}{8^2}}=\frac{8}{\sqrt{2}}=5.65$.
-
-Below we do this with our pseudo images, the only caveat being we divide by 3 to maintain our magnitude zero-point. Why? Well, consider what you would do if these 3 images were in the same band for the same exposure time and had the same measured sky RMS- our optimal stacking method is to just add them together, but this would increase the implied flux by a factor of 3, so dividing by 3 means we have the same magnitude zero-point but our stacked image now has a reduced sky RMS when we measure it.
-
-```R
-stack=matrix(0,2000,2000) #Since our images are assumed to be 2k*2k
-stack=stack+(Jim-pro_J_tot_dil$sky)/(pro_J_tot_dil$skyRMS^2)
-stack=stack+(Him-pro_H_tot_dil$sky)/(pro_H_tot_dil$skyRMS^2)
-stack=stack+(Kim-pro_K_tot_dil$sky)/(pro_K_tot_dil$skyRMS^2)
-inv_var=(1/pro_J_tot_dil$skyRMS^2 + 1/pro_H_tot_dil$skyRMS^2 + 1/pro_K_tot_dil$skyRMS^2)
-stack=stack/inv_var
-```
-
-We can now make a new detection based on the S/N stacked images!
-
-```R
-pro_det_stack=profoundProFound(stack)
-```
-
-We can now effectively re-run all the above, but using pro_det_stack where before we had pro_det_K.
