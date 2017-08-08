@@ -25,6 +25,8 @@ library(ProFit)
 library(LaplacesDemon)
 ```
 
+## Making Simulated Data
+
 Next we generate a random image with 200 stars and 200 extended sources. The value used roughly correspoond to the source densities and magnitude distributions you might expect to find in a Z-band VIKING frame (this was used to derive the image statistics).
 
 ```{r}
@@ -102,6 +104,8 @@ magimage(im_test)
 points(model_test$sersic$xcen, model_test$sersic$ycen, col='yellow')
 points(model_test$pointsource$xcen, model_test$pointsource$ycen, col='green')
 ```
+
+## Deep Extraction With ProFound
 
 Now we run ProFound with fairly standard settings (note we set the VIRCAM pixel scale):
 
@@ -270,3 +274,29 @@ Total TP = `r (length(testmatch_gals_2$bestmatch[,1])+length(testmatch_stars_2$b
 Total FP = `r (dim(pro_test_2$segstats)[1]-length(testmatch_gals_2$bestmatch[,1])-length(testmatch_stars_2$bestmatch[,1]))/(Ngal+Nstar)`.
 
 Running it like this produces simialr True-Positive rates, but a lower global False-Positive rate. The moral? If you know what you doing you might want to jump straight to a deeper extraction, but if you are uncertain then you can proceed in a few iterations, i.e. extract the bright sources you are confident about and then go back later to dig around in the noise to get some more.
+
+## Residual Correlation Structure
+
+The pixel correlation plots give you some idea of whether there are more sources to be extracted from the data.
+
+First we will re-run **ProFound** with a few different skycut levels:
+
+```{r}
+pro_test_sc1=profoundProFound(im_test, magzero=30, skycut=1, plot=FALSE, boundstats=TRUE, pixscale=0.34, tolerance=2)
+pro_test_sc2=profoundProFound(im_test, magzero=30, skycut=2, plot=FALSE, boundstats=TRUE, pixscale=0.34, tolerance=2)
+pro_test_sc4=profoundProFound(im_test, magzero=30, skycut=4, plot=FALSE, boundstats=TRUE, pixscale=0.34, tolerance=2)
+```
+
+Next we can re make the correlation plots using the 
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+profoundPixelCorrelation(im_test, objects = pro_test_sc1$objects_redo, sky=pro_test_sc1$sky, skyRMS=pro_test_sc1$skyRMS, plot=TRUE, ylim=c(-0.1,0.1))
+profoundPixelCorrelation(im_test, objects = pro_test_sc2$objects_redo, sky=pro_test_sc2$sky, skyRMS=pro_test_sc2$skyRMS, plot=TRUE, ylim=c(-0.1,0.1))
+profoundPixelCorrelation(im_test, objects = pro_test_sc4$objects_redo, sky=pro_test_sc4$sky, skyRMS=pro_test_sc4$skyRMS, plot=TRUE, ylim=c(-0.1,0.1))
+```
+
+It is worth describing what the above tells us. The solid lines show correlation between all non-masked non-object pixels at different scales. In general an excess correlation means we are on average seeing features at a certain scale. The solid line is actually sensitive to both negative and positive features, where the former could come from a biased sky-subtraction.
+
+To help separate the two the **profoundPixelCorrelation** also returns the difference between the correlation of positive pixels (after sky subtraction) and negative pixels with the same lags (the dashed lines). If the solid line shows an excess and the dashed line is lower (or even on zero) then this is a good clue that the difference is due to a funky sky subtraction or even intrumental correlation structure (particularly true in the NIR), i.e. there is as much positive as negative correlation structure. This means we are probably not missing a significant number of real sources (which are only ever positive). If the dashed line sites above the solid line then it is a sure sign that there are more sources lurking since we see more correlation for positive than negative pixels.
+
+It might be that in a real image the dashed lines can never be brought all the way down to zero, i.e. there are very faint sub-noise objects that are clustered on a typical scale that we can see in these plots, but have no hope of extracting from the image.
