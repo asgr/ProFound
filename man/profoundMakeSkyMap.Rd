@@ -10,10 +10,9 @@ The high level function computes the absolute sky and sky RMS level over an imag
 }
 \usage{
 profoundMakeSkyMap(image, objects, mask, box = c(100,100), grid = box, skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=TRUE,
-paddim = TRUE)
+skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE)
 profoundMakeSkyGrid(image, objects, mask, box = c(100,100), grid = box, type = 'bilinear',
-skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=TRUE,
+skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=FALSE,
 paddim = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.

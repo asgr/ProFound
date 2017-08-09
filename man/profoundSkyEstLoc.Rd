@@ -9,7 +9,7 @@ Calculate the sky and sky RMS for a subset region of a larger image, as used in 
 }
 \usage{
 profoundSkyEstLoc(image, objects, mask, loc = dim(image)/2, box = c(100, 100),
-skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=TRUE,
+skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE,
 paddim = TRUE, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
