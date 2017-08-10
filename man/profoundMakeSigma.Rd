@@ -21,10 +21,10 @@ Numeric matrix; required, the image we want to analyse.
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. Pixels set to 0 are interpreted as sky, and set to zero for calculating object shot-noise. If provided, this matrix *must* be the same dimensions as \option{image}. 
 }
   \item{sky}{
-Numeric; the absolute sky level. Consider using the sky output from \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+Numeric; the absolute sky level. Consider using the sky output from \code{\link{profoundSkyEst}} or \code{\link{profoundMakeSkyGrid}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted!
 }
   \item{skyRMS}{
-Numeric; the RMS of the sky. Consider using the skyRMS output from \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+Numeric; the RMS of the sky. Consider using the skyRMS output from \code{\link{profoundSkyEst}} or \code{\link{profoundMakeSkyGrid}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{skycut}{
 How many multiples of \option{skyRMS} above the \option{sky} to start calculating shot-noise based on the \option{gain} scaling of the \option{image}. If you are missing an object mask You almost certainly do not want this to be below 0 (else you will reduce the level of the sigma map just due to fluctuations in the sky), and in practice this should probably be set in the range 1-3.

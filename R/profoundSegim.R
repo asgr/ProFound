@@ -734,3 +734,60 @@ profoundSegimPlot=function(image, segim, mask, sky=0, ...){
     magimage(mask, lo=0, hi=1, col=c(NA,hsv(alpha=0.3)), add=T)
   }
 }
+
+profoundMakeSegimPropagate=function(image, segim, objects, mask, sky=0, lambda=1e-4, plot=FALSE, ...){
+  
+  if(!requireNamespace("EBImage", quietly = TRUE)){
+    stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
+   }
+  
+  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
+  if(rembig){
+    invisible(gc())
+  }
+  
+  if(!missing(mask)){
+    mask[is.na(image)]=1
+  }else{
+    if(any(is.na(image))){
+      mask=matrix(0,dim(image)[1],dim(image)[2])
+      mask[is.na(image)]=1
+    }
+  }
+  
+  if(missing(objects)){
+    if(!missing(segim)){
+      objects=segim
+      objects[objects != 0] = 1
+    }
+  }
+  
+  image_sky=image-sky
+  
+  if(rembig){
+    rm(image)
+    rm(sky)
+    invisible(gc())
+  }
+  
+  if(missing(mask)){
+    propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, lambda=lambda))
+  }else{
+    propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, mask=mask, lambda=lambda))
+  }
+  
+  if(rembig){
+    rm(segim)
+    rm(mask)
+    invisible(gc())
+  }
+  
+  propim_sky=propim
+  propim_sky[objects>0]=0
+  
+  if(plot){
+    profoundSegimPlot(image=image_sky, segim=propim, mask=mask, ...)
+  }
+  
+  return=list(propim=propim, propim_sky=propim_sky)
+}
