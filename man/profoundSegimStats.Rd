@@ -102,10 +102,10 @@ A data.frame with columns:
   \item{asymm}{180 degree flux asymmetry (0-1, where 0 is perfect symmetry and 1 complete asymmetry)}
   \item{flux_reflect}{Flux corrected for asymmetry by doubling the contribution of flux for asymmetric pixels (defined as no matching segment pixel found when the segment is rotated through 180 degrees)}
   \item{mag_reflect}{\option{flux_reflect} converted to mag using \option{magzero}}
-  \item{maj}{Weighted standard deviation along the major axis, i.e. the first moment, so ~2 times this would be a typical major axis Kron radius (always in units of pix)}
-  \item{min}{Weighted standard deviation along the minor axis, i.e. the first moment, so ~2 times this would be a typical minor axis Kron radius  (always in units of pix)}
+  \item{maj}{Weighted standard deviation along the major axis, i.e. the first moment, so ~2 times this would be a typical semi-major axis Kron radius (always in units of pix)}
+  \item{min}{Weighted standard deviation along the minor axis, i.e. the first moment, so ~2 times this would be a typical semi-minor axis Kron radius  (always in units of pix)}
   \item{axrat}{Axial ratio as given by min/maj}
-  \item{ang}{Orientation of the major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical)}
+  \item{ang}{Orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical)}
   \item{flux_err}{Estimated total error in the flux for the segment}
   \item{mag_err}{Estimated total error in the magnitude for the segment}
   \item{flux_err_sky}{Sky subtraction component of the flux error}
@@ -121,7 +121,7 @@ A data.frame with columns:
   \item{Nmask}{Number of edge segment pixels that are touching a masked pixel (note NAs in \option{image} are also treated as masked pixels)}
   \item{edge_frac}{Fraction of edge segment pixels that are touching the sky i.e. \option{Nsky}\option{Nedge}, higher generally meaning more robust segmentation statistics}
   \item{edge_excess}{Ratio of the number of edge pixels to the expected number given the elliptical geometry measurements of the segment. If this is larger than 1 then it is a sign that the segment geometry is irregular, and is likely a flag for compromised photometry}
-  \item{Flagborder}{A binary flag telling the user which \option{image} borders the segment touches. The bottom of the \option{image} is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9.}
+  \item{flagborder}{A binary flag telling the user which \option{image} borders the segment touches. The bottom of the \option{image} is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9.}
   
 \code{profoundSegimplot} is a simple function that overlays the image segments on the original \option{image}. This can be very slow for large numbers (1,000s) of segments because it uses the base \code{\link{contour}} function to draw the segments individually.
 }
