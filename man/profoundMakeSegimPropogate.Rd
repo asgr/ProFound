@@ -74,7 +74,12 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
 
-profoundMakeSegimPropagate(image$imDat,segim=profound$segim, plot=TRUE)
+tempprop=profoundMakeSegimPropagate(image$imDat, segim=profound$segim, plot=TRUE)
+
+tempprop_stats=profoundSegimStats(image$imDat, segim=tempprop$propim_sky,
+sky=profound$sky, skyRMS=profound$skyRMS)
+
+magplot(profound$segstats$mag, tempprop_stats$flux/tempprop_stats$N100, grid=TRUE)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
