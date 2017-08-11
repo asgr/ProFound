@@ -5,7 +5,7 @@
 Propagate Identified Segments
 }
 \description{
-Propogates all identified segments across the full image, only ignoring masked regions. This serves to identify which segment every pxiel is most likely to belong to using a number of image related criteria.
+Propagates all identified segments across the full image, only ignoring masked regions. This serves to identify which segment every pixel is most likely to belong to using a number of image related criteria.
 }
 \usage{
 profoundMakeSegimPropagate(image, segim, mask, sky = 0, lambda = 1e-04, plot=FALSE, ...)
@@ -37,7 +37,7 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 }
 }
 \details{
-This function propgates out the identified segments into the rest of the \option{image}, only region identified in the \option{mask} will not be assigned to a segment. To assign pixels a mixture of the Euclidian distance and the local gradient is used (as described below). The purpose of this routine is to idenify all pixels in the image with their most likely segment (whether nominally object or sky pixel). The true sky pixels identified as belonging to a segment should also provide the best possible local estimate of the sky level.
+This function propgates out the identified segments into the rest of the \option{image}, only region identified in the \option{mask} will not be assigned to a segment. To assign pixels a mixture of the Euclidian distance and the local gradient is used (as described below). The purpose of this routine is to identify all pixels in the image with their most likely segment (whether nominally object or sky pixel). The true sky pixels identified as belonging to a segment should also provide the best possible local estimate of the sky level.
 
 For internal completeness, the below description is taken almost verbatim from the EBImage popagate function.
 
