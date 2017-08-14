@@ -723,28 +723,22 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
 profoundSegimPlot=function(image, segim, mask, sky=0, header, ...){
   if(!missing(image)){
     if(any(names(image)=='imDat') & missing(header)){
-      if(verbose){message('Supplied image contains image and header components.')}
       header=image$hdr
       image=image$imDat
     }else if(any(names(image)=='imDat') & !missing(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header.')}
       image=image$imDat
     }
     if(any(names(image)=='dat') & missing(header)){
-      if(verbose){message('Supplied image contains image and header components.')}
       header=image$hdr[[1]]
       header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
       image=image$dat[[1]]
     }else if(any(names(image)=='dat') & !missing(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header.')}
       image=image$dat[[1]]
     }
     if(any(names(image)=='image') & missing(header)){
-      if(verbose){message('Supplied image contains image and header components.')}
       header=image$header
       image=image$image
     }else if(any(names(image)=='image') & !missing(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header.')}
       image=image$image
     }
   }
@@ -764,7 +758,7 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, ...){
     contour(temp$x,temp$y,z,add=T,col=rainbow(1e3)[sample(1e3,1)],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
   }
   if(!missing(mask)){
-    magimage(mask, lo=0, hi=1, col=c(NA,hsv(alpha=0.3)), add=T)
+    magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.3)), add=T)
   }
 }
 

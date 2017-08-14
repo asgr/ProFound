@@ -178,7 +178,7 @@ out_profound=profoundProFound(image, magzero=30, verbose=TRUE, boundstats=TRUE)
 The output we get is in segstats is useful, telling us whether or not an object is isolated:
 
 ```{r}
-out_profound$segstats[1:10,c("Nedge", "Nsky", "Nobject", "Nborder", "edge_frac", "edge_excess", "Flagborder")]
+out_profound$segstats[1:10,c("Nedge", "Nsky", "Nobject", "Nborder", "edge_frac", "edge_excess", "flag_border")]
 ```
 
 The edge_frac column is simply Nsky/Nedge (the number of segment edge pixels purely touching sky divided by the number of pixels in the segment edge). Where it is 1 the segment must be well isolated, because none of its outer pixels are touching either an image boundary or another object.
@@ -208,14 +208,14 @@ magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_p
 legend('topleft',legend='Non-Elliptical Segment')
 ```
 
-The Flagborder column tells us which border of the image the segment touches. The bottom of the image is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9. In our case we can see we should find segments touching the bottom, left and top of the image:
+The flag_border column tells us which border of the image the segment touches. The bottom of the image is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9. In our case we can see we should find segments touching the bottom, left and top of the image:
 
 ```{r, fig.width=6, fig.height=6, dpi=40}
-magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==1,"segID"]), col=c(0,rainbow(100)))
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==1,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Segment Borders Bottom')
-magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==2,"segID"]), col=c(0,rainbow(100)))
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==2,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Segment Borders Left')
-magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Flagborder==4,"segID"]), col=c(0,rainbow(100)))
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==4,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Segment Borders Top')
 ```
 
