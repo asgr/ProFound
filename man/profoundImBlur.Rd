@@ -1,4 +1,4 @@
-\name{profoundImBlur}
+\name{profoundIm}
 \alias{profoundImBlur}
 \alias{profoundImGrad}
 \alias{profoundImDiff}
@@ -7,7 +7,7 @@
 Image Transformations
 }
 \description{
-Various image transformation functions that assist in exploring data.
+Various image transformation functions that assist in exploring data. These all require the \code{imager} package to be installed.
 }
 \usage{
 profoundImBlur(image, sigma = 1, plot = FALSE, ...)
