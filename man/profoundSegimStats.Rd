@@ -12,7 +12,8 @@ Basic summary statistics for image segments, e.g. aperture parameters, fluxes an
 profoundSegimStats(image, segim, mask, sky = 0, skyRMS = 0, magzero = 0, gain, pixscale = 1,
 header, sortcol = "segID", decreasing = FALSE, rotstats = FALSE, boundstats = FALSE,
 offset = 1)
-profoundSegimPlot(image, segim, mask, sky = 0, header, ...)
+profoundSegimPlot(image, segim, mask, sky = 0, header, col=rainbow(max(segim), end=2/3),
+...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -40,6 +41,15 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
   \item{pixscale}{
   Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
+  \item{header}{
+Full FITS header in table or vector format. If this is provided then the segmentations statistics table will gain \option{RAcen} and \option{Decen} coordinate outputs. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. Missing header keywords are printed out and other header option arguments are used in these cases. See \code{\link{magWCSxy2radec}}.
+}
+  \item{sortcol}{
+Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
+}
+  \item{decreasing}{
+Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.
+}
   \item{rotstats}{
 Logical; if TRUE then the \option{asymm}, \option{flux_reflect} and \option{mag_reflect} are computed, else they are set to NA. This is because they are very expensive to compute compared to other photometric properties.
 }
@@ -49,14 +59,8 @@ Logical; if TRUE then various pixel boundary statistics are computed (\option{Ne
   \item{offset}{
 Integer scalar; the distance to offset when searching for nearby segments.  
 }
-  \item{header}{
-Full FITS header in table or vector format. If this is provided then the segmentations statistics table will gain \option{RAcen} and \option{Decen} coordinate outputs. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. Missing header keywords are printed out and other header option arguments are used in these cases. See \code{\link{magWCSxy2radec}}.
-}
-  \item{sortcol}{
-Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
-}
-  \item{decreasing}{
-Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.
+  \item{col}{
+Colour palette; the colours to map the segment IDs against. This is by default the magnitude using a rainbow palette, going from red for bright segments, via green, to blue for faint segments.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.

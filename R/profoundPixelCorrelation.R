@@ -65,7 +65,7 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
     lines(output_cortab[,c('lag','cory_diff')], col='red', lty=2)
     lines(output_cortab[,c('lag','relsdx')], col='blue', lty=3)
     lines(output_cortab[,c('lag','relsdy')], col='red', lty=3)
-    legend('topright', legend=c('x-cor','y-cor','x-cor-diff','y-cor-diff','x-rel-sd','y-rel-sd'), col=c('blue','red'), lty=c(1,1,2,2,3,3))
+    legend('topright', legend=c('x-cor','y-cor','x-cor-diff','y-cor-diff','x-rel-sd','y-rel-sd'), col=c('blue','red'), lty=c(1,1,2,2,3,3), bg='white')
   }
   
   return=list(cortab=output_cortab, fft=output_FFT, image_sky=image)

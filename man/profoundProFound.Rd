@@ -11,12 +11,12 @@ This is the highest level source detection function provided in \code{ProFit}, c
 \usage{
 profoundProFound(image, segim, objects, mask, tolerance = 4, ext = 2, sigma = 1,
 smooth = TRUE, pixcut = 5, skycut = 2, SBlim, size = 5, shape = "disc", iters = 6,
-threshold = 1.05, converge = 'flux', magzero = 0, gain, pixscale = 1, sky, skyRMS,
+threshold = 1.05, converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS,
 redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bilinear",
 skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE,
 paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-boundstats = FALSE, nearstats=boundstats, offset = 1, sortcol = "segID",
-decreasing = FALSE, lowmemory=FALSE, ...)
+boundstats = FALSE, nearstats=boundstats, offset = 1, sortcol = "mag", decreasing = FALSE,
+lowmemory=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -169,6 +169,7 @@ A list containing:
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
+  \item{Nseg}{The total number of segments extracted (dim(segstats)[1]).}
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
   \item{header}{The header provided, if missing this is NULL.}
   \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}

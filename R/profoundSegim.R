@@ -720,7 +720,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
 }
 
-profoundSegimPlot=function(image, segim, mask, sky=0, header, ...){
+profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(segim), end=2/3), ...){
   if(!missing(image)){
     if(any(names(image)=='imDat') & missing(header)){
       header=image$hdr
@@ -755,7 +755,7 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, ...){
   for(i in segvec){
     z=segim==i
     z=z[ceiling(temp$x), ceiling(temp$y)]
-    contour(temp$x,temp$y,z,add=T,col=rainbow(1e3)[sample(1e3,1)],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
+    contour(temp$x,temp$y,z,add=T,col=col[i*length(col)/length(segvec)],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
   }
   if(!missing(mask)){
     magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.3)), add=T)
@@ -800,7 +800,7 @@ profoundMakeSegimPropagate=function(image, segim, objects, mask, sky=0, lambda=1
   if(missing(mask)){
     propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, lambda=lambda))
   }else{
-    propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, mask=mask, lambda=lambda))
+    propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, mask=1-mask, lambda=lambda))
   }
   
   if(rembig){
