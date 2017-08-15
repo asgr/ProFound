@@ -81,6 +81,13 @@ tempprop_stats=profoundSegimStats(image$imDat, segim=tempprop$propim_sky,
 sky=profound$sky, skyRMS=profound$skyRMS)
 
 magplot(profound$segstats$mag, tempprop_stats$flux/tempprop_stats$N100, grid=TRUE)
+
+#You can stop the propogation using a mask:
+
+mask=array(0, dim=dim(image$imDat))
+mask[1:50,]=1
+
+profoundMakeSegimPropagate(image$imDat, segim=profound$segim, plot=TRUE, mask=mask)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
