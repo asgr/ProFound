@@ -576,7 +576,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   sep=sqrt((xcen-xmax)^2+(ycen-ymax)^2)*pixscale
   
   pad=10^ceiling(log10(ylen))
-  uniqueID=ceiling(xcen)*pad+ceiling(ycen)
+  uniqueID=ceiling(xmax)*pad+ceiling(ymax)
   
   if(rotstats){
     asymm=tempDT[,.asymm(x-0.5,y-0.5,flux),by=segID]$V1
@@ -800,7 +800,8 @@ profoundMakeSegimPropagate=function(image, segim, objects, mask, sky=0, lambda=1
   if(missing(mask)){
     propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, lambda=lambda))
   }else{
-    propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, mask=1-mask, lambda=lambda))
+    #Because EBImage is odd we need to use mask to mean pixels to be propagated, i.e. where the ProFound mask=0
+    propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, mask=(mask==0), lambda=lambda))
   }
   
   if(rembig){
