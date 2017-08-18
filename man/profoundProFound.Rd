@@ -9,14 +9,14 @@ ProFound Source Detection
 This is the highest level source detection function provided in \code{ProFit}, calculating both the initial segmentation map and reasonable estimates for the total flux apertures for each source in an automatic manner.
 }
 \usage{
-profoundProFound(image, segim, objects, mask, tolerance = 4, ext = 2, sigma = 1,
-smooth = TRUE, pixcut = 5, skycut = 2, SBlim, size = 5, shape = "disc", iters = 6,
-threshold = 1.05, converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS,
-redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bilinear",
-skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE,
-paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-boundstats = FALSE, nearstats=boundstats, offset = 1, sortcol = "mag", decreasing = FALSE,
-lowmemory=FALSE, ...)
+profoundProFound(image, segim, objects, mask,  skycut=1, pixcut=3, tolerance = 4, ext = 2,
+sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05,
+converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky = TRUE,
+redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
+skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
+header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
+nearstats=boundstats, offset = 1, sortcol = "mag", decreasing = FALSE, lowmemory=FALSE,
+...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +32,12 @@ Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provide
   \item{mask}{
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
+  \item{skycut}{
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profoundMakeSegim}}.
+}
+  \item{pixcut}{
+Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profoundMakeSegim}}.
+}
   \item{tolerance}{
 Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. Parsed to \code{\link{profoundMakeSegim}}.
 }
@@ -43,12 +49,6 @@ Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. P
 }
   \item{smooth}{
 Logical; should smoothing be done on the target \option{image}? Parsed to \code{\link{profoundMakeSegim}}.
-}
-  \item{pixcut}{
-Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profoundMakeSegim}}.
-}
-  \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profoundMakeSegim}}.
 }
   \item{SBlim}{
 Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Parsed to \code{\link{profoundMakeSegim}}.
@@ -157,6 +157,8 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 This high level function is both a source detection and a segmented aperture growing function. The latter is achieved through consecutive dilation and flux measurement operations. It is not super fast, but it is designed to be fairly robust and fast enough for most use cases.
 
 \code{profoundProFound} initially makes a segmentation map using the \code{\link{profoundMakeSegim}} function. It then makes repeated dilations and flux measurements of this segmentation map using \code{\link{profoundMakeSegimDilate}}, and calculates the convergent flux segment for each source. These are combined to make a final segmentation map with associated source statistics (if requested).
+
+The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{pixcut}, \option{tolerance}, \option{sigma}, \option{ext}.
 
 \code{\link{profoundMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profoundProFound} is not trivially replicated by other astronomy tools.
 }

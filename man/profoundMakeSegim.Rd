@@ -8,10 +8,10 @@ Watershed Image Segmentation
 A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be parsed to the \option{segim} input of \code{profitSetupData}).
 }
 \usage{
-profoundMakeSegim(image, mask, objects, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE,
-pixcut = 5, skycut = 2, SBlim, magzero = 0, gain, pixscale = 1, sky, skyRMS, header,
-verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,  boundstats = FALSE,
-offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+profoundMakeSegim(image, mask, objects, skycut = 1, pixcut = 3, tolerance = 4, ext = 2,
+sigma = 1, smooth = TRUE, SBlim, magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS,
+header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,12 @@ Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
+  \item{skycut}{
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profoundMakeSegim}}.
+}
+  \item{pixcut}{
+Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profoundMakeSegim}}.
+}
   \item{tolerance}{
 Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually.
 }
@@ -35,12 +41,6 @@ Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE.
 }
   \item{smooth}{
 Logical; should smoothing be done on the target \option{image}?
-}
-  \item{pixcut}{
-Integer scalar; the number of pixels required to identify an object.
-}
-  \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS.
 }
   \item{SBlim}{
 Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used.
@@ -100,7 +100,7 @@ To use this function you will need to have \code{EBImage} installed. Since this 
 
 Linux users might also need to install some non-standard graphics libraries (depending on your install). If you do not have them already, you should look to install **jpeg** and **tiff** libraries (these are apparently technically not entirely free, hence not coming by default on some strictly open source Linux variants).
 
-The \code{profoundMakeSegim} function offers a high level internal to R interface for making quick segmentation maps. The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{tolerance}, \option{sigma}, \option{ext}, \option{skycut}, \option{pixcut}.
+The \code{profoundMakeSegim} function offers a high level internal to R interface for making quick segmentation maps. The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{pixcut}, \option{tolerance}, \option{sigma}, \option{ext}.
 }
 \value{
 A list containing:

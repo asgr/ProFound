@@ -84,6 +84,7 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
+# We need the ProFit library to show the profile: library(ProFit)
 image = readFITS(system.file("extdata", 'KiDS/G278109fitim.fits',
 package="ProFound"))$imDat
 segim = readFITS(system.file("extdata", 'KiDS/G278109segim.fits',
@@ -98,8 +99,8 @@ ylim=c(25,17), grid=TRUE, type='l')
 points(ellipses_box$ellipses$radhi[4:19],ellipses_box$ellipses$SB[4:19])
 #A rough bulge+disk surface brightness profile:
 rlocs=seq(1,30,by=0.1)
-bulge=profoundRadialSersic(rlocs, mag=17.6, re=1.7, nser=3)
-disk=profoundRadialSersic(rlocs, mag=17.4, re=13, nser=0.7)
+bulge=profitRadialSersic(rlocs, mag=17.6, re=1.7, nser=3)
+disk=profitRadialSersic(rlocs, mag=17.4, re=13, nser=0.7)
 lines(rlocs, profoundFlux2SB(bulge, pixscale=0.2), col='red')
 lines(rlocs, profoundFlux2SB(disk, pixscale=0.2), col='blue')
 lines(rlocs, profoundFlux2SB(bulge+disk, pixscale=0.2), col='green')
@@ -109,8 +110,8 @@ lines(rlocs, profoundFlux2SB(bulge+disk, pixscale=0.2), col='green')
 #Since the ellipses are divided by equi-flux we can minimise sum-square of the SB diff:
 sumsq1D=function(par=c(17.6, log10(1.7), log10(3), 17.4, log10(13), log10(0.7)),
 rad, SB, pixscale=1){
-  bulge=profoundRadialSersic(rad, mag=par[1], re=10^par[2], nser=10^par[3])
-  disk=profoundRadialSersic(rad, mag=par[4], re=10^par[5], nser=10^par[6])
+  bulge=profitRadialSersic(rad, mag=par[1], re=10^par[2], nser=10^par[3])
+  disk=profitRadialSersic(rad, mag=par[4], re=10^par[5], nser=10^par[6])
   total=profoundFlux2SB(bulge+disk, pixscale=pixscale)
   return=sum((total-SB)^2)
 }
@@ -127,8 +128,8 @@ ylim=c(25,17), grid=TRUE, type='l')
 points(ellipses_box$ellipses$radhi[4:19],ellipses_box$ellipses$SB[4:19])
 #A simple bulge+disk surface brightness profile:
 rlocs=seq(1,30,by=0.1)
-bulge=profoundRadialSersic(rlocs, mag=fit1D[1], re=10^fit1D[2], nser=10^fit1D[3])
-disk=profoundRadialSersic(rlocs, mag=fit1D[4], re=10^fit1D[5], nser=10^fit1D[6])
+bulge=profitRadialSersic(rlocs, mag=fit1D[1], re=10^fit1D[2], nser=10^fit1D[3])
+disk=profitRadialSersic(rlocs, mag=fit1D[4], re=10^fit1D[5], nser=10^fit1D[6])
 lines(rlocs, profoundFlux2SB(bulge, pixscale=0.2), col='red')
 lines(rlocs, profoundFlux2SB(disk, pixscale=0.2), col='blue')
 lines(rlocs, profoundFlux2SB(bulge+disk, pixscale=0.2), col='green')
