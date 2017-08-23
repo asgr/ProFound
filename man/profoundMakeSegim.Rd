@@ -82,7 +82,7 @@ Logical; if TRUE then various pixel boundary statistics are computed (\option{Ne
 Integer scalar; the distance to offset when searching for nearby segments (used in \code{\link{profoundSegimStats}}).
 }
   \item{sortcol}{
-Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
+Character; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
 }
   \item{decreasing}{
 Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.

@@ -15,7 +15,7 @@ converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky 
 redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
 header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats=boundstats, offset = 1, sortcol = "mag", decreasing = FALSE, lowmemory=FALSE,
+nearstats=boundstats, offset = 1, sortcol = "segID", decreasing = FALSE, lowmemory=FALSE,
 ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -141,7 +141,7 @@ Logical; if TRUE then the IDs of nearby segments is calculated via \code{\link{p
 Integer scalar; the distance to offset when searching for nearby segments (used in both \code{\link{profoundSegimStats}} and \code{\link{profoundSegimNear}}).  
 }
   \item{sortcol}{
-Character; name of the output column that the returned segmentation statistics data.frame should be sorted by. See below for column names and contents.
+Character; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
 }
   \item{decreasing}{
 Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.
