@@ -90,9 +90,13 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
     if(hassky==FALSE){
       sky=roughsky$sky
+      if(verbose){message(' - Sky statistics :')}
+      if(verbose){print(summary(as.numeric(sky)))}
     }
     if(hasskyRMS==FALSE){
       skyRMS=roughsky$skyRMS
+      if(verbose){message(' - Sky-RMS statistics :')}
+      if(verbose){print(summary(as.numeric(skyRMS)))}
     }
   }else{
     if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS or iters=0")}
@@ -118,10 +122,14 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
       if(hassky==FALSE){
-        sky=bettersky$sky
+        sky=roughsky$sky
+        if(verbose){message(' - Sky statistics :')}
+        if(verbose){print(summary(as.numeric(sky)))}
       }
       if(hasskyRMS==FALSE){
-        skyRMS=bettersky$skyRMS
+        skyRMS=roughsky$skyRMS
+        if(verbose){message(' - Sky-RMS statistics :')}
+        if(verbose){print(summary(as.numeric(skyRMS)))}
       }
     }else{
       if(verbose){message("Skipping making better sky map - User provided sky and sky RMS or iters=0")}
@@ -182,6 +190,10 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, doclip=doclip, shiftloc = shiftloc, paddim = paddim)
       skyRMS=sky$skyRMS
       sky=sky$sky
+      if(verbose){message(' - Sky statistics :')}
+      if(verbose){print(summary(as.numeric(sky)))}
+      if(verbose){message(' - Sky-RMS statistics :')}
+      if(verbose){print(summary(as.numeric(skyRMS)))}
     }else{
       if(verbose){message("Skipping making final sky map - redosky set to FALSE")}
       objects_redo=NULL
