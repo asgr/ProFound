@@ -8,8 +8,8 @@ Create diagnostic plot of estimated iso-photal ellipses
 Generates a useful plot merging a rapidly changing colour mapping with the estimated ellipses.
 }
 \usage{
-profoundGetEllipsesPlot(image, ellipses, segellipseID = "all", pixscale = 1,
-col = rep(rainbow(10, s = 0.5), 4), border = "auto", lty = 'auto',
+profoundGetEllipsesPlot(image, ellipses, segim, segID = 1, segellipseID = "all",
+pixscale = 1, col = rep(rainbow(10, s = 0.5), 4), border = "auto", lty = 'auto',
 lwd = 'auto', ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -19,6 +19,12 @@ Numeric matrix; required, the image we want to analyse.
 }
   \item{ellipses}{
 Data.frame; the ellipse information, but in practice the \option{ellipse} list output of \code{\link{profoundGetEllipses}}.
+}
+  \item{segim}{
+Numeric matrix; optional, the segmentation map of the image. This matrix *must* be the same dimensions as \option{image}.
+}
+  \item{segID}{
+Integer scalar; optional, the desired \option{segim} segment to extract from the \option{image}.
 }
   \item{segellipseID}{
 Integer vector; the segellipseID to be plotted. The default of 'all' will display all ellipses.

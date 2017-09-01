@@ -16,7 +16,8 @@
 
 # RStudio files
 .Rproj.user/
-ProFound.Rproj
+*Rproj*
+*Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -33,4 +34,3 @@ vignettes/rsconnect
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
-.Rproj.user
