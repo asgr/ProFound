@@ -16,7 +16,8 @@ profoundMag2Flux=function(mag=0, magzero=0){
 
 profoundFlux2Mag=function(flux=1, magzero=0){
   flux[is.na(flux)]=0
-  output=rep(NA,length(flux))
+  output=flux
+  output[]=NA
   output[which(flux>0)]=-2.5*log10(flux[which(flux>0)])+magzero
   return(output)
 }

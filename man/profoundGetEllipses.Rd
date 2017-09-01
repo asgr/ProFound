@@ -97,14 +97,15 @@ pixscale=0.2)
 magplot(ellipses_box$ellipses$radhi[4:19], ellipses_nobox$ellipses$SB[4:19],
 ylim=c(25,17), grid=TRUE, type='l')
 points(ellipses_box$ellipses$radhi[4:19],ellipses_box$ellipses$SB[4:19])
-#A rough bulge+disk surface brightness profile:
+#A rough bulge+disk surface brightness profile (mean axrat~0.6):
 rlocs=seq(1,30,by=0.1)
-bulge=profitRadialSersic(rlocs, mag=17.6, re=1.7, nser=3)
-disk=profitRadialSersic(rlocs, mag=17.4, re=13, nser=0.7)
+bulge=profitRadialSersic(rlocs, mag=18.2, re=1.7, nser=3)
+disk=profitRadialSersic(rlocs, mag=18, re=13, nser=0.7)
 lines(rlocs, profoundFlux2SB(bulge, pixscale=0.2), col='red')
 lines(rlocs, profoundFlux2SB(disk, pixscale=0.2), col='blue')
 lines(rlocs, profoundFlux2SB(bulge+disk, pixscale=0.2), col='green')
-#To get correct magnitudes you would need to modify the components by the axrat.
+#To get correct magnitudes you would need to modify the components by the axrat
+#and pixel scale.
 
 #We can do a better 1D fit with ease:
 #Since the ellipses are divided by equi-flux we can minimise sum-square of the SB diff:

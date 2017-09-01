@@ -79,13 +79,13 @@ profoundGetEllipses=function(image, segim, segID=1, levels=10, magzero=0, pixsca
   tempellipses=cbind(segellipseID=1:length(tempellipses[,1]), fluxfrac=isolevels+1/levels, tempellipses, SB=SB)
   tempellipses=as.data.frame(tempellipses)
   if(plot){
-    profoundGetEllipsesPlot(image=image, ellipses=tempellipses, pixscale=pixscale, ...)
+    profoundGetEllipsesPlot(image=image, ellipses=tempellipses, segim=segim, segID=segID, pixscale=pixscale, ...)
   }
   return=list(ellipses=tempellipses, segellipses=segelllipses)
 }
 
-profoundGetEllipsesPlot=function(image, ellipses, segellipseID='all', pixscale=1, col=rep(rainbow(10,s=0.5),4), border='auto', lty='auto', lwd='auto', ...){
-  magimage(image, col=col, ...)
+profoundGetEllipsesPlot=function(image, ellipses, segim, segID=1, segellipseID='all', pixscale=1, col=rep(rainbow(10,s=0.5),4), border='auto', lty='auto', lwd='auto', ...){
+  tempcon = magimage(image, col=col, ...)
   if(segellipseID[1]=='all'){segellipseID=1:length(ellipses[,1])}
   for(i in segellipseID){
     if(round(ellipses[ellipses$segellipseID==i,'fluxfrac'],2)<0.5){
@@ -108,6 +108,10 @@ profoundGetEllipsesPlot=function(image, ellipses, segellipseID='all', pixscale=1
       if(border=='auto'){tempborder='black'}else{tempborder=border}
       if(lty=='auto'){templty=2}else{templty=lty}
       if(lwd=='auto'){templwd=1}else{templwd=lwd}
+    }
+    if(!missing(segim)){
+      tempcon = magimage(1-(segim==segID), add=T, magmap=F, zlim=c(0,1), col=NA)
+      contour(tempcon, add=T, drawlabels=F, levels=1, col = "darkgreen")
     }
     profoundDrawEllipse(xcen=ellipses[ellipses$segellipseID==i,'xcen'], ycen=ellipses[ellipses$segellipseID==i,'ycen'], rad=ellipses[ellipses$segellipseID==i,'radhi']/pixscale, axrat=ellipses[ellipses$segellipseID==i,'axrat'], ang=ellipses[ellipses$segellipseID==i,'ang'], box=ellipses[ellipses$segellipseID==i,'box'], col=tempborder, lty=templty, lwd=templwd)
   }
