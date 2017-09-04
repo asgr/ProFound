@@ -73,6 +73,15 @@
   return(which( outer(tab1[,1], tab2[,1], "==") & outer(tab1[,2], tab2[,2], "=="), arr.ind=TRUE))
 }
 
+.fluxcalc=function(flux){
+  sumflux=sum(flux, na.rm=TRUE)
+  temp=cumsum(flux)/sumflux
+  N50seg=sum(temp>=0.5)
+  N90seg=sum(temp>=0.1)
+  N100seg=length(flux)
+  return=list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg)
+}
+
 profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, magzero=0, gain=NULL, pixscale=1, sky, skyRMS, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
@@ -532,7 +541,6 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   ylen=dim(image)[2]
   segvec=which(tabulate(segim)>0)
   segvec=segvec[segvec>0]
-  #locs=expand.grid(1:xlen,1:ylen)-0.5
   
   segsel=which(segim>0)
   
@@ -565,6 +573,8 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]))
   }
   
+  setkey(tempDT, flux)
+  
   if(rembig){
     rm(xloc)
     rm(yloc)
@@ -577,20 +587,21 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
-  flux=tempDT[,sum(flux, na.rm=TRUE),by=segID]$V1
-  mag=profoundFlux2Mag(flux=flux, magzero=magzero)
+  #flux=tempDT[,sum(flux, na.rm=TRUE),by=segID]$V1
+  fluxout=tempDT[,.fluxcalc(flux), by=segID]
+  mag=profoundFlux2Mag(flux=fluxout$flux, magzero=magzero)
   
-  N50seg=tempDT[,length(which(cumsum(sort(flux))/sum(flux, na.rm=TRUE)>=0.5)),by=segID]$V1
-  N90seg=tempDT[,length(which(cumsum(sort(flux))/sum(flux, na.rm=TRUE)>=0.1)),by=segID]$V1
-  N100seg=tempDT[,.N,by=segID]$N
+  #N50seg=tempDT[,length(which(cumsum(flux)/sum(flux, na.rm=TRUE)>=0.5)),by=segID]$V1
+  #N90seg=tempDT[,length(which(cumsum(flux)/sum(flux, na.rm=TRUE)>=0.1)),by=segID]$V1
+  #N100seg=tempDT[,.N,by=segID]$N
   
   if(any(flux==0)){
-    N50seg[flux==0]=N100seg[flux==0]
-    N90seg[flux==0]=N100seg[flux==0]
+    fluxout$N50seg[flux==0]=fluxout$N100seg[flux==0]
+    fluxout$N90seg[flux==0]=fluxout$N100seg[flux==0]
   }
   
   if(hassky){
-    flux_err_sky=tempDT[,sd(sky, na.rm=TRUE), by=segID]$V1*N100seg
+    flux_err_sky=tempDT[,sd(sky, na.rm=TRUE), by=segID]$V1*fluxout$N100seg
   }else{
     flux_err_sky=0
   }
@@ -602,13 +613,13 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   }
   
   if(!is.null(gain)){
-    flux_err_shot=sqrt(flux)/gain
+    flux_err_shot=sqrt(fluxout$flux)/gain
   }else{
     flux_err_shot=0
   }
   
   flux_err=sqrt(flux_err_sky^2+flux_err_skyRMS^2+flux_err_shot^2)
-  mag_err=(2.5/log(10))*abs(flux_err/flux)
+  mag_err=(2.5/log(10))*abs(flux_err/fluxout$flux)
   
   if(hassky){
     sky_mean=tempDT[,mean(sky, na.rm=TRUE), by=segID]$V1
@@ -654,15 +665,15 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   eigvec=.cov2eigvec(xsd, ysd, covxy)
   ang=.eigvec2ang(eigvec)
   
-  R50seg=sqrt(N50seg/(axrat*pi))*pixscale
-  R90seg=sqrt(N90seg/(axrat*pi))*pixscale
-  R100seg=sqrt(N100seg/(axrat*pi))*pixscale
+  R50seg=sqrt(fluxout$N50seg/(axrat*pi))*pixscale
+  R90seg=sqrt(fluxout$N90seg/(axrat*pi))*pixscale
+  R100seg=sqrt(fluxout$N100seg/(axrat*pi))*pixscale
   
   con=R50seg/R90seg
 
-  SB_N50=profoundFlux2SB(flux=flux*0.5/N50seg, magzero=magzero, pixscale=pixscale)
-  SB_N90=profoundFlux2SB(flux=flux*0.9/N90seg, magzero=magzero, pixscale=pixscale)
-  SB_N100=profoundFlux2SB(flux=flux/N100seg, magzero=magzero, pixscale=pixscale)
+  SB_N50=profoundFlux2SB(flux=fluxout$flux*0.5/fluxout$N50seg, magzero=magzero, pixscale=pixscale)
+  SB_N90=profoundFlux2SB(flux=fluxout$flux*0.9/fluxout$N90seg, magzero=magzero, pixscale=pixscale)
+  SB_N100=profoundFlux2SB(flux=fluxout$flux/fluxout$N100seg, magzero=magzero, pixscale=pixscale)
   
   if(!missing(header)){
     coord=magWCSxy2radec(xcen, ycen, header=header)
@@ -774,7 +785,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     edge_excess=NA
   }
     
-  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=flux, mag=mag, N50=N50seg, N90=N90seg, N100=N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, maj=rad$hi, min=rad$lo, axrat=axrat, ang=ang, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, sky_mean=sky_mean, sky_sum=sky_mean*N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
+  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, maj=rad$hi, min=rad$lo, axrat=axrat, ang=ang, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
   return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
 }
 
