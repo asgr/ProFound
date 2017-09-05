@@ -76,9 +76,22 @@
 .fluxcalc=function(flux){
   sumflux=sum(flux, na.rm=TRUE)
   temp=cumsum(flux)/sumflux
-  N50seg=sum(temp>=0.5)
-  N90seg=sum(temp>=0.1)
+  
   N100seg=length(flux)
+  
+  loc50=min(which(temp>=0.5))
+  loc50cumsumhi=temp[loc50]
+  loc50cumsumlo=temp[loc50-1]
+  N50seg=N100seg-(loc50-1)+(0.5-loc50cumsumlo)/(loc50cumsumhi-loc50cumsumlo)
+  
+  loc90=min(which(temp>=0.1))
+  loc90cumsumhi=temp[loc90]
+  loc90cumsumlo=temp[loc90-1]
+  N90seg=N100seg-(loc90-1)+(0.1-loc90cumsumlo)/(loc90cumsumhi-loc90cumsumlo)
+  
+  #N50seg=sum(temp>=0.5)
+  #N90seg=sum(temp>=0.1)
+  
   return=list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg)
 }
 
