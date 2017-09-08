@@ -146,8 +146,8 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{asymm}{180 degree flux asymmetry (0-1, where 0 is perfect symmetry and 1 complete asymmetry)}
   \item{flux_reflect}{Flux corrected for asymmetry by doubling the contribution of flux for asymmetric pixels (defined as no matching segment pixel found when the segment is rotated through 180 degrees)}
   \item{mag_reflect}{\option{flux_reflect} converted to mag using \option{magzero}}
-  \item{maj}{Weighted standard deviation along the major axis, i.e. the first moment, so ~2 times this would be a typical semi-major axis Kron radius (always in units of pix)}
-  \item{min}{Weighted standard deviation along the minor axis, i.e. the first moment, so ~2 times this would be a typical semi-minor axis Kron radius  (always in units of pix)}
+  \item{semimaj}{Weighted standard deviation along the major axis, i.e. the semi-major first moment, so ~2 times this would be a typical major axis Kron radius (always in units of pix)}
+  \item{semimin}{Weighted standard deviation along the minor axis, i.e. the semi-minor first moment, so ~2 times this would be a typical minor axis Kron radius  (always in units of pix)}
   \item{axrat}{Axial ratio as given by min/maj}
   \item{ang}{Orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical)}
   \item{flux_err}{Estimated total error in the flux for the segment}

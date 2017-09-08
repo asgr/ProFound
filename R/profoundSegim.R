@@ -101,7 +101,7 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
     invisible(gc())
   }
   call=match.call()
-  if(verbose){message(' - Running profoundMakeSegim:')}
+  if(verbose){message(' - Running MakeSegim:')}
   timestart = proc.time()[3]
   if(!requireNamespace("imager", quietly = TRUE)){
     stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
@@ -220,14 +220,14 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   
   if(missing(header)){header=NULL}
   
-  if(verbose){message(paste(" - profoundMakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
+  if(verbose){message(paste(" - MakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
   return=list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)
 }
 
 profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky, skyRMS, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
   
-  if(verbose){message(' - Running profoundMakeSegimExpand:')}
+  if(verbose){message(' - Running MakeSegimExpand:')}
   timestart = proc.time()[3]
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
@@ -368,7 +368,7 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
 
 profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, skyRMS=0, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
 
-  if(verbose){message(' - Running profoundMakeSegimDilate:')}
+  if(verbose){message(' - Running MakeSegimDilate:')}
   timestart = proc.time()[3]
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
@@ -798,7 +798,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     edge_excess=NA
   }
     
-  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, maj=rad$hi, min=rad$lo, axrat=axrat, ang=ang, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
+  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, semimaj=rad$hi, semimin=rad$lo, axrat=axrat, ang=ang, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
   return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
 }
 
@@ -844,3 +844,41 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
   }
 }
 
+profoundSegimNear=function(segim, offset=1){
+  
+  if(length(segim)>1e6){rembig=TRUE}else{rembig=FALSE}
+  if(rembig){
+    invisible(gc())
+  }
+  
+  xlen=dim(segim)[1]
+  ylen=dim(segim)[2]
+  
+  segim_inner=segim[(offset+1):(xlen-offset),(offset+1):(ylen-offset)]
+  off_down=segim[(offset+1):(xlen-offset),(offset+1):(ylen-offset)-offset]
+  off_left=segim[(offset+1):(xlen-offset)-offset,(offset+1):(ylen-offset)]
+  off_up=segim[(offset+1):(xlen-offset),(offset+1):(ylen-offset)+offset]
+  off_right=segim[(offset+1):(xlen-offset)+offset,(offset+1):(ylen-offset)]
+  
+  tabcomb=data.table(segID=as.integer(segim_inner), down=as.integer(off_down), left=as.integer(off_left), up=as.integer(off_up), right=as.integer(off_right))
+  
+  if(rembig){
+      rm(segim_inner)
+      rm(off_down)
+      rm(off_left)
+      rm(off_up)
+      rm(off_right)
+      invisible(gc())
+    }
+  
+  tabcomb=tabcomb[segID>0,]
+  setorder(tabcomb,segID)
+  
+  segID=NULL; down=NULL; left=NULL; up=NULL; right=NULL; nearID=NULL; Nnear=NULL
+  
+  #The line means for each set of segID pixels, identify unique adjacent pixels that do not have the ID of the segID of interest or 0 (sky) and sort the touching ID list and return to a listed data.frame. Ouch!
+  
+  tabnear=tabcomb[,list(nearID=list(sort(setdiff(unique(c(down,left,up,right)),c(0,segID))))),by=segID]
+  tabnear[,Nnear:=length(unlist(nearID)),by=segID]
+  return=tabnear
+}

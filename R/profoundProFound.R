@@ -1,26 +1,39 @@
 .selectCoG=function(diffmat, threshold=1.05){
-  tempout={}
-  for(i in 1:dim(diffmat)[1]){
-    tempsel=which(diffmat[i,]>1 & diffmat[i,]<threshold)+1
-    if(length(tempsel)==0){
-      if(any(diffmat[i,]<1, na.rm=TRUE)){
-        tempsel=min(which(diffmat[i,]<1))
-      }else{
-        tempsel=which.min(diffmat[i,])+1
-        if(length(tempsel)==0){
-          tempsel=1
-        }
-      }
-    }else{
-      tempsel=min(tempsel)
-    }
-    tempout=c(tempout, tempsel)
+  IDmat=matrix(rep(1:dim(diffmat)[2],each=dim(diffmat)[1]),nrow=dim(diffmat)[1])
+  logmat=diffmat>1 & diffmat<threshold
+  IDfin=IDmat
+  IDfin[logmat==FALSE]=NA
+  NegFlux=which(diffmat<threshold^0.2,arr.ind=TRUE)
+  if(length(NegFlux)>0){
+    NegFlux[,2]=NegFlux[,2]-1
+    IDfin[NegFlux]=IDmat[NegFlux]
+    IDfin[NegFlux[NegFlux[,2]==0,1],1]=0
   }
+  tempout=suppressWarnings(apply(IDfin,1,min,na.rm=TRUE))
+  tempout[is.infinite(tempout)]=dim(diffmat)[2]
+  tempout=tempout+1
+  # tempout={}
+  # for(i in 1:dim(diffmat)[1]){
+  #   tempsel=which(diffmat[i,]>(threshold^0.1) & diffmat[i,]<threshold)+1
+  #   if(length(tempsel)==0){
+  #     if(any(diffmat[i,]<1, na.rm=TRUE)){
+  #       tempsel=min(which(diffmat[i,]<1))
+  #     }else{
+  #       tempsel=which.min(diffmat[i,])
+  #       if(length(tempsel)==0){
+  #         tempsel=1
+  #       }
+  #     }
+  #   }else{
+  #     tempsel=min(tempsel)
+  #   }
+  #   tempout=c(tempout, tempsel)
+  # }
   return=tempout
 }
 
-profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, offset=1, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, ...){
-  if(verbose){message('Running profoundProFound:')}
+profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, offset=1, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, ...){
+  if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   call=match.call()
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
@@ -122,12 +135,12 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
       if(hassky==FALSE){
-        sky=roughsky$sky
+        sky=bettersky$sky
         if(verbose){message(' - Sky statistics :')}
         if(verbose){print(summary(as.numeric(sky)))}
       }
       if(hasskyRMS==FALSE){
-        skyRMS=roughsky$skyRMS
+        skyRMS=bettersky$skyRMS
         if(verbose){message(' - Sky-RMS statistics :')}
         if(verbose){print(summary(as.numeric(skyRMS)))}
       }
@@ -153,7 +166,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       
       if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
       
-      diffmat=rbind(compmat[,2:iters]/compmat[,1:(iters-1)])
+      diffmat=rbind(compmat[,2:(iters+1)]/compmat[,1:(iters)])
       selseg=.selectCoG(diffmat, threshold)
       
       segim=segim$segim
@@ -175,6 +188,8 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       
       objects=segim
       objects[objects!=0]=1
+      
+      selseg=selseg-1
       
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
@@ -253,12 +268,92 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       SBlim=NULL
     }
     if(missing(header)){header=NULL}
-    if(verbose){message(paste('profoundProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    return=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, segstats=segstats, Nseg=dim(segstats)[1], near=near, header=header, SBlim=SBlim, magzero=magzero, gain=gain, pixscale=pixscale, call=call)
+    if(keepim==FALSE){image=NULL}
+    if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, segstats=segstats, Nseg=dim(segstats)[1], near=near, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, gain=gain, call=call)
   }else{
     if(missing(header)){header=NULL}
+    if(keepim==FALSE){image=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
-    if(verbose){message(paste('profoundProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    return=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, segstats=NULL, Nseg=0, near=NULL, header=header, SBlim=NULL,  magzero=magzero, gain=gain, pixscale=pixscale, call=call)
+    if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, image=image, segstats=NULL, Nseg=0, near=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, gain=gain, call=call)
   }
+  class(output)='profound'
+  return=output
+}
+
+plot.profound=function(x, ...){
+  
+  if(is.null(x$image)){
+    stop('Missing image!')
+  }
+  
+  layout(matrix(1:9, 3, byrow=TRUE))
+  
+  if(!is.null(x$header)){
+  
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimageWCS(x$image, x$header)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimageWCS(x$segim, x$header, col=c(NA, rainbow(1e4, end=2/3)))
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimageWCS((x$image-x$sky)/x$skyRMS, x$header)
+    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(1e4, end=2/3)), add=TRUE)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    area=prod(x$dim)*x$pixscale^2/(3600^2)
+    temphist=maghist(x$segstats$mag, log='y', scale=2/area, plot=FALSE, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5))
+    magplot(temphist, log='y', xlab='mag', ylab='# / Deg-Sq/d[mag]', grid=TRUE)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimageWCS(x$sky, x$header)
+    legend('topleft',legend='sky',bg='white')
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimageWCS(x$skyRMS, x$header)
+    legend('topleft',legend='skyRMS',bg='white')
+    
+    maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, na.rm = TRUE)), cex=2, xlab='mag', ylab='R50 / asec', grid=TRUE)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magplot(x$segstats$mag, x$segstats$axrat, pch='.', col=hsv(alpha=0.5), ylim=c(0,1), cex=2, xlab='mag', ylab='axrat', grid=TRUE)
+  
+  }else{
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimage(x$image)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimage(x$segim, col=c(NA, rainbow(1e4, end=2/3)))
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimage((x$image-x$sky)/x$skyRMS)
+    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(1e4, end=2/3)), add=TRUE)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    maghist(x$segstats$mag, log='y', xlab='mag', ylab='#', grid=TRUE)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimage(x$sky)
+    legend('topleft',legend='sky',bg='white')
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magimage(x$skyRMS)
+    legend('topleft',legend='skyRMS',bg='white')
+    
+    maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, na.rm = TRUE)), cex=2, xlab='mag', ylab='R50 / Pixels', grid=TRUE)
+    
+    par(mar=c(3.5,3.5,0.5,0.5))
+    magplot(x$segstats$mag, x$segstats$axrat, pch='.', col=hsv(alpha=0.5), ylim=c(0,1), cex=2, xlab='mag', ylab='axrat', grid=TRUE)
+    
+  }
+  
 }

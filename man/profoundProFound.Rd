@@ -16,7 +16,7 @@ redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "me
 skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
 header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 nearstats=boundstats, offset = 1, sortcol = "segID", decreasing = FALSE, lowmemory=FALSE,
-...)
+keepim = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -149,6 +149,9 @@ Logical; if FALSE (default) the segmentation statistics data.frame will be sorte
 \item{lowmemory}{
 Logical; if TRUE then a low memory mode of ProFound will be used. This limits the large \option{image} pixel matched outputs to just \option{segim}, with \option{segim_orig}, \option{objects} and \option{objects_redo} set to NULL, and \option{sky} and \option{skyRMS} set to 0. Internally the sky and skyRMS are used as normal for flux estimates, but they are removed as soon as possible within the function in order to free up memory. 
 }
+\item{keepim}{
+Logical; if TRUE then the input \option{image} matrix is parsed through to the image output of the function. If FALSE then this is set to NULL.
+}
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
 }
@@ -163,21 +166,23 @@ The defaults should work reasonably well on modern survey data (see Examples), b
 \code{\link{profoundMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profoundProFound} is not trivially replicated by other astronomy tools.
 }
 \value{
-A list containing:
+A object list of class 'profound' containing:
 
   \item{segim}{Integer matrix; the dilated and converged segmentation map matched pixel by pixel to \option{image}.}
   \item{segim_orig}{Integer matrix; the pre-dilated segmentation map matched pixel by pixel to \option{image}.}
   \item{objects}{Logical matrix; the object map matched pixel by pixel to \option{image}. 1 means there is an object at this pixel, 0 means it is a sky pixel. Can be used as a mask in various other functions that require objects to be masked out.}
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
+  \item{image}{The input \option{image} matrix is \option{keepim}=TRUE, else NULL.}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
   \item{Nseg}{The total number of segments extracted (dim(segstats)[1]).}
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
   \item{header}{The header provided, if missing this is NULL.}
   \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
   \item{magzero}{The assumed magnitude zero point. This is relevant to various outputs returned by the segmentation statistics.}
-  \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
+  \item{dim}{The dimensions of the processed image.}
   \item{pixscale}{The assumed pixel scale. This is relevant to various outputs returned by the segmentation statistics.}
+  \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
   \item{call}{The original function call.}
   
 If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
@@ -212,8 +217,8 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{asymm}{180 degree flux asymmetry (0-1, where 0 is perfect symmetry and 1 complete asymmetry)}
   \item{flux_reflect}{Flux corrected for asymmetry by doubling the contribution of flux for asymmetric pixels (defined as no matching segment pixel found when the segment is rotated through 180 degrees)}
   \item{mag_reflect}{\option{flux_reflect} converted to mag using \option{magzero}}
-  \item{maj}{Weighted standard deviation along the major axis, i.e. the first moment, so ~2 times this would be a typical semi-major axis Kron radius (always in units of pix)}
-  \item{min}{Weighted standard deviation along the minor axis, i.e. the first moment, so ~2 times this would be a typical semi-minor axis Kron radius  (always in units of pix)}
+  \item{semimaj}{Weighted standard deviation along the major axis, i.e. the semi-major first moment, so ~2 times this would be a typical major axis Kron radius (always in units of pix)}
+  \item{semimin}{Weighted standard deviation along the minor axis, i.e. the semi-minor first moment, so ~2 times this would be a typical minor axis Kron radius  (always in units of pix)}
   \item{axrat}{Axial ratio as given by min/maj}
   \item{ang}{Orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical)}
   \item{flux_err}{Estimated total error in the flux for the segment}
