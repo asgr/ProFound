@@ -889,3 +889,25 @@ profoundSegimNear=function(segim, offset=1){
   tabnear[,Nnear:=length(unlist(nearID)),by=segID]
   return=tabnear
 }
+
+profoundSegimMerge=function(image, segim_base, segim_add, mask, sky=0){
+  
+  segim_add[segim_add>0]=segim_add[segim_add>0]+max(segim_base, na.rm=TRUE)
+  
+  image=image-sky
+  
+  stats_base=profoundSegimStats(image=image, segim=segim_base, mask=mask)[,c('segID','uniqueID','flux')]
+  stats_add=profoundSegimStats(image=image, segim=segim_add, mask=mask)[,c('segID','uniqueID','flux')]
+  
+  compID=cbind(1:length(stats_base$uniqueID), match(stats_base$uniqueID, stats_add$uniqueID))
+  flux_base=stats_base[compID[,1],'flux']
+  flux_add=stats_add[compID[,2],'flux']
+  
+  segim_base[segim_base %in% stats_base[compID[flux_base<flux_add,1],'segID']]=0
+  segim_add[segim_add %in% stats_add[compID[flux_base>flux_add,2],'segID']]=0
+  
+  segim_merge=segim_base
+  segim_merge[segim_add>0]=segim_add[segim_add>0]
+  
+  return=segim_merge
+}
