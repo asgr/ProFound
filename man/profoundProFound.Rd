@@ -200,6 +200,7 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
   \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
   \item{mag}{Total flux converted to mag using \option{magzero}}
+  \item{cenfrac}{Fraction of flux in the brightest pixel}
   \item{N50}{Number of brightest pixels containing 50\% of the flux}
   \item{N90}{Number of brightest pixels containing 90\% of the flux}
   \item{N100}{Total number of pixels in this segment, i.e. contains 100\% of the flux}
@@ -221,6 +222,8 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{semimin}{Weighted standard deviation along the minor axis, i.e. the semi-minor first moment, so ~2 times this would be a typical minor axis Kron radius  (always in units of pix)}
   \item{axrat}{Axial ratio as given by min/maj}
   \item{ang}{Orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical)}
+  \item{signif}{Approximate singificance of the detection using the Chi-Square distribution}
+  \item{FPlim}{Approximate  false-positive significance limit below which one such source might appear spuriously on an image this large}
   \item{flux_err}{Estimated total error in the flux for the segment}
   \item{mag_err}{Estimated total error in the magnitude for the segment}
   \item{flux_err_sky}{Sky subtraction component of the flux error}

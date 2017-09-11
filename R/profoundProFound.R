@@ -98,7 +98,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   hassky=!missing(sky)
   hasskyRMS=!missing(skyRMS)
   
-  if((hassky==FALSE | hasskyRMS==FALSE) & iters>0){
+  if((hassky==FALSE | hasskyRMS==FALSE) & missing(segim)){
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
     roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, shiftloc = shiftloc, paddim = paddim)
     if(hassky==FALSE){
@@ -112,7 +112,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       if(verbose){print(summary(as.numeric(skyRMS)))}
     }
   }else{
-    if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS or iters=0")}
+    if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS, or user provided segim")}
   }
   
   #Make the initial segmentation map, if not provided.
@@ -159,7 +159,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       
       for(i in 1:iters){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profoundMakeSegimDilate(image=image, segim=segim_array[,,i], mask=mask, size=size, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
+        segim=profoundMakeSegimDilate(image=image-sky, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
         compmat=cbind(compmat, segim$segstats[,converge])
         segim_array[,,i+1]=segim$segim
       }
@@ -297,6 +297,8 @@ plot.profound=function(x, ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$segim, x$header, col=c(NA, rainbow(1e4, end=2/3)))
+    abline(v=c(0,dim(x$image)[1]))
+    abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS((x$image-x$sky)/x$skyRMS, x$header)
@@ -305,7 +307,7 @@ plot.profound=function(x, ...){
     par(mar=c(3.5,3.5,0.5,0.5))
     area=prod(x$dim)*x$pixscale^2/(3600^2)
     temphist=maghist(x$segstats$mag, log='y', scale=2/area, plot=FALSE, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5))
-    magplot(temphist, log='y', xlab='mag', ylab='# / Deg-Sq/d[mag]', grid=TRUE)
+    magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$sky, x$header)
@@ -318,10 +320,11 @@ plot.profound=function(x, ...){
     maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, na.rm = TRUE)), cex=2, xlab='mag', ylab='R50 / asec', grid=TRUE)
+    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magplot(x$segstats$mag, x$segstats$axrat, pch='.', col=hsv(alpha=0.5), ylim=c(0,1), cex=2, xlab='mag', ylab='axrat', grid=TRUE)
+    fluxrat=x$segstats$flux/x$segstats$flux_err
+    magplot(x$segstats$SB_N90, fluxrat, pch='.', col=hsv(alpha=0.5), ylim=c(0.5,max(fluxrat, na.rm=TRUE)), cex=3, xlab='SB90 / mag/asec-sq', ylab='Flux/Flux-Error', grid=TRUE, log='y')
   
   }else{
     
@@ -330,6 +333,8 @@ plot.profound=function(x, ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$segim, col=c(NA, rainbow(1e4, end=2/3)))
+    abline(v=c(0,dim(x$image)[1]))
+    abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage((x$image-x$sky)/x$skyRMS)
@@ -349,11 +354,11 @@ plot.profound=function(x, ...){
     maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, na.rm = TRUE)), cex=2, xlab='mag', ylab='R50 / Pixels', grid=TRUE)
+    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / Pixels', grid=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magplot(x$segstats$mag, x$segstats$axrat, pch='.', col=hsv(alpha=0.5), ylim=c(0,1), cex=2, xlab='mag', ylab='axrat', grid=TRUE)
-    
+    fluxrat=x$segstats$flux/x$segstats$flux_err
+    magplot(x$segstats$SB_N90, fluxrat, pch='.', col=hsv(alpha=0.5), ylim=c(0.5,max(fluxrat, na.rm=TRUE)), cex=3, xlab='SB90 / mag/pix-sq', ylab='Flux/Flux-Error', grid=TRUE, log='y')
   }
   
 }
