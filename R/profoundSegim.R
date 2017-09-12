@@ -586,7 +586,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]))
   }
   
-  setkey(tempDT, flux)
+  setkey(tempDT, segID, flux)
   
   if(rembig){
     rm(xloc)
@@ -600,13 +600,8 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
-  #flux=tempDT[,sum(flux, na.rm=TRUE),by=segID]$V1
   fluxout=tempDT[,.fluxcalc(flux), by=segID]
   mag=profoundFlux2Mag(flux=fluxout$flux, magzero=magzero)
-  
-  #N50seg=tempDT[,length(which(cumsum(flux)/sum(flux, na.rm=TRUE)>=0.5)),by=segID]$V1
-  #N90seg=tempDT[,length(which(cumsum(flux)/sum(flux, na.rm=TRUE)>=0.1)),by=segID]$V1
-  #N100seg=tempDT[,.N,by=segID]$N
   
   if(any(flux==0)){
     fluxout$N50seg[flux==0]=fluxout$N100seg[flux==0]
