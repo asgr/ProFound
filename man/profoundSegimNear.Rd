@@ -23,10 +23,10 @@ Integer scalar; the distance to offset when searching for nearby segments.
 This function can be run by the user directly, but usually it is called from within a higher routine in the \code{ProFound} suite of objects detection functions.
 }
 \value{
-A data.frame of lists. This is a slightly unusal structure to see in R, but it allows for a compact manner of storing uneven vectors of touching segIDs. E.g. you might have a massive segment touching 30 other segments and many segments touching none. Padding a normal matrix out to accomodate the larger figure would be quite inefficient.
+A data.frame of lists giving the segIDs of nearby segments for every segment. This is a slightly unusal structure to see in R, but it allows for a compact manner of storing uneven vectors of touching segmentss. E.g. you might have a massive segment touching 30 other segments and many segments touching none. Padding a normal matrix out to accommodate the larger figure would be quite inefficient.
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
-  \item{nearID}{An embedded list of segmentation IDs for nearby segments. I.e. each list element of \option{nearID} is a vector (see Examples clarity).}
+  \item{nearID}{An embedded list of segmentation IDs for nearby segments. I.e. each list element of \option{nearID} is a vector (see Examples for clarity).}
   \item{Nnear}{The total number of segments that are considered to be nearby.}
 
 }

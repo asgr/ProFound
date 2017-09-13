@@ -882,7 +882,30 @@ profoundSegimNear=function(segim, offset=1){
   
   tabnear=tabcomb[,list(nearID=list(sort(setdiff(unique(c(down,left,up,right)),c(0,segID))))),by=segID]
   tabnear[,Nnear:=length(unlist(nearID)),by=segID]
-  return=tabnear
+  return=as.data.frame(tabnear)
+}
+
+profoundSegimGroup=function(segim){
+  if(!requireNamespace("EBImage", quietly = TRUE)){
+    stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
+  }
+  
+  Ngroup=NULL; segID=NULL
+  
+  groupim=EBImage::bwlabel(segim)
+  segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
+  groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
+  segIDmin=segimDT[groupID>0,min(segID, na.rm=TRUE),by=groupID]$V1
+  remap=vector(length=max(groupID))
+  remap[groupID]=segIDmin
+  groupim[groupim>0]=remap[segimDT[groupID>0,groupID]]
+  
+  segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
+  groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
+  groupsegID=segimDT[groupID>0,list(segID=list(sort(unique(segID)))),by=groupID]
+  groupsegID[,Ngroup:=length(unlist(segID)),by=groupID]
+  setkey(groupsegID,groupID)
+  return=list(groupim=groupim, groupsegID=as.data.frame(groupsegID))
 }
 
 profoundSegimMerge=function(image, segim_base, segim_add, mask, sky=0){

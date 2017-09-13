@@ -15,8 +15,8 @@ converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky 
 redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
 header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats=boundstats, offset = 1, sortcol = "segID", decreasing = FALSE, lowmemory=FALSE,
-keepim = TRUE, ...)
+nearstats=boundstats, groupstats=boundstats, offset = 1, sortcol = "segID",
+decreasing = FALSE, lowmemory=FALSE, keepim = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -137,6 +137,9 @@ Logical; if TRUE then various pixel boundary statistics are computed (\option{Ne
   \item{nearstats}{
 Logical; if TRUE then the IDs of nearby segments is calculated via \code{\link{profoundSegimNear}} and output to the returned object \option{near}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want nearby object IDs returned.
 }
+  \item{groupstats}{
+Logical; if TRUE then the IDs of grouped segments is calculated via \code{\link{profoundSegimGroup}} and output to the returned object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object IDs returned.
+}
   \item{offset}{
 Integer scalar; the distance to offset when searching for nearby segments (used in both \code{\link{profoundSegimStats}} and \code{\link{profoundSegimNear}}).  
 }
@@ -177,6 +180,7 @@ A object list of class 'profound' containing:
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
   \item{Nseg}{The total number of segments extracted (dim(segstats)[1]).}
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
+  \item{group}{If \option{groupstats}=TRUE then contains the output of \code{\link{profoundSegimGroup}}.}
   \item{header}{The header provided, if missing this is NULL.}
   \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
   \item{magzero}{The assumed magnitude zero point. This is relevant to various outputs returned by the segmentation statistics.}
