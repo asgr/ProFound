@@ -1,0 +1,88 @@
+---
+title: "ProFound: Segim Maps"
+author: "Aaron Robotham"
+date: "14 Sep 2017"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ProFit: Segim Maps}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+First load the libraries we need:
+
+```{r}
+library(knitr)
+library(ProFit)
+library(ProFound)
+library(FITSio)
+```
+
+Having a good segmentation map is important for the successful running of ProFit. Luckily ProFit now comes with some utility functions to help you get there. We can start with a simple example:
+
+```{r, fig.width=5, fig.height=5}
+image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFit"))$imDat
+segim_old = readFITS(system.file("extdata", 'KiDS/G266035segim.fits', package="ProFit"))$imDat
+segim_new = profoundMakeSegim(image, plot=TRUE)
+profoundSegimPlot(image, segim_old)
+```
+
+The above works pretty well using just the default options in profitMakeSegim, but it is noticeably tighter than the segmentation that we made for the ProFit package. This took a SExtractor segmentation map as the starting point, and expanded the segments out. We can do the same thing within ProFit:
+
+```{r, fig.width=5, fig.height=5}
+segim_new_expand=profoundMakeSegimExpand(image, segim_new$segim, skycut=-1, expandsigma=5, dim=c(31,31), expand=1, plot=TRUE)
+profoundSegimPlot(image, segim_old)
+```
+
+This expanded segmentation map is now very similar to the hand-crafted one included with the package.
+
+A harder example is galaxy G278109:
+
+```{r, fig.width=5, fig.height=5}
+image = readFITS(system.file("extdata", 'KiDS/G278109fitim.fits', package="ProFit"))$imDat
+segim_old = readFITS(system.file("extdata", 'KiDS/G278109segim.fits', package="ProFit"))$imDat
+segim_new = profoundMakeSegim(image, plot=TRUE)
+profoundSegimPlot(image, segim_old)
+```
+
+A good start might be to merge the main two segments that the watershed has split the galaxy into. We can do this by raising the tolerance:
+
+```{r, fig.width=5, fig.height=5}
+segim_new = profoundMakeSegim(image, tolerance = Inf, plot=TRUE)
+```
+
+This has merged the galaxy together with the part it associated with the star. We can easily pick out the star by segmenting the difference version of the image:
+
+```{r, fig.width=5, fig.height=5}
+segim_new_diff = profoundMakeSegim(profoundImDiff(image), skycut=2, plot=TRUE)
+```
+
+This type of segmentation has the ability to identify bright sources embedded in relatively smooth backgrounds, as we had here.
+
+We can find the new segments for our largest object easily:
+
+```{r}
+unique(segim_new_diff$segim[segim_new$segim==1])
+```
+
+0 refers to sky pixels, so we can ignore them, the other two segments are the core of the galaxy and the star. We can find the radial distance between the old segment and the new ones to decide which need to be added in:
+
+```{r}
+sqrt(rowSums((segim_new_diff$segstats[1:2,c("xcen","ycen")]-segim_new$segstats[c(1,1),c("xcen","ycen")])^2))
+```
+
+The first segment shares the same flux weighted centre to a sub-pixel distance and the second is ~30 pixels away. We can be certain the first segment is describing the same object, and the second is an additional object.
+
+Now we can add this new object to our image only segmentation map:
+
+```{r, fig.width=5, fig.height=5}
+segim_new$segim[segim_new_diff$segim==2]=max(segim_new$segim)+1
+profoundSegimPlot(image, segim_new$segim)
+```
+
+We should probably expand the main segment out, as before:
+
+```{r, fig.width=5, fig.height=5}
+segim_new_expand=profoundMakeSegimExpand(image, segim_new$segim, skycut=-1, expandsigma=5, dim=c(31,31), expand=1, plot=TRUE)
+profoundSegimPlot(image, segim_old)
+```
