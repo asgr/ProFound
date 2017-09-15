@@ -29,7 +29,7 @@ Integer scalar; the number of ellipse levels to extract from the \option{image}.
 Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the surface brightness output will represent mag/asec^2.
 }
   \item{pixscale}{
-Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the surface brightness output will represent mag/asec^2.
+Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output \option{radhi}, \option{radlo} and \option{radav} is in terms of pixels, otherwise they are in arcseconds. If provided along with \option{magzero} then the surface brightness output will represent mag/asec^2.
 }
   \item{fixcen}{
 Logical; should the ellipse centres be fixed to a common flux weighted centre?
@@ -61,14 +61,14 @@ A list containing:
 \item{fluxfrac}{The approximate fraction of galaxy flux contained within this ellipse.}
 \item{xcen}{The flux weighted x centre of the ellipse.}
 \item{ycen}{The flux weighted y centre of the ellipse.}
-\item{radhi}{The major axis extent of the ellipse (always in units of pix).}
-\item{radlo}{The minor axis extent of the ellipse (always in units of pix).}
-\item{radav}{The average radius of the ellipse (always in units of pix).}
+\item{radhi}{The major axis extent of the ellipse (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)..}
+\item{radlo}{The minor axis extent of the ellipse (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)..}
+\item{radav}{The average radius of the ellipse (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)..}
 \item{axrat}{The axial ratio of the ellipse as given by \option{radlo}/\option{radhi}.}
 \item{ang}{The angle of the ellipse in the usual ProFit sense, see \code{profitMakeModel}.}
 \item{box}{The boxiness of the ellipse in the usual ProFit sense, see \code{profitMakeModel}.}
 \item{xsd}{The flux weighted standard deviation in x (always in units of pix).}
-\item{xsd}{The flux weighted standard deviation in y (always in units of pix).}
+\item{ysd}{The flux weighted standard deviation in y (always in units of pix).}
 \item{covxy}{The flux weighted covariance in xy (always in units of pix).}
 \item{corxy}{The flux weighted correlation in xy (always in units of pix).}
 \item{flux}{The flux contained in the segmented pixels associated with this ellipse.}
