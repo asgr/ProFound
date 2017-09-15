@@ -2,7 +2,7 @@
 \alias{profoundSkyEstLoc}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Calculate Sky in Subest
+Calculate Sky in Subset of Pixels
 }
 \description{
 Calculate the sky and sky RMS for a subset region of a larger image, as used in \code{\link{profoundMakeSkyMap}}.
