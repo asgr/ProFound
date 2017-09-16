@@ -609,7 +609,9 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   }
   
   if(hassky){
-    flux_err_sky=tempDT[,sd(sky, na.rm=TRUE), by=segID]$V1*fluxout$N100seg
+    #With one version of data.table sd doesn't work when all numbers are identical (complains about gsd and negative length vectors). Fixed with explicit sd caclulation until this gets fixed.
+    #flux_err_sky=tempDT[,sd(sky, na.rm=TRUE), by=segID]$V1*fluxout$N100seg
+    flux_err_sky=tempDT[,sqrt(sum((sky-mean(sky, na.rm=TRUE))^2)/(.N-1)), by=segID]$V1*fluxout$N100seg
   }else{
     flux_err_sky=0
   }
@@ -633,8 +635,6 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   
   flux_err=sqrt(flux_err_sky^2+flux_err_skyRMS^2+flux_err_shot^2)
   mag_err=(2.5/log(10))*abs(flux_err/fluxout$flux)
-  
-  fluxout=tempDT[,.fluxcalc(flux), by=segID]
   
   if(hassky){
     sky_mean=tempDT[,mean(sky, na.rm=TRUE), by=segID]$V1
