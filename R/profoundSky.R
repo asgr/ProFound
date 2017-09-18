@@ -39,6 +39,29 @@
     return = temp
 }
 
+.subgrid=function(dim=c(100,100), grid=c(10,10)){
+  xhimult=ceiling(dim[1]/grid[1])
+  yhimult=ceiling(dim[2]/grid[2])
+  xhipix=xhimult*grid[1]
+  yhipix=yhimult*grid[2]
+  expandlen=xhipix*yhipix
+  gridlen=prod(grid)
+  tempgrid=matrix(0,expandlen,3)
+  tempgrid[,1]=rep(rep(1:grid[1],each=grid[2]),times=expandlen/gridlen)+rep(rep(seq(0,(xhimult-1)*grid[1],by=grid[1]),each=gridlen),times=yhimult)
+  tempgrid[,2]=rep(rep(1:grid[2],times=grid[1]),times=expandlen/gridlen)+rep(rep(seq(0,(yhimult-1)*grid[2],by=grid[2]),each=gridlen),each=xhimult)
+  tempgrid[,3]=rep(1:(xhimult*yhimult),each=gridlen)
+  tempgrid=tempgrid[tempgrid[,1]<=dim[1] & tempgrid[,2]<=dim[2],]
+  #tempmat=matrix(0,dim[1],dim[2])
+  tempgrid=tempgrid[order(tempgrid[,2],tempgrid[,1]),3]
+  #tempmat[]=tempgrid[,3]
+  return=tempgrid
+}
+
+.quickclip=function(flux){
+  sel=magclip(flux, estimate='lo')$x
+  return=list(sky=median(sel, na.rm=TRUE), skyRMS=sd(sel, na.rm=TRUE))
+}
+
 profoundSkyEst=function(image, objects, mask, cutlo=cuthi/2, cuthi=sqrt(sum((dim(image)/2)^2)), skycut='auto', clipiters=5, radweight=0, plot=FALSE, ...){
   radweight=-radweight
   xlen=dim(image)[1]
@@ -232,4 +255,14 @@ profoundMakeSkyGrid=function(image, objects, mask, box=c(100,100), grid=box, typ
   }
   
   return=list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS)
+}
+
+#Alas, the quick function does not appear to be quicker than the current profoundMakeSkyGrid function. Oh well, worth try.
+
+.profoundQuickSky=function(image, box=c(100,100)){
+  tempIDs=.subgrid(dim(image), grid=box)
+  tempDT=data.table(flux=as.numeric(image), subset=tempIDs)
+  setkey(tempDT, subset)
+  flux=NULL
+  return=tempDT[,.quickclip(flux),by=subset]
 }
