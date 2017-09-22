@@ -1,14 +1,14 @@
 .meanwt=function(x, wt){
   wt[wt<0]=0
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
-  sum(x*wt, na.rm = T)/sum(wt, na.rm = T)
+  sum(x*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)
 }
 
 .varwt=function(x, wt, xcen){
   wt[wt<0]=0
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   if(missing(xcen)){xcen=.meanwt(x, wt)}
-  return=(sum((x-xcen)^2*wt, na.rm = T)/sum(wt, na.rm = T))
+  return=(sum((x-xcen)^2*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE))
 }
 
 .covarwt=function(x, y, wt, xcen, ycen){
@@ -16,7 +16,7 @@
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   if(missing(xcen)){xcen=.meanwt(x, wt)}
   if(missing(ycen)){ycen=.meanwt(y, wt)}
-  return=(sum((x-xcen)*(y-ycen)*wt, na.rm = T)/sum(wt, na.rm = T))
+  return=(sum((x-xcen)*(y-ycen)*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE))
 }
 
 .cov2eigval=function(sx,sy,sxy){
@@ -627,14 +627,14 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   
   if(hassky){
     #With one version of data.table sd doesn't work when all numbers are identical (complains about gsd and negative length vectors). Fixed with explicit sd caclulation until this gets fixed.
-    #flux_err_sky=tempDT[,sd(sky, na.rm=TRUE), by=segID]$V1*fluxout$N100seg
-    flux_err_sky=tempDT[,sqrt(sum((sky-mean(sky, na.rm=TRUE))^2)/(.N-1)), by=segID]$V1*fluxout$N100seg
+    flux_err_sky=tempDT[,sd(sky, na.rm=FALSE)*1, by=segID]$V1*fluxout$N100seg
+    #flux_err_sky=tempDT[,sqrt(sum((sky-mean(sky, na.rm=TRUE))^2)/(.N-1)), by=segID]$V1*fluxout$N100seg
   }else{
     flux_err_sky=0
   }
   
   if(hasskyRMS){
-    flux_err_skyRMS=tempDT[,sqrt(sum(skyRMS^2, na.rm=TRUE)), by=segID]$V1
+    flux_err_skyRMS=tempDT[,sqrt(sum(skyRMS^2, na.rm=FALSE)), by=segID]$V1
     pchi=pchisq(tempDT[,sum((flux/skyRMS)^2, na.rm=TRUE), by=segID]$V1, df=fluxout$N100seg, log.p=TRUE)
     signif=qnorm(pchi, log.p=TRUE)
     FPlim=qnorm(1-fluxout$N100seg/(xlen*ylen))
@@ -654,13 +654,13 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   mag_err=(2.5/log(10))*abs(flux_err/fluxout$flux)
   
   if(hassky){
-    sky_mean=tempDT[,mean(sky, na.rm=TRUE), by=segID]$V1
+    sky_mean=tempDT[,mean(sky, na.rm=FALSE), by=segID]$V1
   }else{
     sky_mean=0
   }
   
   if(hasskyRMS){
-    skyRMS_mean=tempDT[,mean(skyRMS, na.rm=TRUE), by=segID]$V1
+    skyRMS_mean=tempDT[,mean(skyRMS, na.rm=FALSE), by=segID]$V1
   }else{
     skyRMS_mean=0
   }
@@ -853,7 +853,7 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
   }else{
     temp=magimageWCS(image, header=header, ...)
   }
-  if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
+  if(min(segim,na.rm=FALSE)!=0){segim=segim-min(segim,na.rm=FALSE)}
   segvec=which(tabulate(segim)>0)
   for(i in segvec){
     z=segim==i
@@ -914,7 +914,7 @@ profoundSegimGroup=function(segim){
   groupim=EBImage::bwlabel(segim)
   segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
   groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
-  segIDmin=segimDT[groupID>0,min(segID, na.rm=TRUE),by=groupID]$V1
+  segIDmin=segimDT[groupID>0,min(segID, na.rm=FALSE),by=groupID]$V1
   remap=vector(length=max(groupID))
   remap[groupID]=segIDmin
   groupim[groupim>0]=remap[segimDT[groupID>0,groupID]]
@@ -929,7 +929,7 @@ profoundSegimGroup=function(segim){
 
 profoundSegimMerge=function(image, segim_base, segim_add, mask, sky=0){
   
-  segim_add[segim_add>0]=segim_add[segim_add>0]+max(segim_base, na.rm=TRUE)
+  segim_add[segim_add>0]=segim_add[segim_add>0]+max(segim_base, na.rm=FALSE)
   
   image=image-sky
   

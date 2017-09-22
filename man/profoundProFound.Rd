@@ -174,6 +174,7 @@ A object list of class 'profound' containing:
   \item{segim}{Integer matrix; the dilated and converged segmentation map matched pixel by pixel to \option{image}.}
   \item{segim_orig}{Integer matrix; the pre-dilated segmentation map matched pixel by pixel to \option{image}.}
   \item{objects}{Logical matrix; the object map matched pixel by pixel to \option{image}. 1 means there is an object at this pixel, 0 means it is a sky pixel. Can be used as a mask in various other functions that require objects to be masked out.}
+  \item{objects_redo}{Logical matrix; the dilated object map matched pixel by pixel to \option{image}. See \option{redosky} and \option{redoskysize}. Can be used as a mask in various other functions that require objects to be masked out.}
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{image}{The input \option{image} matrix is \option{keepim}=TRUE, else NULL.}
