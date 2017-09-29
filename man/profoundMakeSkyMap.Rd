@@ -60,7 +60,7 @@ The matrix generated will have many fewer pixels than the original \option{image
 \value{
 \code{profoundMakeSkyMap} produces a list of two lists. The first (called sky) contains a list of x,y,z values for the absolute sky, and second (called skyRMS) contains a list of x,y,z values for the sky RMS. The grids returned are as coarse as the \option{box} option provided.
 
-\code{profoundMakeSkyMap} produces a list of two lists. The first (called sky) is a matrix of values for the absolute sky. The second (called skyRMS) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
+\code{profoundMakeSkyGrid} produces a list of two lists. The first (called sky) is a matrix of values for the absolute sky. The second (called skyRMS) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
 }
 \author{
 Aaron Robotham

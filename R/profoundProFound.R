@@ -316,9 +316,12 @@ plot.profound=function(x, ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     area=prod(x$dim)*x$pixscale^2/(3600^2)
-    temphist=maghist(x$segstats$mag, log='y', scale=2/area, plot=FALSE, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5))
-    magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
-    
+    temphist=maghist(x$segstats$mag, log='y', scale=2/area, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
+    #magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
+    ymax=log10(max(temphist$counts,na.rm = T))
+    xmax=temphist$mids[which.max(temphist$counts)]
+    abline(ymax - xmax*0.6, 0.6, col='red')
+      
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$sky, x$header)
     legend('topleft',legend='sky',bg='white')
@@ -351,7 +354,10 @@ plot.profound=function(x, ...){
     magimage(x$segim-x$segim_orig, col=c(NA, rainbow(1e4, end=2/3)), add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    maghist(x$segstats$mag, log='y', xlab='mag', ylab='#', grid=TRUE)
+    temphist=maghist(x$segstats$mag, log='y', xlab='mag', ylab='#', grid=TRUE)
+    ymax=log10(max(temphist$counts,na.rm = T))
+    xmax=temphist$mids[which.max(temphist$counts)]
+    abline(ymax - xmax*0.6, 0.6, col='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$sky)
