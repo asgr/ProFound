@@ -247,6 +247,7 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{flag_border}{A binary flag telling the user which \option{image} borders the segment touches. The bottom of the \option{image} is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9.}
   \item{iter}{The iteration number when the source was flagged as having convergent flux}
   \item{origfrac}{The ratio between the final converged flux and the initial \code{\link{profoundMakeSegim}} iso-contour estimate}
+  \item{flag_keep}{A suggested flag for selecting good objects. Objects flagged FALSE have hit the iteration limit and have grown their flux by more than the median for all objects at the iteration limit.}
 }
 \author{
 Aaron Robotham

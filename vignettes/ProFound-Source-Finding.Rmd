@@ -21,7 +21,7 @@ The **ProFound** source finding and image utilites suite covers the following fu
 
 - profoundMakeSegim: Watershed image segmentation
 - profoundMakeSkyGrid: Calculate smoothed (e.g. bicubic) sky maps
-- profoundSkyEst: Sky estimator using circular annuli (robust to bright sources)
+- profoundSkyEst: Sky estimator using circular annuli (robust to bright central extended sources)
 
 
 ### Mid Level
@@ -31,14 +31,17 @@ The **ProFound** source finding and image utilites suite covers the following fu
 - profoundGetEllipsesPlot: Create diagnostic plot of estimated iso-photal ellipses
 - profoundMakeSegimDilate: Segmentation map dilation
 - profoundMakeSegimExpand: Segmentation map expansion
+- profoundMakeSegimPropagate: Propagate segmentation map segments over adjacent sky pixels
 - profoundMakeSigma: Make a Sigma Map
 - profoundMakeSkyMap: Calculate coarse sky maps
 - profoundMakeStack: Create a stacked image
-- profoundSegimNear: Find the IDs of all segments near to other segments
-- profoundSegimStats: Image segmentation statistics (e.g. flux, apertures etc)
-- profoundSegimPlot: Image segmentation plots
-- profoundSkyEstLoc: Local sky estimator using source clipping
 - profoundPixelCorrelation: Calculate pixel-to-pixel correlation and 2D image FFT
+- profoundSegimGroup: Find the IDs of groups of touching segments
+- profoundSegimMerge: Optimally merge segmentation maps
+- profoundSegimNear: Find the IDs of all segments near to other segments
+- profoundSegimPlot: Image segmentation plots
+- profoundSegimStats: Image segmentation statistics (e.g. flux, apertures etc)
+- profoundSkyEstLoc: Local sky estimator using source clipping
 
 ### Low Level
 

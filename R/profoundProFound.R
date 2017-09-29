@@ -42,31 +42,33 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   if(!missing(image)){
     if(any(names(image)=='imDat') & missing(header)){
-      if(verbose){message('Supplied image contains image and header components.')}
+      if(verbose){message('Supplied image contains image and header components')}
       header=image$hdr
       image=image$imDat
     }else if(any(names(image)=='imDat') & !missing(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header.')}
+      if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$imDat
     }
     if(any(names(image)=='dat') & missing(header)){
-      if(verbose){message('Supplied image contains image and header components.')}
+      if(verbose){message('Supplied image contains image and header components')}
       header=image$hdr[[1]]
       header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
       image=image$dat[[1]]
     }else if(any(names(image)=='dat') & !missing(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header.')}
+      if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$dat[[1]]
     }
     if(any(names(image)=='image') & missing(header)){
-      if(verbose){message('Supplied image contains image and header components.')}
+      if(verbose){message('Supplied image contains image and header components')}
       header=image$header
       image=image$image
     }else if(any(names(image)=='image') & !missing(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header.')}
+      if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$image
     }
   }
+  
+  if(verbose){message(paste('Supplied image is',dim(image)[1],'x',dim(image)[2],'pixels'))}
   
   #Treat image NAs as masked regions:
   
@@ -83,7 +85,8 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   if(missing(pixscale) & !missing(header)){
     pixscale=profoundGetPixScale(header)
-    if(verbose){message(paste('Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
+    if(verbose){message(paste('Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel'))}
+    if(verbose){message(paste('Supplied image is',round(dim(image)[1]*pixscale/60,3),'x',round(dim(image)[2]*pixscale/60,3),'amin, ', round(prod(dim(image))*pixscale^2/(3600^2),3),'deg-sq'))}
   }
   
   if(missing(objects)){
@@ -239,6 +242,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       if(verbose){message(paste(' - boundstats =', boundstats))}
       segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
       segstats=cbind(segstats, iter=selseg, origfrac=origfrac)
+      segstats=cbind(segstats, flag_keep=segstats$origfrac> median(segstats$origfrac[segstats$iter==iters]) | segstats$iter<iters)
     }else{
       if(verbose){message("Skipping segmentation statistics - segstats set to FALSE")}
       segstats=NULL
