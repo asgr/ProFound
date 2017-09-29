@@ -18,7 +18,7 @@ library(ProFit)
 
 ```{r, fig.width=5, fig.height=5}
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
-profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE)
+profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE, rotstats=TRUE)
 ```
 
 We can identify the large group of central potentially confused sources from the group output from **ProFound**:
@@ -164,7 +164,7 @@ sigma=profoundMakeSigma(image$imDat, objects=profound$objects, gain=0.5, sky=pro
 ```
 
 ```{r}
-group1_Data=profitSetupData(image$imDat-profound$sky, sigma=sigma, modellist=group1_modellist, tofit=group1_tofit, tolog=group1_tolog, intervals=group1_interval, magzero=30, algo.func='optim', psf=psf_model, region=matrix(profound$segim %in% unlist(profound$group$groupsegID[1,'segID'])[1:5], 356), verbose=TRUE, openclenv='get')
+group1_Data=profitSetupData(image$imDat-profound$sky, sigma=sigma, modellist=group1_modellist, tofit=group1_tofit, tolog=group1_tolog, intervals=group1_interval, magzero=30, algo.func='optim', psf=psf_model, region=matrix(profound$segim %in% unlist(profound$group$groupsegID[1,'segID'])[1:5], 356), verbose=FALSE, openclenv='get')
 ```
 
 ```{r, fig.width=8, fig.height=5}
@@ -173,7 +173,7 @@ profitLikeModel(parm=group1_Data$init, Data=group1_Data, makeplots=TRUE, plotchi
 
 Next we will run a simple optimisation scheme (because we do not have all day...)
 
-```{r}
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
 group1_fit=optim(group1_Data$init, profitLikeModel, method='BFGS', Data=group1_Data, control=list(fnscale=-1))
 ```
 
@@ -184,3 +184,20 @@ profitLikeModel(parm=group1_fit$par, Data=group1_Data, makeplots=TRUE, plotchisq
 ```
 
 That is looking pretty pretty pretty good. A bit of residual structure in the central part, but that is as we might expect seeing as we did not attempt to create a more complex (e.g. elliptical and boxy) PSF.
+
+We can compare the inputs and outputs easily too:
+
+```{r}
+group1_modellist_fit=profitRemakeModellist(parm=group1_fit$par, Data=group1_Data)$modellist
+group1_modellist_fit
+```
+
+We can also see the change in a nicely formatted way if we use the relist function in R:
+
+```{r}
+relist(unlist(group1_modellist)-unlist(group1_modellist_fit), skeleton = group1_modellist)
+```
+
+The stars have migrated position a small amount, as have the extended sources. The extended sources have both hit a position limit, so it might be sensible to expand the allowed x and y centre intervals. Other parameters are barely changed, e.g. the initial **ProFound** guesses for the Re (re) and angle (ang) are actually very good. The axial ratios for the extended sources has changed a bit, but this should be expected since these are highly elliptical sources and the convolution with the PSF will be puffing them out when measured without accounting for the PSF in **ProFound**.
+
+The two bright PSF magnitudes have changed the most, which is not surprising since they were blended together. It is notable that the raw magnitudes calculated by **ProFound** are actually nearer to the fit values than the rotstats variants. In practice, there is rarely an occasion where the raw segmented magnitudes are not a good enough a starting point for optimisation in **ProFit**, since it is in practice hard for them to be more than a factor two wrong in flux, which is easily accurate enough for a sensible starting point with **ProFit**.
