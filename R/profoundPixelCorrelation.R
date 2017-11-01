@@ -27,12 +27,12 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
   corx={}; cory={}; corx_neg={}; cory_neg={}; corx_pos={}; cory_pos={}; relsdx={}; relsdy={}
   
   for(i in lag){
-    corx=c(corx,cor(as.numeric(image[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="complete.obs"))
-    cory=c(cory,cor(as.numeric(image[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="complete.obs"))
-    corx_neg=c(corx_neg,cor(as.numeric(image_neg[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="complete.obs"))
-    cory_neg=c(cory_neg,cor(as.numeric(image_neg[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="complete.obs"))
-    corx_pos=c(corx_pos,cor(as.numeric(image_pos[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="complete.obs"))
-    cory_pos=c(cory_pos,cor(as.numeric(image_pos[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="complete.obs"))
+    corx=c(corx,cor(as.numeric(image[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="na.or.complete"))
+    cory=c(cory,cor(as.numeric(image[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="na.or.complete"))
+    corx_neg=c(corx_neg,cor(as.numeric(image_neg[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="na.or.complete"))
+    cory_neg=c(cory_neg,cor(as.numeric(image_neg[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="na.or.complete"))
+    corx_pos=c(corx_pos,cor(as.numeric(image_pos[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="na.or.complete"))
+    cory_pos=c(cory_pos,cor(as.numeric(image_pos[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="na.or.complete"))
     relsdx=c(relsdx,sd(as.numeric(image[1:(xlen-i),])-as.numeric(image[1:(xlen-i)+i,]), na.rm=TRUE)/sqrt(2))
     relsdy=c(relsdy,sd(as.numeric(image[,1:(ylen-i)])-as.numeric(image[,1:(ylen-i)+i]), na.rm=TRUE)/sqrt(2))
   }
