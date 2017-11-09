@@ -62,7 +62,7 @@ profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
         if('CD1_2' %in% header){CD1_2=as.numeric(header[which(header=='CD1_2')+1])}else{message('Missing CD1_2')}
       }else{
         if('CDELT1' %in% header){
-          CD1_1=header[which(header=='CDELT1')+1,2]
+          CD1_1=as.numeric(header[which(header=='CDELT1')+1])
         }else{
           message("Missing CD1_1 and CDELT1")
         }
@@ -72,7 +72,7 @@ profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
         if('CD2_1' %in% header){CD2_1=as.numeric(header[which(header=='CD2_1')+1])}else{message('Missing CD2_1')}
       }else{
         if('CDELT1' %in% header){
-          CD2_2=header[which(header=='CDELT2')+1,2]
+          CD2_2=as.numeric(header[which(header=='CDELT2')+1])
         }else{
           message("Missing CD2_2 and CDELT2")
         }
