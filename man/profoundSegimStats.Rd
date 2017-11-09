@@ -77,7 +77,7 @@ The interpretation of some of these outputs will depend a lot on the data being 
 A data.frame with columns:
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
-  \item{uniqueID}{Unique ID, which is fairly static and based on the xcen and ycen position}
+  \item{uniqueID}{Unique ID, which is fairly static and based on the xmax and ymax position}
   \item{xcen}{Flux weighted x centre}
   \item{ycen}{Flux weighted y centre}
   \item{xmax}{x position of maximum flux}

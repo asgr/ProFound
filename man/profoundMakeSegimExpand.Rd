@@ -126,7 +126,7 @@ A list containing:
 If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
-  \item{uniqueID}{Unique ID, which is fairly static and based on the xcen and ycen position}
+  \item{uniqueID}{Unique ID, which is fairly static and based on the xmax and ymax position}
   \item{xcen}{Flux weighted x centre}
   \item{ycen}{Flux weighted y centre}
   \item{xmax}{x position of maximum flux}
