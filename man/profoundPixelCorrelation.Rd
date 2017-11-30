@@ -78,7 +78,7 @@ A list containing three objects:
     \item relsdx: The pixel lag implied relative standard-deviation in x
     \item relsdy: The pixel lag implied relative standard-deviation in y
   }
-  \item fft: Numeric matrix; if \option{fft}=TRUE this object contains the modulus of the 2D FFT of the \option{image} with the same dimensions, if \option{fft}=FALSE it is NULL. The output is centred such that small scale structures are in the centre of the image matrix.
+  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the frequency values of the 2D FFT in Hz (the DC or 0 Hz signal is in the absolute centre). z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. The output is centred such that large scale structures are in the centre of the image matrix.
   \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
 }
 }
@@ -96,22 +96,22 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
 
 corout_raw=profoundPixelCorrelation(image$imDat, plot=TRUE)
-magimage(corout_raw$fft)
-points(178, 178, cex=10, col='red')
+magimage(corout_raw$fft, xlab='x / Hz', ylab='y / Hz')
+points(0, 0, cex=10, col='red')
 
 #There is clearly some residual structure masking out the brighter parts of objects:
 
 corout_objects=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects, plot=TRUE)
-magimage(corout_objects$fft)
-points(178, 178, cex=10, col='red')
+magimage(corout_objects$fft, xlab='x / Hz', ylab='y / Hz')
+points(0, 0, cex=10, col='red')
 
 #Using the more aggressive objects_redo removed nearly all of this:
 
 corout_objects_redo=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects_redo, plot=TRUE)
-magimage(corout_objects_redo$fft)
-points(178, 178, cex=10, col='red')
+magimage(corout_objects_redo$fft, xlab='x / Hz', ylab='y / Hz')
+points(0, 0, cex=10, col='red')
 
 #We can use the pixel correlation function, in particular the FFT output, to assess how
 #much further we can afford to push the source extraction in our image.

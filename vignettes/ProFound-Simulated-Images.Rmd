@@ -242,7 +242,9 @@ magimage(profoundPixelCorrelation(im_test_fin, plot=TRUE)$fft); points(500,500,c
 magimage(profoundPixelCorrelation(matrix(rnorm(1e6, mean=0, sd=10), 1000), plot=TRUE)$fft); points(500,500,cex=5,col='red')
 ```
 
-It should be clear that doing a few iterative steps of removing sources and analysing the FFT until there is little high to moderate frequency signal left is a reasonable route to blindly extracting sources. Note if you have correlated pixels you will always have a bright central portion which corresponds to the pixel correlation scale (usuaully a couple of pixels).
+The 2D FFT is complex to interpret, and **profoundPixelCorrelation** only returns the power component in the so-called 'optical representation', where low frequency modes are in the centre of the image, and high frequency is in the corners. Slightly counter-intuitively we see power excess in the centre (so low frequencies). This is a typical feature of images where the structure is smooth without sharp edges, and in the case of astronomy images will tend to mean we have Gaussian-like structures present in the sky since the Fourier transform of a Guassian is a Gaussian. Since undetected sources will tend to be PSF-like in profile, this will create a visible excess in low frequency signal in the FFT.
+
+It should be clear that doing a few iterative steps of removing sources and analysing the FFT until there is little low to moderate frequency signal left is a reasonable route to blindly extracting sources.
 
 In this case we were pushing the data to extremely low surface brightness. We can compare our segmented surface brightness levels to the actual image.
 

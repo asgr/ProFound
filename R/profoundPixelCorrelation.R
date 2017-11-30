@@ -52,7 +52,20 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
     }
     
     centre=matrix(c(rep(c(-1,1),xlenpad/2), rep(c(1,-1),ylenpad/2)),xlenpad,ylenpad)[1:xlen,1:ylen]
-    output_FFT=Mod(fft(z=image*centre))
+    FFT_Mod=Mod(fft(z=image*centre))
+    dimx=dim(FFT_Mod)[1]
+    dimy=dim(FFT_Mod)[2]
+    if(dimx %% 2 == 0){
+      x=c(-(dimx/2+0.5):(dimx/2-0.5))
+    }else{
+      x=c(-floor(dimx/2):floor(dimx/2))
+    }
+    if(dimy %% 2 == 0){
+      y=c(-(dimy/2+0.5):(dimy/2-0.5))
+    }else{
+      y=c(-floor(dimy/2):floor(dimy/2))
+    }
+    output_FFT=list(x=x, y=y, z=FFT_Mod)
   }else{
     output_FFT=NULL
     image=NULL
