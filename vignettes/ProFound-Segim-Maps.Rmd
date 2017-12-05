@@ -1,7 +1,7 @@
 ---
 title: "ProFound: Segim Maps"
 author: "Aaron Robotham"
-date: "14 Sep 2017"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ProFit: Segim Maps}
@@ -36,7 +36,13 @@ profoundSegimPlot(image, segim_old)
 
 This expanded segmentation map is now very similar to the hand-crafted one included with the package.
 
-A harder example is galaxy G278109:
+This is a lower level method of getting out expanded segments. In practice most people will likely be happy with the output from profoundProFound:
+
+```{r, fig.width=5, fig.height=5}
+segim_new_expand=profoundProFound(image, plot=TRUE)
+```
+
+A harder example is galaxy G278109 due to a deeply embedded source in the main galaxy that causes a pretty brutal looking saddle-point deblend:
 
 ```{r, fig.width=5, fig.height=5}
 image = readFITS(system.file("extdata", 'KiDS/G278109fitim.fits', package="ProFit"))$imDat

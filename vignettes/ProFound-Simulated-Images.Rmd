@@ -112,7 +112,7 @@ Now we run ProFound with fairly standard settings (note we set the VIRCAM pixel 
 ```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 
-pro_test=profoundProFound(im_test, magzero=30, skycut=1, pixcut=3, verbose=TRUE, plot=TRUE, boundstats=TRUE, pixscale=0.34, tolerance=2)
+pro_test=profoundProFound(im_test, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE, pixscale=0.34, tolerance=2)
 points(model_test$sersic$xcen, model_test$sersic$ycen, col='yellow')
 points(model_test$pointsource$xcen, model_test$pointsource$ycen, col='green')
 ```
@@ -220,7 +220,7 @@ Total TP = `r (length(testmatch_gals_fin$bestmatch[,1])+length(testmatch_stars_f
 
 Total FP = `r (dim(finalcat)[1]-length(testmatch_gals_fin$bestmatch[,1])-length(testmatch_stars_fin$bestmatch[,1]))/(Ngal+Nstar)`.
 
-So we recover 73% of true galaxies, 97% of true stars (i.e. 84% of all true sources) and suffer 16% false positives. This suggests we cannot push much harder on the detection side since most of the new objects will be FALSE (since TP ~ 1-FP, and it will only get harder from here).
+So we recover 73% of true galaxies, 97% of true stars (i.e. 85% of all true sources) and suffer 17% false positives. This suggests we cannot push much harder on the detection side since most of the new objects will be FALSE (since TP ~ 1-FP, and it will only get harder from here).
 
 We can make a final image with all structure removed, sky subtracted and divided through by the RMS.
 
@@ -242,7 +242,7 @@ magimage(profoundPixelCorrelation(im_test_fin, plot=TRUE)$fft); points(500,500,c
 magimage(profoundPixelCorrelation(matrix(rnorm(1e6, mean=0, sd=10), 1000), plot=TRUE)$fft); points(500,500,cex=5,col='red')
 ```
 
-The 2D FFT is complex to interpret, and **profoundPixelCorrelation** only returns the power component in the so-called 'optical representation', where low frequency modes are in the centre of the image, and high frequency is in the corners. Slightly counter-intuitively we see power excess in the centre (so low frequencies). This is a typical feature of images where the structure is smooth without sharp edges, and in the case of astronomy images will tend to mean we have Gaussian-like structures present in the sky since the Fourier transform of a Guassian is a Gaussian. Since undetected sources will tend to be PSF-like in profile, this will create a visible excess in low frequency signal in the FFT.
+The 2D FFT is complex to interpret, and **profoundPixelCorrelation** only returns the power component in the so-called 'optical representation', where low frequency modes are in the centre of the image, and high frequency modes are in the corners. Slightly counter-intuitively we see power excess in the centre (so low frequencies). This is a typical feature of images where the structure is smooth without sharp edges, and in the case of astronomy images will tend to mean we have Gaussian-like structures present in the sky since the Fourier transform of a Guassian is a Gaussian. Since undetected sources will tend to be PSF-like in profile, this will create a visible excess in low frequency signal in the FFT.
 
 It should be clear that doing a few iterative steps of removing sources and analysing the FFT until there is little low to moderate frequency signal left is a reasonable route to blindly extracting sources.
 
@@ -302,3 +302,42 @@ It is worth describing what the above tells us. The solid lines show correlation
 To help separate the two the **profoundPixelCorrelation** also returns the difference between the correlation of positive pixels (after sky subtraction) and negative pixels with the same lags (the dashed lines). If the solid line shows an excess and the dashed line is lower (or even on zero) then this is a good clue that the difference is due to a funky sky subtraction or even intrumental correlation structure (particularly true in the NIR), i.e. there is as much positive as negative correlation structure. This means we are probably not missing a significant number of real sources (which are only ever positive). If the dashed line sites above the solid line then it is a sure sign that there are more sources lurking since we see more correlation for positive than negative pixels.
 
 It might be that in a real image the dashed lines can never be brought all the way down to zero, i.e. there are very faint sub-noise objects that are clustered on a typical scale that we can see in these plots, but have no hope of extracting from the image.
+
+## Making a Better Sky
+
+The **profoundSkySplitFFT** allows us to make a better sky image by extracting residual structure not captured well by out bilinear/bicubic sky maps that use local box cars to estimate the sky.
+
+The basic idea is you provide the original image, your current best effort sky and sky-RMS maps, and your object mask. The function makes an FFT or the image-sky where object pixels are replaced with Normal samples using the appropriate sky and sky-RMS values. If this is done well already then the image created will look like pure noise.
+
+The FFT generated above is then clipped at a user defined scale which separates out low frequency structure (possible sky) from higher frequency structure (possible real objects). We can see how much difference this might make using a smoother bicubic sky:
+
+```{r}
+pro_bicubic=profoundProFound(im_test, type='bicubic')
+```
+
+```{r}
+newsky=profoundSkySplitFFT(im_test, objects=pro_bicubic$objects_redo, sky=pro_bicubic$sky, skyRMS=pro_bicubic$skyRMS, skyscale=200)
+```
+
+We can see how this compares with the intrinsic and older sky:
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+magimage(grid_sky)
+magimage(pro_bicubic$sky)
+magimage(newsky$sky)
+```
+
+Not a huge visual difference, but we can see we now have smaller residuals with respect to the intrinsic sky:
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+magplot(density(newsky$sky-grid_sky, bw=0.1), col='red', grid=TRUE)
+lines(density(pro_bicubic$sky-grid_sky, bw=0.1), col='blue')
+legend('topright', legend=c('New - Intrinsic Sky', 'Old - Intrinsic Sky'), lty=1, col=c('red','blue'))
+```
+
+We can also look at the new high frequency image to look for sources (effectively im_test-newsky$sky):
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+magimage(newsky$sky_hi)
+```
+
