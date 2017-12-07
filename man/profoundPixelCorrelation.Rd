@@ -65,6 +65,8 @@ The function is useful to assessing a number of image attributes. For one things
 
 For calculating the raw pixel-to-pixel correlation (as returned by \option{cortab}) \option{mask} and \option{object} pixels are ignored, so correlation is only considered where both pixels are flagged as un-masked sky pixels. The 2D image FFT output (\option{fft}) replaces masked or object pixels with Normally distributed noise after the input \option{image} has had the \option{sky} subtracted and divided by the \option{skyRMS}. Note that this means the FFT generated is partly stochastic (it will differ a bit each time it is run), but in practice it will be quite persistant for large scales (the centre) and stochastic at small scales (around the edge of the FFT image).
 
+The slightly weird units used for the k modes of the FFT (see the value section below) is convenient because it means we can correctly label the FFT image in integer pixels counting out from the centre. The way to interpret the k-modes is that if you have an image of size L=356x356 then you can find the pixel representing a particular scale by computing L/S, where S is the scale of interest in pixels. I.e. S=356 is the mode representing the full image length scale since L/S=1 and can be found 1 pixel from the centre, whilst S=178/89 represents the half/quarter image scale and can be found at pixels L/S=2 or 4 (respectively) from the centre. From this reasoning we have Nyqvist sampling at 356/2=178 pixels from the centre (i.e. the edges of the FFT image).
+
 The relative standard-deviations returned in \option{cortab} are calculated by taking the standard-deviation of the lagged pixel differences of (\option{image}-\option{sky})/\option{skyRMS} and dividing through by sqrt(2). This means for well behaved data they should be 1, and the dashed lines on the diagnostic plot should fall on 1.
 
 \code{profoundSkySplitFFT}:
@@ -93,7 +95,7 @@ A list containing three objects:
     \item relsdx: The pixel lag implied relative standard-deviation in x
     \item relsdy: The pixel lag implied relative standard-deviation in y
   }
-  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in k-modes. z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. We use the optical representation, where the DC (or k=0) mode is in the absolute centre. This means larger scale produce power in the central parts of the FFT image, and smaller scales produce power in the outer parts of the FFT image.
+  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in units of (2.pi)/(L.pix), where L is the original dimensions of the image being Fourier transformed in x and y respectively. z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. We use the optical representation, where the DC (or k=0) mode is in the absolute centre. This means larger scale produce power in the central parts of the FFT image, and smaller scales produce power in the outer parts of the FFT image.
   \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
   
 \code{profoundSkySplitFFT}:
