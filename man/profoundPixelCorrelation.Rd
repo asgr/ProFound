@@ -69,9 +69,9 @@ The relative standard-deviations returned in \option{cortab} are calculated by t
 
 \code{profoundSkySplitFFT}:
 
-The FFT split output separates the provided image into hi frequency (\option{sky_hi}) and low frequency (\option{sky_lo}) modes. The idea is that \option{sky_lo} might represent additional sky with complex structure (not captured by the bicubic/bilinear extimated sky) that still needs to be subtracted off the image, whilst \option{sky_hi} might contain some as yet un-subtracted sources.
+The FFT split output separates the provided image into hi k (\option{sky_hi}) and low k (\option{sky_lo}) modes. The idea is that \option{sky_lo} might represent additional sky with complex structure (not captured by the bicubic/bilinear extimated sky) that still needs to be subtracted off the image, whilst \option{sky_hi} might contain some as yet un-subtracted sources.
 
-In principle \code{profoundSkySplitFFT} can be run with any image, but the separation into the low and high frequency modes is not easily interpretable in the presence of many real objects since they will dominate the power at all scales (trust me on this).
+In principle \code{profoundSkySplitFFT} can be run with any image, but the separation into the low and high k modes is not easily interpretable in the presence of many real objects since they will dominate the power at all scales (trust me on this).
 }
 \value{
 \code{profoundPixelCorrelation}:
@@ -93,7 +93,7 @@ A list containing three objects:
     \item relsdx: The pixel lag implied relative standard-deviation in x
     \item relsdy: The pixel lag implied relative standard-deviation in y
   }
-  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the frequency values of the 2D FFT in Hz (the DC or 0 Hz signal is in the absolute centre). z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. The output is centred such that large scale structures are in the centre of the image matrix.
+  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in k-modes (the DC or k=0 signal is in the absolute centre). z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. The output is centred such that large scale structures are in the centre of the image matrix.
   \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
   
 \code{profoundSkySplitFFT}:
@@ -101,8 +101,8 @@ A list containing three objects:
 A list containing three numeric matrices:
 
 \item{sky}{The new sky estimate, defined as the input \option{sky}+\option{sky_lo}.}
-\item{sky_lo}{The low frequency modes extracted from the objects masked \option{image}-\option{sky}.}
-\item{sky_hi}{The high frequency modes extracted from the objects masked \option{image}-\option{sky}.}
+\item{sky_lo}{The low k modes extracted from the objects masked \option{image}-\option{sky}.}
+\item{sky_hi}{The high k modes extracted from the objects masked \option{image}-\option{sky}.}
 }
 }
 \author{
@@ -119,21 +119,21 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
 
 corout_raw=profoundPixelCorrelation(image$imDat, plot=TRUE)
-magimage(corout_raw$fft, xlab='x / Hz', ylab='y / Hz')
+magimage(corout_raw$fft,xlab='kx (356/pix)', ylab='ky (356/pix)')
 points(0, 0, cex=10, col='red')
 
 #There is clearly some residual structure masking out the brighter parts of objects:
 
 corout_objects=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects, plot=TRUE)
-magimage(corout_objects$fft, xlab='x / Hz', ylab='y / Hz')
+magimage(corout_objects$fft, xlab='kx (356/pix)', ylab='ky (356/pix)')
 points(0, 0, cex=10, col='red')
 
 #Using the more aggressive objects_redo removed nearly all of this:
 
 corout_objects_redo=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects_redo, plot=TRUE)
-magimage(corout_objects_redo$fft, xlab='x / Hz', ylab='y / Hz')
+magimage(corout_objects_redo$fft, xlab='kx (356/pix)', ylab='ky (356/pix)')
 points(0, 0, cex=10, col='red')
 
 #We can use the pixel correlation function, in particular the FFT output, to assess how
@@ -192,7 +192,7 @@ magimage(image$imDat-profound$sky)
 magimage(image$imDat-newsky$sky)
 
 #Be warned, you need a reasonable estimate of the sky and objects before running this.
-#If we run on the original image that even the high/low frequency modes look very odd:
+#If we run on the original image that even the high/low k modes look very odd:
 
 magimage(profoundSkySplitFFT(image$imDat)$sky_lo)
 magimage(profoundSkySplitFFT(image$imDat)$sky_hi)

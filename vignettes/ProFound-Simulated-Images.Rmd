@@ -233,18 +233,18 @@ im_test_fin=im_test_fin/pro_test_sub$skyRMS
 To see whether we have removed (or subtracted out in the case of the sky) all structure we can look at pixel-to-pixel correlation and the 2D FFT (both returned as part of the **profoundPixelCorrelation** function):
 
 ```{r, fig.width=6, fig.height=6, dpi=40}
-magimage(profoundPixelCorrelation(im_test, plot=TRUE)$fft); points(500,500,cex=5,col='red')
+magimage(profoundPixelCorrelation(im_test, skyRMS=10, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
 
-magimage(profoundPixelCorrelation(im_test_sub, plot=TRUE)$fft); points(500,500,cex=5,col='red')
+magimage(profoundPixelCorrelation(im_test_sub, skyRMS=10, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
 
-magimage(profoundPixelCorrelation(im_test_fin, plot=TRUE)$fft); points(500,500,cex=5,col='red')
+magimage(profoundPixelCorrelation(im_test_fin, skyRMS=1, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
 
-magimage(profoundPixelCorrelation(matrix(rnorm(1e6, mean=0, sd=10), 1000), plot=TRUE)$fft); points(500,500,cex=5,col='red')
+magimage(profoundPixelCorrelation(matrix(rnorm(1e6, mean=0, sd=10), 1000), skyRMS=10, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
 ```
 
-The 2D FFT is complex to interpret, and **profoundPixelCorrelation** only returns the power component in the so-called 'optical representation', where low frequency modes are in the centre of the image, and high frequency modes are in the corners. Slightly counter-intuitively we see power excess in the centre (so low frequencies). This is a typical feature of images where the structure is smooth without sharp edges, and in the case of astronomy images will tend to mean we have Gaussian-like structures present in the sky since the Fourier transform of a Guassian is a Gaussian. Since undetected sources will tend to be PSF-like in profile, this will create a visible excess in low frequency signal in the FFT.
+The 2D FFT is complex to interpret, and **profoundPixelCorrelation** only returns the power component in the so-called 'optical representation', where low k modes are in the centre of the image, and high k modes are in the corners. Slightly counter-intuitively we see power excess in the centre (so low k modes). This is a typical feature of images where the structure is smooth without sharp edges, and in the case of astronomy images will tend to mean we have Gaussian-like structures present in the sky since the Fourier transform of a Guassian is a Gaussian. Since undetected sources will tend to be PSF-like in profile, this will create a visible excess in low k signal in the FFT.
 
-It should be clear that doing a few iterative steps of removing sources and analysing the FFT until there is little low to moderate frequency signal left is a reasonable route to blindly extracting sources.
+It should be clear that doing a few iterative steps of removing sources and analysing the FFT until there is little low to moderate k-mode signal left is a reasonable route to blindly extracting sources.
 
 In this case we were pushing the data to extremely low surface brightness. We can compare our segmented surface brightness levels to the actual image.
 
@@ -309,7 +309,7 @@ The **profoundSkySplitFFT** allows us to make a better sky image by extracting r
 
 The basic idea is you provide the original image, your current best effort sky and sky-RMS maps, and your object mask. The function makes an FFT or the image-sky where object pixels are replaced with Normal samples using the appropriate sky and sky-RMS values. If this is done well already then the image created will look like pure noise.
 
-The FFT generated above is then clipped at a user defined scale which separates out low frequency structure (possible sky) from higher frequency structure (possible real objects). We can see how much difference this might make using a smoother bicubic sky:
+The FFT generated above is then clipped at a user defined scale which separates out low k-mode structure (possible sky) from higher k-mode structure (possible real objects). We can see how much difference this might make using a smoother bicubic sky:
 
 ```{r}
 pro_bicubic=profoundProFound(im_test, type='bicubic')
@@ -335,7 +335,7 @@ lines(density(pro_bicubic$sky-grid_sky, bw=0.1), col='blue')
 legend('topright', legend=c('New - Intrinsic Sky', 'Old - Intrinsic Sky'), lty=1, col=c('red','blue'))
 ```
 
-We can also look at the new high frequency image to look for sources (effectively im_test-newsky$sky):
+We can also look at the new high k-mode image to look for sources (effectively im_test-newsky$sky):
 
 ```{r, fig.width=6, fig.height=6, dpi=40}
 magimage(newsky$sky_hi)
