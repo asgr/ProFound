@@ -76,11 +76,13 @@ Aaron Robotham
 \code{\link{profoundSkyEst}}, \code{\link{profoundMakeSkyMap}}, \code{\link{profoundMakeSkyGrid}}
 }
 \examples{
+\dontrun{
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
-package="ProFound"))$imDat
+package="ProFit"))$imDat
 profoundSkyEstLoc(image, loc=c(20,20), box=c(40,40), plot=TRUE)$val
 profoundSkyEstLoc(image, loc=c(40,20), box=c(40,40), plot=TRUE)$val
 profoundSkyEstLoc(image, loc=c(60,20), box=c(40,40), plot=TRUE)$val
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

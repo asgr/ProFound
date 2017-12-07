@@ -8,8 +8,8 @@ Make a Sigma Map
 A utility function to construct a \code{ProFit} legal sigma map that can be input to \code{profitSetupData}.
 }
 \usage{
-profoundMakeSigma(image, objects=0, sky=0, skyRMS=1, skycut=0, gain=1, readRMS=0, darkRMS=0,
-image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU',
+profoundMakeSigma(image, objects=0, sky=0, skyRMS=1, skycut=0, gain=1, readRMS=0,
+darkRMS=0, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU',
 output_units='ADU', plot=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.

@@ -71,7 +71,7 @@ Aaron Robotham
 \examples{
 \dontrun{
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
-package="ProFound"))$imDat
+package="ProFit"))$imDat
 sky1 = profoundSkyEst(image, plot=T)
 image_sky = image-sky1$sky
 sky2 = profoundSkyEst(profoundImDiff(image_sky), plot=T)

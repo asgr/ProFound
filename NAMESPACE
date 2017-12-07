@@ -8,3 +8,5 @@ import("graphics")
 import("grDevices")
 
 importFrom("utils", "relist")
+
+S3method("plot","profound")
