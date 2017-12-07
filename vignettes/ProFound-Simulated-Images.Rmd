@@ -233,13 +233,13 @@ im_test_fin=im_test_fin/pro_test_sub$skyRMS
 To see whether we have removed (or subtracted out in the case of the sky) all structure we can look at pixel-to-pixel correlation and the 2D FFT (both returned as part of the **profoundPixelCorrelation** function):
 
 ```{r, fig.width=6, fig.height=6, dpi=40}
-magimage(profoundPixelCorrelation(im_test, skyRMS=10, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
+magimage(profoundPixelCorrelation(im_test, skyRMS=10, plot=TRUE)$fft, xlab='kx (2pi/1000pix)', ylab='ky (2pi/1000pix)'); points(0,0,cex=5,col='red')
 
-magimage(profoundPixelCorrelation(im_test_sub, skyRMS=10, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
+magimage(profoundPixelCorrelation(im_test_sub, skyRMS=10, plot=TRUE)$fft, xlab='kx (2pi/1000pix)', ylab='ky (2pi/1000pix)'); points(0,0,cex=5,col='red')
 
-magimage(profoundPixelCorrelation(im_test_fin, skyRMS=1, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
+magimage(profoundPixelCorrelation(im_test_fin, skyRMS=1, plot=TRUE)$fft, xlab='kx (2pi/1000pix)', ylab='ky (1000/pix)'); points(0,0,cex=5,col='red')
 
-magimage(profoundPixelCorrelation(matrix(rnorm(1e6, mean=0, sd=10), 1000), skyRMS=10, plot=TRUE)$fft, xlab='kx (356/pix)', ylab='ky (356/pix)'); points(0,0,cex=5,col='red')
+magimage(profoundPixelCorrelation(matrix(rnorm(1e6, mean=0, sd=10), 1000), skyRMS=10, plot=TRUE)$fft, xlab='kx (2pi/1000pix)', ylab='ky (2pi/1000pix)'); points(0,0,cex=5,col='red')
 ```
 
 The 2D FFT is complex to interpret, and **profoundPixelCorrelation** only returns the power component in the so-called 'optical representation', where low k modes are in the centre of the image, and high k modes are in the corners. Slightly counter-intuitively we see power excess in the centre (so low k modes). This is a typical feature of images where the structure is smooth without sharp edges, and in the case of astronomy images will tend to mean we have Gaussian-like structures present in the sky since the Fourier transform of a Guassian is a Gaussian. Since undetected sources will tend to be PSF-like in profile, this will create a visible excess in low k signal in the FFT.

@@ -63,7 +63,7 @@ All statistics are computed on (\option{image}-\option{sky})/\option{skyRMS}. If
 
 The function is useful to assessing a number of image attributes. For one things it tells you whether all spatial variance has been detected and removed at small scales as objects (e.g. using \code{\link{profoundProFound}}), or at larger scales as sky fluctuations. Assuming the object detection and sky removal has worked well, the remaining pixel-to-pixel correlation likely represents instrument level covariance. In practice nearly all processes produce positive pixel correlation, but it is not impossible that negative correlation can be introduced during the reduction process, particularly when over-subtracting the sky around bright stars.
 
-For calculating the raw pixel-to-pixel correlation (as returned by \option{cortab}) \option{mask} and \option{object} pixels are ignored, so correlation is only considered where both pixels are flagged as un-masked sky pixels. The 2D image FFT output (\option{fft}) replaces masked or object pixels with Normally distributed noise after the input \option{image} has had the \option{sky} subtracted and divided by the \option{skyRMS}. Note that this means the FFT generated is partly stochastic (it will differ a bit each time it is run), but in practice it will be quite persistant for small scales (the centre) and stochastic at larger scales (around the edge of the FFT image).
+For calculating the raw pixel-to-pixel correlation (as returned by \option{cortab}) \option{mask} and \option{object} pixels are ignored, so correlation is only considered where both pixels are flagged as un-masked sky pixels. The 2D image FFT output (\option{fft}) replaces masked or object pixels with Normally distributed noise after the input \option{image} has had the \option{sky} subtracted and divided by the \option{skyRMS}. Note that this means the FFT generated is partly stochastic (it will differ a bit each time it is run), but in practice it will be quite persistant for large scales (the centre) and stochastic at small scales (around the edge of the FFT image).
 
 The relative standard-deviations returned in \option{cortab} are calculated by taking the standard-deviation of the lagged pixel differences of (\option{image}-\option{sky})/\option{skyRMS} and dividing through by sqrt(2). This means for well behaved data they should be 1, and the dashed lines on the diagnostic plot should fall on 1.
 
@@ -93,7 +93,7 @@ A list containing three objects:
     \item relsdx: The pixel lag implied relative standard-deviation in x
     \item relsdy: The pixel lag implied relative standard-deviation in y
   }
-  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in k-modes (the DC or k=0 signal is in the absolute centre). z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. The output is centred such that large scale structures are in the centre of the image matrix.
+  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in k-modes. z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. We use the optical representation, where the DC (or k=0) mode is in the absolute centre. This means larger scale produce power in the central parts of the FFT image, and smaller scales produce power in the outer parts of the FFT image.
   \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
   
 \code{profoundSkySplitFFT}:
@@ -119,21 +119,21 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
 
 corout_raw=profoundPixelCorrelation(image$imDat, plot=TRUE)
-magimage(corout_raw$fft,xlab='kx (356/pix)', ylab='ky (356/pix)')
+magimage(corout_raw$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
 #There is clearly some residual structure masking out the brighter parts of objects:
 
 corout_objects=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects, plot=TRUE)
-magimage(corout_objects$fft, xlab='kx (356/pix)', ylab='ky (356/pix)')
+magimage(corout_objects$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
 #Using the more aggressive objects_redo removed nearly all of this:
 
 corout_objects_redo=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects_redo, plot=TRUE)
-magimage(corout_objects_redo$fft, xlab='kx (356/pix)', ylab='ky (356/pix)')
+magimage(corout_objects_redo$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
 #We can use the pixel correlation function, in particular the FFT output, to assess how
