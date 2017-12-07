@@ -20,7 +20,7 @@ library(FITSio)
 
 Having a good segmentation map is important for the successful running of ProFit. Luckily ProFit now comes with some utility functions to help you get there. We can start with a simple example:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFit"))$imDat
 segim_old = readFITS(system.file("extdata", 'KiDS/G266035segim.fits', package="ProFit"))$imDat
 segim_new = profoundMakeSegim(image, plot=TRUE)
@@ -29,7 +29,7 @@ profoundSegimPlot(image, segim_old)
 
 The above works pretty well using just the default options in profitMakeSegim, but it is noticeably tighter than the segmentation that we made for the ProFit package. This took a SExtractor segmentation map as the starting point, and expanded the segments out. We can do the same thing within ProFit:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 segim_new_expand=profoundMakeSegimExpand(image, segim_new$segim, skycut=-1, expandsigma=5, dim=c(31,31), expand=1, plot=TRUE)
 profoundSegimPlot(image, segim_old)
 ```
@@ -38,13 +38,13 @@ This expanded segmentation map is now very similar to the hand-crafted one inclu
 
 This is a lower level method of getting out expanded segments. In practice most people will likely be happy with the output from profoundProFound:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 segim_new_expand=profoundProFound(image, plot=TRUE)
 ```
 
 A harder example is galaxy G278109 due to a deeply embedded source in the main galaxy that causes a pretty brutal looking saddle-point deblend:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 image = readFITS(system.file("extdata", 'KiDS/G278109fitim.fits', package="ProFit"))$imDat
 segim_old = readFITS(system.file("extdata", 'KiDS/G278109segim.fits', package="ProFit"))$imDat
 segim_new = profoundMakeSegim(image, plot=TRUE)
@@ -53,13 +53,13 @@ profoundSegimPlot(image, segim_old)
 
 A good start might be to merge the main two segments that the watershed has split the galaxy into. We can do this by raising the tolerance:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 segim_new = profoundMakeSegim(image, tolerance = Inf, plot=TRUE)
 ```
 
 This has merged the galaxy together with the part it associated with the star. We can easily pick out the star by segmenting the difference version of the image:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 segim_new_diff = profoundMakeSegim(profoundImDiff(image), skycut=2, plot=TRUE)
 ```
 
@@ -81,14 +81,14 @@ The first segment shares the same flux weighted centre to a sub-pixel distance a
 
 Now we can add this new object to our image only segmentation map:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 segim_new$segim[segim_new_diff$segim==2]=max(segim_new$segim)+1
 profoundSegimPlot(image, segim_new$segim)
 ```
 
 We should probably expand the main segment out, as before:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 segim_new_expand=profoundMakeSegimExpand(image, segim_new$segim, skycut=-1, expandsigma=5, dim=c(31,31), expand=1, plot=TRUE)
 profoundSegimPlot(image, segim_old)
 ```

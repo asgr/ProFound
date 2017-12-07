@@ -248,7 +248,7 @@ It should be clear that doing a few iterative steps of removing sources and anal
 
 In this case we were pushing the data to extremely low surface brightness. We can compare our segmented surface brightness levels to the actual image.
 
-```{r}
+```{r, dpi=40}
 magplot(density(finalcat$SB_N100, na.rm=TRUE), xlab='Surface Brightness / mag/asec^-2', ylab='PDF')
 abline(v=mean(pro_test$SBlim), col='red')
 ```

@@ -297,7 +297,7 @@ maghist(profound_mean_clip$sky-profound_mode_clip$sky, grid=TRUE)
 
 The median and the mode are the most similar, and for most people the choice will come down to using one of these two. We can check the impact this choice might have on the photometry:
 
-```{r, fig.width=8, fig.height=5}
+```{r, fig.width=8, fig.height=5, dpi=40}
 magplot(profound_median_clip$segstats$mag, profound_median_clip$segstats$mag-profound_mean_clip$segstats$mag, ylim=c(-0.1,0.1), xlab='Median mag', ylab='(Median mag) - (Mean mag)', grid=TRUE)
 lines(magrun(profound_median_clip$segstats$mag, profound_median_clip$segstats$mag-profound_mean_clip$segstats$mag), col='red')
 ```

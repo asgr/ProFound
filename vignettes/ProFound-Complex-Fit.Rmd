@@ -16,7 +16,7 @@ library(ProFound)
 library(ProFit)
 ```
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE, rotstats=TRUE)
 ```
@@ -29,7 +29,7 @@ profound$group$groupsegID[1,]
 
 The main group has 8 segments, which we can view easily:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 magimage(profound$group$groupim==1)
 ```
 
@@ -60,14 +60,14 @@ psf_model=profitMakeModel(modellist=psf_modellist, dim=c(75,75))$z
 
 We can see where this FWHM lies in comparison to the values estimated from **ProFound**.
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 maghist(profound$segstats$R50*2/0.339,breaks=20)
 abline(v=4.47, lty=2)
 ```
 
 Have a quick check:
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 magimage(psf_model)
 ```
 
@@ -159,27 +159,27 @@ group1_tolog=list(
 ```
 
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5, dpi=40}
 sigma=profoundMakeSigma(image$imDat, objects=profound$objects, gain=0.5, sky=profound$sky, skyRMS =profound$skyRMS, plot=TRUE)
 ```
 
 ```{r}
-group1_Data=profitSetupData(image$imDat-profound$sky, sigma=sigma, modellist=group1_modellist, tofit=group1_tofit, tolog=group1_tolog, intervals=group1_interval, magzero=30, algo.func='optim', psf=psf_model, region=matrix(profound$segim %in% unlist(profound$group$groupsegID[1,'segID'])[1:5], 356), verbose=FALSE, openclenv='get')
+group1_Data=profitSetupData(image$imDat-profound$sky, sigma=sigma, modellist=group1_modellist, tofit=group1_tofit, tolog=group1_tolog, intervals=group1_interval, magzero=30, algo.func='optim', psf=psf_model, region=matrix(profound$segim %in% unlist(profound$group$groupsegID[1,'segID'])[1:5], 356), verbose=FALSE)
 ```
 
-```{r, fig.width=8, fig.height=5}
+```{r, fig.width=8, fig.height=5, dpi=40}
 profitLikeModel(parm=group1_Data$init, Data=group1_Data, makeplots=TRUE, plotchisq=TRUE)
 ```
 
 Next we will run a simple optimisation scheme (because we do not have all day...)
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
 group1_fit=optim(group1_Data$init, profitLikeModel, method='BFGS', Data=group1_Data, control=list(fnscale=-1))
 ```
 
 And check the results!
 
-```{r, fig.width=8, fig.height=5}
+```{r, fig.width=8, fig.height=5, eval=FALSE, dpi=40}
 profitLikeModel(parm=group1_fit$par, Data=group1_Data, makeplots=TRUE, plotchisq=TRUE)
 ```
 
@@ -187,14 +187,14 @@ That is looking pretty pretty pretty good. A bit of residual structure in the ce
 
 We can compare the inputs and outputs easily too:
 
-```{r}
+```{r, eval=FALSE}
 group1_modellist_fit=profitRemakeModellist(parm=group1_fit$par, Data=group1_Data)$modellist
 group1_modellist_fit
 ```
 
 We can also see the change in a nicely formatted way if we use the relist function in R:
 
-```{r}
+```{r, eval=FALSE}
 relist(unlist(group1_modellist)-unlist(group1_modellist_fit), skeleton = group1_modellist)
 ```
 
