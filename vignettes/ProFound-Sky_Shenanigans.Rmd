@@ -304,6 +304,39 @@ lines(magrun(profound_median_clip$segstats$mag, profound_median_clip$segstats$ma
 
 So even down to our detection limit the difference tends to be a few hundredths of a mag on average, with the average effect that subtracting a median sky leaves more flux in the image (on average) given us brighter measured magnitudes. For this reason it is probably a good check to always run **ProFound** with both types of sky and check there are not regions with pathelogically weird differences.
 
+## Improving Our Sky Map with FFTs
+
+By doing ProFound source detection on the FFT itself it tells us if there are significant sources of a certain common scale (usually small) still in the image to extract. We can improve the sky using **profoundSkySplitFFT**.
+
+```{r}
+profound=profoundProFound(image, type="bicubic")
+newsky=profoundSkySplitFFT(image$imDat, objects=profound$objects_redo, sky=profound$sky, skyRMS=profound$skyRMS)
+```
+
+We can check the old versus new sky:
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+magimage(profound$sky)
+magimage(newsky$sky)
+```
+
+We can have a look at the original image, old sky subtraction and new sky subtraction (pretty subtle!):
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+magimage(image$imDat)
+magimage(image$imDat-profound$sky)
+magimage(image$imDat-newsky$sky)
+```
+
+Be warned, you need a reasonable estimate of the sky and objects before running **profoundSkySplitFFT**.
+
+If we run on the original image that even the high/low k modes look very odd:
+
+```{r, fig.width=6, fig.height=6, dpi=40}
+magimage(profoundSkySplitFFT(image$imDat)$sky_lo)
+magimage(profoundSkySplitFFT(image$imDat)$sky_hi)
+```
+
 ## Doing Better
 
 I (ASGR) spent a bit of time looking at whether you can do better by attempting to fit a true generative model to the sky. Even when the model is exactly the type used to generate the sky (which will not true for real data of course, the toy setup here is only crudely realistic) there is such a degeneracy between betweent the sky level and the mode of the Normal sky / start of the uniform object distribution, that you rarely do better than the clipped estimate used in ProFound currently. By using medians and quantiles we are also more robust to Lorentzian wings of weirdness, bright star artefacts, and cosmic ray effects (which can even created negative signals depending on how the sky pedestal is implemented).
