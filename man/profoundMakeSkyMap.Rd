@@ -70,7 +70,6 @@ Aaron Robotham
 \code{\link{profoundSkyEst}}, \code{\link{profoundSkyEstLoc}}
 }
 \examples{
-\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 magimage(image)
@@ -78,6 +77,7 @@ skymap = profoundMakeSkyMap(image, box=c(89,89))
 magimage(skymap$sky)
 magimage(skymap$skyRMS)
 
+\dontrun{
 #Now again, masking out the known objects (will not help too much in this case):
 segim=profoundMakeSegim(image, skycut=1.5, plot=TRUE)
 segim_ex=profoundMakeSegimExpand(image, segim$segim, skycut=-Inf, plot=TRUE)

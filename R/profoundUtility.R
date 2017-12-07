@@ -196,7 +196,7 @@ profoundMakeSigma=function(image, objects=0, sky=0, skyRMS=1, skycut=0, gain=1, 
   return=sigma
 }
 
-profoundGainEst=function(image, mask=0, objects=0, sky, skyRMS){
+profoundGainEst=function(image, mask=0, objects=0, sky=0, skyRMS=1){
   if(missing(sky)){
     sky=profoundSkyEst(image=image, mask=mask, objects=objects,plot=FALSE)$sky
   }

@@ -74,15 +74,12 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
-package="ProFound"))$imDat
-sigma = readFITS(system.file("extdata", 'KiDS/G266035sigma.fits',
-package="ProFound"))$imDat
-segim = profoundSegImWatershed(image)
-sigma_est=profoundMakeSigma(image, sky=segim$sky, skyRMS=segim$skyRMS, gain=1.8e13)
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+package="ProFound"))
+profound=profoundProFound(image)
 
-#This gets us close to the demo sigma image:
-magplot(sigma, sigma_est, pch='.')
+sigma_est=profoundMakeSigma(image$imDat, objects=profound$objects, sky=profound$sky,
+skyRMS=profound$skyRMS)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

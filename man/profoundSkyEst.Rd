@@ -72,9 +72,9 @@ Aaron Robotham
 \dontrun{
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
 package="ProFit"))$imDat
-sky1 = profoundSkyEst(image, plot=T)
+sky1 = profoundSkyEst(image, plot=TRUE)
 image_sky = image-sky1$sky
-sky2 = profoundSkyEst(profoundImDiff(image_sky), plot=T)
+sky2 = profoundSkyEst(profoundImDiff(image_sky), plot=TRUE)
 
 #You can check whether you are contaminated by the central objects by plotting the radrun
 #object in the list (it should be flat for a well behaved sky):
@@ -86,28 +86,26 @@ abline(h=sky$sky)
 #this out using the output of profoundSegImWatershed, set cutlo to be larger or weight
 #the sky towards outer annuli.
 
-segim=profoundSegImWatershed(image)
-sky = profoundSkyEst(image, mask=segim$objects, cutlo=0, plot=TRUE)
+profound=profoundProFound(image)
+sky = profoundSkyEst(image, mask=profound$objects, cutlo=0, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
-#The above is better, but not great. A more aggressive segmentation helps:
+#The above is better, but not great. A more aggressive mask helps:
 
-segim=profoundSegImWatershed(image, skycut=0.5, sigma=3)
-sky = profoundSkyEst(image, mask=segim$objects, cutlo=0, plot=TRUE)
+sky = profoundSkyEst(image, mask=profound$objects_redo, cutlo=0, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
 #Or weighting the sky to outer radii
 
-segim=profoundSegImWatershed(image)
-sky = profoundSkyEst(image, mask=segim$objects, cutlo=0, radweight=1, plot=TRUE)
+sky = profoundSkyEst(image, mask=profound$objects, cutlo=0, radweight=1, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 
 #Finally we can leave the central cutlo mask turned on:
 
-sky = profoundSkyEst(image, mask=segim$objects, plot=TRUE)
+sky = profoundSkyEst(image, mask=profound$objects, plot=TRUE)
 magplot(sky$radrun)
 abline(h=sky$sky)
 }

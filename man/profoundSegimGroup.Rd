@@ -47,7 +47,6 @@ Aaron Robotham
 \code{\link{profoundSegimNear}}, ~~~
 }
 \examples{
-\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE)
 
@@ -67,7 +66,6 @@ unlist(group$groupsegID[1,2])
 
 profoundSegimPlot(image$imDat, profound$segim)
 magimage(group$groupim==1, col=c(NA,'red'), add=TRUE)
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

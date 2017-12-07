@@ -63,6 +63,7 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
+# We need the ProFit library to show the profile: library(ProFit)
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFit"))$imDat
 segim = readFITS(system.file("extdata", 'KiDS/G266035segim.fits', package="ProFit"))$imDat
 ellipses = profoundGetEllipses(image=image, segim=segim, segID=4, plot=FALSE)

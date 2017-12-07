@@ -71,8 +71,9 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
+# We need the ProFit library to show the profile: library(ProFit)
 image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
-package="ProFound"))$imDat
+package="ProFit"))$imDat
 tempxy=cbind(which(image>2e-11 & image<3e-11, arr.ind=TRUE)-0.5,
              image[image>2e-11 & image<3e-11])
 magimage(image>2e-11 & image<3e-11)

@@ -140,20 +140,19 @@ Aaron Robotham
 \code{\link{profoundProFound}}, \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
-\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
-segim=profoundMakeSegim(image$imDat, magzero=30, header=image$hdr, verbose=TRUE, plot=TRUE,
-                      rotstats=TRUE)
-print(segim$segstats)
+profound=profoundProFound(image, magzero=30, rotstats=TRUE)
 
-#Note row 6 (the central galaxy) gains 0.15 mag of flux due to the missing flux when
+print(profound$segstats)
+
+#Note row 6 (the central galaxy) gains 0.05 mag of flux due to the missing flux when
 #rotated through 180 degrees. The reflected value of 18.4 is closer to the full profile
-#solution (~18.35) than the non-reflected flux (18.55).
+#solution (~18.35) than the non-reflected flux (18.45).
 
-segim$segim[35:55, 80:100]=max(segim$segim)+1
-print(profoundSegimStats(image$imDat, segim$segim, sky=segim$sky, header=image$hdr))
-profoundSegimPlot(image$imDat, segim$segim)
-}
+profound$segim[35:55, 80:100]=max(profound$segim)+1
+print(profoundSegimStats(image$imDat, segim=profound$segim, sky=profound$sky,
+header=image$hdr))
+profoundSegimPlot(image, profound$segim)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

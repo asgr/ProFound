@@ -42,7 +42,6 @@ Due to the construction of the segmented curve-of-growth in ProFound you may hav
 }
 
 \examples{
-\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE)
 
@@ -62,9 +61,8 @@ unlist(near[3,2])
 
 profoundSegimPlot(image$imDat, profound$segim)
 magimage(profound$segim==3, col=c(NA,'red'), add=TRUE)
-magimage(matrix(profound$segim %in% unlist(near[3,2]), dim(profound$segim)[1]),
+magimage(matrix(profound$segim \%in\% unlist(near[3,2]), dim(profound$segim)[1]),
 col=c(NA,'blue'), add=TRUE)
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

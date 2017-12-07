@@ -45,14 +45,12 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
-\dontrun{
-image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 magimage(image)
 profoundImBlur(image, plot=TRUE)
 profoundImGrad(image, plot=TRUE)
 profoundImDiff(image, plot=TRUE)
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

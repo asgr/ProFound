@@ -8,7 +8,7 @@ Image Gain Estimator
 High level function to estimate a rough value for the image gain in cases where you have no idea what the true image gain is. In practice this tends to be accurate to an order of magnitude and provides a reasonable lower limit for the true gain, which is good enough to make a rough first attempt at a sigma map.
 }
 \usage{
-profoundGainEst(image, mask=0, objects=0, sky, skyRMS)
+profoundGainEst(image, mask = 0, objects = 0, sky = 0, skyRMS = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,10 +42,10 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits',
-package="ProFound"))$imDat
-segim=profoundSegImWatershed(image)
-profoundGainEst(image, segim$objects, sky=segim$sky, plot=TRUE)
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+package="ProFound"))
+profound=profoundProFound(image)
+profoundGainEst(image$imDat, objects=profound$objects_redo, sky=profound$sky)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

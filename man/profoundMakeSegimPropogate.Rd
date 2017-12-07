@@ -70,7 +70,6 @@ Aaron Robotham
 \code{\link{profoundProFound}}
 }
 \examples{
-\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
@@ -88,7 +87,6 @@ mask=array(0, dim=dim(image$imDat))
 mask[1:50,]=1
 
 profoundMakeSegimPropagate(image$imDat, segim=profound$segim, plot=TRUE, mask=mask)
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

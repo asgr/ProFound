@@ -55,8 +55,9 @@ Aaron Robotham
 \examples{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
-stack=profoundMakeStack(list(image$imDat, image$imDat, image$imDat), skyRMS_list = list(8,8,3))
-mean(stack$image==image$imDat)
+stack=profoundMakeStack(list(image$imDat, image$imDat, image$imDat),
+skyRMS_list = list(8,8,3))
+
 stack$skyRMS
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -86,9 +86,9 @@ Aaron Robotham
 \dontrun{
 # We need the ProFit library to show the profile: library(ProFit)
 image = readFITS(system.file("extdata", 'KiDS/G278109fitim.fits',
-package="ProFound"))$imDat
+package="ProFit"))$imDat
 segim = readFITS(system.file("extdata", 'KiDS/G278109segim.fits',
-package="ProFound"))$imDat
+package="ProFit"))$imDat
 ellipses_nobox = profoundGetEllipses(image=image, segim=segim, levels=20, dobox=FALSE,
 pixscale=0.2)
 ellipses_box = profoundGetEllipses(image=image, segim=segim, levels=20, dobox=TRUE,

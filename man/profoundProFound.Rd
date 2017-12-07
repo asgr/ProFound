@@ -256,10 +256,9 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
 }
 \examples{
-\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
-profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
+profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 
 #You can check to see if the final mask is aggressive enough. Notice the halos
 #surrounding bright sources when just using the objects mask.
@@ -271,11 +270,10 @@ temp=image$imDat
 temp[profound$objects_redo>0]=0
 magimage(temp)
 
-magplot(segim$segstats[,c("R50","SB_N90")], log='x', grid=TRUE)
+magplot(profound$segstats[,c("R50","SB_N90")], log='x', grid=TRUE)
 magplot(profound$segstats[,c("R50","SB_N90")], log='x', grid=TRUE)
 
 magplot(profound$segstats[,c("flux","origfrac")], log='x', grid=TRUE)
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -40,14 +40,11 @@ Aaron Robotham
 
 \examples{
 \dontrun{
-#The answer should be almost exactly 0.2 asec/pixel:
+#The answer should be almost exactly 0.339 asec/pixel:
 
-#Using FITSio package
-image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFound"))
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+package="ProFound"))
 profoundGetPixScale(image$hdr)
-#Using astro package
-image = read.fits(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFound"))
-profoundGetPixScale(image$hdr[[1]])
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
