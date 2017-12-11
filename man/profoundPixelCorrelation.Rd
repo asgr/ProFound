@@ -53,7 +53,7 @@ Logical; indicates whether a background grid should be drawn onto the plotting a
 Numeric scalar; required, the pixel scale that the FFT should split the provided \option{image_sky} at. This should be chosen so as to separate out true sky modes and possible sources still in the sky. Too small and real sources will be put into the \option{sky_lo} image returned, so larger is usually safer.
 }
   \item{profound}{
-List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples).
+List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples). As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
   \item{\dots}{
 Further arguments to passe to \code{\link{magplot}}. Only relevant if \option{plot}=TRUE.
@@ -188,6 +188,10 @@ skyRMS=profound$skyRMS)
 # For convenience, the above is the same as running:
 
 newsky=profoundSkySplitFFT(profound=profound)
+
+# For super added convenience you can also un:
+
+newsky=profoundSkySplitFFT(profound)
 
 # Old versus new sky:
 

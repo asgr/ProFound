@@ -85,6 +85,15 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
 }
 
 profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100, profound){
+  if(!missing(image)){
+    if(class(image)=='profound')
+    if(missing(objects)){objects=image$objects_redo}
+    if(missing(mask)){mask=image$mask}
+    if(missing(sky)){sky=image$sky}
+    if(missing(skyRMS)){skyRMS=image$skyRMS}
+    image=image$image
+    if(is.null(image)){stop('Need image in profound object to be non-Null')}
+  }
   if(!missing(profound)){
     if(class(profound) != 'profound'){
       stop('Class of profound input must be of type \'profound\'')
