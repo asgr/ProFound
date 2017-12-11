@@ -278,15 +278,17 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       SBlim=NULL
     }
     if(missing(header)){header=NULL}
-    if(keepim==FALSE){image=NULL}
+    if(keepim==FALSE){image=NULL; mask=NULL}
+    if(missing(mask)){mask=NULL}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, gain=gain, call=call)
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, gain=gain, call=call)
   }else{
     if(missing(header)){header=NULL}
-    if(keepim==FALSE){image=NULL}
+    if(keepim==FALSE){image=NULL; mask=NULL}
+    if(missing(mask)){mask=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, image=image, segstats=NULL, Nseg=0, near=NULL, group=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, gain=gain, call=call)
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, gain=gain, call=call)
   }
   class(output)='profound'
   return=output

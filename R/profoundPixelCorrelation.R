@@ -84,7 +84,18 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
   return=list(cortab=output_cortab, fft=output_FFT, image_sky=image)
 }
 
-profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100){
+profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100, profound){
+  if(!missing(profound)){
+    if(class(profound) != 'profound'){
+      stop('Class of profound input must be of type \'profound\'')
+    }
+    if(missing(image)){image=profound$image}
+    if(missing(objects)){objects=profound$objects_redo}
+    if(missing(mask)){mask=profound$mask}
+    if(missing(sky)){sky=profound$sky}
+    if(missing(skyRMS)){skyRMS=profound$skyRMS}
+  }
+  
   xlen=dim(image)[1]
   ylen=dim(image)[2]
   
@@ -97,15 +108,19 @@ profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100
   image=image-sky
   
   if(!missing(objects)){
-    if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for object padding')}
-    sel_objects=objects>0
-    image[sel_objects]=rnorm(length(which(sel_objects)),mean=0,sd=skyRMS[sel_objects])
+    if(is.null(objects)==FALSE){
+      if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for object padding')}
+      sel_objects=objects>0
+      image[sel_objects]=rnorm(length(which(sel_objects)),mean=0,sd=skyRMS[sel_objects])
+    }
   }
     
   if(!missing(mask)){
-    if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for mask padding')}
-    sel_mask=mask>0
-    image[sel_mask]=rnorm(length(which(sel_mask)),mean=0,sd=skyRMS[sel_objects])
+    if(is.null(mask)==FALSE){
+      if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for mask padding')}
+      sel_mask=mask>0
+      image[sel_mask]=rnorm(length(which(sel_mask)),mean=0,sd=skyRMS[sel_objects])
+    }
   }
 
   fft_orig=fft(image)

@@ -78,7 +78,8 @@ magimage(skymap$sky)
 magimage(skymap$skyRMS)
 
 \dontrun{
-#Now again, masking out the known objects (will not help too much in this case):
+# Now again, masking out the known objects (will not help too much in this case):
+
 segim=profoundMakeSegim(image, skycut=1.5, plot=TRUE)
 segim_ex=profoundMakeSegimExpand(image, segim$segim, skycut=-Inf, plot=TRUE)
 
@@ -86,7 +87,7 @@ skymap=profoundMakeSkyMap(image, objects=segim_ex$objects, box=c(89,89))
 magimage(skymap$sky, magmap=FALSE)
 magimage(skymap$skyRMS, magmap=FALSE)
 
-#We can bilinear interpolate this onto the full image grid:
+# We can bilinear interpolate this onto the full image grid:
 
 skybil = profoundMakeSkyGrid(image, objects=segim_ex$objects, box=c(89,89))
 magimage(skybil$sky, magmap=FALSE)

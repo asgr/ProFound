@@ -21,10 +21,10 @@ decreasing = FALSE, lowmemory=FALSE, keepim = TRUE, ...)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is parsed to \option{image} and the correct header part is parsed to \option{header}. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
-Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as image if supplied. If this is option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one parsed through \option{segim}.
+Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as image if supplied. If this is option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
 }
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
@@ -33,31 +33,31 @@ Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provide
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
   \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{pixcut}{
-Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profoundMakeSegim}}.
+Integer scalar; the number of pixels required to identify an object. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{tolerance}{
-Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. Parsed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{ext}{
-Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects. Parsed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{sigma}{
-Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Parsed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{smooth}{
-Logical; should smoothing be done on the target \option{image}? Parsed to \code{\link{profoundMakeSegim}}.
+Logical; should smoothing be done on the target \option{image}? Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{SBlim}{
-Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Parsed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{size}{
-Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Parsed to \code{\link{profoundMakeSegimDilate}}.
+Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}.
 }
   \item{shape}{
-Character scalar; the shape of the dilation kernel. See \code{makeBrush}. Parsed to \code{\link{profoundMakeSegimDilate}}.
+Character scalar; the shape of the dilation kernel. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}.
 }
   \item{iters}{
 Integer scalar; the maximum number of curve of growth dilations should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to zero then the initial \option{segim} image wither provided or computed internally via \code{\link{profoundMakeSegim}} will be used instead.
@@ -153,7 +153,7 @@ Logical; if FALSE (default) the segmentation statistics data.frame will be sorte
 Logical; if TRUE then a low memory mode of ProFound will be used. This limits the large \option{image} pixel matched outputs to just \option{segim}, with \option{segim_orig}, \option{objects} and \option{objects_redo} set to NULL, and \option{sky} and \option{skyRMS} set to 0. Internally the sky and skyRMS are used as normal for flux estimates, but they are removed as soon as possible within the function in order to free up memory. 
 }
 \item{keepim}{
-Logical; if TRUE then the input \option{image} matrix is parsed through to the image output of the function. If FALSE then this is set to NULL.
+Logical; if TRUE then the input \option{image} and \option{mask} matrices are passed through to the image output of the function. If FALSE then this is set to NULL.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
@@ -177,7 +177,8 @@ A object list of class 'profound' containing:
   \item{objects_redo}{Logical matrix; the dilated object map matched pixel by pixel to \option{image}. See \option{redosky} and \option{redoskysize}. Can be used as a mask in various other functions that require objects to be masked out.}
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
-  \item{image}{The input \option{image} matrix is \option{keepim}=TRUE, else NULL.}
+  \item{image}{The input \option{image} matrix if \option{keepim}=TRUE, else NULL.}
+  \item{mask}{The input \option{mask} matrix if \option{keepim}=TRUE, else NULL.}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
   \item{Nseg}{The total number of segments extracted (dim(segstats)[1]).}
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
@@ -260,7 +261,7 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 
 profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 
-#You can check to see if the final mask is aggressive enough. Notice the halos
+#You can check to see if the final objects mask is aggressive enough. Notice the halos
 #surrounding bright sources when just using the objects mask.
 
 temp=image$imDat

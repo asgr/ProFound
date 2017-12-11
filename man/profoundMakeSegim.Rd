@@ -5,7 +5,7 @@
 Watershed Image Segmentation
 }
 \description{
-A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be parsed to the \option{segim} input of \code{profitSetupData}).
+A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be passed to the \option{segim} input of \code{profitSetupData}).
 }
 \usage{
 profoundMakeSegim(image, mask, objects, skycut = 1, pixcut = 3, tolerance = 4, ext = 2,
@@ -25,10 +25,10 @@ Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
   \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Parsed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{pixcut}{
-Integer scalar; the number of pixels required to identify an object. Parsed to \code{\link{profoundMakeSegim}}.
+Integer scalar; the number of pixels required to identify an object. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{tolerance}{
 Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually.

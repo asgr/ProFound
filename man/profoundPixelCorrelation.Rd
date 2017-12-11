@@ -12,7 +12,7 @@ Returns the x and y dimension pixel-to-pixel correlation (often called covarianc
 profoundPixelCorrelation(image, objects, mask, sky = 0, skyRMS = 1,
 lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
 ylim=c(-1,1), log='x', grid=TRUE, ...)
-profoundSkySplitFFT(image, objects, mask, sky = 0, skyRMS = 1, skyscale=100)
+profoundSkySplitFFT(image, objects, mask, sky = 0, skyRMS = 1, skyscale=100, profound)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -52,8 +52,11 @@ Logical; indicates whether a background grid should be drawn onto the plotting a
   \item{skyscale}{
 Numeric scalar; required, the pixel scale that the FFT should split the provided \option{image_sky} at. This should be chosen so as to separate out true sky modes and possible sources still in the sky. Too small and real sources will be put into the \option{sky_lo} image returned, so larger is usually safer.
 }
+  \item{profound}{
+List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples).
+}
   \item{\dots}{
-Further arguments to parse to \code{\link{magplot}}. Only relevant if \option{plot}=TRUE.
+Further arguments to passe to \code{\link{magplot}}. Only relevant if \option{plot}=TRUE.
 }
 }
 \details{
@@ -124,22 +127,22 @@ magimage(corout_raw$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
 \dontrun{
-#There is clearly some residual structure masking out the brighter parts of objects:
+# There is clearly some residual structure masking out the brighter parts of objects:
 
 corout_objects=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects, plot=TRUE)
 magimage(corout_objects$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
-#Using the more aggressive objects_redo removed nearly all of this:
+# Using the more aggressive objects_redo removed nearly all of this:
 
 corout_objects_redo=profoundPixelCorrelation(image$imDat, sky=profound$sky,
 skyRMS=profound$skyRMS, objects=profound$objects_redo, plot=TRUE)
 magimage(corout_objects_redo$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
-#We can use the pixel correlation function, in particular the FFT output, to assess how
-#much further we can afford to push the source extraction in our image.
+# We can use the pixel correlation function, in particular the FFT output, to assess how
+# much further we can afford to push the source extraction in our image.
 
 profound=profoundProFound(image, skycut=2.0, magzero=30, verbose=TRUE, plot=TRUE)
 corout_objects_redo=profoundPixelCorrelation(image$imDat, sky=profound$sky,
@@ -171,30 +174,34 @@ skyRMS=profound$skyRMS, objects=profound$objects_redo)
 magimage(corout_objects_redo$image_sky)
 profoundProFound(corout_objects_redo$fft$z, skycut=2, verbose=TRUE, plot=TRUE)
 
-#By doing ProFoundsource detection on the FFT itself it tells us if there are significant
-#sources of a certain common scale (usually small) still in the image to extract.
-#The levels above suggest we cannot push much further than a skycut=1.0. Clearly using
-#skycut=0.6 introduces a lot of fake sources.
+# By doing ProFoundsource detection on the FFT itself it tells us if there are significant
+# sources of a certain common scale (usually small) still in the image to extract.
+# The levels above suggest we cannot push much further than a skycut=1.0. Clearly using
+# skycut=0.6 introduces a lot of fake sources.
 
-#We can improve the sky using profoundSkySplitFFT
+# We can improve the sky using profoundSkySplitFFT
 
 profound=profoundProFound(image, type="bicubic")
 newsky=profoundSkySplitFFT(image$imDat, objects=profound$objects_redo, sky=profound$sky,
 skyRMS=profound$skyRMS)
 
-#Old versus new sky:
+# For convenience, the above is the same as running:
+
+newsky=profoundSkySplitFFT(profound=profound)
+
+# Old versus new sky:
 
 magimage(profound$sky)
 magimage(newsky$sky)
 
-#Original image, old sky subtraction and new sky subtraction (pretty subtle!):
+# Original image, old sky subtraction and new sky subtraction (pretty subtle!):
 
 magimage(image$imDat)
 magimage(image$imDat-profound$sky)
 magimage(image$imDat-newsky$sky)
 
-#Be warned, you need a reasonable estimate of the sky and objects before running this.
-#If we run on the original image that even the high/low k modes look very odd:
+# Be warned, you need a reasonable estimate of the sky and objects before running this.
+# If we run on the original image that even the high/low k modes look very odd:
 
 magimage(profoundSkySplitFFT(image$imDat)$sky_lo)
 magimage(profoundSkySplitFFT(image$imDat)$sky_hi)

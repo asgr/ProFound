@@ -5,7 +5,7 @@
 Convert gain between mag-zero points
 }
 \description{
-Simple function to update the gain (electrons/ADU) when changing between magnitude zero points. These gains are what should be parsed to e.g. \code{\link{profoundMakeSigma}}.
+Simple function to update the gain (electrons/ADU) when changing between magnitude zero points. These gains are what should be passed to e.g. \code{\link{profoundMakeSigma}}.
 }
 \usage{
 profoundGainConvert(gain = 1, magzero = 0, magzero_new = 0)
