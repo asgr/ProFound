@@ -142,9 +142,11 @@ profoundImDiff=function(image,sigma=1, plot=FALSE, ...){
   return=output
 }
 
-profoundMakeSigma=function(image, objects=0, sky=0, skyRMS=1, skycut=0, gain=1, readRMS=0, darkRMS=0, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU', output_units='ADU', plot=FALSE, ...){
-  if(!missing(objects) & length(objects)==length(image)){
-    image[objects==0]=0
+profoundMakeSigma=function(image, objects, sky=0, skyRMS=0, readRMS=0, darkRMS=0, skycut=0, gain=1, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU', output_units='ADU', plot=FALSE, ...){
+  if(!missing(objects)){
+    if(length(objects)==length(image)){
+      image[objects==0]=0
+    }
   }
   if(image_units=='ADU'){
     image=gain*image

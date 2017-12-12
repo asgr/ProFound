@@ -8,8 +8,8 @@ Make a Sigma Map
 A utility function to construct a \code{ProFit} legal sigma map that can be input to \code{profitSetupData}.
 }
 \usage{
-profoundMakeSigma(image, objects=0, sky=0, skyRMS=1, skycut=0, gain=1, readRMS=0,
-darkRMS=0, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU',
+profoundMakeSigma(image, objects, sky=0, skyRMS=0, readRMS=0, darkRMS=0, skycut=0,
+gain=1, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU',
 output_units='ADU', plot=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -26,17 +26,17 @@ Numeric; the absolute sky level. Consider using the sky output from \code{\link{
   \item{skyRMS}{
 Numeric; the RMS of the sky. Consider using the skyRMS output from \code{\link{profoundSkyEst}} or \code{\link{profoundMakeSkyGrid}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
-  \item{skycut}{
-How many multiples of \option{skyRMS} above the \option{sky} to start calculating shot-noise based on the \option{gain} scaling of the \option{image}. If you are missing an object mask You almost certainly do not want this to be below 0 (else you will reduce the level of the sigma map just due to fluctuations in the sky), and in practice this should probably be set in the range 1-3.
-}
-  \item{gain}{
-Numeric; the gain (in photo-electrons per ADU). For a very rough estimate consider using the gain output from \code{\link{profoundGainEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
-}
   \item{readRMS}{
 Numeric; the RMS of the read-noise. If you have estimated the sky RMS from the image directly this should not be necessary since it naturally captures this component. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{darkRMS}{
 Numeric; the RMS of the dark-current-noise. If you have estimated the sky RMS from the image directly this should not be necessary since it naturally captures this component. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+}
+  \item{skycut}{
+How many multiples of \option{skyRMS} above the \option{sky} to start calculating shot-noise based on the \option{gain} scaling of the \option{image}. If you are missing an object mask You almost certainly do not want this to be below 0 (else you will reduce the level of the sigma map just due to fluctuations in the sky), and in practice this should probably be set in the range 1-3.
+}
+  \item{gain}{
+Numeric; the gain (in photo-electrons per ADU). For a very rough estimate consider using the gain output from \code{\link{profoundGainEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{image_units}{
 Character; the units of the \option{image}. Must either be 'ADU' for generic astronomical data units, or 'elec' for photo-electrons.
