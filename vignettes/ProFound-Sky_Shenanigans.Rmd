@@ -4,7 +4,7 @@ author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ProFound: Sky Shenanigan}
+  %\VignetteIndexEntry{ProFound: Sky Shenanigans}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

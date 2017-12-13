@@ -1,5 +1,5 @@
 ---
-title: "ProFound-Source-Finding"
+title: "ProFound: Source Finding"
 author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

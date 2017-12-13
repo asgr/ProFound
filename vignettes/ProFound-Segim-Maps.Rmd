@@ -1,10 +1,10 @@
 ---
-title: "ProFound: Segim Maps"
+title: "ProFound: Segmentation Mapss"
 author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ProFit: Segim Maps}
+  %\VignetteIndexEntry{ProFound: Segmentation Maps}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
