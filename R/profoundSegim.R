@@ -823,7 +823,28 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
 }
 
-profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(segim), end=2/3), ...){
+profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(segim), end=2/3), profound, ...){
+  if(!missing(image)){
+    if(class(image)=='profound'){
+      if(missing(segim)){segim=image$segim}
+      if(missing(mask)){mask=image$mask}
+      if(missing(sky)){sky=image$sky}
+      if(missing(header)){header=image$header}
+      image=image$image
+      if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    }
+  }
+  if(!missing(profound)){
+    if(class(profound) != 'profound'){
+      stop('Class of profound input must be of type \'profound\'')
+    }
+    if(missing(image)){image=profound$image}
+    if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    if(missing(segim)){segim=profound$segim}
+    if(missing(mask)){mask=profound$mask}
+    if(missing(sky)){sky=profound$sky}
+    if(missing(header)){header=profound$header}
+  }
   if(!missing(image)){
     if(any(names(image)=='imDat') & missing(header)){
       header=image$hdr
@@ -861,7 +882,9 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
     contour(temp$x,temp$y,z,add=T,col=col[i],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
   }
   if(!missing(mask)){
-    magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.3)), add=T)
+    if(!is.null(mask)){
+      magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.3)), add=T)
+    }
   }
 }
 

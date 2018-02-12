@@ -17,7 +17,7 @@ profoundSkySplitFFT(image, objects, mask, sky = 0, skyRMS = 1, skyscale=100, pro
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Numeric matrix; required, the image we want to analyse.
+Numeric matrix; required, the image we want to analyse. Note, image NAs are treated as masked pixels.
 }
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as image.

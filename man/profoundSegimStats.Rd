@@ -13,7 +13,7 @@ profoundSegimStats(image, segim, mask, sky = 0, skyRMS = 0, magzero = 0, gain,
 pixscale = 1, header, sortcol = "segID", decreasing = FALSE, rotstats = FALSE,
 boundstats = FALSE, offset = 1)
 profoundSegimPlot(image, segim, mask, sky = 0, header, col=rainbow(max(segim), end=2/3),
-...)
+profound, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -61,6 +61,9 @@ Integer scalar; the distance to offset when searching for nearby segments.
 }
   \item{col}{
 Colour palette; the colours to map the segment IDs against. This is by default the magnitude using a rainbow palette, going from red for bright segments, via green, to blue for faint segments.
+}
+  \item{profound}{
+List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure. As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.

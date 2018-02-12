@@ -100,6 +100,7 @@ profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100
       stop('Class of profound input must be of type \'profound\'')
     }
     if(missing(image)){image=profound$image}
+    if(is.null(image)){stop('Need image in profound object to be non-Null')}
     if(missing(objects)){objects=profound$objects_redo}
     if(missing(mask)){mask=profound$mask}
     if(missing(sky)){sky=profound$sky}
