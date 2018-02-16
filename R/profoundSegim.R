@@ -869,7 +869,8 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
   
   image=image-sky
   
-  if(missing(header)){
+  if(missing(header)){header=NULL}
+  if(is.null(header)){
     temp=magimage(image, ...)
   }else{
     temp=magimageWCS(image, header=header, ...)
