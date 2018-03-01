@@ -693,8 +693,8 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   
   corxy=covxy/(xsd*ysd)
   rad=.cov2eigval(xsd, ysd, covxy)
-  rad$hi=sqrt(abs(rad$hi))
-  rad$lo=sqrt(abs(rad$lo))
+  rad$hi=sqrt(abs(rad$hi)+0.08333333) #Added variance of uniform in quadrature (prevents zeros)
+  rad$lo=sqrt(abs(rad$lo)+0.08333333) #Added variance of uniform in quadrature (prevents zeros)
   axrat=rad$lo/rad$hi
   eigvec=.cov2eigvec(xsd, ysd, covxy)
   ang=.eigvec2ang(eigvec)
