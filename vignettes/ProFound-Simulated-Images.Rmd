@@ -17,9 +17,9 @@ install_github('asgr/ProFound')
 install_github('ICRAR/ProFit')
 ```
 
-First of all we load **ProFit** and**ProFound**. We also need to use **LaplacesDemon** because it gives us the Pareto (power-law) distribution that we will use to realistically sample our magnitude ranges later.
+First of all we load **ProFit** and **ProFound**. We also need to use **LaplacesDemon** because it gives us the Pareto (power-law) distribution that we will use to realistically sample our magnitude ranges later.
 
-```{r}
+```{r, eval=FALSE}
 library(ProFound)
 library(ProFit)
 library(LaplacesDemon)
@@ -29,7 +29,7 @@ library(LaplacesDemon)
 
 Next we generate a random image with 200 stars and 200 extended sources. The value used roughly correspoond to the source densities and magnitude distributions you might expect to find in a Z-band VIKING frame (this was used to derive the image statistics).
 
-```{r}
+```{r, eval=FALSE}
 set.seed(666)
 
 ExamplePSF=profitMakeGaussianPSF(fwhm=5)
@@ -64,20 +64,20 @@ im_test<-profitMakeModel(modellist=model_test, psf=ExamplePSF, dim=c(1000,1000),
 
 We can take a peak at the raw model before adding on noise and sky etc:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 ```
 
 Next we add typical VIKING object shot-noise and sky noise:
 
-```{r}
+```{r, eval=FALSE}
 im_test=im_test+rnorm(1e6,sd=sqrt(im_test))
 im_test=im_test+rnorm(1e6,sd=10)
 ```
 
 And we now add a random slightly complex sky:
 
-```{r}
+```{r, eval=FALSE}
 set.seed(666)
 
 model_sky=list(
@@ -97,7 +97,7 @@ im_test=im_test+grid_sky
 
 Let's have a look:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 
 magimage(im_test)
@@ -109,7 +109,7 @@ points(model_test$pointsource$xcen, model_test$pointsource$ycen, col='green')
 
 Now we run ProFound with fairly standard settings (note we set the VIRCAM pixel scale):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 
 pro_test=profoundProFound(im_test, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE, pixscale=0.34, tolerance=2)
@@ -119,7 +119,7 @@ points(model_test$pointsource$xcen, model_test$pointsource$ycen, col='green')
 
 We can match back to our initial catalogue using coordmatch in **celestial**
 
-```{r}
+```{r, eval=FALSE}
 testmatch_gals=coordmatch(cbind(model_test$sersic$xcen,model_test$sersic$ycen)/3600, pro_test$segstats[,c("xcen","ycen")]/3600,5)
 
 testmatch_stars=coordmatch(cbind(model_test$pointsource$xcen,model_test$pointsource$ycen)/3600,pro_test$segstats[,c("xcen","ycen")]/3600,5)
@@ -127,7 +127,7 @@ testmatch_stars=coordmatch(cbind(model_test$pointsource$xcen,model_test$pointsou
 
 And plot the difference in estimated magnitude for the point sources (red) and extended sources (blue):
 
-```{r}
+```{r, eval=FALSE}
 magplot(model_test$sersic$mag[testmatch_gals$bestmatch$refID], model_test$sersic$mag[testmatch_gals$bestmatch$refID]-pro_test$segstats[testmatch_gals$bestmatch$compareID,'mag'], grid=TRUE, ylim=c(-1,1), col='blue')
 points(pro_test$segstats$mag, pro_test$segstats$mag_err, pch='.')
 points(pro_test$segstats$mag, -pro_test$segstats$mag_err, pch='.')
@@ -137,7 +137,7 @@ points(model_test$pointsource$mag[testmatch_stars$bestmatch$refID], model_test$p
 
 We can check how good our sky estimates were too:
 
-```{r}
+```{r, eval=FALSE}
 magplot(density(pro_test$sky))
 lines(density(grid_sky), col='red')
 
@@ -150,14 +150,14 @@ You can see there is a slight bias to a positive sky measurement- this is caused
 
 Next we can make a new image where the detected objects are replaced with noise representing out estimated measurements:
 
-```{r}
+```{r, eval=FALSE}
 im_test_sub=im_test
 im_test_sub[pro_test$objects_redo==1]=rnorm(length(which(pro_test$objects_redo==1)), mean=pro_test$sky[pro_test$objects_redo==1], sd=pro_test$skyRMS[pro_test$objects_redo==1])
 ```
 
 And we can plot this:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(pro_test$objects_redo)
 points(model_test$sersic$xcen, model_test$sersic$ycen, col='yellow')
 points(model_test$pointsource$xcen, model_test$pointsource$ycen, col='green')
@@ -179,7 +179,7 @@ The next step is to run **ProFound** again but pushing down to detect fainter ob
 
 The important parameter now is the skycut. somewhere between 0.1 and 0.2 recovers the very faint objecst we have left- too low and we see a lot of false-positive contamination, too high and our true-positive rate drops. Setting it to 0.15 appears to be about the sweet spot (this would need testing on different depth data with realistic source distributions etc).
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 
 pro_test_sub=profoundProFound(image=im_test_sub, mask=pro_test$objects, sky=pro_test$sky, skyRMS=pro_test$skyRMS, magzero=30, skycut=0.15, pixcut=3, verbose=TRUE, plot=TRUE, boundstats=TRUE, pixscale=0.34, tolerance=2, sigma=5)
@@ -191,13 +191,13 @@ It is worth experimenting with the above, but it should be clear that with a few
 
 Now in practice for very faint extraction you would never use objects on the image edges since you will never have an ideal estimate of the sky. We can cut our catalogue down for this effect:
 
-```{r}
+```{r, eval=FALSE}
 faintcat=pro_test_sub$segstats[pro_test_sub$segstats$Nborder==0,]
 ```
 
 Now we can add our two catalogues (our bright pass and faint pass) back together and match back. Ntoe that the segIDs will be repeated (so be careful using these when catalogues have been combined), but the unique IDs will be unique.
 
-```{r}
+```{r, eval=FALSE}
 finalcat=rbind(pro_test$segstats, faintcat)
 dim(finalcat)
 ```
@@ -206,7 +206,7 @@ The final catalogue is 402 rows, which is encouraging since we created 400 objec
 
 We can match this fainter run back against the original catalogue:
 
-```{r}
+```{r, eval=FALSE}
 testmatch_gals_fin=coordmatch(cbind(model_test$sersic$xcen,model_test$sersic$ycen)/3600,  finalcat[,c("xcen","ycen")]/3600,5)
 
 testmatch_stars_fin=coordmatch(cbind(model_test$pointsource$xcen,model_test$pointsource$ycen)/3600, finalcat[,c("xcen","ycen")]/3600,5)
@@ -214,17 +214,17 @@ testmatch_stars_fin=coordmatch(cbind(model_test$pointsource$xcen,model_test$poin
 
 So some final stats. False-positive=FP (this is bad) and true-positive=TP (this is good).
 
-Galaxy TP = `r length(testmatch_gals_fin$bestmatch[,1])/Ngal`,
-Stars TP = `r length(testmatch_stars_fin$bestmatch[,1])/Nstar`,
-Total TP = `r (length(testmatch_gals_fin$bestmatch[,1])+length(testmatch_stars_fin$bestmatch[,1]))/(Ngal+Nstar)`.
+Galaxy TP = length(testmatch_gals_fin$bestmatch[,1])/Ngal
+Stars TP = length(testmatch_stars_fin$bestmatch[,1])/Nstar
+Total TP = (length(testmatch_gals_fin$bestmatch[,1])+length(testmatch_stars_fin$bestmatch[,1]))/(Ngal+Nstar)
 
-Total FP = `r (dim(finalcat)[1]-length(testmatch_gals_fin$bestmatch[,1])-length(testmatch_stars_fin$bestmatch[,1]))/(Ngal+Nstar)`.
+Total FP = (dim(finalcat)[1]-length(testmatch_gals_fin$bestmatch[,1])-length(testmatch_stars_fin$bestmatch[,1]))/(Ngal+Nstar)
 
 So we recover 73% of true galaxies, 97% of true stars (i.e. 85% of all true sources) and suffer 17% false positives. This suggests we cannot push much harder on the detection side since most of the new objects will be FALSE (since TP ~ 1-FP, and it will only get harder from here).
 
 We can make a final image with all structure removed, sky subtracted and divided through by the RMS.
 
-```{r}
+```{r, eval=FALSE}
 im_test_fin=im_test_sub-pro_test_sub$sky
 im_test_fin[pro_test_sub$objects_redo==1]=rnorm(length(which(pro_test_sub$objects_redo==1)), mean=0, sd=pro_test_sub$skyRMS[pro_test_sub$objects_redo==1])
 im_test_fin=im_test_fin/pro_test_sub$skyRMS
@@ -232,7 +232,7 @@ im_test_fin=im_test_fin/pro_test_sub$skyRMS
 
 To see whether we have removed (or subtracted out in the case of the sky) all structure we can look at pixel-to-pixel correlation and the 2D FFT (both returned as part of the **profoundPixelCorrelation** function):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(profoundPixelCorrelation(im_test, skyRMS=10, plot=TRUE)$fft, xlab='kx (2pi/1000pix)', ylab='ky (2pi/1000pix)'); points(0,0,cex=5,col='red')
 
 magimage(profoundPixelCorrelation(im_test_sub, skyRMS=10, plot=TRUE)$fft, xlab='kx (2pi/1000pix)', ylab='ky (2pi/1000pix)'); points(0,0,cex=5,col='red')
@@ -248,7 +248,7 @@ It should be clear that doing a few iterative steps of removing sources and anal
 
 In this case we were pushing the data to extremely low surface brightness. We can compare our segmented surface brightness levels to the actual image.
 
-```{r, dpi=40}
+```{r, eval=FALSE, dpi=40}
 magplot(density(finalcat$SB_N100, na.rm=TRUE), xlab='Surface Brightness / mag/asec^-2', ylab='PDF')
 abline(v=mean(pro_test$SBlim), col='red')
 ```
@@ -257,25 +257,25 @@ The performance of **ProFound** is obviously substantially better when you are n
 
 Despite running this demo in two phases above, it is in fact hard to do better than a deeper single pass (skycut=1 to skycut=0.9 is the only change here):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 pro_test_2=profoundProFound(im_test, magzero=30, skycut=0.9, pixcut=3, verbose=TRUE, plot=TRUE, boundstats=TRUE, pixscale=0.34, tolerance=2)
 ```
 
 Match back to the intrinsic catalogue as before:
 
-```{r}
+```{r, eval=FALSE}
 testmatch_gals_2=coordmatch(cbind(model_test$sersic$xcen,model_test$sersic$ycen)/3600, pro_test_2$segstats[,c("xcen","ycen")]/3600,5)
 
 testmatch_stars_2=coordmatch(cbind(model_test$pointsource$xcen,model_test$pointsource$ycen)/3600,pro_test_2$segstats[,c("xcen","ycen")]/3600,5)
 ```
 
-Galaxy TP = `r length(testmatch_gals_2$bestmatch[,1])/Ngal`,
-Stars TP = `r length(testmatch_stars_2$bestmatch[,1])/Nstar`,
-Total TP = `r (length(testmatch_gals_2$bestmatch[,1])+length(testmatch_stars_2$bestmatch[,1]))/(Ngal+Nstar)`.
+Galaxy TP = length(testmatch_gals_2$bestmatch[,1])/Ngal
+Stars TP = length(testmatch_stars_2$bestmatch[,1])/Nstar
+Total TP = (length(testmatch_gals_2$bestmatch[,1])+length(testmatch_stars_2$bestmatch[,1]))/(Ngal+Nstar)
 
-Total FP = `r (dim(pro_test_2$segstats)[1]-length(testmatch_gals_2$bestmatch[,1])-length(testmatch_stars_2$bestmatch[,1]))/(Ngal+Nstar)`.
+Total FP = (dim(pro_test_2$segstats)[1]-length(testmatch_gals_2$bestmatch[,1])-length(testmatch_stars_2$bestmatch[,1]))/(Ngal+Nstar)
 
-Running it like this produces simialr True-Positive rates, but a lower global False-Positive rate. The moral? If you know what you doing you might want to jump straight to a deeper extraction, but if you are uncertain then you can proceed in a few iterations, i.e. extract the bright sources you are confident about and then go back later to dig around in the noise to get some more.
+Running it like this produces similar True-Positive rates, but a lower global False-Positive rate. The moral? If you know what you doing you might want to jump straight to a deeper extraction, but if you are uncertain then you can proceed in a few iterations, i.e. extract the bright sources you are confident about and then go back later to dig around in the noise to get some more.
 
 ## Residual Correlation Structure
 
@@ -283,7 +283,7 @@ The pixel correlation plots give you some idea of whether there are more sources
 
 First we will re-run **ProFound** with a few different skycut levels:
 
-```{r}
+```{r, eval=FALSE}
 pro_test_sc1=profoundProFound(im_test, magzero=30, skycut=1, plot=FALSE, boundstats=TRUE, pixscale=0.34, tolerance=2)
 pro_test_sc2=profoundProFound(im_test, magzero=30, skycut=2, plot=FALSE, boundstats=TRUE, pixscale=0.34, tolerance=2)
 pro_test_sc4=profoundProFound(im_test, magzero=30, skycut=4, plot=FALSE, boundstats=TRUE, pixscale=0.34, tolerance=2)
@@ -291,7 +291,7 @@ pro_test_sc4=profoundProFound(im_test, magzero=30, skycut=4, plot=FALSE, boundst
 
 Next we can re make the correlation plots using the 
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 profoundPixelCorrelation(im_test, objects = pro_test_sc1$objects_redo, sky=pro_test_sc1$sky, skyRMS=pro_test_sc1$skyRMS, plot=TRUE, ylim=c(-0.1,0.1))
 profoundPixelCorrelation(im_test, objects = pro_test_sc2$objects_redo, sky=pro_test_sc2$sky, skyRMS=pro_test_sc2$skyRMS, plot=TRUE, ylim=c(-0.1,0.1))
 profoundPixelCorrelation(im_test, objects = pro_test_sc4$objects_redo, sky=pro_test_sc4$sky, skyRMS=pro_test_sc4$skyRMS, plot=TRUE, ylim=c(-0.1,0.1))
@@ -311,17 +311,17 @@ The basic idea is you provide the original image, your current best effort sky a
 
 The FFT generated above is then clipped at a user defined scale which separates out low k-mode structure (possible sky) from higher k-mode structure (possible real objects). We can see how much difference this might make using a smoother bicubic sky:
 
-```{r}
+```{r, eval=FALSE}
 pro_bicubic=profoundProFound(im_test, type='bicubic')
 ```
 
-```{r}
+```{r, eval=FALSE}
 newsky=profoundSkySplitFFT(im_test, objects=pro_bicubic$objects_redo, sky=pro_bicubic$sky, skyRMS=pro_bicubic$skyRMS, skyscale=200)
 ```
 
 We can see how this compares with the intrinsic and older sky:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(grid_sky)
 magimage(pro_bicubic$sky)
 magimage(newsky$sky)
@@ -329,7 +329,7 @@ magimage(newsky$sky)
 
 Not a huge visual difference, but we can see we now have smaller residuals with respect to the intrinsic sky:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magplot(density(newsky$sky-grid_sky, bw=0.1), col='red', grid=TRUE)
 lines(density(pro_bicubic$sky-grid_sky, bw=0.1), col='blue')
 legend('topright', legend=c('New - Intrinsic Sky', 'Old - Intrinsic Sky'), lty=1, col=c('red','blue'))
@@ -337,7 +337,7 @@ legend('topright', legend=c('New - Intrinsic Sky', 'Old - Intrinsic Sky'), lty=1
 
 We can also look at the new high k-mode image to look for sources (effectively im_test-newsky$sky):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(newsky$sky_hi)
 ```
 

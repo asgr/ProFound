@@ -19,7 +19,7 @@ install_github('ICRAR/ProFit')
 
 First load the libraries we need:
 
-```{r}
+```{r, eval=FALSE}
 library(ProFound)
 library(ProFit)
 library(LaplacesDemon)
@@ -46,7 +46,7 @@ The sky is estimated mainly via the use of the **profoundMakeSkyMap** function. 
 
 We can easily create some toy sky with positive flux added in:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 set.seed(666)
 sky=c(rnorm(5e5,mean=0,sd=1),(rnorm(5e5,mean=0,sd=1)+runif(5e5,0,100)))
 maghist(sky, xlab='Pixel Value', ylab='Counts', grid=TRUE)
@@ -56,28 +56,28 @@ From the text output of maghist we can see that the raw properties output would 
 
 We can run magclip with the estimate set to both (the default) and lo:
 
-```{r}
+```{r, eval=FALSE}
 sky_clip_both=magclip(sky)
 sky_clip_lo=magclip(sky, estimate='lo')
 ```
 
 Since we know the fake sources will have positive flux we would expect estimate=lo to work better:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magplot(density(sky_clip_both$x), col='red', grid=TRUE, xlab='Pixel Value', ylab='PDF')
 lines(density(sky_clip_lo$x), col='blue')
 ```
 
 Now we can check how good our sky using the lo estimate is, where the black density line is the true sky we want to get back:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magplot(density(sky_clip_lo$x), col='blue', grid=TRUE, xlab='Sky Pixel Value', ylab='PDF')
 lines(seq(-5,5,len=1e3), dnorm(seq(-5,5,len=1e3)), col='black', grid=TRUE)
 ```
 
 Not bad! The actual sky estimates we end up with are:
 
-```{r}
+```{r, eval=FALSE}
 median(sky_clip_lo$x)
 diff(quantile(sky_clip_lo$x, pnorm(c(-1,0))))
 ```
@@ -86,7 +86,7 @@ Where ideally we want to answer to be 0 and 1.
 
 We could instead use the mean and standard-deviation, but these tend to be less robust to contamination:
 
-```{r}
+```{r, eval=FALSE}
 mean(sky_clip_lo$x)
 sd(sky_clip_lo$x)
 ```
@@ -108,14 +108,14 @@ In practice we also parse **profoundMakeSkyMap** (and all lower functions) a bas
 
 We can do a more realistic test by using the sky estimate maps from the test VIKING Z-band data we include with **ProFound**:
 
-```{r}
+```{r, eval=FALSE}
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, skycut=1, magzero=30, plot=TRUE)
 ```
 
 From this we get a reasonable sky and sky-RMS map:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(profound$sky)
 magimage(profound$skyRMS)
 
@@ -127,7 +127,7 @@ You can see in the sky-RMS histograms that there are two distinct depths in the 
 
 We can now make a noise free simulated image with a mixture of stars and galaxies (the extraction found 67 sources, and we use **ProFound** properties where appropriate):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 ExamplePSF=profitMakeGaussianPSF(fwhm=5)
 ExamplePSF=ExamplePSF/sum(ExamplePSF)
 
@@ -149,31 +149,31 @@ im_test<-profitMakeModel(modellist=model_test, psf=ExamplePSF, dim=c(356,356), m
 
 Let's take a look:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test)
 ```
 
 We can now add back in the sky and sky-RMS we just calculated:
 
-```{r}
+```{r, eval=FALSE}
 im_test_noise=im_test+rnorm(356^2, mean=profound$sky, sd=profound$skyRMS)
 ```
 
 Let's take a look:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(im_test_noise)
 ```
 
 We can now run **ProFound** on this simualted data:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 profound_resim=profoundProFound(im_test_noise, skycut=1, magzero=30, plot=TRUE)
 ```
 
 So finally we can check our new sky estimates:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(profound$sky)
 magimage(profound$skyRMS)
 
@@ -186,7 +186,7 @@ magimage(profound$skyRMS-profound_resim$skyRMS)
 
 It is perhaps more useful to look at the histograms directly:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 maghist(profound$sky, xlab='Pixel Value', ylab='Counts', grid=TRUE)
 maghist(profound$skyRMS, xlab='Pixel Value', ylab='Counts', grid=TRUE)
 
@@ -201,7 +201,7 @@ Broadly we can see many of the sky features are being found in the same places o
 
 The simplest metric to decide whether we are, on average, doing the right thing is to compare the standard deviation in the input sky to that obtained from the input-estimated sky:
 
-```{r}
+```{r, eval=FALSE}
 sd(profound$sky)
 sd(profound$sky-profound_resim$sky)
 
@@ -217,7 +217,7 @@ A good question is how contaminated the sky pixels can be (i.e. non-masked and n
 
 We can do this experiment roughly by varying the number of pixels with object flux in our toy sky model from earlier:
 
-```{r}
+```{r, eval=FALSE}
 contam=seq(1e5, 2e6, by=1e5)
 N=length(contam)
 output=cbind(contam,rep(0,N), rep(0,N), rep(0,N), rep(0,N))
@@ -233,7 +233,7 @@ for(i in 1:N){
 
 We can plot how this behaves:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magplot(1-output[,1]/(5e5+output[,1]),output[,2], log='y', grid=TRUE, xlab='Nsky/Ntotal', ylab='(Sky Estimate) - (Sky Input)', type='l', col='red')
 lines(1-output[,1]/(5e5+output[,1]),output[,4], col='blue')
 legend('topright', legend=c('Median','Mean'), lty=1, col=c('red','blue'))
@@ -270,7 +270,7 @@ For pragmatic reasons of needing to remove complex sky that cannot be fully gene
 
 Below we will run the ProFound sky routine with and without sky clipping and using the three different estimators (mean, median, mode):
 
-```{r}
+```{r, eval=FALSE}
 profound_median_clip=profoundProFound(image, skycut=1.0, magzero=30, skytype='median', doclip=TRUE) #The default mode
 profound_median_noclip=profoundProFound(image, skycut=1.0, magzero=30, skytype='median', doclip=FALSE)
 profound_mean_clip=profoundProFound(image, skycut=1.0, magzero=30, skytype='mean', doclip=TRUE)
@@ -281,7 +281,7 @@ profound_mode_noclip=profoundProFound(image, skycut=1.0, magzero=30, skytype='mo
 
 The difference between the clipped and non-clipped runs are tiny (meaning we have found pretty much all of the sources):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 maghist(profound_median_clip$sky-profound_median_noclip$sky, grid=TRUE)
 maghist(profound_mean_clip$sky-profound_mean_noclip$sky, grid=TRUE)
 maghist(profound_mode_clip$sky-profound_mode_noclip$sky, grid=TRUE)
@@ -289,7 +289,7 @@ maghist(profound_mode_clip$sky-profound_mode_noclip$sky, grid=TRUE)
 
 The differences between the different estimators are larger:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 maghist(profound_mean_clip$sky-profound_median_clip$sky, grid=TRUE)
 maghist(profound_mode_clip$sky-profound_median_clip$sky, grid=TRUE)
 maghist(profound_mean_clip$sky-profound_mode_clip$sky, grid=TRUE)
@@ -297,7 +297,7 @@ maghist(profound_mean_clip$sky-profound_mode_clip$sky, grid=TRUE)
 
 The median and the mode are the most similar, and for most people the choice will come down to using one of these two. We can check the impact this choice might have on the photometry:
 
-```{r, fig.width=8, fig.height=5, dpi=40}
+```{r, eval=FALSE, fig.width=8, fig.height=5, dpi=40}
 magplot(profound_median_clip$segstats$mag, profound_median_clip$segstats$mag-profound_mean_clip$segstats$mag, ylim=c(-0.1,0.1), xlab='Median mag', ylab='(Median mag) - (Mean mag)', grid=TRUE)
 lines(magrun(profound_median_clip$segstats$mag, profound_median_clip$segstats$mag-profound_mean_clip$segstats$mag), col='red')
 ```
@@ -308,21 +308,21 @@ So even down to our detection limit the difference tends to be a few hundredths 
 
 By doing ProFound source detection on the FFT itself it tells us if there are significant sources of a certain common scale (usually small) still in the image to extract. We can improve the sky using **profoundSkySplitFFT**.
 
-```{r}
+```{r, eval=FALSE}
 profound=profoundProFound(image, type="bicubic")
 newsky=profoundSkySplitFFT(image$imDat, objects=profound$objects_redo, sky=profound$sky, skyRMS=profound$skyRMS)
 ```
 
 We can check the old versus new sky:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(profound$sky)
 magimage(newsky$sky)
 ```
 
 We can have a look at the original image, old sky subtraction and new sky subtraction (pretty subtle!):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(image$imDat)
 magimage(image$imDat-profound$sky)
 magimage(image$imDat-newsky$sky)
@@ -332,7 +332,7 @@ Be warned, you need a reasonable estimate of the sky and objects before running 
 
 If we run on the original image that even the high/low k modes look very odd:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(profoundSkySplitFFT(image$imDat)$sky_lo)
 magimage(profoundSkySplitFFT(image$imDat)$sky_hi)
 ```

@@ -88,25 +88,25 @@ install_github('asgr/ProFound')
 
 Load some libraries:
 
-```{r}
+```{r, eval=FALSE}
 library(ProFound)
 ```
 
 First read in some data.
 
-```{r}
+```{r, eval=FALSE}
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',package="ProFound"))
 ```
 
 Give it a quick look:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimageWCS(image)
 ```
 
 A basic example of the lower level **profoundMakeSegim** versus the higher level **profoundProFound**:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 out_segim=segim=profoundMakeSegim(image$imDat, magzero=30, pixscale=0.339, header=image$hdr, plot=TRUE)
 out_profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 ```
@@ -118,13 +118,13 @@ Because it was run in verbose mode, the major **profoundProFound** steps mention
 
 Note because we parsed **profoundProFound** a header we have RA and Dec coordinates in the photometric properties data-frame. We also parsed the appropriate magnitude zero-point and pixel scale so the mag properties are correctly scaled, and R/R50/R90 are in arc-seconds rather than pixels. It is is worth checking the output:
  
-```{r}
+```{r, eval=FALSE}
 out_profound$segstats[1:10,]
 ```
 
 Next we will check the before and after photometry for the brightest 40 sources (the lists differ a bit in detail due to the different sky estimation routines used):
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magplot(out_segim$segstats[1:40,c("R50", "SB_N90")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), log='x', xlim=c(0.4,5), ylim=c(22,25), grid=TRUE, xlab='R50 / asec', ylab='mag / asec^2')
 points(out_profound$segstats[1:40,c("R50", "SB_N90")], col=hsv(magmap(out_segim$segstats$axrat, flip=TRUE)$map), pch=16)
 arrows(out_segim$segstats$R50[1:40], out_segim$segstats$SB_N90[1:40], out_profound$segstats$R50[1:40], out_profound$segstats$SB_N90[1:40], col='lightgrey', length=0)
@@ -151,12 +151,12 @@ It is notable that low surface brightness objects are seen to systematically gro
 
 The **profoundProFound** function also returns a sky and sky RMS image matched to the input image:
 
-```{r, fig.width=6, fig.height=5}
+```{r, eval=FALSE, fig.width=6, fig.height=5}
 maghist(out_profound$sky, xlab='Sky')
 maghist(out_profound$skyRMS, xlab='Sky RMS')
 ```
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimageWCS(image)
 magimageWCS(out_profound$sky, image$hdr)
 magimageWCS(out_profound$skyRMS, image$hdr)
@@ -164,7 +164,7 @@ magimageWCS(out_profound$skyRMS, image$hdr)
 
 The background mask we used here (the default 100x100 option) looks to be pretty good, with not much correlation between the image and the sky map. However, even with a slightly too small sky grid the photometric outputs should be mostly pretty robust- differing by at worst a couple of counts per pixel. This is much less than the typical sky RMS (roughly 9 throughout).
 
-```{r, fig.width=5, fig.height=4}
+```{r, eval=FALSE, fig.width=5, fig.height=4}
 maghist(out_profound$segstats[,'N100']/out_profound$segstats[,'flux'], xlab=' Worst case fraction error')
 ```
 
@@ -174,13 +174,13 @@ In summary, you probably want to use **profoundProFound**, unless you really kno
 
 **ProFound** offers a few useful flags that will help extract high fidelity photometry. To access the boundary flags we have to set boundstats=TRUE when we run **ProFound**:
 
-```{r}
+```{r, eval=FALSE}
 out_profound=profoundProFound(image, magzero=30, verbose=TRUE, boundstats=TRUE)
 ```
 
 The output we get is in segstats is useful, telling us whether or not an object is isolated:
 
-```{r}
+```{r, eval=FALSE}
 out_profound$segstats[1:10,c("Nedge", "Nsky", "Nobject", "Nborder", "edge_frac", "edge_excess", "flag_border")]
 ```
 
@@ -188,14 +188,14 @@ The edge_frac column is simply Nsky/Nedge (the number of segment edge pixels pur
 
 We can easily plot the isolated segments and the non-isolated segments:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac==1,"segID"]), col=c(0,rainbow(100)))
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac!=1,"segID"]), col=c(0,rainbow(100)))
 ```
 
 You might be more interested in removing segments touching an image edge:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Nborder==0,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Isolated Segment')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$Nborder>0,"segID"]), col=c(0,rainbow(100)))
@@ -204,7 +204,7 @@ legend('topleft',legend='Non_Isolated Segment')
 
 The edge_excess column tells us how elliptical or non-elliptical the segments are. Generally values less than 1 are probably fairly sensible looking segments (i.e. ellipses). Larger than this and the segments might have weird gemoetry:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_excess<1,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Fairly Elliptical Segment')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_excess>1,"segID"]), col=c(0,rainbow(100)))
@@ -213,7 +213,7 @@ legend('topleft',legend='Non-Elliptical Segment')
 
 The flag_border column tells us which border of the image the segment touches. The bottom of the image is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9. In our case we can see we should find segments touching the bottom, left and top of the image:
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==1,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Segment Borders Bottom')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==2,"segID"]), col=c(0,rainbow(100)))
@@ -224,7 +224,7 @@ legend('topleft',legend='Segment Borders Top')
 
 Depending on your science requirements, users might want to make use of some or all of these useful flags. Practically the most useful flag is probably edge_frac, where values above 0.8 are usually a good cut off for fairly reliable photometry (i.e. the confused or missing flux is the sub-dominant form of error), but this cannot be treated as a guarantee!
 
-```{r, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac>0.8,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Reliable Photometry Segments')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$edge_frac<0.8,"segID"]), col=c(0,rainbow(100)))

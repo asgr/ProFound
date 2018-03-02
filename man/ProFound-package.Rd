@@ -12,8 +12,8 @@
 \tabular{ll}{
 Package: \tab ProFound\cr
 Type: \tab Package\cr
-Version: \tab 1.0.0\cr
-Date: \tab 2017-12-07\cr
+Version: \tab 1.0.1\cr
+Date: \tab 2018-03-02\cr
 License: \tab LGPL-3\cr
 Depends: \tab R (>= 3.0), magicaxis (>= 2.0.3), celestial (>= 1.4.1), FITSio, data.table\cr
 Suggests: \tab ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon\cr
