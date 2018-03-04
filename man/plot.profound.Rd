@@ -8,12 +8,15 @@ ProFound Diagnostic Grid
 A useful visual grid of ProFound diagnostics. This is useful for checking if something very odd has occurred when running the code.
 }
 \usage{
-\method{plot}{profound}(x, ...)
+\method{plot}{profound}(x, logR50 = TRUE, ...)
 }
 
 \arguments{
   \item{x}{
 Argument for the class dependent \code{plot.profound} function. An object of class profound as output by the \code{\link{profoundProFound}} function. This is the only structure that needs to be provided when executing plot(profound) class dependent plotting, which will use the plot.profound function.  
+}
+  \item{logR50}{
+Logical; specifies whether the bottom-centre panel uses a logarithmic y-axis for R50 (default is TRUE).
 }
   \item{\dots}{
 Nothing to see here.

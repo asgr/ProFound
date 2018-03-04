@@ -429,7 +429,7 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
     segim_new[segim!=0]=segim[segim!=0]
   }else{
     segim_new=segim
-    segim_new[segim_new!=expand]=0
+    segim_new[!(segim_new %in% expand)]=0
     segim_new=EBImage::dilate(segim_new, kern)
     segim_new=EBImage::imageData(segim_new)
     segim_new[segim!=0]=segim[segim!=0]

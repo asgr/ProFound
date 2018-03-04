@@ -294,7 +294,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   return=output
 }
 
-plot.profound=function(x, ...){
+plot.profound=function(x, logR50=TRUE, ...){
   
   if(is.null(x$image)){
     stop('Missing image!')
@@ -335,7 +335,11 @@ plot.profound=function(x, ...){
     maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE)
+    if(logR50){
+      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(min(x$segstats$R50, 0.1, na.rm = TRUE), max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE, log='y')
+    }else{
+      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE)
+    }
     
     par(mar=c(3.5,3.5,0.5,0.5))
     fluxrat=x$segstats$flux/x$segstats$flux_err
@@ -372,7 +376,11 @@ plot.profound=function(x, ...){
     maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / Pixels', grid=TRUE)
+    if(logR50){
+      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(min(x$segstats$R50, 0.1, na.rm = TRUE), max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE, log='y')
+    }else{
+      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE)
+    }
     
     par(mar=c(3.5,3.5,0.5,0.5))
     fluxrat=x$segstats$flux/x$segstats$flux_err
