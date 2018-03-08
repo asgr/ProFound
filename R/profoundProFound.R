@@ -262,7 +262,11 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     
     if(plot){
       if(verbose){message(paste('Plotting segments -',round(proc.time()[3]-timestart,3),'sec'))}
-      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, header=header, ...)
+      if(any(is.finite(sky))){
+        profoundSegimPlot(image=image-sky, segim=segim, mask=mask, header=header, ...)
+      }else{
+        profoundSegimPlot(image=image, segim=segim, mask=mask, header=header, ...)
+      }
     }else{
       if(verbose){message("Skipping segmentation plot - plot set to FALSE")}
     }

@@ -536,7 +536,11 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     pixscale=getpixscale(header)
   }
   
-  hassky=!missing(sky)
+  if(!missing(sky)){
+    hassky=any(is.finite(sky))
+  }else{
+    hassky=FALSE
+  }
   if(hassky){
     if(length(hassky)==1 & sky[1]==0){
       hassky=FALSE
@@ -544,7 +548,11 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
       image=image-sky
     }
   }
-  hasskyRMS=!missing(skyRMS)
+  if(!missing(skyRMS)){
+    hasskyRMS=any(is.finite(skyRMS))
+  }else{
+    hasskyRMS=FALSE
+  }
   if(hasskyRMS){
     if(length(hasskyRMS)==1 & skyRMS[1]==0){hasskyRMS=FALSE}
   }
@@ -974,7 +982,5 @@ profoundSegimMerge=function(image, segim_base, segim_add, mask, sky=0){
 }
 
 profoundSegimWarp=function(segim_in, header_in, header_out){
-  segim_out=magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')
-  names(segim_out)[1]='segim'
-  return=segim_out
+  return=magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')$image
 }

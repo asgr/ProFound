@@ -43,11 +43,13 @@ Aaron Robotham
 VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
 GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
 
-profound=profoundProFound(VST_r, sky=0, skycut=1, sigma=2, tolerance=8, plot=TRUE)
+profound_KiDS=profoundProFound(VST_r, sky=0, skycut=1, sigma=2, tolerance=8, plot=TRUE)
 
-segimFUV=profoundSegimWarp(profound$segim, profound$header, GALEX_NUV$hdr)
+segimFUV=profoundSegimWarp(profound_KiDS$segim, profound_KiDS$header, GALEX_NUV$hdr)
 
-profoundSegimPlot(GALEX_NUV, segim = segimFUV$segim)
+profoundSegimPlot(GALEX_NUV, segim = segimFUV)
+
+profound_GALEX=profoundProFound(GALEX_NUV, segim=segimFUV, plot=TRUE)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
