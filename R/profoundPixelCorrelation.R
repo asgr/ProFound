@@ -51,7 +51,7 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
       image[mask>0]=rnorm(length(which(mask>0)))
     }
     
-    centre=matrix(c(rep(c(-1,1),xlenpad/2), rep(c(1,-1),ylenpad/2)),xlenpad,ylenpad)[1:xlen,1:ylen]
+    centre=matrix(c(rep(c(-1,1),ylenpad/2), rep(c(1,-1),ylenpad/2)),xlenpad,ylenpad)[1:xlen,1:ylen]
     FFT_Mod=Mod(fft(z=image*centre))
     dimx=dim(FFT_Mod)[1]
     dimy=dim(FFT_Mod)[2]
