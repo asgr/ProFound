@@ -972,3 +972,9 @@ profoundSegimMerge=function(image, segim_base, segim_add, mask, sky=0){
   
   return=segim_merge
 }
+
+profoundSegimWarp=function(segim_in, header_in, header_out){
+  segim_out=magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')
+  names(segim_out)[1]='segim'
+  return=segim_out
+}
