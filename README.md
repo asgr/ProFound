@@ -31,7 +31,7 @@ Source installation from GitHub should be easy:
 ```R
 install.packages('devtools')
 library(devtools)
-install_github("ICRAR/ProFound")
+install_github("asgr/ProFound")
 library(ProFound)
 ```
 
