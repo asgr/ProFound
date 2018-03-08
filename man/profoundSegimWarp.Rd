@@ -2,10 +2,10 @@
 \alias{profoundSegimWarp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Remap Segim WCS via Warping
+Remap Segmentation Map via Warping
 }
 \description{
-Remaps an input WCS Tan Gnomonic projection system to a different target WCS. This uses \code{\link{magwarp}} with sensible settings, but \code{\link{magwarp}} can be used more directly if the other lower level options are required. This interface should cover most practical use cases though.
+Remaps an input segmentation map WCS Tan Gnomonic projection system to a different target WCS. This uses \code{\link{magwarp}} with sensible settings, but \code{\link{magwarp}} can be used more directly if the other lower level options are required. This interface should cover most practical use cases though. Using \code{\link{profoundProFound}} with a remapped segmentation map is likely to be more sensible than remapping image flux since it will not produce flux interpolation errors.
 }
 \usage{
 profoundSegimWarp(segim_in, header_in, header_out)
