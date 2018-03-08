@@ -46,12 +46,17 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}, ~~~
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 profound=profoundProFound(image, plot=TRUE)
 profound_diff=profoundProFound(profoundImDiff(image, sigma=2), plot=TRUE)
 tempmerge=profoundSegimMerge(image, profound$segim, profound_diff$segim)
+
+#Notice the new embedded blue segment near the centre:
+
 profoundSegimPlot(image, segim=tempmerge)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

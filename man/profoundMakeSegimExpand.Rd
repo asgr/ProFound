@@ -188,14 +188,13 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}, \code{\link{profoundProFound}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
 }
 \examples{
-
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 segim=profoundMakeSegim(image, plot=TRUE, skycut=2)
 profoundMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=1)
 profoundMakeSegimDilate(image, segim$segim, plot=TRUE)
 
-\dontrun{
 #Some other examples:
 
 profoundMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=0)

@@ -58,6 +58,8 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 stack=profoundMakeStack(list(image$imDat, image$imDat, image$imDat),
 skyRMS_list = list(8,8,3))
 
+#The new signal-to-noise weighted sky should equal sqrt(1/(1/8^2+1/8^2+1/3^2)) = 2.65
+
 stack$skyRMS
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

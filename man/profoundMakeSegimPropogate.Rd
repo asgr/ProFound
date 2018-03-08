@@ -5,7 +5,7 @@
 Propagate Identified Segments
 }
 \description{
-Propagates all identified segments across the full image, only ignoring masked regions. This serves to identify which segment every pixel is most likely to belong to using a number of image related criteria.
+Propagates all identified segments across the full image, only ignoring masked regions. This serves to identify which segment every pixel is most likely to belong to using a number of image related criteria. Uses EBImage's propagate function to do the grunt work.
 }
 \usage{
 profoundMakeSegimPropagate(image, segim, objects, mask, sky = 0, lambda = 1e-04,
@@ -40,7 +40,7 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 \details{
 This function propgates out the identified segments into the rest of the \option{image}, only region identified in the \option{mask} will not be assigned to a segment. To assign pixels a mixture of the Euclidian distance and the local gradient is used (as described below). The purpose of this routine is to identify all pixels in the image with their most likely segment (whether nominally object or sky pixel). The true sky pixels identified as belonging to a segment should also provide the best possible local estimate of the sky level.
 
-For internal completeness, the below description is taken almost verbatim from the EBImage popagate function.
+For internal completeness, the below description is taken almost verbatim from the EBImage propagate function.
 
 The method operates by computing a discretized approximation of the Voronoi regions for given seed points on a Riemann manifold with a metric controlled by local \option{image} features.
 
@@ -67,9 +67,10 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profoundProFound}}
+\code{\link{profoundProFound}} \code{propagate}
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
@@ -87,6 +88,7 @@ mask=array(0, dim=dim(image$imDat))
 mask[1:50,]=1
 
 profoundMakeSegimPropagate(image$imDat, segim=profound$segim, plot=TRUE, mask=mask)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

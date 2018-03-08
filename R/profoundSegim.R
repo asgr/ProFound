@@ -139,7 +139,7 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profoundGetPixScale(header)
+    pixscale=getpixscale(header)
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -270,7 +270,7 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profoundGetPixScale(header)
+    pixscale=getpixscale(header)
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -411,7 +411,7 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profoundGetPixScale(header)
+    pixscale=getpixscale(header)
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
@@ -533,7 +533,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   }
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profoundGetPixScale(header)
+    pixscale=getpixscale(header)
   }
   
   hassky=!missing(sky)

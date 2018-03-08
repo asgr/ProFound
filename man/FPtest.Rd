@@ -82,6 +82,7 @@ FPtest={}
 for(i in 1:1000){FPtest=rbind(FPtest,profoundProFound(matrix(rnorm(1e6),1e3))$segstats)}
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, magzero=30, rotstats=TRUE)
 skyRMS=median(profound$skyRMS)
@@ -96,5 +97,6 @@ dim(FPtest)[1]*totpix/1e6/1e3
 maghist(profound$segstats$mag, seq(-11,-1,by=0.2)+magoff)
 maghist(FPtest$mag+magoff, seq(-6,-1,by=0.2)+magoff, scale=totpix/1e6/1e3, add=TRUE,
 border='red')
+}
 }
 \keyword{datasets}

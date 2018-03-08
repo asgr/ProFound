@@ -84,7 +84,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   #Get the pixel scale, if possible and not provided:
   
   if(missing(pixscale) & !missing(header)){
-    pixscale=profoundGetPixScale(header)
+    pixscale=getpixscale(header)
     if(verbose){message(paste('Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel'))}
     if(verbose){message(paste('Supplied image is',round(dim(image)[1]*pixscale/60,3),'x',round(dim(image)[2]*pixscale/60,3),'amin, ', round(prod(dim(image))*pixscale^2/(3600^2),3),'deg-sq'))}
   }

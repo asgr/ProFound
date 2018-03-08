@@ -1,3 +1,11 @@
+v1.0.2
+
+Does not run Example code that required EBImage.
+
+v1.0.1
+
+Back on CRAN: does not run Vignette code that required EBImage.
+
 v1.0.0
 
 CRAN release version to go with the new Robotham et al MNRAS paper.

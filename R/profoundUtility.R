@@ -31,82 +31,82 @@ profoundSB2Flux=function(SB=0, magzero=0, pixscale=1){
   return(profoundMag2Flux(mag=mag, magzero=magzero))
 }
 
-profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
-  if(!missing(header)){
-    if(is.data.frame(header) | is.matrix(header)){
-      locs=match(c('CD1_1','CD1_2','CD2_1','CD2_2'),header[,1])
-      headerWCS=data.frame(header[locs,1],as.numeric(header[locs,2]))
-      if('CD1_1' %in% headerWCS[,1]){
-        CD1_1=headerWCS[headerWCS[,1]=='CD1_1',2]
-        if('CD1_2' %in% headerWCS[,1]){CD1_2=headerWCS[headerWCS[,1]=='CD1_2',2]}else{message('Missing CD1_2')}
-      }else{
-        if('CDELT1' %in% headerWCS[,1]){
-          CD1_1=headerWCS[headerWCS[,1]=='CDELT1',2]
-        }else{
-          message("Missing CD1_1 and CDELT1")
-        }
-      }
-      if('CD2_2' %in% headerWCS[,1]){
-        CD2_2=headerWCS[headerWCS[,1]=='CD2_2',2]
-        if('CD2_1' %in% headerWCS[,1]){CD2_1=headerWCS[headerWCS[,1]=='CD2_1',2]}else{message('Missing CD2_1')}
-      }else{
-        if('CDELT2' %in% headerWCS[,1]){
-          CD2_2=headerWCS[headerWCS[,1]=='CDELT2',2]
-        }else{
-          message("Missing CD2_2 and CDELT2")
-        }
-      }
-    }else{
-      if('CD1_1' %in% header){
-        CD1_1=as.numeric(header[which(header=='CD1_1')+1])
-        if('CD1_2' %in% header){CD1_2=as.numeric(header[which(header=='CD1_2')+1])}else{message('Missing CD1_2')}
-      }else{
-        if('CDELT1' %in% header){
-          CD1_1=as.numeric(header[which(header=='CDELT1')+1])
-        }else{
-          message("Missing CD1_1 and CDELT1")
-        }
-      }
-      if('CD2_2' %in% header){
-        CD2_2=as.numeric(header[which(header=='CD2_2')+1])
-        if('CD2_1' %in% header){CD2_1=as.numeric(header[which(header=='CD2_1')+1])}else{message('Missing CD2_1')}
-      }else{
-        if('CDELT1' %in% header){
-          CD2_2=as.numeric(header[which(header=='CDELT2')+1])
-        }else{
-          message("Missing CD2_2 and CDELT2")
-        }
-      }
-    }
-  }
-  return(3600*(sqrt(CD1_1^2+CD1_2^2)+sqrt(CD2_1^2+CD2_2^2))/2)
-}
+# profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
+#   if(!missing(header)){
+#     if(is.data.frame(header) | is.matrix(header)){
+#       locs=match(c('CD1_1','CD1_2','CD2_1','CD2_2'),header[,1])
+#       headerWCS=data.frame(header[locs,1],as.numeric(header[locs,2]))
+#       if('CD1_1' %in% headerWCS[,1]){
+#         CD1_1=headerWCS[headerWCS[,1]=='CD1_1',2]
+#         if('CD1_2' %in% headerWCS[,1]){CD1_2=headerWCS[headerWCS[,1]=='CD1_2',2]}else{message('Missing CD1_2')}
+#       }else{
+#         if('CDELT1' %in% headerWCS[,1]){
+#           CD1_1=headerWCS[headerWCS[,1]=='CDELT1',2]
+#         }else{
+#           message("Missing CD1_1 and CDELT1")
+#         }
+#       }
+#       if('CD2_2' %in% headerWCS[,1]){
+#         CD2_2=headerWCS[headerWCS[,1]=='CD2_2',2]
+#         if('CD2_1' %in% headerWCS[,1]){CD2_1=headerWCS[headerWCS[,1]=='CD2_1',2]}else{message('Missing CD2_1')}
+#       }else{
+#         if('CDELT2' %in% headerWCS[,1]){
+#           CD2_2=headerWCS[headerWCS[,1]=='CDELT2',2]
+#         }else{
+#           message("Missing CD2_2 and CDELT2")
+#         }
+#       }
+#     }else{
+#       if('CD1_1' %in% header){
+#         CD1_1=as.numeric(header[which(header=='CD1_1')+1])
+#         if('CD1_2' %in% header){CD1_2=as.numeric(header[which(header=='CD1_2')+1])}else{message('Missing CD1_2')}
+#       }else{
+#         if('CDELT1' %in% header){
+#           CD1_1=as.numeric(header[which(header=='CDELT1')+1])
+#         }else{
+#           message("Missing CD1_1 and CDELT1")
+#         }
+#       }
+#       if('CD2_2' %in% header){
+#         CD2_2=as.numeric(header[which(header=='CD2_2')+1])
+#         if('CD2_1' %in% header){CD2_1=as.numeric(header[which(header=='CD2_1')+1])}else{message('Missing CD2_1')}
+#       }else{
+#         if('CDELT1' %in% header){
+#           CD2_2=as.numeric(header[which(header=='CDELT2')+1])
+#         }else{
+#           message("Missing CD2_2 and CDELT2")
+#         }
+#       }
+#     }
+#   }
+#   return(3600*(sqrt(CD1_1^2+CD1_2^2)+sqrt(CD2_1^2+CD2_2^2))/2)
+# }
 
-profoundInterp2d=function(x,y,image){
-    scale=sum(image)
-    imagelist=list(x=seq(-dim(image)[1]/2,dim(image)[1]/2,len=dim(image)[1]),y=seq(-dim(image)[2]/2,dim(image)[2]/2,len=dim(image)[2]),z=image)
-    ximage = seq(-dim(image)[1]/2,dim(image)[1]/2,len=dim(image)[1])
-    yimage = seq(-dim(image)[2]/2,dim(image)[2]/2,len=dim(image)[2])
-    zimage = image
-    nx = length(ximage)
-    ny = length(yimage)
-    lx = approx(ximage, 1:nx, x, rule=2)$y
-    ly = approx(yimage, 1:ny, y, rule=2)$y
-    lx1 = floor(lx)
-    ly1 = floor(ly)
-    ex = lx - lx1
-    ey = ly - ly1
-    ex[lx1 == nx] = 1
-    ey[ly1 == ny] = 1
-    lx1[lx1 == nx] = nx - 1
-    ly1[ly1 == ny] = ny - 1
-    z=
-	zimage[cbind(lx1, ly1)] * (1 - ex) * (1 - ey) +
-	zimage[cbind(lx1 + 1, ly1)] * ex * (1 - ey) +
-	zimage[cbind(lx1, ly1 + 1)] * (1 - ex) * ey +
-	zimage[cbind(lx1 + 1, ly1 + 1)] * ex * ey
-  return = cbind(X=x,Y=y,Z=z)
-}
+# profoundInterp2d=function(x,y,image){
+#     scale=sum(image)
+#     imagelist=list(x=seq(-dim(image)[1]/2,dim(image)[1]/2,len=dim(image)[1]),y=seq(-dim(image)[2]/2,dim(image)[2]/2,len=dim(image)[2]),z=image)
+#     ximage = seq(-dim(image)[1]/2,dim(image)[1]/2,len=dim(image)[1])
+#     yimage = seq(-dim(image)[2]/2,dim(image)[2]/2,len=dim(image)[2])
+#     zimage = image
+#     nx = length(ximage)
+#     ny = length(yimage)
+#     lx = approx(ximage, 1:nx, x, rule=2)$y
+#     ly = approx(yimage, 1:ny, y, rule=2)$y
+#     lx1 = floor(lx)
+#     ly1 = floor(ly)
+#     ex = lx - lx1
+#     ey = ly - ly1
+#     ex[lx1 == nx] = 1
+#     ey[ly1 == ny] = 1
+#     lx1[lx1 == nx] = nx - 1
+#     ly1[ly1 == ny] = ny - 1
+#     z=
+# 	zimage[cbind(lx1, ly1)] * (1 - ex) * (1 - ey) +
+# 	zimage[cbind(lx1 + 1, ly1)] * ex * (1 - ey) +
+# 	zimage[cbind(lx1, ly1 + 1)] * (1 - ex) * ey +
+# 	zimage[cbind(lx1 + 1, ly1 + 1)] * ex * ey
+#   return = cbind(X=x,Y=y,Z=z)
+# }
 
 profoundImBlur=function(image, sigma=1, plot=FALSE, ...){
   if(!requireNamespace("imager", quietly = TRUE)){

@@ -118,6 +118,7 @@ Aaron Robotham
 \code{\link{profoundProFound}}
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE, plot=TRUE)
@@ -126,7 +127,6 @@ corout_raw=profoundPixelCorrelation(image$imDat, plot=TRUE)
 magimage(corout_raw$fft, xlab='kx (2pi/356pix)', ylab='ky (2pi/356pix)')
 points(0, 0, cex=10, col='red')
 
-\dontrun{
 # There is clearly some residual structure masking out the brighter parts of objects:
 
 corout_objects=profoundPixelCorrelation(image$imDat, sky=profound$sky,

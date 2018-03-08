@@ -143,6 +143,7 @@ Aaron Robotham
 \code{\link{profoundProFound}}, \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, magzero=30, rotstats=TRUE)
 
@@ -156,6 +157,7 @@ profound$segim[35:55, 80:100]=max(profound$segim)+1
 print(profoundSegimStats(image$imDat, segim=profound$segim, sky=profound$sky,
 header=image$hdr))
 profoundSegimPlot(image, profound$segim)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
