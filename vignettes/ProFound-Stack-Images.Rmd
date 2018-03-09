@@ -17,9 +17,15 @@ install_github('asgr/ProFound')
 install_github('ICRAR/ProFit')
 ```
 
+Set global evaluate (basically TRUE for GitHub version and FALSE for CRAN):
+
+```{r}
+evalglobal=FALSE
+```
+
 First of all we load **ProFit** and **ProFound**. We also need to use **LaplacesDemon** because it gives us the Pareto (power-law) distribution that we will use to realistically sample our magnitude ranges later.
 
-```{r, eval=FALSE}
+```{r, eval=evalglobal}
 library(ProFound)
 library(ProFit)
 library(LaplacesDemon)
@@ -35,7 +41,7 @@ To convince yourself consider you have 8 exposures with sky RMS equal to 16 orig
 
 First we generate a random image with 200 stars and 200 extended sources. The value used roughly correspoond to the source densities and magnitude distributions you might expect to find in a Z-band VIKING frame (this was used to derive the image statistics).
 
-```{r, eval=FALSE}
+```{r, eval=evalglobal}
 set.seed(666)
 
 ExamplePSF=profitMakeGaussianPSF(fwhm=5)
@@ -70,7 +76,7 @@ im_test<-profitMakeModel(modellist=model_test, psf=ExamplePSF, dim=c(1000,1000),
 
 Now we can add noise in a realistic manner. Image-1 is the nominal depth of a single Z-band VIKING image, whereas the others are each one quarter the depth (which gives the variance, hence a factor of two in standard-deviation) so the four of them should achieve the same depth when stacked.
 
-```{r, eval=FALSE}
+```{r, eval=evalglobal}
 im_test1=im_test+rnorm(1e6,sd=sqrt(im_test))
 im_test1=im_test1+rnorm(1e6,sd=10)
 im_test2a=im_test+rnorm(1e6,sd=2*sqrt(im_test))
@@ -85,7 +91,7 @@ im_test2d=im_test2d+rnorm(1e6,sd=2*10)
 
 We now need to run **ProFound** on the 5 images separately:
 
-```{r, eval=FALSE}
+```{r, eval=evalglobal}
 pro_test1=profoundProFound(im_test1, skycut=1)
 pro_test2a=profoundProFound(im_test2a, skycut=1)
 pro_test2b=profoundProFound(im_test2b, skycut=1)
@@ -95,7 +101,7 @@ pro_test2d=profoundProFound(im_test2d, skycut=1)
 
 We can now stack the images based on the sky and sky-RMS:
 
-```{r, eval=FALSE}
+```{r, eval=evalglobal}
 stack=profoundMakeStack(image_list = list(im_test1, im_test2a, im_test2b, im_test2c, im_test2d), sky_list = list(pro_test1$sky, pro_test2a$sky, pro_test2b$sky, pro_test2c$sky, pro_test2d$sky), skyRMS_list = list(pro_test1$skyRMS, pro_test2a$skyRMS, pro_test2b$skyRMS, pro_test2c$skyRMS, pro_test2d$skyRMS), magzero_in=c(30,30,30,30,30), magzero_out=30)
 ```
 
@@ -103,13 +109,13 @@ Finally we can re-run **ProFound** to check the depth achieved. If the input sta
 
 First run **ProFound**:
 
-```{r, eval=FALSE}
+```{r, eval=evalglobal}
 pro_stack=profoundProFound(stack$image, skycut=1)
 ```
 
 Then can check the distribution of the sky pixels directly:
 
-```{r, eval=FALSE, fig.width=6, fig.height=6, dpi=40}
+```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
 maghist(pro_stack$skyRMS, grid=TRUE)
 abline(v=7.07, col='red')
 ```

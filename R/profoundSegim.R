@@ -313,17 +313,17 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
   }
   #kernel=profoundMakeGaussianPSF(fwhm = expandsigma, dim=dim)
   maxmat=matrix(min(image, na.rm=TRUE), xlen, ylen)
-  segim_new=matrix(0,xlen,ylen)
+  segim_new=segim
   segvec=which(tabulate(segim)>0)
   segvec=segvec[segvec>0]
   if(expand[1]=='all'){expand=segvec}
   if(verbose){message(paste(" - Expanding segments -", round(proc.time()[3]-timestart,3), "sec"))}
-  for(i in segvec){
+  for(i in expand){
     segtemp=segim
     segtemp[segim==i]=1
     segtemp[segim!=i]=0
+    segim_new[segim_new==i]=0
     if(i %in% expand){
-      #temp=profoundConvolvePSF(segtemp, kernel)
       temp=profoundImBlur(segtemp, expandsigma)
     }else{
       temp=segtemp
