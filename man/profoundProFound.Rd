@@ -190,6 +190,9 @@ A object list of class 'profound' containing:
   \item{pixscale}{The assumed pixel scale. This is relevant to various outputs returned by the segmentation statistics.}
   \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
   \item{call}{The original function call.}
+  \item{date}{The date, more specifically the output of \code{\link{date}}.}
+  \item{ProFound.version}{The version of \code{ProFound} run, more specifically the output of \code{\link{packageVersion}}('ProFound').}
+  \item{R.version}{The version of \code{R} run, more specifically the output of \code{\link{R.version}}.}
   
 If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame with columns (else NULL):
 
