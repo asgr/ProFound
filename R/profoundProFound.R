@@ -312,13 +312,13 @@ plot.profound=function(x, logR50=TRUE, ...){
     magimageWCS(x$image, x$header)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(x$segim, x$header, col=c(NA, rainbow(1e4, end=2/3)), magmap=FALSE)
+    magimageWCS(x$segim, x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
     abline(v=c(0,dim(x$image)[1]))
     abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS((x$image-x$sky)/x$skyRMS, x$header)
-    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(1e4, end=2/3)), magmap=FALSE, add=TRUE)
+    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     area=prod(x$dim)*x$pixscale^2/(3600^2)
@@ -355,13 +355,13 @@ plot.profound=function(x, logR50=TRUE, ...){
     magimage(x$image)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage(x$segim, col=c(NA, rainbow(1e4, end=2/3)), magmap=FALSE)
+    magimage(x$segim, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
     abline(v=c(0,dim(x$image)[1]))
     abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage((x$image-x$sky)/x$skyRMS)
-    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(1e4, end=2/3)), magmap=FALSE, add=TRUE)
+    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     temphist=maghist(x$segstats$mag, log='y', xlab='mag', ylab='#', grid=TRUE)
