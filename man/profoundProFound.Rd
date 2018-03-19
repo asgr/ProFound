@@ -108,7 +108,7 @@ Character scalar; the type of sky level estimator used. Allowed options are 'qua
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
 }
   \item{doclip}{
-Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If an doubt, leave as TRUE.
+Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.
 }
 	\item{shiftloc}{
 Logical; should the cutout centre for the sky shift from \option{loc} of the desired \option{box} size extends beyond the edge of the image? (See \code{\link{magcutout}} for details).
