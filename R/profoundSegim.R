@@ -877,13 +877,15 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
   
   image=image-sky
   
+  segim[is.na(segim)]=0
+  
   if(missing(header)){header=NULL}
   if(is.null(header)){
     temp=magimage(image, ...)
   }else{
     temp=magimageWCS(image, header=header, ...)
   }
-  if(min(segim,na.rm=FALSE)!=0){segim=segim-min(segim,na.rm=FALSE)}
+  if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
   segvec=which(tabulate(segim)>0)
   for(i in segvec){
     z=segim==i

@@ -300,9 +300,20 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
 
 plot.profound=function(x, logR50=TRUE, ...){
   
+  if(class(x)!='profound'){
+    stop('Object class is not of type profound!')
+  }
+  
   if(is.null(x$image)){
     stop('Missing image!')
   }
+  
+  segtemp=x$segim_orig
+  segdiff=x$segim-x$segim_orig
+  segtemp[segdiff<0]=0
+  x$segim_orig=segtemp
+  rm(segtemp)
+  rm(segdiff)
   
   layout(matrix(1:9, 3, byrow=TRUE))
   
