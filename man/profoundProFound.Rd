@@ -48,7 +48,7 @@ Numeric scalar; radius of the neighbourhood in pixels for the detection of neigh
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{smooth}{
-Logical; should smoothing be done on the target \option{image}? Passed to \code{\link{profoundMakeSegim}}.
+Logical; should smoothing be done on the target \option{image}? Passed to \code{\link{profoundMakeSegim}}. If present, this will use the \code{imblur} function from the \code{imager} package. Otherwise it will use the \code{gblur} function from the \code{EBImage} package with a warning. These functions are very similar in output, but not strictly identical.
 }
   \item{SBlim}{
 Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Passed to \code{\link{profoundMakeSegim}}.

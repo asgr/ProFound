@@ -51,7 +51,7 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE.
 }
   \item{smooth}{
-Logical; should smoothing be done on the target \option{image}?
+Logical; should smoothing be done on the target \option{image}? If present, this will use the \code{imblur} function from the \code{imager} package. Otherwise it will use the \code{gblur} function from the \code{EBImage} package with a warning. These functions are very similar in output, but not strictly identical.
 }
   \item{expandsigma}{
 Numeric scalar; standard deviation of the blur used when expanding out the \option{segim}. Roughly speaking if \option{skycut} is set to a low number (say -5) then the expansion will not be prevented by the local sky level and it will grow by the number of pixels specified by \option{expandsigma}.

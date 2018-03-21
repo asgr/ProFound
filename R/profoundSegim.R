@@ -120,9 +120,9 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   call=match.call()
   if(verbose){message(' - Running MakeSegim:')}
   timestart = proc.time()[3]
-  if(!requireNamespace("imager", quietly = TRUE)){
-    stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
-  }
+  # if(!requireNamespace("imager", quietly = TRUE)){
+  #   stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
+  # }
   if(!requireNamespace("EBImage", quietly = TRUE)){
     stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
   }
@@ -169,7 +169,15 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
  
   if(smooth){
     if(verbose){message(paste(" - Smoothing the image -", round(proc.time()[3]-timestart,3), "sec"))}
-    image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
+    if(requireNamespace("imager", quietly = TRUE)){
+      image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
+    }else{
+      if(!requireNamespace("EBImage", quietly = TRUE)){
+      stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+      }
+      message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
+      image=as.matrix(EBImage::gblur(image,sigma))
+    }
   }else{
     if(verbose){message(" - Skipping smoothing - smooth set to FALSE")}
   }
@@ -186,6 +194,7 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
     segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
+    segim=matrix(as.integer(segim),xlen,ylen)
   }else{
     segim=image
   }
@@ -254,9 +263,9 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
   
   call=match.call()
   
-  if(!requireNamespace("imager", quietly = TRUE)){
-    stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
-  }
+  # if(!requireNamespace("imager", quietly = TRUE)){
+  #   stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
+  # }
   
   #Treat image NAs as masked regions:
   
@@ -296,8 +305,16 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
   image[!is.finite(image)]=0
 
   if(smooth){
-    if(verbose){message(paste(" - Smoothing image -", round(proc.time()[3]-timestart,3), "sec"))}
-    image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
+    if(verbose){message(paste(" - Smoothing the image -", round(proc.time()[3]-timestart,3), "sec"))}
+    if(requireNamespace("imager", quietly = TRUE)){
+      image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
+    }else{
+      if(!requireNamespace("EBImage", quietly = TRUE)){
+      stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+      }
+      message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
+      image=as.matrix(EBImage::gblur(image,sigma))
+    }
   }else{
     if(verbose){message(" - Skipping smoothing - smooth set to FALSE")}
   }

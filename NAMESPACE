@@ -7,6 +7,6 @@ import("stats")
 import("graphics")
 import("grDevices")
 
-importFrom("utils", "relist")
+importFrom("utils", "relist", "packageVersion")
 
 S3method("plot","profound")

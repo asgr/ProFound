@@ -32,10 +32,15 @@ profoundSB2Flux=function(SB=0, magzero=0, pixscale=1){
 }
 
 profoundImBlur=function(image, sigma=1, plot=FALSE, ...){
-  if(!requireNamespace("imager", quietly = TRUE)){
-    stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
+  if(requireNamespace("imager", quietly = TRUE)){
+    output=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
+  }else{
+    if(!requireNamespace("EBImage", quietly = TRUE)){
+      stop('The imager or EBImage package is needed for the profoundImBlur function to work. Please install from CRAN.', call. = FALSE)
+    }
+    message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
+    output=as.matrix(EBImage::gblur(image,sigma))
   }
-  output=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
   if(plot){
     magimage(output, ...)
   }
