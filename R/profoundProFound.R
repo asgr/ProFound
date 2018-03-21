@@ -308,12 +308,8 @@ plot.profound=function(x, logR50=TRUE, ...){
     stop('Missing image!')
   }
   
-  segtemp=x$segim_orig
   segdiff=x$segim-x$segim_orig
-  segtemp[segdiff<0]=0
-  x$segim_orig=segtemp
-  rm(segtemp)
-  rm(segdiff)
+  segdiff[segdiff<0]=0
   
   layout(matrix(1:9, 3, byrow=TRUE))
   
@@ -329,7 +325,7 @@ plot.profound=function(x, logR50=TRUE, ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS((x$image-x$sky)/x$skyRMS, x$header)
-    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
+    magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     area=prod(x$dim)*x$pixscale^2/(3600^2)
@@ -372,7 +368,7 @@ plot.profound=function(x, logR50=TRUE, ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage((x$image-x$sky)/x$skyRMS)
-    magimage(x$segim-x$segim_orig, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
+    magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     temphist=maghist(x$segstats$mag, log='y', xlab='mag', ylab='#', grid=TRUE)
