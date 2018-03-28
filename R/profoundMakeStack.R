@@ -34,7 +34,7 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)==FALSE){
         stack=stack+image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        inv_var=1
+        inv_var=inv_var+1
       }
     }
     stack=stack/inv_var
