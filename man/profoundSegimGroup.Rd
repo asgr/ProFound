@@ -38,6 +38,7 @@ The data.frame returned by \option{groupsegID} is a slightly unusal structure to
   \item{groupID}{Group ID, which can be matched against values in \option{groupim}}
   \item{segID}{An embedded list of segmentation IDs for segments in the group. I.e. each list element of \option{segID} is a vector (see Examples for clarity).}
   \item{Ngroup}{The total number of segments that are in the group.}
+  \item{Npix}{The total number of pixels that are in the group.}
 }
 \author{
 Aaron Robotham

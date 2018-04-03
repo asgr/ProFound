@@ -971,9 +971,11 @@ profoundSegimGroup=function(segim){
   groupim[groupim>0]=remap[segimDT[groupID>0,groupID]]
   
   segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
-  groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
+  groups=segimDT[groupID>0,.N,by=groupID]
+  groupID=groups$groupID
   groupsegID=segimDT[groupID>0,list(segID=list(sort(unique(segID)))),by=groupID]
   groupsegID[,Ngroup:=length(unlist(segID)),by=groupID]
+  groupsegID[,Npix:=groups$N]
   setkey(groupsegID,groupID)
   return=list(groupim=groupim, groupsegID=as.data.frame(groupsegID))
 }
