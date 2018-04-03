@@ -960,7 +960,7 @@ profoundSegimGroup=function(segim){
     stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
   }
   
-  Ngroup=NULL; segID=NULL
+  Ngroup=NULL; segID=NULL; Npix=NULL
   
   groupim=EBImage::bwlabel(segim)
   segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
