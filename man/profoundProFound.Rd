@@ -191,6 +191,7 @@ A object list of class 'profound' containing:
   \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
   \item{call}{The original function call.}
   \item{date}{The date, more specifically the output of \code{\link{date}}.}
+  \time{time}{The elapsed run time in seconds.}
   \item{ProFound.version}{The version of \code{ProFound} run, more specifically the output of \code{\link{packageVersion}}('ProFound').}
   \item{R.version}{The version of \code{R} run, more specifically the output of \code{\link{R.version}}.}
   
