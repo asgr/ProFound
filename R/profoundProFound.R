@@ -32,7 +32,7 @@
   return=tempout
 }
 
-profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, offset=1, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, ...){
+profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   call=match.call()
@@ -86,6 +86,8 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   if(missing(pixscale) & !missing(header)){
     pixscale=getpixscale(header)
     if(verbose){message(paste('Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel'))}
+  }else{
+    if(verbose){message(paste('Using suggested pixel scale:',round(pixscale,3),'asec/pixel'))}
   }
   
   skyarea=prod(dim(image))*pixscale^2/(3600^2)
@@ -131,8 +133,6 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(verbose){message("Skipping making an initial segmentation image - User provided segim")}
   }
   
-  segim_orig=segim
-  
   if(any(segim>0)){
     if((hassky==FALSE | hasskyRMS==FALSE) & iters>0){
       if(verbose){message(paste('Doing initial aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
@@ -155,10 +155,19 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     
     if(iters>0){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky)
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
+      
+      if(R50clean[1]!=0){
+        badseg=segstats$R50<=R50clean
+        segim[segim %in% segstats[badseg,'segID']]=0
+        segstats=segstats[which(!badseg),]
+      }
+      
       compmat=cbind(segstats[,converge])
       segim_array=array(0, dim=c(dim(segim),iters+1))
       segim_array[,,1]=segim
+      
+      segim_orig=segim
       
       if(verbose){message('Doing dilations:')}
       
@@ -198,6 +207,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
+      segim_orig=segim
       selseg=0
       origfrac=1
     }
@@ -263,6 +273,20 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       group=NULL
     }
     
+    if(haralickstats){
+      if(requireNamespace("EBImage", quietly = TRUE)){
+        haralick=as.data.frame(EBImage::computeFeatures.haralick(segim,image))
+        haralick=haralick[segstats$segID,]
+      }else{
+        if(verbose){
+          message('The EBImage package is needed to compute Haralick statistics.')
+          haralick=NULL
+        }
+      }
+    }else{
+      haralick=NULL
+    }
+    
     if(plot){
       if(verbose){message(paste('Plotting segments -',round(proc.time()[3]-timestart,3),'sec'))}
       if(any(is.finite(sky))){
@@ -288,14 +312,14 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(missing(mask)){mask=NULL}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }else{
     if(missing(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(missing(mask)){mask=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
   return=output

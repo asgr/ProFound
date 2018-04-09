@@ -2,15 +2,17 @@ year <- sub("-.*", "", meta$Date)
 note <- sprintf("R package version %s", meta$Version)
 
 bibentry(bibtype = "Manual",
-         title = "ProFit: Bayesian profile fitting of galaxy images",
+         title = "ProFound: Source Extraction and Application to Modern Survey Data",
          author = c(person("A.S.G.", "Robotham"),
+                    person("L.J.M", "Davies"),
+                    person("S.P.", "Driver"),
+                    person("S.", "Koushan"),
                     person("D.S.", "Taranu"),
-                    person("R.", "Tobar"),
-                    person("A.", "Moffett"),
-                    person("S.P.", "Driver")
+                    person("S.", "Casura"),
+                    person("J.", "Liske")
                   ),
          year = 2017,
          journal = "MNRAS",
-         volume = "466",
-         pages = "1513",
-         url = "https://github.com/ICRAR/ProFit")
+         volume = "476",
+         pages = "3137",
+         url = "https://github.com/asgr/ProFound")

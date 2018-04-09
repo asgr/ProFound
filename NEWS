@@ -1,3 +1,7 @@
+v1.0.4
+
+Added Haralick features output to ProFound to help diagnose source issues.
+
 v1.0.2
 
 Does not run Example code that required EBImage.

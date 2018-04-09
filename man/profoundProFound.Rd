@@ -15,8 +15,8 @@ converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky 
 redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
 header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats=boundstats, groupstats=boundstats, offset = 1, sortcol = "segID",
-decreasing = FALSE, lowmemory=FALSE, keepim = TRUE, ...)
+nearstats=boundstats, groupstats=boundstats, offset = 1, haralickstats=FALSE,
+sortcol = "segID", decreasing = FALSE, lowmemory=FALSE, keepim = TRUE, R50clean=0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -143,6 +143,9 @@ Logical; if TRUE then the IDs of grouped segments is calculated via \code{\link{
   \item{offset}{
 Integer scalar; the distance to offset when searching for nearby segments (used in both \code{\link{profoundSegimStats}} and \code{\link{profoundSegimNear}}).  
 }
+  \item{haralickstats}{
+Logical; if TRUE then the Haralick texture statistics are computed using the \code{EBImage} function \code{computeFeatures.haralick}. For more detail see the original paper: http://haralick.org/journals/TexturalFeatures.pdf, and a useful online \code{EBImage} document: http://earlglynn.github.io/RNotes/package/EBImage/Haralick-Textural-Features.html.
+}
   \item{sortcol}{
 Character; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
 }
@@ -154,6 +157,9 @@ Logical; if TRUE then a low memory mode of ProFound will be used. This limits th
 }
 \item{keepim}{
 Logical; if TRUE then the input \option{image} and \option{mask} matrices are passed through to the image output of the function. If FALSE then this is set to NULL.
+}
+\item{R50clean}{
+Numeric scalar; setting this to more than 0 cleans sources for spurously small objects. This value should be in arc-seconds if pixel scale is provided or detected, and in pixels otherwise (or if \option{pixscale}=1 is explictly set).
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
@@ -191,7 +197,7 @@ A object list of class 'profound' containing:
   \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
   \item{call}{The original function call.}
   \item{date}{The date, more specifically the output of \code{\link{date}}.}
-  \time{time}{The elapsed run time in seconds.}
+  \item{time}{The elapsed run time in seconds.}
   \item{ProFound.version}{The version of \code{ProFound} run, more specifically the output of \code{\link{packageVersion}}('ProFound').}
   \item{R.version}{The version of \code{R} run, more specifically the output of \code{\link{R.version}}.}
   
@@ -257,6 +263,10 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
 }
 \author{
 Aaron Robotham
+}
+\references{
+Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
+Haralick R.M., et al., 1973, IEEE, SMC-3 (6), 610
 }
 \seealso{
 \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
