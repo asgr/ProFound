@@ -325,7 +325,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   return=output
 }
 
-plot.profound=function(x, logR50=TRUE, ...){
+plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   
   if(class(x)!='profound'){
     stop('Object class is not of type profound!')
@@ -355,12 +355,18 @@ plot.profound=function(x, logR50=TRUE, ...){
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    area=prod(x$dim)*x$pixscale^2/(3600^2)
-    temphist=maghist(x$segstats$mag, log='y', scale=2/area, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
+    if(is.null(x$skyarea)){
+      skyarea=prod(x$dim)*x$pixscale^2/(3600^2)
+    }else{
+      skyarea=x$skyarea
+    }
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$skyarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/deg-sq/d',dmag,'mag',sep=''), grid=TRUE)
     #magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.6, 0.6, col='red')
+    abline(v=xmax, col='red', lty=2)
+    axis(side=1, at=xmax, labels=xmax, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$sky, x$header)
@@ -398,10 +404,12 @@ plot.profound=function(x, logR50=TRUE, ...){
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    temphist=maghist(x$segstats$mag, log='y', xlab='mag', ylab='#', grid=TRUE)
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.6, 0.6, col='red')
+    abline(v=xmax, col='red', lty=2)
+    axis(side=1, at=xmax, labels=xmax, tick=FALSE, line=-1, col.axis='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$sky)
