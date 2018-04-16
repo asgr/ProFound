@@ -365,8 +365,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.6, 0.6, col='red')
-    abline(v=xmax, col='red', lty=2)
-    axis(side=1, at=xmax, labels=xmax, tick=FALSE, line=-1, col.axis='red')
+    abline(v=xmax+0.25, col='red')
+    axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$sky, x$header)
@@ -408,8 +408,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.6, 0.6, col='red')
-    abline(v=xmax, col='red', lty=2)
-    axis(side=1, at=xmax, labels=xmax, tick=FALSE, line=-1, col.axis='red')
+    abline(v=xmax+0.25, col='red')
+    axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$sky)
