@@ -81,6 +81,10 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     }
   }
   
+  if(!missing(segim) & !missing(mask)){
+    segim=segim*(1-mask) 
+  }
+  
   #Get the pixel scale, if possible and not provided:
   
   if(missing(pixscale) & !missing(header)){
