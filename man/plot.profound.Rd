@@ -31,15 +31,15 @@ Run for the side effect of generating a grid of useful diagnostic plots.
 \value{
 Run for the side effect of generating a grid of useful diagnostic plots:
   
-  \item{Top-left}{Input \option{image}}
-  \item{Top-centre}{Output segmentation map}
-  \item{Top-right}{Sky subracted and normalised image with segment dilation extent shown in colour}
-  \item{Middle-left}{Magnitude counts histogram (max in red), scaled to counts per sqaure degree if possible}
-  \item{Middle-centre}{Output calculated sky}
-  \item{Middle-right}{Output calculated skyRMS}
-  \item{Bottom-left}{Dilation iteration histogram}
-  \item{Bottom-centre}{Output mag versus R50}
-  \item{Bottom-right}{Output mag versus axrat}
+  \item{Top-left}{Sky subracted image \option{x$image}-\option{x$sky}, where blue is negative, yellow is 0, and red is positive}
+  \item{Top-centre}{Output segmentation map \option{x$segim}}
+  \item{Top-right}{Sky subracted and normalised image (\option{x$image}-\option{x$sky})/\option{x$skyRMS}, with segment dilation extent shown in colour}
+  \item{Middle-left}{Magnitude (\option{x$segstats$mag}) counts histogram (max in red), scaled to counts per square degree if \option{x$header} is present}
+  \item{Middle-centre}{Output \option{x$sky}}
+  \item{Middle-right}{Output \option{x$skyRMS}}
+  \item{Bottom-left}{Dilation iteration (\option{x$segstats$iter}) histogram}
+  \item{Bottom-centre}{Output mag (\option{x$segstats$mag}) versus R50 (\option{x$segstats$R50})}
+  \item{Bottom-right}{Output mag (\option{x$segstats$mag}) versus axrat (\option{x$segstats$axrat})}
 }
 
 \author{
