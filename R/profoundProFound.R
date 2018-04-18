@@ -78,6 +78,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(any(is.na(image))){
       mask=matrix(0,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1
+      image[mask]=0
     }
   }
   
@@ -280,7 +281,8 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     
     if(haralickstats){
       if(requireNamespace("EBImage", quietly = TRUE)){
-        haralick=as.data.frame(EBImage::computeFeatures.haralick(segim,image))
+        scale=10^(0.4*(30-magzero))
+        haralick=as.data.frame(EBImage::computeFeatures.haralick(segim,(image-sky)*scale))
         haralick=haralick[segstats$segID,]
       }else{
         if(verbose){
@@ -324,7 +326,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(missing(mask)){mask=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=segim, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=NULL, skyRMS=NULL, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
   return=output
@@ -338,6 +340,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   
   if(is.null(x$image)){
     stop('Missing image!')
+  }
+  
+  if(is.null(x$segim)){
+    stop('Missing segmentation map!')
   }
   
   if(is.null(x$sky)){
@@ -368,15 +374,18 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, type='num', zlim=c(0,1), col=cmap)
+    if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$segim, x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
+    if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     abline(v=c(0,dim(x$image)[1]))
     abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(image/x$skyRMS, x$header)
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
+    if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)}
     
     par(mar=c(3.5,3.5,0.5,0.5))
     if(is.null(x$skyarea)){
@@ -417,16 +426,19 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(image, stretchscale=stretchscale, locut=-maximg, hicut=maximg, type='num', zlim=c(0,1), col=cmap)
+    if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$segim, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
+    if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     abline(v=c(0,dim(image)[1]))
     abline(h=c(0,dim(image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(image/x$skyRMS)
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
-    
+    if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)}
+
     par(mar=c(3.5,3.5,0.5,0.5))
     temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))

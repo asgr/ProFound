@@ -911,7 +911,7 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
   }
   if(!missing(mask)){
     if(!is.null(mask)){
-      magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.3)), add=T)
+      magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)
     }
   }
 }
