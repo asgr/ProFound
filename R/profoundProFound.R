@@ -74,11 +74,12 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   if(!missing(mask)){
     mask[is.na(image)]=1
+    image[is.na(image)]=0
   }else{
     if(any(is.na(image))){
       mask=matrix(0,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1
-      image[mask]=0
+      image[is.na(image)]=0
     }
   }
   
