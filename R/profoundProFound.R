@@ -341,10 +341,17 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   }
   
   if(is.null(x$sky)){
-    x$sky=matrix(0, profound$dim[1], profound$dim[2])
+    x$sky=matrix(0, x$dim[1], x$dim[2])
   }
   if(length(x$sky)==1){
-    x$sky=matrix(sky, profound$dim[1], profound$dim[2])
+    x$sky=matrix(x$sky, x$dim[1], x$dim[2])
+  }
+  
+  if(is.null(x$skyRMS)){
+    x$skyRMS=matrix(1, x$dim[1], x$dim[2])
+  }
+  if(length(x$skyRMS)==1){
+    x$skyRMS=matrix(x$skyRMS, x$dim[1], x$dim[2])
   }
   
   segdiff=x$segim-x$segim_orig
