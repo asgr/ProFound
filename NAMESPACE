@@ -8,5 +8,6 @@ import("graphics")
 import("grDevices")
 
 importFrom("utils", "relist", "packageVersion")
+importFrom("RColorBrewer", "brewer.pal")
 
 S3method("plot","profound")

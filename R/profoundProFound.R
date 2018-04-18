@@ -340,15 +340,27 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     stop('Missing image!')
   }
   
+  if(is.null(x$sky)){
+    x$sky=matrix(0, profound$dim[1], profound$dim[2])
+  }
+  if(length(x$sky)==1){
+    x$sky=matrix(sky, profound$dim[1], profound$dim[2])
+  }
+  
   segdiff=x$segim-x$segim_orig
   segdiff[segdiff<0]=0
+  
+  image=x$image-x$sky
+  cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
+  maximg = quantile(abs(image), 0.995, na.rm=TRUE)
+  stretchscale = 1/median(abs(image[which(image>0)]), na.rm=TRUE)
   
   layout(matrix(1:9, 3, byrow=TRUE))
   
   if(!is.null(x$header)){
   
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(x$image, x$header)
+    magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, type='num', zlim=c(0,1), col=cmap)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$segim, x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
@@ -356,7 +368,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS((x$image-x$sky)/x$skyRMS, x$header)
+    magimageWCS(image/x$skyRMS, x$header)
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -397,15 +409,15 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   }else{
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage(x$image)
+    magimage(image, stretchscale=stretchscale, locut=-maximg, hicut=maximg, type='num', zlim=c(0,1), col=cmap)
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$segim, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
-    abline(v=c(0,dim(x$image)[1]))
-    abline(h=c(0,dim(x$image)[2]))
+    abline(v=c(0,dim(image)[1]))
+    abline(h=c(0,dim(image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage((x$image-x$sky)/x$skyRMS)
+    magimage(image/x$skyRMS)
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     
     par(mar=c(3.5,3.5,0.5,0.5))

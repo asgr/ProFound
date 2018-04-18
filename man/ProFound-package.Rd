@@ -12,10 +12,10 @@
 \tabular{ll}{
 Package: \tab ProFound\cr
 Type: \tab Package\cr
-Version: \tab 1.0.4\cr
-Date: \tab 2018-04-09\cr
+Version: \tab 1.0.5\cr
+Date: \tab 2018-04-18\cr
 License: \tab LGPL-3\cr
-Depends: \tab R (>= 3.0), magicaxis (>= 2.0.3), celestial (>= 1.4.1), FITSio, data.table\cr
+Depends: \tab R (>= 3.0), magicaxis (>= 2.0.3), celestial (>= 1.4.1), FITSio, data.table, RColorBrewer\cr
 Suggests: \tab ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon\cr
 }
 }
