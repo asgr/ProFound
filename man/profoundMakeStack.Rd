@@ -39,11 +39,13 @@ for(i in 1:length(image_list)){
   sky_stack=sky_stack+(image_list[[i]]^2)
 }
 stack=stack*sky_stack/(length(skyRMS_list)^2)
+
+The output is explictly sky subtracted (so the sky is now 0 everywhere by definition as far as \code{\link{profoundProFound}} is concerned). The stacked sky is not returned. However, it can be computed by running \code{profoundMakeStack} again, but passing the sky list originally passed to the \option{sky_list} argument to the \option{image_list} argument instead, and not providing any input to the \option{sky_list} argument (or setting this to 0).
 }
 \value{
 A list containing:
-  \item{image}{Numeric matrix; the variance weighted stacked image.}
-  \item{skyRMS}{The sky RMS of the final stacked image}
+  \item{image}{Numeric matrix; the variance-weighted sky-subtracted stacked image.}
+  \item{skyRMS}{Numeric matrix/scalar; the sky RMS image/value of the final stacked image}
   \item{magzero}{The mag-zero point of the stacked image.}
 }
 \author{
