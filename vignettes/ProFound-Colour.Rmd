@@ -33,7 +33,7 @@ One of the big design considerations when developing **ProFound** was to make co
 
 First we need some images to do colour photometry on (these are taken from the **ProFound** Robotham et al 2018 paper):
 
-```{r}
+```{r, eval=evalglobal}
 VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
 GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
