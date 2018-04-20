@@ -26,10 +26,7 @@ Full FITS header in table or vector format. This is the target WCS projection th
 This function uses the \option{interpolation}='nearest' and \option{doscale}=FALSE in \code{\link{magwarp}}.
 }
 \value{
-A list containing:
-
-  \item{segim}{Integer matrix; the remapped image using the target WCS.}
-  \item{header}{The target \option{header_out}.}
+Integer matrix; the remapped image using the target WCS.
 }
 \author{
 Aaron Robotham
