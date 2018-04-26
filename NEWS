@@ -1,3 +1,7 @@
+v1.0.5
+
+Added profoundMultiBand function.
+
 v1.0.4
 
 Added Haralick features output to ProFound to help diagnose source issues.

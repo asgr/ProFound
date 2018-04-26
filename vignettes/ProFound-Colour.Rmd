@@ -111,6 +111,18 @@ plot(pro_NUV_warpK)
 magplot(pro_NUV_warpK$segstats$mag-pro_K$segstats$mag, pro_r_warpK$segstats$mag-pro_K$segstats$mag, xlab='NUV-K', ylab='r-K')
 ```
 
+We can achieve the above in a simple way using the **profoundMultiBand** function, just setting iters_tot=0. This automates many of the fiddly steps and allows for multi band stacking (if desired):
+
+```{r, eval=evalglobal}
+multi=profoundMultiBand(inputlist=list(GALEX_NUV_warpK, VST_r_warpK, VISTA_K), magzero=c(20.08,0,30), iters_tot=0, detectbands='K', multibands=c('NUV','r','K'))
+```
+
+And we can check they really do compute the same results:
+
+```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
+magplot(pro_NUV_warpK$segstats$mag, multi$cat_tot$mag_NUVt, grid=TRUE)
+```
+
 ## Segmentation Map Warping
 
 The alternative approach is to leave the pixels be, but warp the segmentation map itself to fit a target WCS. Handily there is a function to do exactly this!

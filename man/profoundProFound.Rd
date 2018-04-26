@@ -60,7 +60,7 @@ Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels.
 Character scalar; the shape of the dilation kernel. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}.
 }
   \item{iters}{
-Integer scalar; the maximum number of curve of growth dilations should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to zero then the initial \option{segim} image wither provided or computed internally via \code{\link{profoundMakeSegim}} will be used instead.
+Integer scalar; the maximum number of curve of growth dilations that should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to zero then the initial \option{segim} image wither provided or computed internally via \code{\link{profoundMakeSegim}} will be used instead.
 }
   \item{threshold}{
 Numeric scalar; After the curve of growth dilations, \option{threshold} is the relative change of the converging property (see \option{converge}) that flags convergence. If consecutive iterations have a relative difference within this ratio then the dilation is stopped, and this iteration is used to define the segmentation of the object. The effect of this is that different objects will be dilated for a different number of iterations. Usually fainter sources require more.
@@ -175,7 +175,7 @@ The defaults should work reasonably well on modern survey data (see Examples), b
 \code{\link{profoundMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profoundProFound} is not trivially replicated by other astronomy tools.
 }
 \value{
-A object list of class 'profound' containing:
+An object list of class 'profound' containing:
 
   \item{segim}{Integer matrix; the dilated and converged segmentation map matched pixel by pixel to \option{image}.}
   \item{segim_orig}{Integer matrix; the pre-dilated segmentation map matched pixel by pixel to \option{image}.}
