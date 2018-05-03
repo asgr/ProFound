@@ -73,13 +73,25 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   #Treat image NAs as masked regions:
   
   if(!missing(mask)){
-    mask[is.na(image)]=1
-    image[is.na(image)]=0
+    if(anyNA(image)){
+      badpix=is.na(image)
+      mask[badpix]=1
+      image[badpix]=0
+      if(rembig){
+        rm(badpix)
+        gc()
+      }
+    }
   }else{
-    if(any(is.na(image))){
+    if(anyNA(image)){
       mask=matrix(0,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1
-      image[is.na(image)]=0
+      badpix=is.na(image)
+      mask[badpix]=1
+      image[badpix]=0
+      if(rembig){
+        rm(badpix)
+        gc()
+      }
     }
   }
   
