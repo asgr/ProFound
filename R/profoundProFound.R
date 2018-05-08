@@ -73,9 +73,15 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   #Treat image NAs as masked regions:
   
   if(!missing(mask)){
+    if(length(mask)==1){
+      maskflag=mask
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[image==maskflag]=1L
+      
+    }
     if(anyNA(image)){
       badpix=is.na(image)
-      mask[badpix]=1
+      mask[badpix]=1L
       image[badpix]=0
       if(rembig){
         rm(badpix)
@@ -86,7 +92,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(anyNA(image)){
       mask=matrix(0,dim(image)[1],dim(image)[2])
       badpix=is.na(image)
-      mask[badpix]=1
+      mask[badpix]=1L
       image[badpix]=0
       if(rembig){
         rm(badpix)
@@ -115,6 +121,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(!missing(segim)){
       objects=segim
       objects[objects != 0] = 1
+      mode(objects)='integer'
     }
   }
   
@@ -182,7 +189,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       }
       
       compmat=cbind(segstats[,converge])
-      segim_array=array(0, dim=c(dim(segim),iters+1))
+      segim_array=array(0L, dim=c(dim(segim),iters+1))
       segim_array[,,1]=segim
       
       segim_orig=segim
@@ -202,7 +209,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       selseg=.selectCoG(diffmat, threshold)
       
       segim=segim$segim
-      segim[]=0
+      segim[]=0L
       
       if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
       for(i in 1:(iters+1)){
@@ -219,7 +226,8 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
       
       objects=segim
-      objects[objects!=0]=1
+      objects[objects!=0]=1L
+      mode(objects)='integer'
       
       selseg=selseg-1
       

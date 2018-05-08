@@ -130,11 +130,11 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   #Treat image NAs as masked regions:
   
   if(!missing(mask)){
-    mask[is.na(image)]=1
+    mask[is.na(image)]=1L
   }else{
     if(any(is.na(image))){
-      mask=matrix(0,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[is.na(image)]=1L
     }
   }
   
@@ -194,13 +194,13 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
     segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
-    segim=matrix(as.integer(segim),xlen,ylen)
   }else{
     segim=image
   }
+  mode(segim)='integer'
   
   segtab=tabulate(segim)
-  segim[segim %in% which(segtab<pixcut)]=0
+  segim[segim %in% which(segtab<pixcut)]=0L
 
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -210,7 +210,8 @@ profoundMakeSegim=function(image, mask, objects, skycut=1, pixcut=3, tolerance=4
   }
   
   objects=segim
-  objects[objects!=0]=1
+  objects[objects!=0]=1L
+  mode(objects)='integer'
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making final local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -270,11 +271,11 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
   #Treat image NAs as masked regions:
   
   if(!missing(mask)){
-    mask[is.na(image)]=1
+    mask[is.na(image)]=1L
   }else{
     if(any(is.na(image))){
-      mask=matrix(0,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[is.na(image)]=1L
     }
   }
   
@@ -337,9 +338,9 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
   if(verbose){message(paste(" - Expanding segments -", round(proc.time()[3]-timestart,3), "sec"))}
   for(i in expand){
     segtemp=segim
-    segtemp[segim==i]=1
-    segtemp[segim!=i]=0
-    segim_new[segim_new==i]=0
+    segtemp[segim==i]=1L
+    segtemp[segim!=i]=0L
+    segim_new[segim_new==i]=0L
     if(i %in% expand){
       temp=profoundImBlur(segtemp, expandsigma)
     }else{
@@ -350,9 +351,11 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
     segim_new[segsel]=i
     maxmat[segsel]=tempmult[segsel]
   }
+  mode(segim_new)='integer'
   
   objects=segim_new
-  objects[objects!=0]=1
+  objects[objects!=0]=1L
+  mode(objects)='integer'
   
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -419,11 +422,11 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
   #Treat image NAs as masked regions:
   
   if(!missing(mask)){
-    mask[is.na(image)]=1
+    mask[is.na(image)]=1L
   }else{
     if(any(is.na(image))){
-      mask=matrix(0,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[is.na(image)]=1L
     }
   }
   
@@ -439,18 +442,16 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
   if(expand=='all'){
     segim_new=segim
     maxorig=max(segim_new, na.rm=TRUE)
-    segim_new[segim_new>0]=maxorig+1-segim_new[segim_new>0]
-    segim_new=EBImage::dilate(segim_new, kern)
-    segim_new[segim_new>0]=maxorig+1-segim_new[segim_new>0]
-    segim_new=EBImage::imageData(segim_new)
-    segim_new[segim!=0]=segim[segim!=0]
+    segim_new[segim_new>0]=maxorig+1L-segim_new[segim_new>0]
+    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern))
+    segim_new[segim_new>0]=maxorig+1L-segim_new[segim_new>0]
   }else{
     segim_new=segim
-    segim_new[!(segim_new %in% expand)]=0
-    segim_new=EBImage::dilate(segim_new, kern)
-    segim_new=EBImage::imageData(segim_new)
-    segim_new[segim!=0]=segim[segim!=0]
+    segim_new[!(segim_new %in% expand)]=0L
+    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern))
   }
+  segim_new[segim!=0]=segim[segim!=0]
+  mode(segim_new)='integer'
   
   if(rembig){
     rm(segim)
@@ -459,7 +460,7 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
   
   if(!missing(mask)){
     image[mask!=0]=0
-    segim_new[mask!=0]=0
+    segim_new[mask!=0]=0L
   }
   
   if(stats & !missing(image)){
@@ -471,7 +472,8 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
   }
   
   objects=segim_new
-  objects[objects!=0]=1
+  objects[objects!=0]=1L
+  mode(objects)='integer'
   
   if(plot){
     profoundSegimPlot(image=image, segim=segim_new, mask=mask, sky=sky, ...)
@@ -496,18 +498,19 @@ profoundMakeSegimPropagate=function(image, segim, objects, mask, sky=0, lambda=1
   }
   
   if(!missing(mask)){
-    mask[is.na(image)]=1
+    mask[is.na(image)]=1L
   }else{
     if(any(is.na(image))){
-      mask=matrix(0,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[is.na(image)]=1L
     }
   }
   
   if(missing(objects)){
     if(!missing(segim)){
       objects=segim
-      objects[objects != 0] = 1
+      objects[objects != 0] = 1L
+      mode(objects)='integer'
     }
   }
   
@@ -525,6 +528,7 @@ profoundMakeSegimPropagate=function(image, segim, objects, mask, sky=0, lambda=1
     #Because EBImage is odd we need to use mask to mean pixels to be propagated, i.e. where the ProFound mask=0
     propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, mask=(mask==0), lambda=lambda))
   }
+  mode(propim)='integer'
   
   if(rembig){
     rm(segim)
@@ -533,7 +537,8 @@ profoundMakeSegimPropagate=function(image, segim, objects, mask, sky=0, lambda=1
   }
   
   propim_sky=propim
-  propim_sky[objects>0]=0
+  propim_sky[objects>0]=0L
+  mode(propim_sky)='integer'
   
   if(plot){
     profoundSegimPlot(image=image_sky, segim=propim, mask=mask, ...)
@@ -577,11 +582,11 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   #Treat image NAs as masked regions:
   
   if(!missing(mask)){
-    mask[is.na(image)]=1
+    mask[is.na(image)]=1L
   }else{
     if(any(is.na(image))){
-      mask=matrix(0,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[is.na(image)]=1L
     }
   }
   
@@ -894,7 +899,7 @@ profoundSegimPlot=function(image, segim, mask, sky=0, header, col=rainbow(max(se
   
   image=image-sky
   
-  segim[is.na(segim)]=0
+  segim[is.na(segim)]=0L
   
   if(missing(header)){header=NULL}
   if(is.null(header)){
