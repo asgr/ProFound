@@ -101,9 +101,9 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     }
   }
   
-  if(!missing(segim) & !missing(mask)){
-    segim=segim*(1-mask) 
-  }
+  #if(!missing(segim) & !missing(mask)){
+  #  segim=segim*(1-mask) #I don't think we actually need this
+  #}
   
   #Get the pixel scale, if possible and not provided:
   
@@ -215,6 +215,10 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       for(i in 1:(iters+1)){
         select=segim_array[,,i] %in% segstats[selseg==i,'segID']
         segim[select]=segim_array[,,i][select]
+      }
+      
+      if(!missing(mask)){
+        segim[mask!=0]=segim_orig[mask!=0]
       }
       
       if(rembig){

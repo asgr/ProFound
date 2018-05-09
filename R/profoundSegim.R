@@ -100,10 +100,13 @@
     cenfrac=temp[N100seg]-temp[N100seg-1]
     
   }else{
-    sumflux=0
-    N50seg=0
-    N90seg=0
-    cenfrac=0
+    sumflux=NA
+    mode(sumflux)='numeric'
+    N100seg=length(flux)
+    N50seg=N100seg*0.5
+    N90seg=N100seg*0.9
+    cenfrac=NA
+    mode(cenfrac)='numeric'
   }
   
   #N50seg=sum(temp>=0.5)
@@ -327,7 +330,7 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
     image[image<skycut]=0
   }
   if(!missing(mask)){
-    image[mask!=0]=0
+    image[mask!=0]=NA
   }
   #kernel=profoundMakeGaussianPSF(fwhm = expandsigma, dim=dim)
   maxmat=matrix(min(image, na.rm=TRUE), xlen, ylen)
@@ -460,8 +463,7 @@ profoundMakeSegimDilate=function(image, segim, mask, size=9, shape='disc', expan
   }
   
   if(!missing(mask)){
-    image[mask!=0]=0
-    segim_new[mask!=0]=0L
+    image[mask!=0]=NA
   }
   
   if(stats & !missing(image)){
@@ -591,7 +593,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     }
   }
   
-  #Set masked things to 0, to be safe:
+  #Set masked things to NA, to be safe:
   
   if(!missing(mask)){
     image[mask!=0]=NA
@@ -651,9 +653,9 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   fluxout=tempDT[,.fluxcalc(flux), by=segID]
   mag=profoundFlux2Mag(flux=fluxout$flux, magzero=magzero)
   
-  if(any(flux==0)){
-    fluxout$N50seg[flux==0]=fluxout$N100seg[flux==0]
-    fluxout$N90seg[flux==0]=fluxout$N100seg[flux==0]
+  if(any(fluxout$flux==0, na.rm=TRUE)){
+    fluxout$N50seg[fluxout$flux==0]=fluxout$N100seg[fluxout$flux==0]
+    fluxout$N90seg[fluxout$flux==0]=fluxout$N100seg[fluxout$flux==0]
   }
   
   if(hassky){
@@ -704,8 +706,8 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   
   xmax=xcen
   ymax=ycen
-  xmax[fluxout$N100seg>0]=tempDT[,x[which.max(flux)]-0.5,by=segID]$V1
-  ymax[fluxout$N100seg>0]=tempDT[,y[which.max(flux)]-0.5,by=segID]$V1
+  xmax[!is.na(fluxout$flux)]=tempDT[,x[which.max(flux)]-0.5,by=segID]$V1
+  ymax[!is.na(fluxout$flux)]=tempDT[,y[which.max(flux)]-0.5,by=segID]$V1
   
   sep=sqrt((xcen-xmax)^2+(ycen-ymax)^2)*pixscale
   
@@ -735,6 +737,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   R100seg=sqrt(fluxout$N100seg/(axrat*pi))*pixscale
   
   con=R50seg/R90seg
+  con[R90seg==0]=NA
 
   SB_N50=profoundFlux2SB(flux=fluxout$flux*0.5/fluxout$N50seg, magzero=magzero, pixscale=pixscale)
   SB_N90=profoundFlux2SB(flux=fluxout$flux*0.9/fluxout$N90seg, magzero=magzero, pixscale=pixscale)
@@ -755,7 +758,6 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
   }
   
   if(boundstats){
-    
     segim_inner=segim[(offset+1):(xlen-offset),(offset+1):(ylen-offset)]
     off_down=segim[(offset+1):(xlen-offset),(offset+1):(ylen-offset)-offset]
     off_left=segim[(offset+1):(xlen-offset)-offset,(offset+1):(ylen-offset)]
@@ -810,7 +812,7 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     
     if(!missing(mask)){
       outer_mask=segim_inner>0 & (mask[2:(xlen-1)+1,2:(ylen-1)]==1 | mask[2:(xlen-1)-1,2:(ylen-1)]==1 | mask[2:(xlen-1),2:(ylen-1)+1]==1 | mask[2:(xlen-1),2:(ylen-1)-1]==1)
-      segim_mask=segim_inner
+      segim_mask=segim_edge
       segim_mask[outer_mask==0]=0
       tab_mask=tabulate(segim_mask)
       tab_mask=c(tab_mask,rep(0,max(segID)-length(tab_mask)))
@@ -827,8 +829,8 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     }
     
     Nedge=Nedge+Nborder
-    Nsky=Nsky-Nmask #Raw Nsky-Nmask-Nborder, to correct for masked pixels
-    Nobject=Nedge-Nsky-Nmask-Nborder # Nedge-Nsky
+    #Nsky=Nsky-Nmask #Raw Nsky-Nmask-Nborder, to correct for masked pixels
+    Nobject=Nedge-Nsky-Nborder # Nedge-Nsky
     edge_frac=Nsky/Nedge
 
     #Using Ramanujan approximation from Wikipedia:
@@ -849,7 +851,17 @@ profoundSegimStats=function(image, segim, mask, sky=0, skyRMS=0, magzero=0, gain
     edge_frac=NA
     edge_excess=NA
   }
-    
+  
+  if(anyNA(fluxout$flux)){
+    bad=is.na(fluxout$flux)
+    asymm[bad]=NA
+    flux_reflect[bad]=NA
+    mag_reflect[bad]=NA
+    signif[bad]=NA
+    FPlim[bad]=NA
+    edge_excess[bad]=NA
+  }
+  
   segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, cenfrac=fluxout$cenfrac, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, semimaj=rad$hi, semimin=rad$lo, axrat=axrat, ang=ang, signif=signif, FPlim=FPlim, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
   return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
 }
