@@ -87,25 +87,35 @@
     # print(flux)
     # print(temp)
   
-    loc50=min(which(temp>=0.5))
-    loc50cumsumhi=temp[loc50]
-    loc50cumsumlo=temp[loc50-1]
-    N50seg=N100seg-(loc50-1)+(0.5-loc50cumsumlo)/(loc50cumsumhi-loc50cumsumlo)
+    if(sumflux>0){
+      loc50=min(which(temp>=0.5))
+      loc50cumsumhi=temp[loc50]
+      loc50cumsumlo=temp[loc50-1]
+      N50seg=N100seg-(loc50-1)+(0.5-loc50cumsumlo)/(loc50cumsumhi-loc50cumsumlo)
+      
+      loc90=min(which(temp>=0.1))
+      loc90cumsumhi=temp[loc90]
+      loc90cumsumlo=temp[loc90-1]
+      N90seg=N100seg-(loc90-1)+(0.1-loc90cumsumlo)/(loc90cumsumhi-loc90cumsumlo)
     
-    loc90=min(which(temp>=0.1))
-    loc90cumsumhi=temp[loc90]
-    loc90cumsumlo=temp[loc90-1]
-    N90seg=N100seg-(loc90-1)+(0.1-loc90cumsumlo)/(loc90cumsumhi-loc90cumsumlo)
-  
-    cenfrac=temp[N100seg]-temp[N100seg-1]
+      cenfrac=temp[N100seg]-temp[N100seg-1]
+    }else{
+      N100seg=length(flux)
+      N50seg=NA
+      N90seg=NA
+      cenfrac=NA
+      mode(N50seg)='numeric'
+      mode(N90seg)='numeric'
+      mode(cenfrac)='numeric'
+    }
     
   }else{
     sumflux=NA
-    mode(sumflux)='numeric'
     N100seg=length(flux)
     N50seg=N100seg*0.5
     N90seg=N100seg*0.9
     cenfrac=NA
+    mode(sumflux)='numeric'
     mode(cenfrac)='numeric'
   }
   

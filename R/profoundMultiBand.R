@@ -27,16 +27,18 @@ profoundMultiBand=function(inputlist=NULL, dir='', mask, skycut = 1, pixcut = 3,
     }
     presentbands=multibands
   }
-
-  if(detectbands[1]=='get'){
-    detectbands=presentbands
-  }else{
-    detectbands=detectbands[detectbands %in% presentbands]
-  }
   
   if(multibands[1]=='get'){
     multibands=presentbands
   }
+  
+  if(detectbands[1]=='get'){
+    detectbands=presentbands
+  }
+  if(detectbands[1]=='all'){
+    detectbands=multibands
+  }
+  detectbands=detectbands[detectbands %in% presentbands]
   
   if(catappend[1]=='get'){
     catappend=presentbands
