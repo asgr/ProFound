@@ -352,6 +352,7 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
     maxmat[segsel]=tempmult[segsel]
   }
   mode(segim_new)='integer'
+  segim_new[segim>0]=segim[segim>0]
   
   objects=segim_new
   objects[objects!=0]=1L
