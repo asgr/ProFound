@@ -12,7 +12,7 @@ profoundMultiBand(inputlist = NULL, dir = "", mask, skycut = 1, pixcut = 3, tole
 ext = 2, sigma = 1, smooth = TRUE, iters_tot = 2, detectbands = "r",
 multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL, catappend = multibands,
 totappend = "t", colappend = "c", dotot = TRUE, docol = TRUE, boundstats = TRUE,
-haralickstats = TRUE, verbose = FALSE)
+haralickstats = TRUE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -81,6 +81,9 @@ Logical; if TRUE then the Haralick texture statistics are computed for the detec
 }
   \item{verbose}{
 Logical; should verbose output from \code{\link{profoundProFound}} be displayed to the user? Basic information is always printed out, to help catch silly user errors quickly.
+}
+  \item{\dots}{
+Further arguments to be passed to the stacked detection image run of \code{\link{profoundProFound}}.
 }
 }
 \details{
