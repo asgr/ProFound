@@ -360,7 +360,7 @@ profoundMakeSegimExpand=function(image, segim, mask, objects, skycut=1, SBlim, m
       temp=segtemp
     }
     tempmult=temp*image
-    segsel=tempmult>maxmat & temp>0.01 & image>skycut
+    segsel=which(tempmult>maxmat & temp>0.01 & image>skycut)
     segim_new[segsel]=i
     maxmat[segsel]=tempmult[segsel]
   }
