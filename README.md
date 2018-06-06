@@ -37,7 +37,7 @@ library(ProFound)
 
 #### Package Dependencies
 
-The above should also install the required packages. If you have trouble with this you can try installing the required packages manually first and then retry the installation for \code{ProFound}:
+The above should also install the required packages. If you have trouble with this you can try installing the required packages manually first and then retry the installation for **ProFound**:
 
 ```R
 install.packages(c('magicaxis', 'FITSio', 'data.table')) # Required packages
@@ -47,14 +47,14 @@ library(devtools)
 install_github("asgr/ProFound")
 ```
 
-To use the **profoundMakeSegim** and **profoundProFound** function for image segmentation you will need to have \code{EBImage} installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
+To use the **profoundMakeSegim** and **profoundProFound** function for image segmentation you will need to have **EBImage** installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
 
 ```R
 source("http://bioconductor.org/biocLite.R")
 biocLite("EBImage")
 ```
 
-Be warned, it will probably ask you to update a whole bunch of stuff. Just say **no** and only install \code{EBImage} for now. If something else needs updating or is missing you will get a warning when trying to use it, and you can update those packages as neccessary. If you say yes you will probably sit there for an hour whilst it builds dozens of packages from source that you do not need to really update.
+Be warned, it will probably ask you to update a whole bunch of stuff. Just say **no** and only install **EBImage** for now. If something else needs updating or is missing you will get a warning when trying to use it, and you can update those packages as neccessary. If you say yes you will probably sit there for an hour whilst it builds dozens of packages from source that you do not need to really update (or need at all).
 
 Linux users might also need to install some non-standard graphics libraries (depending on your install). If you do not have them already, you should look to install **Cairo**, **jpeg** and **tiff** libraries (these are apparently technically not entirely free, hence not coming by default on some strictly open source Linux variants). For **Cairo** you might need to install the development version, so check this if you are having issues.
 
@@ -87,6 +87,14 @@ A replacement for much of the functionality of SExtractor. This was originally d
 ## Contributors
 
 A.S.G. Robotham
+
+## Reference
+
+Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
+
+## Forums
+
+Please sign up to <http://profit.freeforums.net/> if you want to ask a question (or browse the questions asked).
 
 ## License
 
