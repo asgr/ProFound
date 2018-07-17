@@ -8,8 +8,8 @@ Multi Band ProFound Photometry
 Run multiband \code{ProFound} photometry either with loaded data, or images on a local disk.
 }
 \usage{
-profoundMultiBand(inputlist = NULL, dir = "", mask, skycut = 1, pixcut = 3, tolerance = 4,
-ext = 2, sigma = 1, smooth = TRUE, iters_tot = 2, detectbands = "r",
+profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 3,
+tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_tot = 2, detectbands = "r",
 multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL, catappend = multibands,
 totappend = "t", colappend = "c", dotot = TRUE, docol = TRUE, boundstats = TRUE,
 haralickstats = TRUE, verbose = FALSE, ...)
@@ -21,6 +21,9 @@ A list of already loaded images. Typically of the type loaded in from FITS files
 }
   \item{dir}{
 If \option{inputlist} is left as NULL then \code{profoundMultiBand} will instead try to load in FITS images from the directory specified by \option{dir}. The images in the directory must have names like \option{multibands}[i].fits etc (so with the defaults names like u.fits and g.fits would be okay). Since \option{multibands} effectively specifies the file names much more complicated naming can be used and passed in, but it is also used by default for naming the catalogue column outputs, so shorter names/references are likely to be preferable there (i.e. mag_ut is simpler than mag_KiDS_VST_ut etc). This can be over-ridden by using \option{catappend}.
+}
+  \item{segim}{
+Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as the detection image/s if supplied. If this option is used then \code{profoundMultiBand} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
 }
   \item{mask}{
 Boolean matrix or integer scalar; optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis. if a scalar is provided it indicates the exact \option{image} values that should be treated as masked (e.g. by setting masked pixels to 0 or -999). The latter achieves the same effect as setting masked \option{image} pixels to NA, but allows for the fact not all programs can produce \code{R} legal NA values. 

@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, catappend=multibands, totappend='t', colappend='c', dotot=TRUE, docol=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, catappend=multibands, totappend='t', colappend='c', dotot=TRUE, docol=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
   
   # v1.0 of the multiband script
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)
@@ -108,7 +108,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', mask, skycut = 1, pixcut = 3,
       detect=inputlist[[which(multibands==detectbands)]]
     }
     temp_magzero=magzero[multibands==detectbands]
-    pro_detect=profoundProFound(detect, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
+    pro_detect=profoundProFound(detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
   }else{
   
     # Multiple detection bands requested, so we prepare lists for stacking
@@ -133,7 +133,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', mask, skycut = 1, pixcut = 3,
       
       # Run ProFound on current detection band with input parameters
       
-      pro_detect=profoundProFound(detect, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, magzero=temp_magzero, verbose=verbose)
+      pro_detect=profoundProFound(detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, magzero=temp_magzero, verbose=verbose)
       
       # Append to lists for stacking
       
@@ -169,7 +169,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', mask, skycut = 1, pixcut = 3,
     
     # For reference we run ProFound with the stacked sky added back in, passing it the stacked sky too.
     
-    pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
+    pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
     
     # Delete and clean up
     
