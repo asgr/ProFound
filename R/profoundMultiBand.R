@@ -48,8 +48,16 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     magzero=rep(magzero, length(multibands))
   }
   
+  if(length(magzero)!=length(multibands)){
+    stop('Length of magzero must equal length of multibands!')
+  }
+  
   if(length(gain)==1){
     gain=rep(gain, length(multibands))
+  }
+  
+  if(length(gain)!=length(multibands)){
+    stop('Length of gain must equal length of multibands!')
   }
   
   magzero=magzero[which(multibands %in% presentbands)]
