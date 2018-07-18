@@ -9,10 +9,10 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 }
 \usage{
 profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 3,
-tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_tot = 2, detectbands = "r",
-multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL, catappend = multibands,
-totappend = "t", colappend = "c", dotot = TRUE, docol = TRUE, boundstats = TRUE,
-haralickstats = TRUE, verbose = FALSE, ...)
+tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 2,
+detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL,
+catappend = multibands, totappend = "t", colappend = "c", dotot = TRUE, docol = TRUE,
+boundstats = TRUE, haralickstats = TRUE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,7 +23,7 @@ A list of already loaded images. Typically of the type loaded in from FITS files
 If \option{inputlist} is left as NULL then \code{profoundMultiBand} will instead try to load in FITS images from the directory specified by \option{dir}. The images in the directory must have names like \option{multibands}[i].fits etc (so with the defaults names like u.fits and g.fits would be okay). Since \option{multibands} effectively specifies the file names much more complicated naming can be used and passed in, but it is also used by default for naming the catalogue column outputs, so shorter names/references are likely to be preferable there (i.e. mag_ut is simpler than mag_KiDS_VST_ut etc). This can be over-ridden by using \option{catappend}.
 }
   \item{segim}{
-Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as the detection image/s if supplied. If this option is used then \code{profoundMultiBand} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
+Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as the detection image/s if supplied. If this option is used then \code{profoundMultiBand} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim} and dilate this according to the \option{iters_det} argument (so set this to 0 if you want the \option{segim} to be used as is).
 }
   \item{mask}{
 Boolean matrix or integer scalar; optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis. if a scalar is provided it indicates the exact \option{image} values that should be treated as masked (e.g. by setting masked pixels to 0 or -999). The latter achieves the same effect as setting masked \option{image} pixels to NA, but allows for the fact not all programs can produce \code{R} legal NA values. 
@@ -45,6 +45,9 @@ Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. P
 }
   \item{smooth}{
 Logical; should smoothing be done on the target detection \option{image}? Passed to \code{\link{profoundProFound}}. If present, this will use the \code{imblur} function from the \code{imager} package. Otherwise it will use the \code{gblur} function from the \code{EBImage} package with a warning. These functions are very similar in output, but not strictly identical.
+}
+  \item{iters_det}{
+Integer scalar; the maximum number of curve of growth dilations that should be made to the detection image. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to 0 then the undilated \option{segim} image, whether provided or computed internally via \code{\link{profoundMakeSegim}}, will be used instead.
 }
   \item{iters_tot}{
 Integer scalar; the maximum number of curve of additional growth dilations that should be made above the dilated detection segmentation map for multi band total colour photometry. This is only relevant if \option{dotot}=TRUE. This should not be set too high (and might even be 0) since the detection image should generally be fairly deep.

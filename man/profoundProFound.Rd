@@ -60,7 +60,7 @@ Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels.
 Character scalar; the shape of the dilation kernel. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}.
 }
   \item{iters}{
-Integer scalar; the maximum number of curve of growth dilations that should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to zero then the initial \option{segim} image wither provided or computed internally via \code{\link{profoundMakeSegim}} will be used instead.
+Integer scalar; the maximum number of curve of growth dilations that should be made. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}.  If this is set to 0 then the undilated \option{segim} image, whether provided or computed internally via \code{\link{profoundMakeSegim}}, will be used instead.
 }
   \item{threshold}{
 Numeric scalar; After the curve of growth dilations, \option{threshold} is the relative change of the converging property (see \option{converge}) that flags convergence. If consecutive iterations have a relative difference within this ratio then the dilation is stopped, and this iteration is used to define the segmentation of the object. The effect of this is that different objects will be dilated for a different number of iterations. Usually fainter sources require more.

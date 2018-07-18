@@ -1,6 +1,6 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, catappend=multibands, totappend='t', colappend='c', dotot=TRUE, docol=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, catappend=multibands, totappend='t', colappend='c', dotot=TRUE, docol=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
   
-  # v1.0 of the multiband script
+  # v1.1 of the multiband function
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)
   # This should only be sourced, for *any* modifications contact Aaron Robotham
   
@@ -8,7 +8,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   # detectbands and multibands are the names of the target bands, which should be the names of the images ignoring the .fits ending
   # By default Simon's script names them as u.fits and g.fits etc, hence the literal bands naming
   # detectbands can be a vector of target detection bands for stacking
-  # multibands is by default a vector of all optical and NIR bands
+  # multibands is by default a vector of all SDSS optical bands
   # You can select whether to do total and/or colour photometry with dotot and docol
   # magzero must be matched to the number of bands in multibands (which reflects the magzero in each respectively), or one value which is then recycled
   # catappend are the band names to use as the extra tag attached to the column names in the cat_tot and cat_col outputs (by default this is linked to multibands)
@@ -81,6 +81,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   }
   
   message(paste('*** Will use',paste(detectbands,collapse=''),'for source detection ***'))
+  if(!missing(segim)){
+    message('*** Will use provided segim for detection statistics ***')
+  }
   
   if(dotot | docol){
     message(paste('*** Will use',paste(multibands,collapse=''),'for multi band photometry ***'))
@@ -108,7 +111,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
       detect=inputlist[[which(multibands==detectbands)]]
     }
     temp_magzero=magzero[multibands==detectbands]
-    pro_detect=profoundProFound(detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
+    pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
   }else{
   
     # Multiple detection bands requested, so we prepare lists for stacking
@@ -133,7 +136,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
       
       # Run ProFound on current detection band with input parameters
       
-      pro_detect=profoundProFound(detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, magzero=temp_magzero, verbose=verbose)
+      pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose)
       
       # Append to lists for stacking
       
@@ -169,7 +172,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     
     # For reference we run ProFound with the stacked sky added back in, passing it the stacked sky too.
     
-    pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
+    pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
     
     # Delete and clean up
     
@@ -209,7 +212,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         
         # Compute total multi band photometry, allowing some extra dilation via the iters_tot argument
         
-        pro_multi_tot=profoundProFound(multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, iters=iters_tot, verbose=verbose)
+        pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, iters=iters_tot, verbose=verbose)
         
         # Append column names and concatenate cat_tot together
         
@@ -223,9 +226,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         # If we have already run the total photometry then we use the sky and skyRMS computed there for speed
         
         if(dotot){
-          pro_multi_col=profoundProFound(multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, iters=0, verbose=verbose)$segstats
+          pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, iters=0, verbose=verbose)$segstats
         }else{
-          pro_multi_col=profoundProFound(multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, iters=0, verbose=verbose)$segstats
+          pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, iters=0, verbose=verbose)$segstats
         }
         
         # Append column names and concatenate cat_col together
