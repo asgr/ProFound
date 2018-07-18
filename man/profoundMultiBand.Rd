@@ -138,6 +138,25 @@ plot(multi$pro_detect)
 
 magplot(multi$cat_tot$mag_rt, multi$cat_col$mag_NUVc-multi$cat_col$mag_rc, ylim=c(-2,10))
 points(multi$cat_tot$mag_rt, multi$cat_col$mag_rc-multi$cat_col$mag_Kc, col='red')
+
+# Some options on passing segim:
+
+multi2=profoundMultiBand(segim=multi$pro_detect$segim, inputlist=list(GALEX_NUV_VST,
+VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
+iters_det = 0)
+
+multi3=profoundMultiBand(segim=multi$pro_detect$segim_orig, inputlist=list(GALEX_NUV_VST,
+VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
+iters_det = 6)
+
+#multi and multi3 should create identical plots (since we are dilating the original
+#segim_orig in the same manner), but multi2 will just be the final dilated segim without
+#any dilations, hence the Dilations histogram is all 0. The final fluxes should be the
+#same though (bottom-centre and bottom-right).
+
+plot(multi)
+plot(multi2)
+plot(multi3)
 }
 }
 \keyword{ Detection }% use one of  RShowDoc("KEYWORDS")
