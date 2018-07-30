@@ -300,8 +300,15 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     
     if(groupstats){
       group=profoundSegimGroup(segim=segim)
+      if(stats & !missing(image)){
+        groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+        colnames(groupstats)[1]='groupID'
+      }else{
+        groupstats=NULL
+      }
     }else{
       group=NULL
+      groupstats=NULL
     }
     
     if(haralickstats){
@@ -344,14 +351,14 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(missing(mask)){mask=NULL}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }else{
     if(missing(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(missing(mask)){mask=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=NULL, skyRMS=NULL, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=NULL, skyRMS=NULL, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
   return=output

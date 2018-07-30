@@ -185,10 +185,11 @@ An object list of class 'profound' containing:
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{image}{The input \option{image} matrix if \option{keepim}=TRUE, else NULL.}
   \item{mask}{The input \option{mask} matrix if \option{keepim}=TRUE, else NULL.}
-  \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
+  \item{segstats}{If \option{stats}=TRUE then contains the output of \code{\link{profoundSegimStats}} run using the final \option{segim} (see below), otherwise NULL.}
   \item{Nseg}{The total number of segments extracted (dim(segstats)[1]).}
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
   \item{group}{If \option{groupstats}=TRUE then contains the output of \code{\link{profoundSegimGroup}}.}
+  \item{groupstats}{If \option{groupstats}=TRUE and \option{stats}=TRUE then contains the output of \code{\link{profoundSegimStats}} run using the final \option{group$groupim} (see below), otherwise NULL.}
   \item{header}{The header provided, if missing this is NULL.}
   \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
   \item{magzero}{The assumed magnitude zero point. This is relevant to various outputs returned by the segmentation statistics.}

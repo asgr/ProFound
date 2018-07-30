@@ -56,7 +56,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     gain=rep(gain, length(multibands))
   }
   
-  if(length(gain)!=length(multibands)){
+  if(is.null(gain)==FALSE & length(gain)!=length(multibands)){
     stop('Length of gain must equal length of multibands!')
   }
   
@@ -98,6 +98,8 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     message(paste('*** Magzero:',paste(multibands,magzero,sep='=', collapse=' '),' ***'))
     if(!is.null(gain)){
       message(paste('*** Gain:',paste(multibands,gain,sep='=', collapse=' '),' ***'))
+    }else{
+      message('*** Gain: not specified for any bands ***')
     }
     
     if(dotot){
