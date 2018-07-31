@@ -20,7 +20,7 @@ install_github('ICRAR/ProFit')
 Set global evaluate (basically TRUE for GitHub version and FALSE for CRAN):
 
 ```{r}
-evalglobal=TRUE
+evalglobal=FALSE
 ```
 
 First load the libraries we need:
