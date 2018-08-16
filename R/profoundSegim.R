@@ -1036,3 +1036,27 @@ profoundSegimMerge=function(image, segim_base, segim_add, mask, sky=0){
 profoundSegimWarp=function(segim_in, header_in, header_out){
   return=magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')$image
 }
+
+profoundSegimKeep=function(segim, groupim, groupID_merge, segID_merge){
+  segim_out=segim
+  
+  if(! missing(groupID_merge)){
+    groupID_merge=groupID_merge[groupID_merge %in% groupim]
+    removeID=segim[groupim %in% groupID_merge]
+    segim_out[segim_out %in% removeID]=0
+    segim_out[groupim %in% groupID_merge]=groupim[groupim %in% groupID_merge]
+  }
+  
+  if(! missing(segID_merge)){
+    if(! is.list(segID_merge)){
+      stop('segID_merge must be a list of segments to be merged!')
+    }
+    for(i in 1:length(segID_merge)){
+      tempID=segID_merge[[i]]
+      tempID=tempID[tempID %in% segim_out]
+      segim_out[segim_out %in% tempID]=min(tempID)
+    }
+  }
+  
+  return=segim_out
+}

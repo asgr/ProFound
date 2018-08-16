@@ -13,7 +13,7 @@ profoundSegimWarp(segim_in, header_in, header_out)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{segim_in}{
-Numeric matrix; required, the segmentation map we want to remap. If \option{segim_in} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of the list is parsed to \option{segim_in} and the correct header part is passed to \option{header_in}.
+Integer matrix; required, the segmentation map we want to remap. If \option{segim_in} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of the list is parsed to \option{segim_in} and the correct header part is passed to \option{header_in}.
 }
   \item{header_in}{
 Full FITS header in table or vector format. This should be the header WCS that matches \option{segim_in}. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If \option{header_in} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.

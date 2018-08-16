@@ -24,7 +24,7 @@ sortcol = "segID", decreasing = FALSE, ...)
 Numeric matrix; required, the image we want to analyse. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
-Numeric matrix; required, the segmentation map of the image. This matrix *must* be the same dimensions as \option{image}.
+Integer matrix; required, the segmentation map of the image. This matrix *must* be the same dimensions as \option{image}.
 }
   \item{mask}{
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.

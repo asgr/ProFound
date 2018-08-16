@@ -21,7 +21,7 @@ profound, ...)
 Numeric matrix; required, the image we want to analyse. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
-Numeric matrix; required, the segmentation map of the \option{image}. This matrix *must* be the same dimensions as \option{image}.
+Integer matrix; required, the segmentation map of the \option{image}. This matrix *must* be the same dimensions as \option{image}.
 }
   \item{mask}{
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
@@ -33,7 +33,7 @@ User provided estimate of the absolute sky level. Can be a scalar or a matrix ma
 User provided estimate of the RMS of the sky. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{magzero}{
-  Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
+Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
   \item{gain}{
 Numeric scalar; the gain (in photo-electrons per ADU). This is only used to compute object shot-noise component of the flux error (else this is set to 0).

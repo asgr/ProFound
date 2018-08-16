@@ -24,7 +24,7 @@ sortcol = "segID", decreasing = FALSE, lowmemory=FALSE, keepim = TRUE, R50clean=
 Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
-Numeric matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
+Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
 }
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.

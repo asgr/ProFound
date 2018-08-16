@@ -17,7 +17,7 @@ plot=FALSE, ...)
 Numeric matrix; required, the image we want to analyse. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
-Numeric matrix; required, the segmentation map of the image. This matrix *must* be the same dimensions as \option{image}.
+Integer matrix; required, the segmentation map of the image. This matrix *must* be the same dimensions as \option{image}.
 }
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.

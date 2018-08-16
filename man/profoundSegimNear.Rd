@@ -13,7 +13,7 @@ profoundSegimNear(segim, offset = 1)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{segim}{
-Numeric matrix; a specified segmentation map of the image (required).
+Integer matrix; a specified segmentation map of the image (required).
 }
   \item{offset}{
 Integer scalar; the distance to offset when searching for nearby segments.
