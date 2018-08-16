@@ -1037,13 +1037,15 @@ profoundSegimWarp=function(segim_in, header_in, header_out){
   return=magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')$image
 }
 
-profoundSegimKeep=function(segim, groupim, groupID_merge, segID_merge){
+profoundSegimKeep=function(segim, groupim, groupID_merge, segID_merge, clean=FALSE){
   segim_out=segim
   
   if(! missing(groupID_merge)){
     groupID_merge=groupID_merge[groupID_merge %in% groupim]
-    removeID=segim[groupim %in% groupID_merge]
-    segim_out[segim_out %in% removeID]=0
+    if(clean){
+      removeID=segim[groupim %in% groupID_merge]
+      segim_out[segim_out %in% removeID]=0
+    }
     segim_out[groupim %in% groupID_merge]=groupim[groupim %in% groupID_merge]
   }
   

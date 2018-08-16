@@ -11,8 +11,9 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 3,
 tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 2,
 detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL,
-bandappend = multibands, totappend = "t", colappend = "c", grpappend ='g', dotot = TRUE,
-docol = TRUE, dogrp=TRUE, boundstats = TRUE, haralickstats = TRUE, verbose = FALSE, ...)
+bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
+docol = TRUE, dogrp = TRUE, groupby = "segim", boundstats = TRUE, groupstats = boundstats,
+haralickstats = TRUE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -85,8 +86,14 @@ Logical; should non-dilated segment colour photometry be computed for the bands 
   \item{dogrp}{
 Logical; should group segment photometry be computed for the bands specified in \option{multibands}? This might be useful for re-assembling large galaxies that are broken up at a later date. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
 }
+  \item{groupby}{
+Character scalar; How should the grouped segmentation map be formed that will be used to produce the cat_grp output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less. If segim is used then it will be dilated by \option{iters_tot}, if segim_orig is used then it will be dilated by \option{iters_det} + \option{iters_tot}.
+}
   \item{boundstats}{
 Logical; if TRUE then various pixel boundary statistics are computed for the detection image and all multi-band photometry. See also \code{\link{profoundProFound}}. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
+}
+  \item{groupstats}{
+Logical; if TRUE then the IDs of grouped segments is calculated for the detection image via \code{\link{profoundSegimGroup}} and output to the returned object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object IDs returned.
 }
   \item{haralickstats}{
 Logical; if TRUE then the Haralick texture statistics are computed for the detection image. See also \code{\link{profoundProFound}}.

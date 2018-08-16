@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, groupby='segim', boundstats=TRUE, groupstats = boundstats, haralickstats=TRUE, verbose=FALSE, ...){
   
   # v1.1 of the multiband function
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)
@@ -60,9 +60,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     stop('Length of gain must equal length of multibands!')
   }
   
-  if(dogrp & boundstats==FALSE){
-    stop('If dogrp=TRUE than boundstats=TRUE must also be set!')
-  }
+  #if(dogrp & boundstats==FALSE){
+  #  stop('If dogrp=TRUE than boundstats=TRUE must also be set!')
+  #}
   
   magzero=magzero[which(multibands %in% presentbands)]
   magzero=magzero[!is.na(magzero)]
@@ -97,7 +97,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     message('*** Will use provided segim for detection statistics ***')
   }
   
-  if(dotot | docol){
+  if(dotot | docol | dogrp){
     message(paste('*** Will use',paste(multibands,collapse=''),'for multi band photometry ***'))
     message(paste('*** Magzero:',paste(multibands,magzero,sep='=', collapse=' '),' ***'))
     if(!is.null(gain)){
@@ -112,6 +112,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     if(docol){
       message('*** Will compute isophotal colour multi band photometry ***')
     }
+    if(dogrp){
+      message('*** Will compute grouped segment multi band photometry ***')
+    }
   }
   
   if(length(detectbands)==1){
@@ -125,7 +128,22 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
       detect=inputlist[[which(multibands==detectbands)]]
     }
     temp_magzero=magzero[multibands==detectbands]
-    pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
+    pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=FALSE, haralickstats=haralickstats, ...)
+    
+    if(groupstats | dogrp){
+      if(groupby=='segim'){
+        group=profoundSegimGroup(pro_detect$segim)
+        group_iters=iters_tot
+      }else if(groupby=='segim_orig'){
+        group=profoundSegimGroup(pro_detect$segim_orig)
+        group_iters=iters_det+iters_tot
+      }
+      if(groupstats){
+        pro_detect$group=group
+        pro_detect$groupstats=profoundSegimStats(image=pro_detect$image, segim=pro_detect$group$groupim, mask=mask, sky=pro_detect$sky, skyRMS=pro_detect$skyRMS, magzero=temp_magzero, header=pro_detect$header, boundstats=boundstats)
+      }
+    }
+    
   }else{
   
     # Multiple detection bands requested, so we prepare lists for stacking
@@ -186,7 +204,21 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     
     # For reference we run ProFound with the stacked sky added back in, passing it the stacked sky too.
     
-    pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, haralickstats=haralickstats, ...)
+    pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, groupstats=FALSE, haralickstats=haralickstats, ...)
+    
+    if(groupstats | dogrp){
+      if(groupby=='segim'){
+        group=profoundSegimGroup(pro_detect$segim)
+        group_iters=0
+      }else if(groupby=='segim_orig'){
+        group=profoundSegimGroup(pro_detect$segim_orig)
+        group_iters=iters_det+iters_tot
+      }
+      if(groupstats){
+        pro_detect$group=group
+        pro_detect$groupstats=profoundSegimStats(image=detect_image_stack$image+detect_sky_stack$image, segim=pro_detect$group$groupim, mask=mask, sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, magzero=detect_magzero[1], header=header, boundstats=boundstats)
+      }
+    }
     
     # Delete and clean up
     
@@ -196,25 +228,25 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   }
   
   # Create base total and colour photometry catalogues
-  
-  if(dotot){
-    cat_tot=data.frame(segID=pro_detect$segstats$segID)
-  }else{
-    cat_tot=NULL
-  }
-  if(docol){
-    cat_col=data.frame(segID=pro_detect$segstats$segID)
-  }else{
-    cat_col=NULL
-  }
-  if(dogrp){
-    cat_grp=data.frame(groupID=pro_detect$groupstats$groupID)
-  }else{
-    cat_grp=NULL
-  }
 
+  cat_tot=NULL
+  cat_col=NULL
+  cat_grp=NULL
   
-  if(dotot | docol){
+  if(dotot | docol | dogrp){
+    
+    if(dotot){
+      cat_tot=data.frame(segID=pro_detect$segstats$segID)
+    }
+    
+    if(docol){
+      cat_col=data.frame(segID=pro_detect$segstats$segID)
+    }
+    
+    if(dogrp){
+      cat_grp=data.frame(groupID=pro_detect$group$groupsegID$groupID)
+    }
+    
     for(i in 1:length(multibands)){
       
       # Loop around multi bands
@@ -263,9 +295,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         # If we have already run the total photometry then we use the sky and skyRMS computed there for speed
         
         if(dotot){
-          pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose)$segstats
+          pro_multi_grp=profoundProFound(image=multi, segim=group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=group_iters, verbose=verbose)$segstats
         }else{
-          pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose)$segstats
+          pro_multi_grp=profoundProFound(image=multi, segim=group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=group_iters, verbose=verbose)$segstats
         }
         
         # Append column names and concatenate cat_col together
