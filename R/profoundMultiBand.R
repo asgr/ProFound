@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, groupby='segim', boundstats=TRUE, groupstats = boundstats, haralickstats=TRUE, verbose=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=0, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, groupby='segim', boundstats=TRUE, groupstats = boundstats, haralickstats=TRUE, verbose=FALSE, ...){
   
   # v1.1 of the multiband function
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)

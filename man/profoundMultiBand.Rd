@@ -9,7 +9,7 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 }
 \usage{
 profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 3,
-tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 2,
+tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 0,
 detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL,
 bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
 docol = TRUE, dogrp = TRUE, groupby = "segim", boundstats = TRUE, groupstats = boundstats,
@@ -51,7 +51,7 @@ Logical; should smoothing be done on the target detection \option{image}? Passed
 Integer scalar; the maximum number of curve of growth dilations that should be made to the detection image. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to 0 then the undilated \option{segim} image, whether provided or computed internally via \code{\link{profoundMakeSegim}}, will be used instead.
 }
   \item{iters_tot}{
-Integer scalar; the maximum number of curve of additional growth dilations that should be made above the dilated detection segmentation map for multi band total colour photometry. This is only relevant if \option{dotot}=TRUE. This should not be set too high (and might even be 0) since the detection image should generally be fairly deep.
+Integer scalar; the maximum number of curve of additional growth dilations that should be made above the dilated detection segmentation map for multi band total colour photometry. This is only relevant if \option{dotot}=TRUE. This should not be set too high (and might even be 0, the default) since the detection image should generally be fairly deep.
 }
   \item{detectbands}{
 Character vector; the names of the detection bands that will be stacked using \code{\link{profoundMakeStack}} and then analysed with the provided settings with \code{\link{profoundProFound}} to make a reference segmentation map for further multi band photometry. These bands must be present in \option{multibands}. Can be a scalar (i.e. a single band is used). If set to 'get' then it will use all legal FITS files in the target directory. If set to 'all' then it will use all \option{multibands} inputs.
