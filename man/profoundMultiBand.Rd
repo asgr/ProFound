@@ -11,8 +11,8 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 3,
 tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 2,
 detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL,
-catappend = multibands, totappend = "t", colappend = "c", dotot = TRUE, docol = TRUE,
-boundstats = TRUE, haralickstats = TRUE, verbose = FALSE, ...)
+bandappend = multibands, totappend = "t", colappend = "c", grpappend ='g', dotot = TRUE,
+docol = TRUE, dogrp=TRUE, boundstats = TRUE, haralickstats = TRUE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -64,23 +64,29 @@ Numeric vector; the magnitude zero point of the images being used. \option{magze
   \item{gain}{
 Numeric vector; the gain of the images being used. \option{gain} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
 }
-  \item{catappend}{
-Character vector; characters to be appended per band in the output multi band photometry catalogues. The default will create column with names like mag_ut (total) and mag_uc (colour).
+  \item{bandappend}{
+Character vector; characters to be appended per band in the output multi band photometry catalogues. The default will create columns with names like mag_ut (total) and mag_uc (colour).
 }
   \item{totappend}{
-Character scalar; character to be appended in the output multi band total photometry catalogue (\code{cat_tot}). The default will create column with names like mag_ut and R50_ut.
+Character scalar; character to be appended in the output multi band total photometry catalogue (\code{cat_tot}). The default will create columns with names like mag_ut and R50_ut.
 }
   \item{colappend}{
 Character scalar; character to be appended in the output multi band colour photometry catalogue (\code{cat_col}). The default will create column with names like mag_uc and R50_uc.
 }
+  \item{grpappend}{
+Character scalar; character to be appended in the grouped segment multi band total photometry catalogue (\code{cat_tot}). The default will create columns with names like mag_ug and R50_ug.
+}
   \item{dotot}{
-Logical; should dilated segment total photometry be computed for the bands specified in \option{multibands}. This will return closer to total magnitudes in all target bands.
+Logical; should dilated segment total photometry be computed for the bands specified in \option{multibands}? This will return closer to total magnitudes in all target bands.
 }
   \item{docol}{
-ogical; should non-dilated segment colour photometry be computed for the bands specified in \option{multibands}. This will return better colour magnitudes in all target bands (i.e. more accurate differences between bands) and will typically under-represent the total photometry.
+Logical; should non-dilated segment colour photometry be computed for the bands specified in \option{multibands}? This will return better colour magnitudes in all target bands (i.e. more accurate differences between bands) and will typically under-represent the total photometry.
+}
+  \item{dogrp}{
+Logical; should group segment photometry be computed for the bands specified in \option{multibands}? This might be useful for re-assembling large galaxies that are broken up at a later date. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
 }
   \item{boundstats}{
-Logical; if TRUE then various pixel boundary statistics are computed for the detection image. See also \code{\link{profoundProFound}}.
+Logical; if TRUE then various pixel boundary statistics are computed for the detection image and all multi-band photometry. See also \code{\link{profoundProFound}}. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
 }
   \item{haralickstats}{
 Logical; if TRUE then the Haralick texture statistics are computed for the detection image. See also \code{\link{profoundProFound}}.
@@ -101,8 +107,9 @@ In the simplest sense this script runs \code{\link{profoundProFound}} on each de
 An object list of class 'profoundmulti' containing:
 
 \item{pro_detect}{The full output of \code{\link{profoundProFound}} for the detection image (of class 'profound').}
-\item{cat_tot}{If \option{dotot}=TRUE, the dilated total photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats}}.}
-\item{cat_col}{If \option{docol}=TRUE, the non-dilated colour photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats}}.}
+\item{cat_tot}{If \option{dotot}=TRUE, the dilated total photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$segim}.}
+\item{cat_col}{If \option{docol}=TRUE, the non-dilated colour photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$segim_orig}.}
+\item{cat_grp}{If \option{dogrp}=TRUE, the group segment photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$group$groupim}.}
 \item{detectbands}{Character vector; the names of the detection bands used.}
 \item{multibands}{Character vector; the names of the target multi band photometry images used.}
 \item{call}{The original function call.}

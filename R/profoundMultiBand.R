@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, catappend=multibands, totappend='t', colappend='c', dotot=TRUE, docol=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det=6, iters_tot=2, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, boundstats=TRUE, haralickstats=TRUE, verbose=FALSE, ...){
   
   # v1.1 of the multiband function
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)
@@ -11,9 +11,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   # multibands is by default a vector of all SDSS optical bands
   # You can select whether to do total and/or colour photometry with dotot and docol
   # magzero must be matched to the number of bands in multibands (which reflects the magzero in each respectively), or one value which is then recycled
-  # catappend are the band names to use as the extra tag attached to the column names in the cat_tot and cat_col outputs (by default this is linked to multibands)
+  # bandappend are the band names to use as the extra tag attached to the column names in the cat_tot and cat_col outputs (by default this is linked to multibands)
   # totappend and colapped is just the extra tag attached to the column names in the cat_tot and cat_col outputs
-  # boundstats and haralickstats only apply to the detection photometry
+  # boundstats and haralickstats applied to all band now
   
   timestart=proc.time()[3]
   
@@ -40,8 +40,8 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   }
   detectbands=detectbands[detectbands %in% presentbands]
   
-  if(catappend[1]=='get'){
-    catappend=presentbands
+  if(bandappend[1]=='get'){
+    bandappend=presentbands
   }
   
   if(length(magzero)==1){
@@ -60,10 +60,14 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     stop('Length of gain must equal length of multibands!')
   }
   
+  if(dogrp & boundstats==FALSE){
+    stop('If dogrp=TRUE than boundstats=TRUE must also be set!')
+  }
+  
   magzero=magzero[which(multibands %in% presentbands)]
   magzero=magzero[!is.na(magzero)]
-  catappend=catappend[which(multibands %in% presentbands)]
-  catappend=catappend[!is.na(catappend)]
+  bandappend=bandappend[which(multibands %in% presentbands)]
+  bandappend=bandappend[!is.na(bandappend)]
   if(!is.null(gain)){
     gain=gain[which(multibands %in% presentbands)]
     gain=gain[!is.na(gain)]
@@ -74,12 +78,12 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   # Some safety checks
   
   if(!is.null(gain)){
-    if(length(unique(c(length(multibands), length(magzero), length(catappend), length(gain))))!=1){
-      stop('multibands, magzero, catappend and gain are not all the same length - they must be!')
+    if(length(unique(c(length(multibands), length(magzero), length(bandappend), length(gain))))!=1){
+      stop('multibands, magzero, bandappend and gain are not all the same length - they must be!')
     }
   }else{
-    if(length(unique(c(length(multibands), length(magzero), length(catappend))))!=1){
-      stop('multibands, magzero and catappend are not all the same length - they must be!')
+    if(length(unique(c(length(multibands), length(magzero), length(bandappend))))!=1){
+      stop('multibands, magzero and bandappend are not all the same length - they must be!')
     }
   }
   if(!is.null(inputlist)){
@@ -194,14 +198,19 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
   # Create base total and colour photometry catalogues
   
   if(dotot){
-    cat_tot=data.frame(segID=1:pro_detect$Nseg)
+    cat_tot=data.frame(segID=pro_detect$segstats$segID)
   }else{
     cat_tot=NULL
   }
   if(docol){
-    cat_col=data.frame(segID=1:pro_detect$Nseg)
+    cat_col=data.frame(segID=pro_detect$segstats$segID)
   }else{
     cat_col=NULL
+  }
+  if(dogrp){
+    cat_grp=data.frame(groupID=pro_detect$groupstats$groupID)
+  }else{
+    cat_grp=NULL
   }
 
   
@@ -222,36 +231,54 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         
         # Compute total multi band photometry, allowing some extra dilation via the iters_tot argument
         
-        pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, iters=iters_tot, verbose=verbose)
+        pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, groupstats=FALSE, iters=iters_tot, verbose=verbose)
         
         # Append column names and concatenate cat_tot together
         
-        setnames(pro_multi_tot$segstats, paste0(names(pro_multi_tot$segstats), '_', catappend[i], totappend))
+        setnames(pro_multi_tot$segstats, paste0(names(pro_multi_tot$segstats), '_', bandappend[i], totappend))
         cat_tot=cbind(cat_tot, pro_multi_tot$segstats)
+        
       }
       
       if(docol){
         
-        # Compute colour multi band photometry, allowing some extra dilation via the iters_tot argument
+        # Compute colour multi band photometry
         # If we have already run the total photometry then we use the sky and skyRMS computed there for speed
         
         if(dotot){
-          pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, iters=0, verbose=verbose)$segstats
+          pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose)$segstats
         }else{
-          pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, iters=0, verbose=verbose)$segstats
+          pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose)$segstats
         }
         
         # Append column names and concatenate cat_col together
         
-        setnames(pro_multi_col, paste0(names(pro_multi_col), '_', catappend[i], colappend))
+        setnames(pro_multi_col, paste0(names(pro_multi_col), '_', bandappend[i], colappend))
         cat_col=cbind(cat_col, pro_multi_col)
+      }
+      
+      if(dogrp){
+        
+        # Compute group multi band photometry
+        # If we have already run the total photometry then we use the sky and skyRMS computed there for speed
+        
+        if(dotot){
+          pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose)$segstats
+        }else{
+          pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose)$segstats
+        }
+        
+        # Append column names and concatenate cat_col together
+        names(pro_multi_grp)[1]='groupID'
+        setnames(pro_multi_grp, paste0(names(pro_multi_grp), '_', bandappend[i], grpappend))
+        cat_grp=cbind(cat_grp, pro_multi_grp)
       }
     }
   }
   
   # Return all of the things!
   
-  output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, detectbands=detectbands, multibands=multibands, call=match.call(), date=date(), time=proc.time()[3]-timestart)
+  output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, cat_grp=cat_grp, detectbands=detectbands, multibands=multibands, call=match.call(), date=date(), time=proc.time()[3]-timestart)
   class(output)='profoundmulti'
   return=output
 }
