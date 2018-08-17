@@ -136,7 +136,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         group_iters=iters_tot
       }else if(groupby=='segim_orig'){
         group=profoundSegimGroup(pro_detect$segim_orig)
-        group_iters=iters_det+iters_tot
+        group$groupim=profoundSegimKeep(segim=pro_detect$segim, segID_merge = group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
+        group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+        group_iters=iters_tot
       }
       if(groupstats){
         pro_detect$group=group
@@ -212,7 +214,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         group_iters=0
       }else if(groupby=='segim_orig'){
         group=profoundSegimGroup(pro_detect$segim_orig)
-        group_iters=iters_det+iters_tot
+        group$groupim=profoundSegimKeep(segim=pro_detect$segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
+        group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+        group_iters=iters_tot
       }
       if(groupstats){
         pro_detect$group=group

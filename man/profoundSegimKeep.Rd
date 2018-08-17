@@ -13,10 +13,10 @@ profoundSegimKeep(segim, groupim, groupID_merge, segID_merge, clean = FALSE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{segim}{
-Integer matrix; required, the segmentation map. This matrix *must* be the same dimensions as \option{groupim}.
+Integer matrix; required, the segmentation map.
 }
   \item{groupim}{
-Integer matrix; required, the grouped segmentation map. This matrix *must* be the same dimensions as \option{segim}.
+Integer matrix; the grouped segmentation map. This matrix *must* be the same dimensions as \option{segim} (if supplied).
 }
   \item{groupID_merge}{
 Integer vector; the group IDs that the user wants to persist into the final segmentation map (removing all \option{segim} segments that overlap with any of the specified group IDs).
