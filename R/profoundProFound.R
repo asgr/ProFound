@@ -308,7 +308,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       }else{
         stop('Non legal groupby option, must be segim or segim_orig!')
       }
-      group=profoundSegimGroup(segim=segim)
+
       if(stats & !missing(image)){
         groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
         colnames(groupstats)[1]='groupID'
