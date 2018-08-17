@@ -5,7 +5,7 @@
 Draw Ellipse
 }
 \description{
-Calculates the \option{x} and \option{y} location of an ellipse, allowing for the presence of boxiness.
+Draws multiple ellipses on a plot window.
 }
 \usage{
 profoundDrawEllipse(xcen = 0, ycen = 0, rad = 1, axrat = 1, ang = 0, box = 0, ...)
@@ -49,45 +49,12 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-library(ProFit)
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
-model = list(
- sersic = list(
-  xcen = 50,
-  ycen = 50,
-  mag = 15,
-  re = 10,
-  nser = 4,
-  ang = 30,
-  axrat = 0.3,
-  box = 0.5
- )
-)
-
-image=profoundMakeModel(model)$z
-temp=magimage(image)
-contour(temp, col='red', drawlabels=FALSE, add=TRUE)
-profoundDrawEllipse(model$sersic$xcen, model$sersic$ycen, rad=26, axrat=model$sersic$axrat,
-ang=model$sersic$ang, box=model$sersic$box, col='blue', lty=2)
-
-model = list(
- sersic = list(
-  xcen = 50,
-  ycen = 50,
-  mag = 15,
-  re = 10,
-  nser = 4,
-  ang = 30,
-  axrat = 0.3,
-  box = -0.5
- )
-)
-
-image=profoundMakeModel(model)$z
-temp=magimage(image)
-contour(temp, col='red', drawlabels=FALSE, add=TRUE)
-profoundDrawEllipse(model$sersic$xcen, model$sersic$ycen, rad=30, axrat=model$sersic$axrat,
-ang=model$sersic$ang, box=model$sersic$box, col='blue', lty=2)
+profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
+profoundDrawEllipse(profound$segstats$xcen, profound$segstats$ycen,
+profound$segstats$R100/0.339, profound$segstats$axrat, profound$segstats$ang,
+col='white', lty=2)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

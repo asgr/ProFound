@@ -150,6 +150,20 @@ profoundGainEst=function(image, mask=0, objects=0, sky=0, skyRMS=1){
   return=10^findgain$par
 }
 
+profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge){
+  if(! missing(groupID_merge)){
+    remove_segIDs=unique(unlist(groupsegID[groupsegID$groupID %in% groupID_merge,'segID']))
+    remove_segIDs=remove_segIDs[!remove_segIDs %in% groupID_merge]
+    segstats=segstats[! segstats$segID %in% remove_segIDs,]
+    segstats[segstats$segID %in% groupID_merge,2:dim(segstats)[2]]=NA
+    segstats[segstats$segID %in% groupID_merge,1:dim(groupstats)[2]]=groupstats[groupstats$groupID %in% groupID_merge,]
+    segstats=segstats[order(segstats$segID),]
+  }
+  segstats=cbind(segstats, origin='seg')
+  segstats[segstats$segID %in% groupID_merge,'origin']='group'
+  return=segstats
+}
+  
 ### Deprecated Functions ###
 
 # profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
