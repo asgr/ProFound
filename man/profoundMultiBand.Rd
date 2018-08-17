@@ -12,8 +12,8 @@ profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 
 tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 0,
 detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL,
 bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
-docol = TRUE, dogrp = TRUE, groupby = "segim", boundstats = TRUE, groupstats = boundstats,
-haralickstats = TRUE, verbose = FALSE, ...)
+docol = TRUE, dogrp = TRUE, groupby = "segim_orig", boundstats = TRUE,
+groupstats = boundstats, haralickstats = TRUE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -87,7 +87,7 @@ Logical; should non-dilated segment colour photometry be computed for the bands 
 Logical; should group segment photometry be computed for the bands specified in \option{multibands}? This might be useful for re-assembling large galaxies that are broken up at a later date. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
 }
   \item{groupby}{
-Character scalar; How should the grouped segmentation map be formed that will be used to produce the cat_grp output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less. If segim is used then it will be dilated by \option{iters_tot}, if segim_orig is used then it will be dilated by \option{iters_det} + \option{iters_tot}.
+Character scalar; How should the grouped segmentation map be formed that will be used to produce the cat_grp output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
 }
   \item{boundstats}{
 Logical; if TRUE then various pixel boundary statistics are computed for the detection image and all multi-band photometry. See also \code{\link{profoundProFound}}. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.

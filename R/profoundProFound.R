@@ -32,7 +32,7 @@
   return=tempout
 }
 
-profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
+profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', sigmasel=1, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   call=match.call()
@@ -299,6 +299,15 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     }
     
     if(groupstats){
+      if(groupby=='segim'){
+        group=profoundSegimGroup(segim)
+      }else if(groupby=='segim_orig'){
+        group=profoundSegimGroup(segim_orig)
+        group$groupim=profoundSegimKeep(segim=segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
+        group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+      }else{
+        stop('Non legal groupby option, must be segim or segim_orig!')
+      }
       group=profoundSegimGroup(segim=segim)
       if(stats & !missing(image)){
         groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
