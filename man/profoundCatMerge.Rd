@@ -8,7 +8,7 @@ Catalogue Merging Tool
 Merges segmentation and grouped segmentation catalogues based on which groups are preferred.
 }
 \usage{
-profoundCatMerge(segstats, groupstats, groupsegID, groupID_merge)
+profoundCatMerge(segstats, groupstats, groupsegID, groupID_merge, flag = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,6 +23,9 @@ List; group information as output by \option{profoundSegimGroup} or \option{prof
 }
   \item{groupID_merge}{
 Integer vector; group IDs that are preferred solutions. All segmented belonging to the corresponding group will be removed, and the new group photometry inserted instead.
+}
+  \item{flag}{
+Logical; should an extra column be added to the end specifying the origin of the photometry (either 'seg' for the segmentation map, or 'group' for the grouped segmentation map)?  
 }
 }
 \details{

@@ -29,6 +29,8 @@ First load the libraries we need:
 library(ProFound)
 ```
 
+## It's a Colourful Life
+
 One of the big design considerations when developing **ProFound** was to make colour photometry easy and flexible. This vignette will discuss a couple of ways to tackle it.
 
 First we need some images to do colour photometry on (these are taken from the **ProFound** Robotham et al 2018 paper):
@@ -121,6 +123,36 @@ And we can check they really do compute the same results:
 
 ```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
 magplot(pro_NUV_warpK$segstats$mag, multi$cat_tot$mag_NUVt, grid=TRUE)
+```
+
+## Oher Colour Outputs
+
+You might have noticed that **profoundMultiBand** mentions measuring three different types of photometry: total photometry, bright isophotal colour photometry and grouped segment photometry. Total photometry uses the dilated total photometry segmentation map, whereas the isophotal photometry only uses the brighter segim_orig (pre-dilation) map. Grouped segment photometry is a bit more complicated- it represents the flux for groups of touching segments (either grouped by touching segim_orig or dilated segim, depending on the 'groupby' setting in **profoundMultiBand**). In some cases the groups might represent better photometry, e.g. consider the dilated grouped segments (this is like running with tolerance=Inf):
+
+```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
+profoundSegimPlot(multi$pro_detect$image, multi$pro_detect$group$groupim)
+```
+
+The three catalogues are included in the list output of **profoundMultiBand**, and are named 'cat_tot', 'cat_col' and 'cat_grp'. Mostly the grouped photometry will be the same as the total, since mostly things are not touching pre-dilation:
+
+```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
+magplot(multi$cat_grp$mag_rg, multi$cat_tot[match(multi$cat_grp$groupID, multi$cat_tot$segID),"mag_rt"],grid=TRUE, log='')
+abline(0,1,col='red')
+```
+
+There are two clear outliers, one of which is the central bright source (segment/group ID 1), which in our grouped catalogue has become merged with its neighbouring star (segment ID 3). If we *did* want to merge this together there is a handy utility function to do so, where 'groupID_merge' is a vector of all the groups we prefer over the segmented versions of the photometry (in this case just groupID 1):
+
+```{r, eval=evalglobal}
+merge_cat=profoundCatMerge(segstats=multi$cat_tot, groupstats=multi$cat_grp, groupsegID=multi$pro_detect$group$groupsegID, groupID_merge=1)
+multi$cat_tot[1:5,c('segID', 'mag_rt')]
+multi$cat_grp[1:5,c('groupID', 'mag_rg')]
+merge_cat[1:5,c('segID', 'mag_rt', 'origin')]
+```
+
+We gain an origin flag in this new catalogue making it clear what the origin of the photometry is ('group' for groupstats, or 'seg' for segstats). Notice how in the merged catalogue segment ID 3 has been removed, since it is merged in with segment ID 1 to form groupID=1. All this grouping information is stored in the groupsegID object:
+
+```{r, eval=evalglobal}
+multi$pro_detect$group$groupsegID[1,"segID"][[1]]
 ```
 
 ## Segmentation Map Warping

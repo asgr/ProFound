@@ -150,7 +150,7 @@ profoundGainEst=function(image, mask=0, objects=0, sky=0, skyRMS=1){
   return=10^findgain$par
 }
 
-profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge){
+profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=TRUE){
   if(! missing(groupID_merge)){
     remove_segIDs=unique(unlist(groupsegID[groupsegID$groupID %in% groupID_merge,'segID']))
     remove_segIDs=remove_segIDs[!remove_segIDs %in% groupID_merge]
@@ -159,8 +159,10 @@ profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge){
     segstats[segstats$segID %in% groupID_merge,1:dim(groupstats)[2]]=groupstats[groupstats$groupID %in% groupID_merge,]
     segstats=segstats[order(segstats$segID),]
   }
-  segstats=cbind(segstats, origin='seg')
-  segstats[segstats$segID %in% groupID_merge,'origin']='group'
+  if(flag){
+    segstats=cbind(segstats, origin='seg')
+    segstats[segstats$segID %in% groupID_merge,'origin']='group'
+  }
   return=segstats
 }
   
