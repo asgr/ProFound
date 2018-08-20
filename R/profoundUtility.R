@@ -160,7 +160,7 @@ profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=
     segstats=segstats[order(segstats$segID),]
   }
   if(flag){
-    segstats=cbind(segstats, origin='seg')
+    segstats=cbind(segstats, origin='seg', stringsAsFactors=FALSE)
     segstats[segstats$segID %in% groupID_merge,'origin']='group'
   }
   return=segstats
