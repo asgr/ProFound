@@ -136,7 +136,7 @@ profoundSegimPlot(multi$pro_detect$image, multi$pro_detect$group$groupim)
 The three catalogues are included in the list output of **profoundMultiBand**, and are named 'cat_tot', 'cat_col' and 'cat_grp'. Mostly the grouped photometry will be the same as the total, since mostly things are not touching pre-dilation:
 
 ```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
-magplot(multi$cat_grp$mag_rg, multi$cat_tot[match(multi$cat_grp$groupID, multi$cat_tot$segID),"mag_rt"],grid=TRUE, log='')
+magplot(multi$cat_grp$mag_rg, multi$cat_tot[match(multi$cat_grp$groupID, multi$cat_tot$segID),"mag_rt"], grid=TRUE, log='', xlab='Group Mag', ylab='Total Mag')
 abline(0,1,col='red')
 ```
 
@@ -154,6 +154,21 @@ We gain an origin flag in this new catalogue making it clear what the origin of 
 ```{r, eval=evalglobal}
 multi$pro_detect$group$groupsegID[1,"segID"][[1]]
 ```
+
+We might also only want to use segments from the colour catalogue that exist in this new merger catalogue. This is easy to do with base **R**:
+
+```{r, eval=evalglobal}
+merge_cat_col=multi$cat_col[multi$cat_col$segID %in% merge_cat$segID,]
+```
+
+These now both have the same number of rows by construction, and sources will appear on the same row, so we can plot comparisons very easily:
+
+```{r, eval=evalglobal}
+magplot(merge_cat$mag_rt, merge_cat_col$mag_rc, xlab='Total Mag', ylab='Colour Mag', grid=TRUE)
+abline(0,1,col='red')
+```
+
+As a note, there is one object that is actually fainter in its dilated total photometry- it is pretty faint, and probably not a good object!
 
 ## Segmentation Map Warping
 
