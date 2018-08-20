@@ -163,7 +163,7 @@ merge_cat_col=multi$cat_col[multi$cat_col$segID %in% merge_cat$segID,]
 
 These now both have the same number of rows by construction, and sources will appear on the same row, so we can plot comparisons very easily:
 
-```{r, eval=evalglobal}
+```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
 magplot(merge_cat$mag_rt, merge_cat_col$mag_rc, xlab='Total Mag', ylab='Colour Mag', grid=TRUE)
 abline(0,1,col='red')
 ```
