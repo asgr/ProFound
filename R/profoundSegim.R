@@ -992,6 +992,7 @@ profoundSegimGroup=function(segim){
   
   groupim=EBImage::bwlabel(segim)
   segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
+  segimDT[groupID>0,groupID:=min(groupID),by=segID]
   groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
   segIDmin=segimDT[groupID>0,min(segID, na.rm=FALSE),by=groupID]$V1
   remap=vector(length=max(groupID))
