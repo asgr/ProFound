@@ -8,7 +8,8 @@ Catalogue Merging Tool
 Merges segmentation and grouped segmentation catalogues based on which groups are preferred.
 }
 \usage{
-profoundCatMerge(segstats, groupstats, groupsegID, groupID_merge, flag = TRUE)
+profoundCatMerge(segstats, groupstats, groupsegID, groupID_merge, flag = TRUE,
+rowreset = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +27,9 @@ Integer vector; group IDs that are preferred solutions. All segmented belonging 
 }
   \item{flag}{
 Logical; should an extra column be added to the end specifying the origin of the photometry (either 'seg' for the segmentation map, or 'group' for the grouped segmentation map)?  
+}
+  \item{rowreset}{
+Logical; should the data.frame row names be reset to be 1:Nrow of the data.frame? The default leaves a trace of the group segment selection (i.e. you can see the selected row numbers from the provided \option{segstats}).
 }
 }
 \details{
