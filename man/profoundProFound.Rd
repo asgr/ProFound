@@ -139,10 +139,10 @@ Logical; if TRUE then various pixel boundary statistics are computed (\option{Ne
 Logical; if TRUE then the IDs of nearby segments is calculated via \code{\link{profoundSegimNear}} and output to the returned object \option{near}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want nearby object IDs returned.
 }
   \item{groupstats}{
-Logical; if TRUE then the IDs of grouped dilated segments (based on the output \option{segim}) is calculated via \code{\link{profoundSegimGroup}} and output to the object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object IDs returned. If \option{stats}=TRUE is also set then this flag will also create the \option{groupstats} output of photometric properties of the groups.
+Logical; if TRUE then the IDs of grouped dilated segments (based on the output \option{segim}) is calculated via \code{\link{profoundSegimGroup}} and output to the list object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object information returned. If \option{stats}=TRUE is also set then this flag will also create the \option{groupstats} output of photometric properties of the groups.
 }
   \item{groupby}{
-Character scalar; How should the grouped segmentation map be formed that will be used to produce the cat_grp output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
+Character scalar; How should the grouped segmentation map be formed that will be used to produce the \option{groupstats} output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
 }
   \item{offset}{
 Integer scalar; the distance to offset when searching for nearby segments (used in both \code{\link{profoundSegimStats}} and \code{\link{profoundSegimNear}}).  
