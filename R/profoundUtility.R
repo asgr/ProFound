@@ -163,6 +163,7 @@ profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=
     segstats=cbind(segstats, origin='seg', stringsAsFactors=FALSE)
     segstats[segstats$segID %in% groupID_merge,'origin']='group'
   }
+  row.names(segstats)=NULL
   return=segstats
 }
   
