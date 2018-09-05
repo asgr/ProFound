@@ -23,7 +23,7 @@ Integer matrix; optional, the segmentation map of the image. This matrix *must* 
 Integer scalar; optional, the desired \option{segim} segment to extract from the \option{image}.
 }
   \item{levels}{
-Integer scalar; the number of ellipse levels to extract from the \option{image}.
+Integer scalar or vector. If a scalar this is the number of ellipse levels to extract from the \option{image}. If a vector this specfies the extremes of all fractional levels, i.e. it should generally start at 0 and end at 1 to capture all isophotal levels.
 }
   \item{magzero}{
 Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the surface brightness output will represent mag/asec^2.

@@ -56,27 +56,34 @@ profoundGetEllipses=function(image, segim, segID=1, levels=10, magzero=0, pixsca
   tempxy=cbind(tempxy,cumsum(tempxy[,3])/sum(tempxy[,3],na.rm=T))
   tempellipses={}
   segelllipses=matrix(0,dim(segim)[1],dim(segim)[2])
-  isolevels=seq(0,1-1/levels,by=1/levels)
+  if(length(levels)>1){
+    isolevels=levels
+    difflevels=diff(isolevels)
+    levels=length(levels)
+  }else{
+    isolevels=seq(0,1,by=1/levels)
+    difflevels=diff(isolevels)
+  }
   if(fixcen){
     tempellipse=profoundGetEllipse(tempxy[,1:3])
     xcen=as.numeric(tempellipse['xcen'])
     ycen=as.numeric(tempellipse['ycen'])
-    for(i in isolevels){
-      segelllipses[ceiling(tempxy[tempxy[,4]>i & tempxy[,4]<i+1/levels,1:2])]=round(i*levels+1,0)
+    for(i in 1:(length(isolevels)-1)){
+      segelllipses[ceiling(tempxy[tempxy[,4]>isolevels[i] & tempxy[,4]<isolevels[i]+difflevels[i],1:2])]=i
       tempellipses=rbind(tempellipses,
-                        c(profoundGetEllipse(tempxy[tempxy[,4]>i & tempxy[,4]<i+1/levels,1:3], xcen=xcen, ycen=ycen, pixscale=pixscale, dobox=dobox), flux=sum(tempxy[tempxy[,4]>i & tempxy[,4]<i+1/levels,3], na.rm=T), N=length(which(tempxy[,4]>i & tempxy[,4]<i+1/levels)))
+                        c(profoundGetEllipse(tempxy[tempxy[,4]>isolevels[i]  & tempxy[,4]<isolevels[i]+difflevels[i],1:3], xcen=xcen, ycen=ycen, pixscale=pixscale, dobox=dobox), flux=sum(tempxy[tempxy[,4]>isolevels[i]  & tempxy[,4]<isolevels[i]+difflevels[i],3], na.rm=T), N=length(which(tempxy[,4]>isolevels[i] & tempxy[,4]<isolevels[i]+difflevels[i])))
                         )
     }
   }else{
-    for(i in isolevels){
-      segelllipses[ceiling(tempxy[tempxy[,4]>i & tempxy[,4]<i+1/levels,1:2])]=round(i*levels+1,0)
+    for(i in 1:(length(isolevels)-1)){
+      segelllipses[ceiling(tempxy[tempxy[,4]>isolevels[i]  & tempxy[,4]<isolevels[i]+difflevels[i],1:2])]=i
       tempellipses=rbind(tempellipses,
-                        c(profoundGetEllipse(tempxy[tempxy[,4]>i & tempxy[,4]<i+1/levels,1:3], pixscale=pixscale, dobox=dobox), flux=sum(tempxy[tempxy[,4]>i & tempxy[,4]<i+0.05,3], na.rm=T), N=length(which(tempxy[,4]>i & tempxy[,4]<i+1/levels)))
+                        c(profoundGetEllipse(tempxy[tempxy[,4]>isolevels[i]  & tempxy[,4]<isolevels[i]+difflevels[i],1:3], pixscale=pixscale, dobox=dobox), flux=sum(tempxy[tempxy[,4]>isolevels[i] & tempxy[,4]<isolevels[i]+difflevels[i],3], na.rm=T), N=length(which(tempxy[,4]>isolevels[i] & tempxy[,4]<isolevels[i]+difflevels[i])))
                         )
     }
   }
   SB=profoundFlux2SB(tempellipses[,'flux']/tempellipses[,'N'], magzero=magzero, pixscale=pixscale)
-  tempellipses=cbind(segellipseID=1:length(tempellipses[,1]), fluxfrac=isolevels+1/levels, tempellipses, SB=SB)
+  tempellipses=cbind(segellipseID=1:length(tempellipses[,1]), fluxfrac=isolevels[2:length(isolevels)], tempellipses, SB=SB)
   tempellipses=as.data.frame(tempellipses)
   if(plot){
     profoundGetEllipsesPlot(image=image, ellipses=tempellipses, segim=segim, segID=segID, pixscale=pixscale, ...)
