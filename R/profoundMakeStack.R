@@ -14,27 +14,35 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
     inv_var=0
     for(i in 1:length(image_list)){
       if(is.list(sky_list) & is.list(skyRMS_list)){
-        image_list[[i]]=image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        sky_list[[i]]=sky_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        skyRMS_list[[i]]=skyRMS_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        stack=stack+(image_list[[i]]-sky_list[[i]])/(skyRMS_list[[i]]^2)
-        inv_var=inv_var+(1/skyRMS_list[[i]]^2)
+        if(is.null(image_list[[i]])==FALSE & is.null(sky_list[[i]])==FALSE & is.null(skyRMS_list[[i]])==FALSE){
+          image_list[[i]]=image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          sky_list[[i]]=sky_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          skyRMS_list[[i]]=skyRMS_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          stack=stack+(image_list[[i]]-sky_list[[i]])/(skyRMS_list[[i]]^2)
+          inv_var=inv_var+(1/skyRMS_list[[i]]^2)
+        }
       }
       if(is.list(sky_list) & is.list(skyRMS_list)==FALSE){
-        image_list[[i]]=image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        sky_list[[i]]=sky_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        stack=stack+(image_list[[i]]-sky_list[[i]])
-        inv_var=1
+        if(is.null(image_list[[i]])==FALSE & is.null(sky_list[[i]])==FALSE){
+          image_list[[i]]=image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          sky_list[[i]]=sky_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          stack=stack+(image_list[[i]]-sky_list[[i]])
+          inv_var=1
+        }
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)){
-        image_list[[i]]=image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        skyRMS_list[[i]]=skyRMS_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        stack=stack+image_list[[i]]/(skyRMS_list[[i]]^2)
-        inv_var=inv_var+(1/skyRMS_list[[i]]^2)
+        if(is.null(image_list[[i]])==FALSE & is.null(skyRMS_list[[i]])==FALSE){
+          image_list[[i]]=image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          skyRMS_list[[i]]=skyRMS_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          stack=stack+image_list[[i]]/(skyRMS_list[[i]]^2)
+          inv_var=inv_var+(1/skyRMS_list[[i]]^2)
+        }
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)==FALSE){
-        stack=stack+image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
-        inv_var=inv_var+1
+        if(is.null(image_list[[i]])==FALSE){
+          stack=stack+image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
+          inv_var=inv_var+1
+        }
       }
     }
     stack=stack/inv_var
@@ -48,7 +56,7 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
     if(!missing(skyRMS_list)){
       skyRMS=skyRMS_list
     }else{
-      skyRMS=1
+      skyRMS=NULL
     }
   }
 return=list(image=stack, skyRMS=skyRMS, magzero=magzero_out)
