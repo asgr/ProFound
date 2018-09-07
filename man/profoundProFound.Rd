@@ -13,11 +13,11 @@ profoundProFound(image, segim, objects, mask,  skycut=1, pixcut=3, tolerance = 4
 sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05,
 converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky = TRUE,
 redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
-header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats = boundstats, groupstats = boundstats, groupby = 'segim_orig', offset = 1,
-haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
-keepim = TRUE, R50clean=0, ...)
+skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2, boxiter = 0,
+doclip = TRUE, shiftloc = FALSE, paddim = TRUE,header, verbose = FALSE, plot = FALSE,
+stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
+groupstats = boundstats, groupby = 'segim_orig', offset = 1, haralickstats = FALSE,
+sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, R50clean=0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -107,6 +107,15 @@ Character scalar; the type of sky level estimator used. Allowed options are 'qua
 }
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
+}
+\item{skypixmin}{
+Numeric scalar; the minimum number of sky pixels desired in our cutout. The default is that we need half the original number of pixels in the \option{box} to be sky.
+}
+\item{boxadd}{
+Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
+}
+\item{boxiter}{
+Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
 }
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.

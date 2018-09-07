@@ -2,7 +2,7 @@
 \alias{profoundSkyEst}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Local Sky Estimator
+Old Sky Estimator (Somewhat Defunct)
 }
 \description{
 A high level utility to estimate the sky properties of a supplied \option{image}. This is closely related to the equivalent routines available in the LAMBDAR R package.

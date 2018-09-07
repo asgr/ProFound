@@ -10,10 +10,11 @@ The high level function computes the absolute sky and sky RMS level over an imag
 }
 \usage{
 profoundMakeSkyMap(image, objects, mask, box = c(100,100), grid = box, skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc = FALSE, paddim = TRUE)
+skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2, boxiter = 0,
+doclip = TRUE, shiftloc = FALSE, paddim = TRUE)
 profoundMakeSkyGrid(image, objects, mask, box = c(100,100), grid = box, type = 'bilinear',
-skytype = "median", skyRMStype = "quanlo", sigmasel = 1, doclip = TRUE, shiftloc=FALSE,
-paddim = TRUE)
+skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
+boxadd = box/2, boxiter = 0, doclip = TRUE, shiftloc=FALSE, paddim = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,11 +45,20 @@ Character scalar; the type of sky level estimator used. Allowed options are 'qua
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
 }
+\item{skypixmin}{
+Numeric scalar; the minimum number of sky pixels desired in our cutout. The default is that we need half the original number of pixels in the \option{box} to be sky.
+}
+\item{boxadd}{
+Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
+}
+\item{boxiter}{
+Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
+}
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If an doubt, leave as TRUE.
 }
 	\item{shiftloc}{
-Logical; should the cutout centre for the sky shift from \option{loc} of the desired \option{box} size extends beyond the edge of the image? (See \code{\link{magcutout}} for details).
+Logical; should the cutout centre for the sky shift from \option{loc} if the desired \option{box} size extends beyond the edge of the image? (See \code{\link{magcutout}} for details).
 }
 	\item{paddim}{
 Logical; should the cutout be padded with image data until it meets the desired \option{box} size (if \option{shiftloc} is true) or padded with NAs for data outside the image boundary otherwise? (See \code{\link{magcutout}} for details).
