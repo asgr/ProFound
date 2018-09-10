@@ -291,8 +291,8 @@ image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="P
 
 profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 
-#You can check to see if the final objects mask is aggressive enough. Notice the halos
-#surrounding bright sources when just using the objects mask.
+# You can check to see if the final objects mask is aggressive enough. Notice the halos
+# surrounding bright sources when just using the objects mask.
 
 temp=image$imDat
 temp[profound$objects>0]=0
@@ -305,6 +305,16 @@ magplot(profound$segstats[,c("R50","SB_N90")], log='x', grid=TRUE)
 magplot(profound$segstats[,c("R50","SB_N90")], log='x', grid=TRUE)
 
 magplot(profound$segstats[,c("flux","origfrac")], log='x', grid=TRUE)
+
+## An example of a large galaxy:
+
+VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+
+# Running on defaults results in the central galaxy subtracting itself:
+plot(profoundProFound(VST_r))
+
+# Setting boxters=2 fixes things nicely:
+plot(profoundProFound(VST_r, boxiters=2))
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
