@@ -283,7 +283,7 @@ Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
 Haralick R.M., et al., 1973, IEEE, SMC-3 (6), 610
 }
 \seealso{
-\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}
+\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}, \code{\link{profoundMultiband}}
 }
 \examples{
 \dontrun{

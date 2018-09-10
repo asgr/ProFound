@@ -102,7 +102,7 @@ Logical; if TRUE then the Haralick texture statistics are computed for the detec
 Logical; should verbose output from \code{\link{profoundProFound}} be displayed to the user? Basic information is always printed out, to help catch silly user errors quickly.
 }
   \item{\dots}{
-Further arguments to be passed to the stacked detection image run of \code{\link{profoundProFound}}.
+Further arguments to be passed to all instances of \code{\link{profoundProFound}}. E.g. if the sky \option{box} is set to a non-default value (default is \option{box}=c(100,100)), this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}.
 }
 }
 \details{
@@ -143,11 +143,18 @@ VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)
 VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)
 
-# Run profoundMultiBand:
+# Run profoundMultiBand on defaults:
 multi=profoundMultiBand(inputlist=list(GALEX_NUV_VST, VST_r, VISTA_K_VST),
 magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'))
 
-# Check some of the outputs:
+# Notice the blue halo around the central sources:
+plot(multi$pro_detect)
+
+# Run profoundMultiBand with boxiters=2 (to avoid over-subtracting the sky):
+multi=profoundMultiBand(inputlist=list(GALEX_NUV_VST, VST_r, VISTA_K_VST),
+magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'), boxiters = 2)
+
+# Looks better now:
 plot(multi$pro_detect)
 
 magplot(multi$cat_tot$mag_rt, multi$cat_col$mag_NUVc-multi$cat_col$mag_rc, ylim=c(-2,10))
@@ -157,20 +164,20 @@ points(multi$cat_tot$mag_rt, multi$cat_col$mag_rc-multi$cat_col$mag_Kc, col='red
 
 multi2=profoundMultiBand(segim=multi$pro_detect$segim, inputlist=list(GALEX_NUV_VST,
 VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
-iters_det = 0)
+iters_det = 0, boxiters = 2)
 
 multi3=profoundMultiBand(segim=multi$pro_detect$segim_orig, inputlist=list(GALEX_NUV_VST,
 VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
-iters_det = 6)
+iters_det = 6, boxiters = 2)
 
 #multi and multi3 should create identical plots (since we are dilating the original
 #segim_orig in the same manner), but multi2 will just be the final dilated segim without
 #any dilations, hence the Dilations histogram is all 0. The final fluxes should be the
-#same though (bottom-centre and bottom-right).
+#same though for all 3 runs (bottom-centre and bottom-right).
 
-plot(multi)
-plot(multi2)
-plot(multi3)
+plot(multi$pro_detect)
+plot(multi2$pro_detect)
+plot(multi3$pro_detect)
 }
 }
 \keyword{ Detection }% use one of  RShowDoc("KEYWORDS")
