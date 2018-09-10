@@ -10,8 +10,8 @@ Calculate the sky and sky RMS for a subset region of a larger image, as used in 
 \usage{
 profoundSkyEstLoc(image, objects, mask, loc = dim(image)/2, box = c(100, 100),
 skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiter = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, plot = FALSE,
-...)
+boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
+plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,7 +45,7 @@ Numeric scalar; the minimum number of sky pixels desired in our cutout. The defa
 \item{boxadd}{
 Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
 }
-\item{boxiter}{
+\item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
 }
   \item{doclip}{

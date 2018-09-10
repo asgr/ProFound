@@ -10,11 +10,11 @@ The high level function computes the absolute sky and sky RMS level over an imag
 }
 \usage{
 profoundMakeSkyMap(image, objects, mask, box = c(100,100), grid = box, skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2, boxiter = 0,
-doclip = TRUE, shiftloc = FALSE, paddim = TRUE)
+skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
+boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE)
 profoundMakeSkyGrid(image, objects, mask, box = c(100,100), grid = box, type = 'bilinear',
 skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiter = 0, doclip = TRUE, shiftloc=FALSE, paddim = TRUE)
+boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc=FALSE, paddim = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -51,7 +51,7 @@ Numeric scalar; the minimum number of sky pixels desired in our cutout. The defa
 \item{boxadd}{
 Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
 }
-\item{boxiter}{
+\item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
 }
   \item{doclip}{
