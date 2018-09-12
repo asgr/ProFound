@@ -4,6 +4,28 @@
   return=.varwt(x=.profoundEllipse(x=x, y=y, flux=1, xcen=0, ycen=0, ang=par[2], axrat=10^par[3], box=par[4])[,1], xcen=1, wt=wt)
 }
 
+.profoundEllipse=function(x, y, flux, xcen=0, ycen=0, ang=0, axrat=1, box=0){
+  if(is.matrix(x)){
+    z=x
+    x = seq(0.5, dim(z)[1] - 0.5)
+    y = seq(0.5, dim(z)[2] - 0.5)
+    temp=expand.grid(x,y)
+    x=temp[,1]
+    y=temp[,2]
+    flux=as.numeric(z)
+  }
+  if(!is.numeric(box)) box = 0
+  rad=sqrt((x-xcen)^2+(y-ycen)^2)
+  angrad=-ang*pi/180
+  angmod=atan2((x-xcen),(y-ycen))-angrad
+  xmod=rad*sin(angmod)
+  ymod=rad*cos(angmod)
+  xmod=xmod/axrat
+  radmod=(abs(xmod)^(2+box)+abs(ymod)^(2+box))^(1/(2+box))
+  output=cbind(rad=radmod, flux=flux)
+  return(output)
+}
+
 profoundGetEllipse=function(x, y, z, xcen, ycen, scale=sqrt(2), pixscale=1, dobox=FALSE, plot=FALSE, ...){
   if(is.matrix(x)){
     if(dim(x)[2]==3){
@@ -122,29 +144,6 @@ profoundGetEllipsesPlot=function(image, ellipses, segim, segID=1, segellipseID='
     }
     profoundDrawEllipse(xcen=ellipses[ellipses$segellipseID==i,'xcen'], ycen=ellipses[ellipses$segellipseID==i,'ycen'], rad=ellipses[ellipses$segellipseID==i,'radhi']/pixscale, axrat=ellipses[ellipses$segellipseID==i,'axrat'], ang=ellipses[ellipses$segellipseID==i,'ang'], box=ellipses[ellipses$segellipseID==i,'box'], col=tempborder, lty=templty, lwd=templwd)
   }
-}
-
-.profoundEllipse=function(x, y, flux, xcen=0, ycen=0, ang=0, axrat=1, box=0){
-  if(is.matrix(x)){
-    z=x
-    x = seq(0.5, dim(z)[1] - 0.5)
-    y = seq(0.5, dim(z)[2] - 0.5)
-    temp=expand.grid(x,y)
-    x=temp[,1]
-    y=temp[,2]
-    flux=as.numeric(z)
-  }
-  if(!is.numeric(box)) box = 0
-  rad=sqrt((x-xcen)^2+(y-ycen)^2)
-  angrad=-ang*pi/180
-  angmod=atan2((x-xcen),(y-ycen))-angrad
-  xmod=rad*sin(angmod)
-  ymod=rad*cos(angmod)
-  xmod=xmod/axrat
-  radmod=(abs(xmod)^(2+box)+abs(ymod)^(2+box))^(1/(2+box))
-  output=cbind(rad=radmod, flux=flux)
-  output=output[order(radmod),]
-  return(output)
 }
 
 profoundDrawEllipse=function(xcen=0, ycen=0, rad=1, axrat=1, ang=0, box=0, ...){

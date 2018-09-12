@@ -168,7 +168,65 @@ profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=
   }
   return=segstats
 }
+
+profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzero=0, df=5, radtrunc=2, iterative=TRUE, doallstats=TRUE){
+  if(class(image)=='profound'){
+    if(missing(segim)){segim=image$segim}
+    if(missing(segstats)){segstats=image$segstats}
+    if(missing(groupim)){groupim=image$group$groupim}
+    if(missing(groupsegID)){groupsegID=image$group$groupsegID}
+    if(missing(magzero)){magzero=image$magzero}
+    image=image$image-image$sky
+  }
+  groupsegID=groupsegID[groupsegID$Ngroup>=2,,drop=FALSE]
+  output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
+  Npad=1
+  image_temp=image
+  for(i in 1:dim(groupsegID)[1]){
+    Ngroup=groupsegID[i,"Ngroup"]
+    segIDlist=unlist(groupsegID[i,"segID"])
+    segIDlist=segIDlist[segIDlist>0]
   
+    tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
+    weightmatrix=matrix(0,length(tempgridgroup[,1]),length(segIDlist))
+    
+    for(i in 1:length(segIDlist)){
+      tempgridseg=which(segim[tempgridgroup]==segIDlist[i])
+  
+      groupout=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[i],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[i],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[i],"ang"],axrat=segstats[segstats$segID==segIDlist[i],"axrat"])
+      segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[i],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[i],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[i],"ang"],axrat=segstats[segstats$segID==segIDlist[i],"axrat"])
+    #tempspline=smooth.spline(segout[segout[,2]>0,1],log10(segout[segout[,2]>0,2]), df=df)
+      select=which(segout[,2]>0)
+      if(length(unique(segout[select,1]))>df){
+        weightmatrix[,i]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, groupout[,1])$y
+        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),i]=0
+      }else{
+        weightmatrix[,i]=0
+      }
+      if(iterative){
+        image_temp[tempgridgroup]=image_temp[tempgridgroup]-weightmatrix[,i]
+      }
+    }
+    weightmatrix=weightmatrix/.rowSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    output[Npad:(Npad+Ngroup-1),"flux_db"]=.colSums(weightmatrix*image[tempgridgroup], dim(weightmatrix)[1], dim(weightmatrix)[2])
+    output[Npad:(Npad+Ngroup-1),"N100_db"]=.colSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    Npad=Npad+Ngroup
+  }
+  output[,"mag_db"]=profoundFlux2Mag(flux=output[,'flux_db'], magzero=magzero)
+  
+  if(doallstats){
+    output=output[match(segstats$segID,output$segID),]
+    output[is.na(output[,"flux_db"]),c("segID", "flux_db", "mag_db", "N100_db")]=segstats[is.na(output[,"flux_db"]),c("segID", "flux","mag","N100")]
+    output=cbind(output, flux_err_sky_db=segstats[,"flux_err_sky"]*sqrt(output[,'N100_db']/segstats[,'N100']))
+    output=cbind(output, flux_err_skyRMS_db=segstats[,"flux_err_skyRMS"]*sqrt(output[,'N100_db']/segstats[,'N100']))
+    output=cbind(output, flux_err_shot_db=segstats[,"flux_err_shot"]*sqrt(output[,'flux_db']/segstats[,'flux']))
+    output=cbind(output, flux_err_db=sqrt(output[,'flux_err_sky_db']^2+output[,'flux_err_skyRMS_db']^2+output[,'flux_err_shot_db']^2))
+    output=cbind(output, mag_err_db=(2.5/log(10))*abs(output[,'flux_err_db']/output[,'flux_db']))
+  }
+  
+  invisible(output)
+}
+
 ### Deprecated Functions ###
 
 # profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){

@@ -14,10 +14,11 @@ sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold 
 converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky = TRUE,
 redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,header, verbose = FALSE,
-plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
-groupstats = boundstats, groupby = 'segim_orig', offset = 1, haralickstats = FALSE,
-sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, R50clean=0, ...)
+boxiters = 0, deblend = FALSE, df = 5, radtrunc = 2, iterative = TRUE, doclip = TRUE,
+shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE,
+rotstats = FALSE, boundstats = FALSE, nearstats = boundstats, groupstats = boundstats,
+groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
+decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, R50clean=0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -108,14 +109,26 @@ Character scalar; the type of sky level estimator used. Allowed options are 'qua
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
 }
-\item{skypixmin}{
+  \item{skypixmin}{
 Numeric scalar; the minimum number of sky pixels desired in our cutout. The default is that we need half the original number of pixels in the \option{box} to be sky.
 }
-\item{boxadd}{
+  \item{boxadd}{
 Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
 }
-\item{boxiters}{
+  \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
+}
+  \item{deblend}{
+Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
+}
+  \item{df}{
+Integer scalar; degrees of freedom.
+}
+  \item{radtrunc}{
+Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group.
+}
+  \item{iterative}{
+Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top.
 }
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.
@@ -283,7 +296,7 @@ Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
 Haralick R.M., et al., 1973, IEEE, SMC-3 (6), 610
 }
 \seealso{
-\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}, \code{\link{profoundMultiband}}
+\code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}, \code{\link{profoundMultiBand}}
 }
 \examples{
 \dontrun{
