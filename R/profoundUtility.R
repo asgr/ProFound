@@ -180,11 +180,15 @@ profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzer
   }
   groupsegID=groupsegID[groupsegID$Ngroup>=2,,drop=FALSE]
   output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
+  if(iterative){
+    output[,"flux_db"]=segstats[match(output$segID, segstats$segID),"flux"]
+    output=output[order(output[,"groupID"],-output[,"flux_db"]),]
+  }
   Npad=1
   image_temp=image
   for(i in 1:dim(groupsegID)[1]){
     Ngroup=groupsegID[i,"Ngroup"]
-    segIDlist=unlist(groupsegID[i,"segID"])
+    segIDlist=output[output[,'groupID']==groupsegID[i,"groupID"],"segID"]
     segIDlist=segIDlist[segIDlist>0]
   
     tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
@@ -219,9 +223,11 @@ profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzer
     output[is.na(output[,"flux_db"]),c("segID", "flux_db", "mag_db", "N100_db")]=segstats[is.na(output[,"flux_db"]),c("segID", "flux","mag","N100")]
     output=cbind(output, flux_err_sky_db=segstats[,"flux_err_sky"]*sqrt(output[,'N100_db']/segstats[,'N100']))
     output=cbind(output, flux_err_skyRMS_db=segstats[,"flux_err_skyRMS"]*sqrt(output[,'N100_db']/segstats[,'N100']))
-    output=cbind(output, flux_err_shot_db=segstats[,"flux_err_shot"]*sqrt(output[,'flux_db']/segstats[,'flux']))
+    output=cbind(output, flux_err_shot_db=segstats[,"flux_err_shot"]*suppressWarnings(sqrt(output[,'flux_db']/segstats[,'flux'])))
     output=cbind(output, flux_err_db=sqrt(output[,'flux_err_sky_db']^2+output[,'flux_err_skyRMS_db']^2+output[,'flux_err_shot_db']^2))
     output=cbind(output, mag_err_db=(2.5/log(10))*abs(output[,'flux_err_db']/output[,'flux_db']))
+  }else if(iterative){
+    output=output[order(output[,'groupID'],output[,'segID']),]
   }
   
   invisible(output)

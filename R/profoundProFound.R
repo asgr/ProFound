@@ -303,6 +303,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     }
     
     if(groupstats){
+      if(verbose){message(' - groupstats = TRUE')}
       if(groupby=='segim'){
         group=profoundSegimGroup(segim)
       }else if(groupby=='segim_orig'){
@@ -320,13 +321,17 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
         groupstats=NULL
       }
     }else{
+      if(verbose){message(' - groupstats = FALSE')}
       group=NULL
       groupstats=NULL
     }
     
-    if(deblend){
+    if(deblend & stats & !missing(image)){
+      if(verbose){message(' - deblend = TRUE')}
       tempblend=profoundFluxDeblend(image=image-sky, segim=segim, segstats=segstats, groupim=group$groupim, groupsegID=group$groupsegID, magzero=magzero, df=df, radtrunc=radtrunc, iterative=iterative, doallstats=TRUE)
       segstats=cbind(segstats,tempblend[,2:10])
+    }else{
+      if(verbose){message(' - deblend = FALSE')}
     }
     
     if(haralickstats){
@@ -352,7 +357,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
         profoundSegimPlot(image=image, segim=segim, mask=mask, header=header, ...)
       }
     }else{
-      if(verbose){message("Skipping segmentation plot - plot set to FALSE")}
+      if(verbose){message("Skipping segmentation plot - plot = FALSE")}
     }
     
     if(!missing(SBlim)){
