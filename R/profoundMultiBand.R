@@ -44,6 +44,14 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     bandappend=presentbands
   }
   
+  if(length(iters_tot)==1){
+    iters_tot=rep(iters_tot, length(multibands))
+  }
+  
+  if(length(iters_tot)!=length(iters_tot)){
+    stop('Length of iters_tot must equal length of multibands!')
+  }
+  
   if(length(magzero)==1){
     magzero=rep(magzero, length(multibands))
   }
@@ -103,7 +111,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     if(!is.null(gain)){
       message(paste('*** Gain:',paste(multibands,gain,sep='=', collapse=' '),' ***'))
     }else{
-      message('*** Gain: not specified for any bands ***')
+      message('*** Gain: not specified for any bands, so shot-noise will be ignored ***')
     }
     
     if(dotot){
@@ -129,25 +137,6 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     }
     temp_magzero=magzero[multibands==detectbands]
     pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
-    
-    # if(groupstats | dogrp){
-    #   if(groupby=='segim'){
-    #     group=profoundSegimGroup(pro_detect$segim)
-    #     group_iters=iters_tot
-    #   }else if(groupby=='segim_orig'){
-    #     group=profoundSegimGroup(pro_detect$segim_orig)
-    #     group$groupim=profoundSegimKeep(segim=pro_detect$segim, segID_merge = group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
-    #     group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
-    #     group_iters=iters_tot
-    #   }else{
-    #     stop('Non legal groupby option, must be segim or segim_orig!')
-    #   }
-    #   if(groupstats){
-    #     pro_detect$group=group
-    #     pro_detect$groupstats=profoundSegimStats(image=pro_detect$image, segim=pro_detect$group$groupim, mask=mask, sky=pro_detect$sky, skyRMS=pro_detect$skyRMS, magzero=temp_magzero, header=pro_detect$header, boundstats=boundstats)
-    #   }
-    # }
-    
   }else{
   
     # Multiple detection bands requested, so we prepare lists for stacking
@@ -210,24 +199,6 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
     
     pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    # if(groupstats | dogrp){
-    #   if(groupby=='segim'){
-    #     group=profoundSegimGroup(pro_detect$segim)
-    #     group_iters=0
-    #   }else if(groupby=='segim_orig'){
-    #     group=profoundSegimGroup(pro_detect$segim_orig)
-    #     group$groupim=profoundSegimKeep(segim=pro_detect$segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
-    #     group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
-    #     group_iters=iters_tot
-    #   }else{
-    #     stop('Non legal groupby option, must be segim or segim_orig!')
-    #   }
-    #   if(groupstats){
-    #     pro_detect$group=group
-    #     pro_detect$groupstats=profoundSegimStats(image=detect_image_stack$image+detect_sky_stack$image, segim=pro_detect$group$groupim, mask=mask, sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, magzero=detect_magzero[1], header=header, boundstats=boundstats)
-    #   }
-    # }
-    
     # Delete and clean up
     
     rm(detect_image_stack)
@@ -271,7 +242,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
         
         # Compute total multi band photometry, allowing some extra dilation via the iters_tot argument
         
-        pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, groupstats=FALSE, iters=iters_tot, verbose=verbose, ...)
+        pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, groupstats=FALSE, iters=iters_tot[i], verbose=verbose, ...)
         
         # Append column names and concatenate cat_tot together
         
@@ -308,7 +279,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim, mask, skycut = 1, pixc
           pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
         }
         
-        # Append column names and concatenate cat_col together
+        # Append column names and concatenate cat_grp together
         names(pro_multi_grp)[1]='groupID'
         setnames(pro_multi_grp, paste0(names(pro_multi_grp), '_', bandappend[i], grpappend))
         cat_grp=cbind(cat_grp, pro_multi_grp)

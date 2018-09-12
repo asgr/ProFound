@@ -132,7 +132,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   if((hassky==FALSE | hasskyRMS==FALSE) & missing(segim)){
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=0, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     if(hassky==FALSE){
       sky=roughsky$sky
       if(verbose){message(' - Sky statistics :')}
@@ -428,7 +428,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   if(!is.null(x$header)){
   
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, type='num', zlim=c(0,1), col=cmap)
+    stretchscale=stretchscale = 1/median(abs(image[which(image>0)]), na.rm=TRUE)
+    magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -457,7 +458,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(x$sky, x$header)
+    stretchscale = 1/median(abs(x$sky[which(x$sky>0)]), na.rm=TRUE)
+    magimageWCS(x$sky, x$header, locut=-max(abs(x$sky)), hicut=max(abs(x$sky)), range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -480,7 +482,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   }else{
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage(image, stretchscale=stretchscale, locut=-maximg, hicut=maximg, type='num', zlim=c(0,1), col=cmap)
+    stretchscale=stretchscale = 1/median(abs(image[which(image>0)]), na.rm=TRUE)
+    magimage(image, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -503,7 +506,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage(x$sky)
+    stretchscale = 1/median(abs(x$sky[which(x$sky>0)]), na.rm=TRUE)
+    magimage(x$sky, locut=-max(abs(x$sky)), hicut=max(abs(x$sky)), range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
