@@ -14,7 +14,7 @@ sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold 
 converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky = TRUE,
 redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, deblend = FALSE, df = 5, radtrunc = 2, iterative = TRUE, doclip = TRUE,
+boxiters = 0, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE, doclip = TRUE,
 shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE,
 rotstats = FALSE, boundstats = FALSE, nearstats = boundstats, groupstats = boundstats,
 groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
@@ -122,13 +122,13 @@ Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
 }
   \item{df}{
-Integer scalar; degrees of freedom.
+Integer scalar; degrees of freedom for the non-parametric spline fitting. See \code{\link{profoundFluxDeblend}}.
 }
   \item{radtrunc}{
-Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group.
+Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group. See \code{\link{profoundFluxDeblend}}.
 }
   \item{iterative}{
-Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top.
+Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top. See \code{\link{profoundFluxDeblend}}.
 }
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.

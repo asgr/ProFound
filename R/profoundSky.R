@@ -140,7 +140,7 @@ profoundSkyEstLoc=function(image, objects, mask, loc=dim(image)/2, box=c(100,100
     skyN=0
     iterN=0
     tempcomb={}
-    while(skyN<skypixmin & iterN<boxiters){
+    while(skyN<skypixmin & iterN<=boxiters){
       if(!missing(objects)){
         tempcomb=magcutout(image=objects, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0
         if(!missing(mask)){
@@ -149,13 +149,14 @@ profoundSkyEstLoc=function(image, objects, mask, loc=dim(image)/2, box=c(100,100
       }else{
         tempcomb=magcutout(image=mask, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0
       }
+      tempcomb[is.na(tempcomb)]=FALSE
       tempcomb=which(tempcomb)
       skyN=length(tempcomb)
       box=box+boxadd
       iterN=iterN+1
     }
     box=box-boxadd #since one too many boxadds will have occurred when it terminates
-    
+
     if(length(tempcomb)>0){
       select=magcutout(image, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image[tempcomb]
     }else{

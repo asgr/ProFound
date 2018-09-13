@@ -169,7 +169,7 @@ profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=
   return=segstats
 }
 
-profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzero=0, df=5, radtrunc=2, iterative=TRUE, doallstats=TRUE){
+profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE){
   if(class(image)=='profound'){
     if(missing(segim)){segim=image$segim}
     if(missing(segstats)){segstats=image$segstats}

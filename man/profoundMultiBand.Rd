@@ -164,11 +164,11 @@ points(multi$cat_tot$mag_rt, multi$cat_col$mag_rc-multi$cat_col$mag_Kc, col='red
 
 multi2=profoundMultiBand(segim=multi$pro_detect$segim, inputlist=list(GALEX_NUV_VST,
 VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
-iters_det = 0, boxiters = 2)
+iters_det = 0, boxiters=2)
 
 multi3=profoundMultiBand(segim=multi$pro_detect$segim_orig, inputlist=list(GALEX_NUV_VST,
 VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
-iters_det = 6, boxiters = 2)
+iters_det = 6, boxiters=2)
 
 #multi and multi3 should create identical plots (since we are dilating the original
 #segim_orig in the same manner), but multi2 will just be the final dilated segim without

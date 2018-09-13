@@ -8,8 +8,8 @@ Mid Level Image Deblender
 Given a target image, a segmentation map, image segstats and group properties, this function will attempt a non-parametric deblend based on local fitting of B-splines to create a weight map for each segment in a group. Flux is guaranteed to be conserved, and errors are appropriately rescaled.
 }
 \usage{
-profoundFluxDeblend(image, segim, segstats, groupim, groupsegID, magzero = 0,  df = 5,
-radtrunc = 2, iterative = TRUE, doallstats = TRUE) 
+profoundFluxDeblend(image, segim, segstats, groupim, groupsegID, magzero = 0,  df = 3,
+radtrunc = 2, iterative = FALSE, doallstats = TRUE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,7 +32,7 @@ List; group information as output by \option{profoundSegimGroup} or \option{prof
 Numeric scalar; the magnitude zero point.
 }
   \item{df}{
-Integer scalar; degrees of freedom.
+Integer scalar; degrees of freedom for the non-parametric spline fitting. See \code{\link{smooth.spline}}.
 }
   \item{radtrunc}{
 Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group.
@@ -72,7 +72,7 @@ Given the large number of inputs required, this function effectively needs \code
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{profoundProFound}}
+\code{\link{profoundProFound}}, \code{\link{smooth.spline}}
 }
 \examples{
 \dontrun{
