@@ -21,7 +21,7 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
           stack=stack+(image_list[[i]]-sky_list[[i]])/(skyRMS_list[[i]]^2)
           inv_var=inv_var+(1/skyRMS_list[[i]]^2)
         }else{
-          message(paste('Missing data in image_list element',i,'so will skipp for stacking!'))
+          message(paste('Missing data in image_list element',i,'so will skip for stacking!'))
         }
       }
       if(is.list(sky_list) & is.list(skyRMS_list)==FALSE){
@@ -31,7 +31,7 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
           stack=stack+(image_list[[i]]-sky_list[[i]])
           inv_var=1
         }else{
-          message(paste('Missing data in image_list element',i,'so will skipp for stacking!'))
+          message(paste('Missing data in image_list element',i,'so will skip for stacking!'))
         }
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)){
@@ -41,7 +41,7 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
           stack=stack+image_list[[i]]/(skyRMS_list[[i]]^2)
           inv_var=inv_var+(1/skyRMS_list[[i]]^2)
         }else{
-          message(paste('Missing data in image_list element',i,'so will skipp for stacking!'))
+          message(paste('Missing data in image_list element',i,'so will skip for stacking!'))
         }
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)==FALSE){
@@ -49,7 +49,7 @@ profoundMakeStack=function(image_list, sky_list=NULL, skyRMS_list=NULL, magzero_
           stack=stack+image_list[[i]]*profoundMag2Flux(magzero_in[i],magzero_out)
           inv_var=inv_var+1
         }else{
-          message(paste('Missing data in image_list element',i,'so will skipp for stacking!'))
+          message(paste('Missing data in image_list element',i,'so will skip for stacking!'))
         }
       }
     }
