@@ -11,14 +11,15 @@ This is the highest level source detection function provided in \code{ProFit}, c
 \usage{
 profoundProFound(image, segim, objects, mask,  skycut=1, pixcut=3, tolerance = 4, ext = 2,
 sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05,
-converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosky = TRUE,
-redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE, doclip = TRUE,
-shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE,
-rotstats = FALSE, boundstats = FALSE, nearstats = boundstats, groupstats = boundstats,
-groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
-decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, R50clean=0, ...)
+converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosegim = FALSE,
+redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bilinear",
+skytype = "median", skyRMStype = "quanlo", roughpedestal = TRUE, sigmasel = 1,
+skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3,
+radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
+verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
+nearstats = boundstats, groupstats = boundstats, groupby = 'segim_orig', offset = 1,
+haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
+keepim = TRUE, R50clean=0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -85,6 +86,9 @@ User provided estimate of the absolute sky level. If this is not provided then i
   \item{skyRMS}{
 User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
+  \item{redosegim}{
+Logical; should the segmentation map be re-computed based using the interim "better sky"? This is usually only required if the sky subtraction was radically poor and complex in the first place, and can be quite computationally expensive since the watershed deblend will need to be redone too.
+}
   \item{redosky}{
 Logical; should the sky and sky RMS grids be re-computed using the final segmentation map? This uses \code{\link{profoundMakeSkyGrid}} to compute the sky and sky RMS grids. If \option{redosky}=TRUE then the output will include the aggressively masked \option{objects_redo} image, if \option{redosky}=FALSE then \option{objects_redo} will be NA.
 }
@@ -105,6 +109,9 @@ Character scalar; the type of sky level estimator used. Allowed options are 'med
 }
   \item{skyRMStype}{
 Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
+}
+  \item{roughpedestal}{
+Logical; when the initial "rough sky" is computed, should only a pedestal (based on the median of the sky map) be used for the sky? This is a good option if the image is known to contain a *very* large (many times the \option{box} size) galaxy that might otherwise be over subtracted by the initial rough sky map.
 }
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.

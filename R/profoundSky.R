@@ -157,10 +157,10 @@ profoundSkyEstLoc=function(image, objects, mask, loc=dim(image)/2, box=c(100,100
     }
     box=box-boxadd #since one too many boxadds will have occurred when it terminates
 
-    if(length(tempcomb)>0){
+    if(skyN>0){
       select=magcutout(image, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image[tempcomb]
     }else{
-      select=magcutout(image, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image
+      select=NA
     }
   }else{
     select=magcutout(image, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image
@@ -222,8 +222,8 @@ profoundMakeSkyMap=function(image, objects, mask, box=c(100,100), grid=box, skyt
   }
   tempmat_sky=matrix(tempsky[,1],length(xseq))
   tempmat_skyRMS=matrix(tempsky[,2],length(xseq))
-  tempmat_sky[is.na(tempmat_sky)]=mean(tempmat_sky, na.rm = TRUE)
-  tempmat_skyRMS[is.na(tempmat_skyRMS)]=mean(tempmat_skyRMS, na.rm = TRUE)
+  tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
+  tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
   return=list(sky=list(x=xseq, y=yseq, z=tempmat_sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))
 }
 
@@ -246,8 +246,8 @@ profoundMakeSkyGrid=function(image, objects, mask, box=c(100,100), grid=box, typ
   }
   tempmat_sky=matrix(tempsky[,1],length(xseq))
   tempmat_skyRMS=matrix(tempsky[,2],length(xseq))
-  tempmat_sky[is.na(tempmat_sky)]=mean(tempmat_sky, na.rm = TRUE)
-  tempmat_skyRMS[is.na(tempmat_skyRMS)]=mean(tempmat_skyRMS, na.rm = TRUE)
+  tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
+  tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
   
   if(rembig){
     invisible(gc())
