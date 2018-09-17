@@ -96,7 +96,7 @@ Logical; should the sky and sky RMS grids be re-computed using the final segment
 Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels to apply to the \option{object} mask before performing the initial and final aggressively masked sky estimates (the latter is only relevant if \option{redosky}=TRUE). Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Dilation is done by \code{\link{profoundMakeSegimDilate}}. If \option{redosky}=TRUE, the final dilated \option{objects} mask is returned as \option{objects_redo}. As a rule of thumb you probably want ~50\% of your image pixels to be masked as objects, much more than this and you might not be able to sample enough sky pixels, much more less and the sky estimates might be biased by object flux in the wings.
 }
   \item{box}{
-Integer vector; the dimensions of the box car filter to estimate the sky with. For convenience, if length 1 then both dimensions of \option{box} used internally are assumed to equal the specified \option{box}. I.e. 200 would be interpreted as c(200,200).
+Integer vector; the dimensions of the box car filter to estimate the sky with. For convenience, if length 1 then both dimensions of \option{box} used internally are assumed to equal the specified \option{box}. I.e. 200 would be interpreted as c(200,200). Dependent default arguments (\option{grid}, \option{boxadd} and \option{skypixmin}) are updated sensibly.
 }
   \item{grid}{
 Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}.
