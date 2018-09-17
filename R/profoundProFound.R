@@ -405,7 +405,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   return=output
 }
 
-plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
+plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   
   if(class(x)!='profound'){
     stop('Object class is not of type profound!')
@@ -484,7 +484,16 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     magimageWCS(x$skyRMS, x$header)
     legend('topleft',legend='skyRMS',bg='white')
     
-    maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+    if(hist=='iters'){
+      maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+    }else if(hist=='sky'){
+      try({
+        tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF')
+        curve(dnorm(x, mean=0, sd=1), col='red', add=TRUE)
+        legend('topleft',legend='sky pixel properties',bg='white')
+        })
+    }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
     par(mar=c(3.5,3.5,0.5,0.5))
     if(logR50){
@@ -532,7 +541,16 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     magimage(x$skyRMS)
     legend('topleft',legend='skyRMS',bg='white')
     
-    maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+    if(hist=='iters'){
+      maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+    }else if(hist=='sky'){
+      try({
+        tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF')
+        curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
+        legend('topleft',legend='sky pixel properties',bg='white')
+        })
+    }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
     par(mar=c(3.5,3.5,0.5,0.5))
     if(logR50){
