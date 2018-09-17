@@ -38,6 +38,13 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   call=match.call()
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   
+  if(length(box)==1){
+    box=rep(box,2)
+    if(missing(grid)){grid=box}
+    if(missing(boxadd)){boxadd=box/2}
+    if(missing(skypixmin)){skypixmin=prod(box)/2}
+  }
+  
   #Split out image and header parts of input:
   
   if(!missing(image)){
@@ -432,14 +439,14 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   image=x$image-x$sky
   cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
   maximg = quantile(abs(image), 0.995, na.rm=TRUE)
-  stretchscale = 1/median(abs(image[which(image>0)]), na.rm=TRUE)
+  stretchscale = 1/median(abs(image), na.rm=TRUE)
   
   layout(matrix(1:9, 3, byrow=TRUE))
   
   if(!is.null(x$header)){
   
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale=stretchscale = 1/median(abs(image[which(image>0)]), na.rm=TRUE)
+    stretchscale=stretchscale = 1/median(abs(image), na.rm=TRUE)
     magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
@@ -469,7 +476,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale = 1/median(abs(x$sky[which(x$sky>0)]), na.rm=TRUE)
+    stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
     magimageWCS(x$sky, x$header, locut=-max(abs(x$sky)), hicut=max(abs(x$sky)), range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
     legend('topleft',legend='sky',bg='white')
     
@@ -493,7 +500,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
   }else{
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale=stretchscale = 1/median(abs(image[which(image>0)]), na.rm=TRUE)
+    stretchscale=stretchscale = 1/median(abs(image), na.rm=TRUE)
     magimage(image, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
@@ -517,7 +524,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale = 1/median(abs(x$sky[which(x$sky>0)]), na.rm=TRUE)
+    stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
     magimage(x$sky, locut=-max(abs(x$sky)), hicut=max(abs(x$sky)), range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     legend('topleft',legend='sky',bg='white')
     
