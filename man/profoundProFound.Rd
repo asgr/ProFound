@@ -13,7 +13,7 @@ profoundProFound(image, segim, objects, mask,  skycut=1, pixcut=3, tolerance = 4
 sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05,
 converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosegim = FALSE,
 redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bilinear",
-skytype = "median", skyRMStype = "quanlo", roughpedestal = TRUE, sigmasel = 1,
+skytype = "median", skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1,
 skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3,
 radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
@@ -87,7 +87,7 @@ User provided estimate of the absolute sky level. If this is not provided then i
 User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{redosegim}{
-Logical; should the segmentation map be re-computed based using the interim "better sky"? This is usually only required if the sky subtraction was radically poor and complex in the first place, and can be quite computationally expensive since the watershed deblend will need to be redone too.
+Logical; should the segmentation map be re-computed based using the interim "better sky"? This is usually only required if the sky subtraction was radically poor and complex in the first place, and can be quite computationally expensive since the watershed deblend will need to be redone too. Will be forced to FALSE if the user supplies a segmentation map. If the user wants to flag object pixels they should pass it to option{objects}.
 }
   \item{redosky}{
 Logical; should the sky and sky RMS grids be re-computed using the final segmentation map? This uses \code{\link{profoundMakeSkyGrid}} to compute the sky and sky RMS grids. If \option{redosky}=TRUE then the output will include the aggressively masked \option{objects_redo} image, if \option{redosky}=FALSE then \option{objects_redo} will be NA.
