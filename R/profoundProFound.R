@@ -489,9 +489,9 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }else if(hist=='sky'){
       try({
         tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
-        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF')
-        curve(dnorm(x, mean=0, sd=1), col='red', add=TRUE)
-        legend('topleft',legend='sky pixel properties',bg='white')
+        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
+        legend('topleft',legend='sky pixels',bg='white')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
@@ -546,9 +546,9 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }else if(hist=='sky'){
       try({
         tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
-        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF')
+        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend='sky pixel properties',bg='white')
+        legend('topleft',legend='sky pixels',bg='white')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
