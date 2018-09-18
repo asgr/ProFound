@@ -346,7 +346,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       groupstats=NULL
     }
     
-    if(deblend & stats & !missing(image)){
+    if(deblend & stats & !missing(image) & any(group$groupsegID$Ngroup>1)){
       if(verbose){message(' - deblend = TRUE')}
       tempblend=profoundFluxDeblend(image=image-sky, segim=segim, segstats=segstats, groupim=group$groupim, groupsegID=group$groupsegID, magzero=magzero, df=df, radtrunc=radtrunc, iterative=iterative, doallstats=TRUE)
       segstats=cbind(segstats,tempblend[,2:10])

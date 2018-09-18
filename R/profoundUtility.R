@@ -178,7 +178,7 @@ profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzer
     if(missing(magzero)){magzero=image$magzero}
     image=image$image-image$sky
   }
-  groupsegID=groupsegID[groupsegID$Ngroup>=2,,drop=FALSE]
+  groupsegID=groupsegID[groupsegID$Ngroup>1,,drop=FALSE]
   output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
   if(iterative){
     output[,"flux_db"]=segstats[match(output$segID, segstats$segID),"flux"]
