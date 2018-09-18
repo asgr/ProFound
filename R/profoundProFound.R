@@ -490,7 +490,11 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
       maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
     }else if(hist=='sky'){
       try({
-        tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+        if(!is.null(x$objects_redo)){
+          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+        }else{
+          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects==0]
+        }
         magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
@@ -547,7 +551,11 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
       maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
     }else if(hist=='sky'){
       try({
-        tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+        if(!is.null(x$objects_redo)){
+          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+        }else{
+          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects==0]
+        }
         magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
