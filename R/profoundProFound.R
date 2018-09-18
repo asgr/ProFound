@@ -326,8 +326,10 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
         group=profoundSegimGroup(segim)
       }else if(groupby=='segim_orig'){
         group=profoundSegimGroup(segim_orig)
-        group$groupim=profoundSegimKeep(segim=segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
-        group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+        any(group$groupsegID$Ngroup>1){
+          group$groupim=profoundSegimKeep(segim=segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
+          group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+        }
       }else{
         stop('Non legal groupby option, must be segim or segim_orig!')
       }
