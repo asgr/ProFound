@@ -10,9 +10,9 @@ Image Transformations
 Various image transformation functions that assist in exploring data. These all require the \code{imager} package to be installed.
 }
 \usage{
-profoundImBlur(image, sigma = 1, plot = FALSE, ...)
-profoundImGrad(image, sigma = 1, plot = FALSE, ...)
-profoundImDiff(image, sigma = 1, plot = FALSE, ...)
+profoundImBlur(image = NULL, sigma = 1, plot = FALSE, ...)
+profoundImGrad(image = NULL, sigma = 1, plot = FALSE, ...)
+profoundImDiff(image = NULL, sigma = 1, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

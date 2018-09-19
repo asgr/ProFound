@@ -31,7 +31,7 @@ profoundSB2Flux=function(SB=0, magzero=0, pixscale=1){
   return(profoundMag2Flux(mag=mag, magzero=magzero))
 }
 
-profoundImBlur=function(image, sigma=1, plot=FALSE, ...){
+profoundImBlur=function(image=NULL, sigma=1, plot=FALSE, ...){
   if(requireNamespace("imager", quietly = TRUE)){
     output=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
   }else{
@@ -47,7 +47,7 @@ profoundImBlur=function(image, sigma=1, plot=FALSE, ...){
   return=output
 }
 
-profoundImGrad=function(image, sigma=1, plot=FALSE, ...){
+profoundImGrad=function(image=NULL, sigma=1, plot=FALSE, ...){
   if(!requireNamespace("imager", quietly = TRUE)){
     stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
   }
@@ -58,7 +58,7 @@ profoundImGrad=function(image, sigma=1, plot=FALSE, ...){
   return=output
 }
 
-profoundImDiff=function(image,sigma=1, plot=FALSE, ...){
+profoundImDiff=function(image=NULL,sigma=1, plot=FALSE, ...){
   if(!requireNamespace("imager", quietly = TRUE)){
     stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
   }
@@ -70,8 +70,8 @@ profoundImDiff=function(image,sigma=1, plot=FALSE, ...){
   return=output
 }
 
-profoundMakeSigma=function(image, objects, sky=0, skyRMS=0, readRMS=0, darkRMS=0, skycut=0, gain=1, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU', output_units='ADU', plot=FALSE, ...){
-  if(!missing(objects)){
+profoundMakeSigma=function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0, darkRMS=0, skycut=0, gain=1, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU', output_units='ADU', plot=FALSE, ...){
+  if(!is.null(objects)){
     if(length(objects)==length(image)){
       image[objects==0]=0
     }
@@ -126,7 +126,7 @@ profoundMakeSigma=function(image, objects, sky=0, skyRMS=0, readRMS=0, darkRMS=0
   return=sigma
 }
 
-profoundGainEst=function(image, mask=0, objects=0, sky=0, skyRMS=1){
+profoundGainEst=function(image=NULL, mask=0, objects=0, sky=0, skyRMS=1){
   if(missing(sky)){
     sky=profoundSkyEst(image=image, mask=mask, objects=objects,plot=FALSE)$sky
   }
@@ -150,8 +150,8 @@ profoundGainEst=function(image, mask=0, objects=0, sky=0, skyRMS=1){
   return=10^findgain$par
 }
 
-profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=TRUE, rowreset=FALSE){
-  if(! missing(groupID_merge)){
+profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, groupID_merge=NULL, flag=TRUE, rowreset=FALSE){
+  if(! is.null(groupID_merge)){
     remove_segIDs=unique(unlist(groupsegID[groupsegID$groupID %in% groupID_merge,'segID']))
     remove_segIDs=remove_segIDs[!remove_segIDs %in% groupID_merge]
     segstats=segstats[! segstats$segID %in% remove_segIDs,]
@@ -169,13 +169,13 @@ profoundCatMerge=function(segstats, groupstats, groupsegID, groupID_merge, flag=
   return=segstats
 }
 
-profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE){
+profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE){
   if(class(image)=='profound'){
-    if(missing(segim)){segim=image$segim}
-    if(missing(segstats)){segstats=image$segstats}
-    if(missing(groupim)){groupim=image$group$groupim}
-    if(missing(groupsegID)){groupsegID=image$group$groupsegID}
-    if(missing(magzero)){magzero=image$magzero}
+    if(is.null(segim)){segim=image$segim}
+    if(is.null(segstats)){segstats=image$segstats}
+    if(is.null(groupim)){groupim=image$group$groupim}
+    if(is.null(groupsegID)){groupsegID=image$group$groupsegID}
+    if(is.null(magzero)){magzero=image$magzero}
     image=image$image-image$sky
   }
   groupsegID=groupsegID[groupsegID$Ngroup>1,,drop=FALSE]
@@ -236,7 +236,7 @@ profoundFluxDeblend=function(image, segim, segstats, groupim, groupsegID, magzer
 ### Deprecated Functions ###
 
 # profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
-#   if(!missing(header)){
+#   if(!is.null(header)){
 #     if(is.data.frame(header) | is.matrix(header)){
 #       locs=match(c('CD1_1','CD1_2','CD2_1','CD2_2'),header[,1])
 #       headerWCS=data.frame(header[locs,1],as.numeric(header[locs,2]))

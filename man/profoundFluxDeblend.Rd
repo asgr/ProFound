@@ -8,8 +8,9 @@ Mid Level Image Deblender
 Given a target image, a segmentation map, image segstats and group properties, this function will attempt a non-parametric deblend based on local fitting of B-splines to create a weight map for each segment in a group. Flux is guaranteed to be conserved, and errors are appropriately rescaled.
 }
 \usage{
-profoundFluxDeblend(image, segim, segstats, groupim, groupsegID, magzero = 0,  df = 3,
-radtrunc = 2, iterative = FALSE, doallstats = TRUE) 
+profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
+groupsegID = NULL, magzero = 0,  df = 3, radtrunc = 2, iterative = FALSE,
+doallstats = TRUE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

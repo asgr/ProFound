@@ -8,7 +8,7 @@ Image Gain Estimator
 High level function to estimate a rough value for the image gain in cases where you have no idea what the true image gain is. In practice this tends to be accurate to an order of magnitude and provides a reasonable lower limit for the true gain, which is good enough to make a rough first attempt at a sigma map.
 }
 \usage{
-profoundGainEst(image, mask = 0, objects = 0, sky = 0, skyRMS = 1)
+profoundGainEst(image = NULL, mask = 0, objects = 0, sky = 0, skyRMS = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

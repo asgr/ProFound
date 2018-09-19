@@ -8,10 +8,11 @@ Watershed Image Segmentation
 A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be passed to the \option{segim} input of \code{profitSetupData}).
 }
 \usage{
-profoundMakeSegim(image, mask, objects, skycut = 1, pixcut = 3, tolerance = 4, ext = 2,
-sigma = 1, smooth = TRUE, SBlim, magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS,
-header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut = 3,
+tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, SBlim = NULL, magzero = 0, gain = NULL,
+pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL, verbose = FALSE, plot = FALSE,
+stats = TRUE, rotstats = FALSE, boundstats = FALSE, offset = 1, sortcol = "segID",
+decreasing = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

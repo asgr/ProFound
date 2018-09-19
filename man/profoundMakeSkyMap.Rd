@@ -9,12 +9,14 @@ Calculate Sky Maps
 The high level function computes the absolute sky and sky RMS level over an image at a scale defined locally by the \option{box} parameter. This coarse map can then be used to compute sky/skyRMS values for the local sky anywhere on an image. This function uses \code{\link{profoundSkyEstLoc}} to calculate the sky statistics for the subset boxcar regions.
 }
 \usage{
-profoundMakeSkyMap(image, objects, mask, box = c(100,100), grid = box, skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE)
-profoundMakeSkyGrid(image, objects, mask, box = c(100,100), grid = box, type = 'bilinear',
-skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc=FALSE, paddim = TRUE)
+profoundMakeSkyMap(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
+grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
+skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
+paddim = TRUE)
+profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
+grid = box, type = 'bilinear', skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
+skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
+paddim = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

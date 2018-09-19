@@ -9,15 +9,16 @@ ProFound Source Detection
 This is the highest level source detection function provided in \code{ProFit}, calculating both the initial segmentation map and reasonable estimates for the total flux apertures for each source in an automatic manner.
 }
 \usage{
-profoundProFound(image, segim, objects, mask,  skycut=1, pixcut=3, tolerance = 4, ext = 2,
-sigma = 1, smooth = TRUE, SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05,
-converge = 'flux', magzero = 0, gain = NULL, pixscale = 1, sky, skyRMS, redosegim = FALSE,
-redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bilinear",
-skytype = "median", skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1,
-skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3,
-radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
-verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats = boundstats, groupstats = boundstats, groupby = 'segim_orig', offset = 1,
+profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut=1,
+pixcut=3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, SBlim, size = 5,
+shape = "disc", iters = 6, threshold = 1.05, converge = 'flux', magzero = 0, gain = NULL,
+pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
+redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
+skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2,
+boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE,
+doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE,
+stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
+groupstats = boundstats, group = NULL, groupby = 'segim_orig', offset = 1,
 haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
 keepim = TRUE, R50clean=0, ...)
 }
@@ -169,6 +170,9 @@ Logical; if TRUE then the IDs of nearby segments is calculated via \code{\link{p
 }
   \item{groupstats}{
 Logical; if TRUE then the IDs of grouped dilated segments (based on the output \option{segim}) is calculated via \code{\link{profoundSegimGroup}} and output to the list object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object information returned. If \option{stats}=TRUE is also set then this flag will also create the \option{groupstats} output of photometric properties of the groups.
+}
+  \item{group}{
+List; you can pass in the output from \code{\link{profoundSegimGroup}} directly, meaning groups will not be re-computed internally. This might be useful for speed in certain matched photometry applications.
 }
   \item{groupby}{
 Character scalar; How should the grouped segmentation map be formed that will be used to produce the \option{groupstats} output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.

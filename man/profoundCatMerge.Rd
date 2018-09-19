@@ -8,8 +8,8 @@ Catalogue Merging Tool
 Merges segmentation and grouped segmentation catalogues based on which groups are preferred.
 }
 \usage{
-profoundCatMerge(segstats, groupstats, groupsegID, groupID_merge, flag = TRUE,
-rowreset = FALSE)
+profoundCatMerge(segstats = NULL, groupstats = NULL, groupsegID = NULL,
+groupID_merge = NULL, flag = TRUE, rowreset = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

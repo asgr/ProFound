@@ -8,8 +8,8 @@ Calculate single annulus properties of an iso-photal ellipse
 Returns single ellipse properties for a specific set of pixels, assumed to be be a narrow range in flux (i.e. an iso-photal annulus).
 }
 \usage{
-profoundGetEllipse(x, y, z, xcen, ycen, scale = sqrt(2), pixscale = 1, dobox = FALSE,
-plot=FALSE, ...)
+profoundGetEllipse(x, y, z, xcen = NULL, ycen = NULL, scale = sqrt(2), pixscale = 1,
+dobox = FALSE, plot=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

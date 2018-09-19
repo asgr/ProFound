@@ -9,10 +9,11 @@ Pixel to pixel correlation statistics
 Returns the x and y dimension pixel-to-pixel correlation (often called covariance) at various scales, optionally returning a diagnostic plot.
 }
 \usage{
-profoundPixelCorrelation(image, objects, mask, sky = 0, skyRMS = 1,
+profoundPixelCorrelation(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
 lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
 ylim=c(-1,1), log='x', grid=TRUE, ...)
-profoundSkySplitFFT(image, objects, mask, sky = 0, skyRMS = 1, skyscale=100, profound)
+profoundSkySplitFFT(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
+skyscale = 100, profound = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

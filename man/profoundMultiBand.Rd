@@ -8,12 +8,12 @@ Multi Band ProFound Photometry
 Run multiband \code{ProFound} photometry either with loaded data, or images on a local disk.
 }
 \usage{
-profoundMultiBand(inputlist = NULL, dir = "", segim, mask, skycut = 1, pixcut = 3,
-tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6, iters_tot = 0,
-detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0, gain = NULL,
-bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
-docol = TRUE, dogrp = TRUE, groupby = "segim_orig", boundstats = TRUE,
-groupstats = boundstats, haralickstats = TRUE, verbose = FALSE, ...)
+profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL, skycut = 1,
+pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6,
+iters_tot = 0, detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0,
+gain = NULL, bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g',
+dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE, groupby = "segim_orig",
+boundstats = TRUE, groupstats = boundstats, haralickstats = TRUE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -85,6 +85,9 @@ Logical; should non-dilated segment colour photometry be computed for the bands 
 }
   \item{dogrp}{
 Logical; should group segment photometry be computed for the bands specified in \option{multibands}? This might be useful for re-assembling large galaxies that are broken up at a later date. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
+}
+  \item{deblend}{
+Logical; should total segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output segstats? This only applies to the \option{cat_tot} output.
 }
   \item{groupby}{
 Character scalar; How should the grouped segmentation map be formed that will be used to produce the cat_grp output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.

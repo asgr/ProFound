@@ -26,7 +26,7 @@
   return(output)
 }
 
-profoundGetEllipse=function(x, y, z, xcen, ycen, scale=sqrt(2), pixscale=1, dobox=FALSE, plot=FALSE, ...){
+profoundGetEllipse=function(x, y, z, xcen=NULL, ycen=NULL, scale=sqrt(2), pixscale=1, dobox=FALSE, plot=FALSE, ...){
   if(is.matrix(x)){
     if(dim(x)[2]==3){
       y=x[,2]
@@ -34,8 +34,8 @@ profoundGetEllipse=function(x, y, z, xcen, ycen, scale=sqrt(2), pixscale=1, dobo
       x=x[,1]
     }
   }
-  if(missing(xcen)){xcen=.meanwt(x, wt=z)}
-  if(missing(ycen)){ycen=.meanwt(y, wt=z)}
+  if(is.null(xcen)){xcen=.meanwt(x, wt=z)}
+  if(is.null(ycen)){ycen=.meanwt(y, wt=z)}
   xsd=sqrt(.varwt(x, wt=z))
   ysd=sqrt(.varwt(y, wt=z))
   covxy=.covarwt(x, y, wt=z)
@@ -70,8 +70,8 @@ profoundGetEllipse=function(x, y, z, xcen, ycen, scale=sqrt(2), pixscale=1, dobo
   return=c(xcen=xcen, ycen=ycen, radhi=rad$hi*scale*pixscale, radlo=rad$lo*scale*pixscale, radav=radav*pixscale, axrat=axrat, ang=ang, box=box, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy)
 }
 
-profoundGetEllipses=function(image, segim, segID=1, levels=10, magzero=0, pixscale=1, fixcen=TRUE, dobox=FALSE, plot=TRUE, ...){
-  if(missing(segim)){segim=segID}
+profoundGetEllipses=function(image=NULL, segim=NULL, segID=1, levels=10, magzero=0, pixscale=1, fixcen=TRUE, dobox=FALSE, plot=TRUE, ...){
+  if(is.null(segim)){segim=segID}
   tempxy=which(segim==segID, arr.ind = T)-0.5
   tempxy=cbind(tempxy,image[segim==segID])
   tempxy=tempxy[order(tempxy[,3],decreasing = T),]
@@ -113,7 +113,7 @@ profoundGetEllipses=function(image, segim, segID=1, levels=10, magzero=0, pixsca
   return=list(ellipses=tempellipses, segellipses=segelllipses)
 }
 
-profoundGetEllipsesPlot=function(image, ellipses, segim, segID=1, segellipseID='all', pixscale=1, col=rep(rainbow(10,s=0.5),4), border='auto', lty='auto', lwd='auto', ...){
+profoundGetEllipsesPlot=function(image=NULL, ellipses=NULL, segim=NULL, segID=1, segellipseID='all', pixscale=1, col=rep(rainbow(10,s=0.5),4), border='auto', lty='auto', lwd='auto', ...){
   tempcon = magimage(image, col=col, ...)
   if(segellipseID[1]=='all'){segellipseID=1:length(ellipses[,1])}
   for(i in segellipseID){
@@ -138,7 +138,7 @@ profoundGetEllipsesPlot=function(image, ellipses, segim, segID=1, segellipseID='
       if(lty=='auto'){templty=2}else{templty=lty}
       if(lwd=='auto'){templwd=1}else{templwd=lwd}
     }
-    if(!missing(segim)){
+    if(!is.null(segim)){
       tempcon = magimage(1-(segim==segID), add=T, magmap=F, zlim=c(0,1), col=NA)
       contour(tempcon, add=T, drawlabels=F, levels=1, col = "darkgreen")
     }

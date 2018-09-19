@@ -8,7 +8,7 @@ Segment Neighbour IDs
 Returns a data.frame of all nearby (default is touching) segments surrounding every segment in a provided segim.
 }
 \usage{
-profoundSegimNear(segim, offset = 1)
+profoundSegimNear(segim = NULL, offset = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

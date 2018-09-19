@@ -8,7 +8,7 @@ Stack Images
 Stacks multiple images based on their signal-to-noise.
 }
 \usage{
-profoundMakeStack(image_list, sky_list = NULL, skyRMS_list = NULL, magzero_in = 0,
+profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL, magzero_in = 0,
 magzero_out = 0)
 }
 %- maybe also 'usage' for other objects documented here.

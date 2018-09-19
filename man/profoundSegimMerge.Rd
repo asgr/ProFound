@@ -8,7 +8,8 @@ Merge Segmentation Maps
 Takes two segmentation maps and merges them in a sensible manner, making sure segments representing the same object are not overlaid on each other.
 }
 \usage{
-profoundSegimMerge(image, segim_base, segim_add, mask, sky = 0)
+profoundSegimMerge(image = NULL, segim_base = NULL, segim_add = NULL, mask = NULL,
+sky = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

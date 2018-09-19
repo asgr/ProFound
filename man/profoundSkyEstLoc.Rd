@@ -8,10 +8,10 @@ Calculate Sky in Subset of Pixels
 Calculate the sky and sky RMS for a subset region of a larger image, as used in \code{\link{profoundMakeSkyMap}}.
 }
 \usage{
-profoundSkyEstLoc(image, objects, mask, loc = dim(image)/2, box = c(100, 100),
-skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
-plot = FALSE, ...)
+profoundSkyEstLoc(image = NULL, objects = NULL, mask = NULL, loc = dim(image)/2,
+box = c(100, 100), skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
+skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
+paddim = TRUE, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -8,8 +8,8 @@ Propagate Identified Segments
 Propagates all identified segments across the full image, only ignoring masked regions. This serves to identify which segment every pixel is most likely to belong to using a number of image related criteria. Uses EBImage's propagate function to do the grunt work.
 }
 \usage{
-profoundMakeSegimPropagate(image, segim, objects, mask, sky = 0, lambda = 1e-04,
-plot=FALSE, ...)
+profoundMakeSegimPropagate(image = NULL, segim = NULL, objects = NULL, mask = NULL,
+sky = 0, lambda = 1e-04, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

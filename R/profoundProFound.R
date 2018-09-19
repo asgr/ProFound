@@ -32,7 +32,7 @@
   return=tempout
 }
 
-profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky, skyRMS, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   call=match.call()
@@ -47,29 +47,29 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   #Split out image and header parts of input:
   
-  if(!missing(image)){
-    if(any(names(image)=='imDat') & missing(header)){
+  if(!is.null(image)){
+    if(any(names(image)=='imDat') & is.null(header)){
       if(verbose){message('Supplied image contains image and header components')}
       header=image$hdr
       image=image$imDat
-    }else if(any(names(image)=='imDat') & !missing(header)){
+    }else if(any(names(image)=='imDat') & !is.null(header)){
       if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$imDat
     }
-    if(any(names(image)=='dat') & missing(header)){
+    if(any(names(image)=='dat') & is.null(header)){
       if(verbose){message('Supplied image contains image and header components')}
       header=image$hdr[[1]]
       header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
       image=image$dat[[1]]
-    }else if(any(names(image)=='dat') & !missing(header)){
+    }else if(any(names(image)=='dat') & !is.null(header)){
       if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$dat[[1]]
     }
-    if(any(names(image)=='image') & missing(header)){
+    if(any(names(image)=='image') & is.null(header)){
       if(verbose){message('Supplied image contains image and header components')}
       header=image$header
       image=image$image
-    }else if(any(names(image)=='image') & !missing(header)){
+    }else if(any(names(image)=='image') & !is.null(header)){
       if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$image
     }
@@ -79,7 +79,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   #Treat image NAs as masked regions:
   
-  if(!missing(mask)){
+  if(!is.null(mask)){
     if(length(mask)==1){
       maskflag=mask
       mask=matrix(0L,dim(image)[1],dim(image)[2])
@@ -108,13 +108,13 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     }
   }
   
-  #if(!missing(segim) & !missing(mask)){
+  #if(!is.null(segim) & !is.null(mask)){
   #  segim=segim*(1-mask) #I don't think we actually need this
   #}
   
   #Get the pixel scale, if possible and not provided:
   
-  if(missing(pixscale) & !missing(header)){
+  if(missing(pixscale) & !is.null(header)){
     pixscale=getpixscale(header)
     if(verbose){message(paste('Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel'))}
   }else{
@@ -124,8 +124,8 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   skyarea=prod(dim(image))*pixscale^2/(3600^2)
   if(verbose){message(paste('Supplied image is',round(dim(image)[1]*pixscale/60,3),'x',round(dim(image)[2]*pixscale/60,3),'amin, ', round(skyarea,3),'deg-sq'))}
   
-  if(missing(objects)){
-    if(!missing(segim)){
+  if(is.null(objects)){
+    if(!is.null(segim)){
       objects=segim
       objects[objects != 0] = 1
       mode(objects)='integer'
@@ -134,10 +134,10 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   #Check for user provided sky, and compute if missing:
   
-  hassky=!missing(sky)
-  hasskyRMS=!missing(skyRMS)
+  hassky=!is.null(sky)
+  hasskyRMS=!is.null(skyRMS)
   
-  if((hassky==FALSE | hasskyRMS==FALSE) & missing(segim)){
+  if((hassky==FALSE | hasskyRMS==FALSE) & is.null(segim)){
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
     roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=0, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     if(roughpedestal){
@@ -160,7 +160,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
   
   #Make the initial segmentation map, if not provided.
   
-  if(missing(segim)){
+  if(is.null(segim)){
     if(verbose){message(paste('Making initial segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
     segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, plot=FALSE, stats=FALSE)
     objects=segim$objects
@@ -235,7 +235,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
         segim[select]=segim_array[,,i][select]
       }
       
-      if(!missing(mask)){
+      if(!is.null(mask)){
         segim[mask!=0]=segim_orig[mask!=0]
       }
       
@@ -289,7 +289,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       invisible(gc())
     }
     
-    if(stats & !missing(image)){
+    if(stats & !is.null(image)){
       if(verbose){message(paste('Calculating final segstats for',length(which(tabulate(segim)>0)),'objects -',round(proc.time()[3]-timestart,3),'sec'))}
       if(verbose){message(paste(' - magzero =', round(magzero,3)))}
       if(verbose){
@@ -323,18 +323,22 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     if(groupstats){
       if(verbose){message(' - groupstats = TRUE')}
       if(groupby=='segim'){
-        group=profoundSegimGroup(segim)
+        if(is.null(group)){
+          group=profoundSegimGroup(segim)
+        }
       }else if(groupby=='segim_orig'){
-        group=profoundSegimGroup(segim_orig)
-        if(any(group$groupsegID$Ngroup>1)){
-          group$groupim=profoundSegimKeep(segim=segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
-          group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+        if(is.null(group)){
+          group=profoundSegimGroup(segim_orig)
+          if(any(group$groupsegID$Ngroup>1)){
+            group$groupim=profoundSegimKeep(segim=segim, segID_merge=group$groupsegID[group$groupsegID$Ngroup>1,'segID'])
+            group$groupsegID$Npix=tabulate(group$groupim)[group$groupsegID$groupID]
+          }
         }
       }else{
         stop('Non legal groupby option, must be segim or segim_orig!')
       }
 
-      if(stats & !missing(image)){
+      if(stats & !is.null(image) & !is.null(group)){
         groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
         colnames(groupstats)[1]='groupID'
       }else{
@@ -346,7 +350,7 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
       groupstats=NULL
     }
     
-    if(deblend & stats & !missing(image) & any(group$groupsegID$Ngroup>1)){
+    if(deblend & stats & !is.null(image) & any(group$groupsegID$Ngroup>1)){
       if(verbose){message(' - deblend = TRUE')}
       tempblend=profoundFluxDeblend(image=image-sky, segim=segim, segstats=segstats, groupim=group$groupim, groupsegID=group$groupsegID, magzero=magzero, df=df, radtrunc=radtrunc, iterative=iterative, doallstats=TRUE)
       segstats=cbind(segstats,tempblend[,2:10])
@@ -390,15 +394,15 @@ profoundProFound=function(image, segim, objects, mask, skycut=1, pixcut=3, toler
     }else{
       SBlim=NULL
     }
-    if(missing(header)){header=NULL}
+    if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
-    if(missing(mask)){mask=NULL}
+    if(is.null(mask)){mask=NULL}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }else{
-    if(missing(header)){header=NULL}
+    if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
-    if(missing(mask)){mask=NULL}
+    if(is.null(mask)){mask=NULL}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=NULL, skyRMS=NULL, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)

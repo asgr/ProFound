@@ -12,8 +12,8 @@
 \tabular{ll}{
 Package: \tab ProFound\cr
 Type: \tab Package\cr
-Version: \tab 1.1.6\cr
-Date: \tab 2018-09-17\cr
+Version: \tab 1.2.0\cr
+Date: \tab 2018-09-19\cr
 License: \tab LGPL-3\cr
 Depends: \tab R (>= 3.0), FITSio, magicaxis (>= 2.0.3)\cr
 Imports: \tab RColorBrewer, data.table, celestial (>= 1.4.1)\cr

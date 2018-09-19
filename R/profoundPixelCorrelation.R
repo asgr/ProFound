@@ -1,4 +1,4 @@
-profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE, plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
+profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE, plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
   
   xlen=dim(image)[1]
   ylen=dim(image)[2]
@@ -10,11 +10,11 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
   flag_neg=image<0
   flag_pos=image>0
   
-  if(!missing(objects)){
+  if(!is.null(objects)){
     image[objects>0]=NA
   }
   
-  if(!missing(mask)){
+  if(!is.null(mask)){
     image[mask>0]=NA
   }
   
@@ -43,11 +43,11 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
     xlenpad=xlen+xlen%%2
     ylenpad=ylen+ylen%%2
     
-    if(!missing(objects)){
+    if(!is.null(objects)){
       image[objects>0]=rnorm(length(which(objects>0)))
     }
     
-    if(!missing(mask)){
+    if(!is.null(mask)){
       image[mask>0]=rnorm(length(which(mask>0)))
     }
     
@@ -84,25 +84,25 @@ profoundPixelCorrelation=function(image, objects, mask, sky=0, skyRMS=1, lag=c(1
   return=list(cortab=output_cortab, fft=output_FFT, image_sky=image)
 }
 
-profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100, profound){
-  if(!missing(image)){
+profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, skyscale=100, profound=NULL){
+  if(!is.null(image)){
     if(class(image)=='profound'){
-      if(missing(objects)){objects=image$objects_redo}
-      if(missing(mask)){mask=image$mask}
+      if(is.null(objects)){objects=image$objects_redo}
+      if(is.null(mask)){mask=image$mask}
       if(missing(sky)){sky=image$sky}
       if(missing(skyRMS)){skyRMS=image$skyRMS}
       image=image$image
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
     }
   }
-  if(!missing(profound)){
+  if(!is.null(profound)){
     if(class(profound) != 'profound'){
       stop('Class of profound input must be of type \'profound\'')
     }
-    if(missing(image)){image=profound$image}
+    if(is.null(image)){image=profound$image}
     if(is.null(image)){stop('Need image in profound object to be non-Null')}
-    if(missing(objects)){objects=profound$objects_redo}
-    if(missing(mask)){mask=profound$mask}
+    if(is.null(objects)){objects=profound$objects_redo}
+    if(is.null(mask)){mask=profound$mask}
     if(missing(sky)){sky=profound$sky}
     if(missing(skyRMS)){skyRMS=profound$skyRMS}
   }
@@ -118,7 +118,7 @@ profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100
   
   image=image-sky
   
-  if(!missing(objects)){
+  if(!is.null(objects)){
     if(is.null(objects)==FALSE){
       if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for object padding')}
       sel_objects=objects>0
@@ -126,12 +126,10 @@ profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100
     }
   }
     
-  if(!missing(mask)){
-    if(is.null(mask)==FALSE){
-      if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for mask padding')}
-      sel_mask=mask>0
-      image[sel_mask]=rnorm(length(which(sel_mask)),mean=0,sd=skyRMS[sel_objects])
-    }
+  if(!is.null(mask)){
+    if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for mask padding')}
+    sel_mask=mask>0
+    image[sel_mask]=rnorm(length(which(sel_mask)),mean=0,sd=skyRMS[sel_objects])
   }
 
   fft_orig=fft(image)
@@ -142,11 +140,6 @@ profoundSkySplitFFT=function(image, objects, mask, sky=0, skyRMS=1, skyscale=100
   fft_orig[xlen+1-1:clipfreqx, 1:clipfreqy]=0
   fft_orig[1:clipfreqx, ylen+1-1:clipfreqy]=0
   fft_orig[xlen+1-1:clipfreqx, ylen+1-1:clipfreqy]=0
-  
-  # if(!missing(modclip)){
-  #   FFT_Mod=Mod(fft_orig)
-  #   fft_orig[FFT_Mod>quantile(FFT_Mod,modclip)]=0
-  # }
   
   image_new=Re(fft(fft_orig,inverse=TRUE))/prod(xlen,ylen)
   return=list(sky=sky+image-image_new, sky_lo=image-image_new, sky_hi=image_new)

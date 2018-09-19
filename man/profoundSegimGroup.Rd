@@ -8,7 +8,7 @@ Create Segmentation Groups
 Given an input segmentation map, returns a map of groups of touching segments as well as the IDs of segments within each group.
 }
 \usage{
-profoundSegimGroup(segim)
+profoundSegimGroup(segim = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

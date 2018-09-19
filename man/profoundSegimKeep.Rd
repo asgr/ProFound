@@ -8,7 +8,8 @@ Merge Segmentation Map with Grouped Segmentation map
 Allows users to safely merge a standard segim with a groupim, where you can specify segments to be newly merged together, or groups to be merged.
 }
 \usage{
-profoundSegimKeep(segim, groupim, groupID_merge, segID_merge, clean = FALSE)
+profoundSegimKeep(segim = NULL, groupim = NULL, groupID_merge = NULL, segID_merge = NULL,
+clean = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

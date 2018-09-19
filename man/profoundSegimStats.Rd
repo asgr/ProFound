@@ -9,11 +9,11 @@ Image Segmentation Statistics
 Basic summary statistics for image segments, e.g. aperture parameters, fluxes and surface brightness estimates. These might provide useful first guesses to ProFit fitting parameters (particularly \option{flux}, \option{axrat} and \option{ang}).
 }
 \usage{
-profoundSegimStats(image, segim, mask, sky = 0, skyRMS = 0, magzero = 0, gain,
-pixscale = 1, header, sortcol = "segID", decreasing = FALSE, rotstats = FALSE,
-boundstats = FALSE, offset = 1)
-profoundSegimPlot(image, segim, mask, sky = 0, header, col=rainbow(max(segim), end=2/3),
-profound, ...)
+profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = 0, skyRMS = 0,
+magzero = 0, gain = NULL, pixscale = 1, header, sortcol = "segID", decreasing = FALSE,
+rotstats = FALSE, boundstats = FALSE, offset = 1)
+profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = 0, header = NULL,
+col = rainbow(max(segim), end=2/3), profound = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
