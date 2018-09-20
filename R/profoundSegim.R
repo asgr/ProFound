@@ -1,43 +1,43 @@
-.meanwt=function(x, wt){
+.meanwt=function(x=NULL, wt=NULL){
   wt[wt<0]=0
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   sum(x*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)
 }
 
-.varwt=function(x, wt, xcen){
+.varwt=function(x=NULL, wt=NULL, xcen=NULL){
   wt[wt<0]=0
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
-  if(missing(xcen)){xcen=.meanwt(x, wt)}
+  if(is.null(xcen)){xcen=.meanwt(x, wt)}
   return=(sum((x-xcen)^2*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE))
 }
 
-.covarwt=function(x, y, wt, xcen, ycen){
+.covarwt=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
   wt[wt<0]=0
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
-  if(missing(xcen)){xcen=.meanwt(x, wt)}
-  if(missing(ycen)){ycen=.meanwt(y, wt)}
+  if(is.null(xcen)){xcen=.meanwt(x, wt)}
+  if(is.null(ycen)){ycen=.meanwt(y, wt)}
   return=(sum((x-xcen)*(y-ycen)*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE))
 }
 
-.cov2eigval=function(sx,sy,sxy){
+.cov2eigval=function(sx=NULL, sy=NULL, sxy=NULL){
   b=-sx^2-sy^2
   c=sx^2*sy^2-sxy^2
   return=(list(hi=(-b+sqrt(b^2-4*c))/2,lo=(-b-sqrt(b^2-4*c))/2))
 }
 
-.cov2eigvec=function(sx,sy,sxy){
+.cov2eigvec=function(sx=NULL, sy=NULL, sxy=NULL){
   eigval=.cov2eigval(sx,sy,sxy)$hi
   eigvec=(sx^2-eigval)/sxy
   return=eigvec
 }
 
-.eigvec2ang=function(eigvec){
+.eigvec2ang=function(eigvec=NULL){
   return=(90-atan(eigvec)*180/pi)%%180
 }
 
-.asymm=function(x, y, wt, xcen, ycen){
-  if(missing(xcen)){xcen=.meanwt(x, wt)}
-  if(missing(ycen)){ycen=.meanwt(y, wt)}
+.asymm=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
+  if(is.null(xcen)){xcen=.meanwt(x, wt)}
+  if(is.null(ycen)){ycen=.meanwt(y, wt)}
   relx=round(x-xcen)
   rely=round(y-ycen)
   frame1=data.frame(x=relx,y=rely,wt1=wt)
@@ -48,9 +48,9 @@
   return=asymm
 }
 
-.reflect=function(x, y, wt, xcen, ycen){
-  if(missing(xcen)){xcen=.meanwt(x, wt)}
-  if(missing(ycen)){ycen=.meanwt(y, wt)}
+.reflect=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
+  if(is.null(xcen)){xcen=.meanwt(x, wt)}
+  if(is.null(ycen)){ycen=.meanwt(y, wt)}
   relx=round(x-xcen)
   rely=round(y-ycen)
   frame1=data.frame(x=relx,y=rely,wt1=wt)
