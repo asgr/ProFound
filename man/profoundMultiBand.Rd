@@ -12,8 +12,7 @@ profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL, skycut 
 pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6,
 iters_tot = 0, detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0,
 gain = NULL, bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g',
-dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE, groupby = "segim_orig",
-boundstats = TRUE, groupstats = boundstats, haralickstats = TRUE, verbose = FALSE, ...)
+dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -89,20 +88,8 @@ Logical; should group segment photometry be computed for the bands specified in 
   \item{deblend}{
 Logical; should total segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output segstats? This only applies to the \option{cat_tot} output.
 }
-  \item{groupby}{
-Character scalar; How should the grouped segmentation map be formed that will be used to produce the cat_grp output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
-}
-  \item{boundstats}{
-Logical; if TRUE then various pixel boundary statistics are computed for the detection image and all multi-band photometry. See also \code{\link{profoundProFound}}. \option{boundstats} must also be set to TRUE if \option{dogrp}=TRUE is set.
-}
   \item{groupstats}{
 Logical; if TRUE then the IDs of grouped segments is calculated for the detection image via \code{\link{profoundSegimGroup}} and output to the returned object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object IDs returned.
-}
-  \item{haralickstats}{
-Logical; if TRUE then the Haralick texture statistics are computed for the detection image. See also \code{\link{profoundProFound}}.
-}
-  \item{verbose}{
-Logical; should verbose output from \code{\link{profoundProFound}} be displayed to the user? Basic information is always printed out, to help catch silly user errors quickly.
 }
   \item{\dots}{
 Further arguments to be passed to all instances of \code{\link{profoundProFound}}. E.g. if the sky \option{box} is set to a non-default value (default is \option{box}=c(100,100)), this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}.

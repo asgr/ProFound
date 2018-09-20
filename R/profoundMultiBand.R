@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, iters_det=6, iters_tot=0, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupby='segim_orig', boundstats=TRUE, groupstats=boundstats, haralickstats=TRUE, verbose=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, iters_det=6, iters_tot=0, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, ...){
   
   # v1.1 of the multiband function
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)
@@ -13,14 +13,13 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
   # magzero must be matched to the number of bands in multibands (which reflects the magzero in each respectively), or one value which is then recycled
   # bandappend are the band names to use as the extra tag attached to the column names in the cat_tot and cat_col outputs (by default this is linked to multibands)
   # totappend and colapped is just the extra tag attached to the column names in the cat_tot and cat_col outputs
-  # boundstats and haralickstats applied to all band now
   
   timestart=proc.time()[3]
   
   dots=list(...)
   
-  dotsignoredetect=c('iters', 'sky', 'skyRMS', 'deblend', 'plot', 'stats')
-  dotsignoremulti=c('iters', 'sky', 'skyRMS', 'plot', 'stats')
+  dotsignoredetect=c('iters', 'sky', 'skyRMS', 'deblend', 'plot', 'stats', 'haralickstats')
+  dotsignoremulti=c('iters', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats')
   
   if(length(dots)>0){
   dotsdetect=dots[! names(dots) %in% dotsignoredetect]
@@ -152,7 +151,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
     
     # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, deblend=FALSE, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats), dotsdetect))
+    pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=(groupstats | dogrp)), dotsdetect))
     
   }else{
   
@@ -180,7 +179,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
       
       # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, ...)
       
-      pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, deblend=FALSE, verbose=verbose), dotsdetect))
+      pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=FALSE), dotsdetect))
       
       # Append to lists for stacking
       
@@ -218,7 +217,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
     
     #pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, deblend=FALSE, verbose=verbose, boundstats=boundstats, groupstats=groupstats, groupby=groupby, haralickstats=FALSE), dotsdetect))
+    pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, deblend=FALSE, groupstats=(groupstats | dogrp)), dotsdetect))
     
     # Delete and clean up
     
@@ -265,7 +264,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
         
         # pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, groupstats=FALSE, iters=iters_tot[i], verbose=verbose, ...)
         
-        pro_multi_tot=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], boundstats=boundstats, groupstats=FALSE, iters=iters_tot[i], deblend=deblend, verbose=verbose), dotsmulti))
+        pro_multi_tot=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], groupstats=FALSE, iters=iters_tot[i], deblend=deblend, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))
         
         # Append column names and concatenate cat_tot together
         
@@ -282,11 +281,11 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
         if(dotot){
           #pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, deblend=FALSE, verbose=verbose), dotsmulti))$segstats
+          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }else{
           #pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, deblend=FALSE, verbose=verbose), dotsmulti))$segstats
+          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }
         
         # Append column names and concatenate cat_col together
@@ -303,11 +302,11 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
         if(dotot){
           # pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, deblend=FALSE, verbose=verbose), dotsmulti))$segstats
+          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }else{
           # pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, deblend=FALSE, verbose=verbose), dotsmulti))$segstats
+          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }
         
         # Append column names and concatenate cat_grp together
