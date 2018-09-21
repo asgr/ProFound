@@ -8,8 +8,7 @@ Multi Band ProFound Photometry
 Run multiband \code{ProFound} photometry either with loaded data, or images on a local disk.
 }
 \usage{
-profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL, skycut = 1,
-pixcut = 3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, iters_det = 6,
+profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL, iters_det = 6,
 iters_tot = 0, detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0,
 gain = NULL, bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g',
 dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE, ...)
@@ -27,24 +26,6 @@ Integer matrix; a specified segmentation map of the image. This matrix *must* be
 }
   \item{mask}{
 Boolean matrix or integer scalar; optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis. if a scalar is provided it indicates the exact \option{image} values that should be treated as masked (e.g. by setting masked pixels to 0 or -999). The latter achieves the same effect as setting masked \option{image} pixels to NA, but allows for the fact not all programs can produce \code{R} legal NA values. 
-}
-  \item{skycut}{
-Numeric scalar; the lowest threshold to make on the detection \option{image} in units of the skyRMS. Passed to \code{\link{profoundProFound}}.
-}
-  \item{pixcut}{
-Integer scalar; the number of pixels required to identify an object. Passed to \code{\link{profoundProFound}}.
-}
-  \item{tolerance}{
-Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. Passed to \code{\link{profoundProFound}}.
-}
-  \item{ext}{
-Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects. Passed to \code{\link{profoundProFound}}.
-}
-  \item{sigma}{
-Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Passed to \code{\link{profoundProFound}}.
-}
-  \item{smooth}{
-Logical; should smoothing be done on the target detection \option{image}? Passed to \code{\link{profoundProFound}}. If present, this will use the \code{imblur} function from the \code{imager} package. Otherwise it will use the \code{gblur} function from the \code{EBImage} package with a warning. These functions are very similar in output, but not strictly identical.
 }
   \item{iters_det}{
 Integer scalar; the maximum number of curve of growth dilations that should be made to the detection image. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to 0 then the undilated \option{segim} image, whether provided or computed internally via \code{\link{profoundMakeSegim}}, will be used instead.
@@ -160,10 +141,10 @@ multi3=profoundMultiBand(segim=multi$pro_detect$segim_orig, inputlist=list(GALEX
 VST_r, VISTA_K_VST), magzero=c(20.08,0,30), detectbands='r', multibands=c('NUV','r','K'),
 iters_det = 6, boxiters=2)
 
-#multi and multi3 should create identical plots (since we are dilating the original
-#segim_orig in the same manner), but multi2 will just be the final dilated segim without
-#any dilations, hence the Dilations histogram is all 0. The final fluxes should be the
-#same though for all 3 runs (bottom-centre and bottom-right).
+# multi and multi3 should create identical plots (since we are dilating the original
+# segim_orig in the same manner), but multi2 will just be the final dilated segim without
+# any dilations, hence the top-right is all green (segim=segim_orig). The final fluxes
+# should be the same though for all 3 runs (left-middle, bottom-centre and bottom-right).
 
 plot(multi$pro_detect)
 plot(multi2$pro_detect)

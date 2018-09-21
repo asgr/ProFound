@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, iters_det=6, iters_tot=0, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, iters_det=6, iters_tot=0, detectbands='r', multibands=c('u','g','r','i','z'), magzero=0, gain=NULL, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, ...){
   
   # v1.1 of the multiband function
   # Written and maintained by Aaron Robotham (inspired by scripts by Soheil Koushan and Simon Driver)
@@ -16,10 +16,12 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
   
   timestart=proc.time()[3]
   
+  call=match.call()
+  
   dots=list(...)
   
   dotsignoredetect=c('iters', 'sky', 'skyRMS', 'deblend', 'plot', 'stats', 'haralickstats')
-  dotsignoremulti=c('iters', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats')
+  dotsignoremulti=c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats')
   
   if(length(dots)>0){
   dotsdetect=dots[! names(dots) %in% dotsignoredetect]
@@ -151,7 +153,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
     
     # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=(groupstats | dogrp)), dotsdetect))
+    pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=(groupstats | dogrp)), dotsdetect))
     
   }else{
   
@@ -179,7 +181,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
       
       # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, ...)
       
-      pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=FALSE), dotsdetect))
+      pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=FALSE), dotsdetect))
       
       # Append to lists for stacking
       
@@ -217,7 +219,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
     
     #pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, deblend=FALSE, groupstats=(groupstats | dogrp)), dotsdetect))
+    pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, deblend=FALSE, groupstats=(groupstats | dogrp)), dotsdetect))
     
     # Delete and clean up
     
@@ -225,6 +227,8 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
     rm(detect_sky_stack)
     gc()
   }
+  
+  pro_detect$call=NULL
   
   # Create base total and colour photometry catalogues
 
@@ -300,13 +304,13 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
         # If we have already run the total photometry then we use the sky and skyRMS computed there for speed
         
         if(dotot){
-          # pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
-          
-          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
+        #   # pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
+        #   
+          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=iters_tot[i], deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }else{
-          # pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
-          
-          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
+        #   # pro_multi_grp=profoundProFound(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
+        #   
+          pro_multi_grp=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$group$groupim, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=iters_tot[i], deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }
         
         # Append column names and concatenate cat_grp together
@@ -319,7 +323,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, skycut
   
   # Return all of the things!
   
-  output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, cat_grp=cat_grp, detectbands=detectbands, multibands=multibands, call=match.call(), date=date(), time=proc.time()[3]-timestart)
+  output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, cat_grp=cat_grp, detectbands=detectbands, multibands=multibands, call=call, date=date(), time=proc.time()[3]-timestart)
   class(output)='profoundmulti'
   return=output
 }
