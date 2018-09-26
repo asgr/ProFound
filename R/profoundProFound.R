@@ -190,9 +190,18 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       }
       if(redosegim){
         if(verbose){message(paste('Making better segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profoundMakeSegim(image=image, mask=mask, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, plot=FALSE, stats=FALSE)
-        objects=segim$objects
-        segim=segim$segim
+        imagescale=(image-sky)/skyRMS
+        imagescale[!is.finite(imagescale)]=0
+        if(!is.null(SBlim) & !missing(magzero)){
+          imagescale[imagescale<skycut | sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
+        }else{
+          imagescale[imagescale<skycut]=0
+        }
+        if(!is.null(mask)){
+          imagescale[mask!=0]=0
+        }
+        segim[imagescale==0]=0
+        objects[segim==0]=0
       }
     }else{
       if(verbose){message("Skipping making better sky map - User provided sky and sky RMS")}
