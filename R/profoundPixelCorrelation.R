@@ -81,7 +81,7 @@ profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, sk
     legend('topright', legend=c('x-cor','y-cor','x-cor-diff','y-cor-diff','x-rel-sd','y-rel-sd'), col=c('blue','red'), lty=c(1,1,2,2,3,3), bg='white')
   }
   
-  return=list(cortab=output_cortab, fft=output_FFT, image_sky=image)
+  invisible(list(cortab=output_cortab, fft=output_FFT, image_sky=image))
 }
 
 profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, skyscale=100, profound=NULL){
@@ -142,5 +142,5 @@ profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=
   fft_orig[xlen+1-1:clipfreqx, ylen+1-1:clipfreqy]=0
   
   image_new=Re(fft(fft_orig,inverse=TRUE))/prod(xlen,ylen)
-  return=list(sky=sky+image-image_new, sky_lo=image-image_new, sky_hi=image_new)
+  invisible(list(sky=sky+image-image_new, sky_lo=image-image_new, sky_hi=image_new))
 }

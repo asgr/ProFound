@@ -6,6 +6,8 @@ import("celestial")
 import("stats")
 import("graphics")
 import("grDevices")
+import("foreach")
+import("doParallel")
 
 importFrom("utils", "relist", "packageVersion")
 importFrom("RColorBrewer", "brewer.pal")

@@ -44,7 +44,7 @@ profoundImBlur=function(image=NULL, sigma=1, plot=FALSE, ...){
   if(plot){
     magimage(output, ...)
   }
-  return=output
+  invisible(output)
 }
 
 profoundImGrad=function(image=NULL, sigma=1, plot=FALSE, ...){
@@ -55,7 +55,7 @@ profoundImGrad=function(image=NULL, sigma=1, plot=FALSE, ...){
   if(plot){
     magimage(output, ...)
   }
-  return=output
+  invisible(output)
 }
 
 profoundImDiff=function(image=NULL,sigma=1, plot=FALSE, ...){
@@ -67,7 +67,7 @@ profoundImDiff=function(image=NULL,sigma=1, plot=FALSE, ...){
   if(plot){
     magimage(output, ...)
   }
-  return=output
+  invisible(output)
 }
 
 profoundMakeSigma=function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0, darkRMS=0, skycut=0, gain=1, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU', output_units='ADU', plot=FALSE, ...){
@@ -123,7 +123,7 @@ profoundMakeSigma=function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0,
   if(plot){
     magimage(sigma, ...)
   }
-  return=sigma
+  invisible(sigma)
 }
 
 profoundGainEst=function(image=NULL, mask=0, objects=0, sky=0, skyRMS=1){
@@ -143,11 +143,11 @@ profoundGainEst=function(image=NULL, mask=0, objects=0, sky=0, skyRMS=1){
     floor=(skyRMS*gain)^2
     trialdata=tempval*gain+floor
     value=-sum(dpois(x=round(trialdata), lambda=floor, log=T))
-    return=value
+    invisible(value)
   }
 
   suppressWarnings({findgain=optim(par=startgain, fn=tempfunc, method="Brent", tempval=tempval, skyRMS=skyRMS, lower=startgain-2, upper=startgain+2)})
-  return=10^findgain$par
+  invisible(10^findgain$par)
 }
 
 profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, groupID_merge=NULL, flag=TRUE, rowreset=FALSE){
@@ -166,7 +166,7 @@ profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, group
   if(rowreset){
     row.names(segstats)=NULL
   }
-  return=segstats
+  invisible(segstats)
 }
 
 profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE){

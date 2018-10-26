@@ -12,11 +12,11 @@ The high level function computes the absolute sky and sky RMS level over an imag
 profoundMakeSkyMap(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
 grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
 skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
-paddim = TRUE)
+paddim = TRUE, cores = 1)
 profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
-grid = box, type = 'bilinear', skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
+grid = box, type = 'bicubic', skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
 skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
-paddim = TRUE)
+paddim = TRUE, cores = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -36,7 +36,7 @@ Integer vector; the dimensions of the box car filter to estimate the sky with.
 Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}.
 }
   \item{type}{
-Character scalar; either "bilinear" for bilinear interpolation (default) or "bicubic" for bicubic interpolation. The former is safer, especially near edges where bicubic interpolation can go a bit crazy.
+Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default). The former creates sharper edges.
 }
   \item{skytype}{
 Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
@@ -64,6 +64,9 @@ Logical; should the cutout centre for the sky shift from \option{loc} if the des
 }
 	\item{paddim}{
 Logical; should the cutout be padded with image data until it meets the desired \option{box} size (if \option{shiftloc} is true) or padded with NAs for data outside the image boundary otherwise? (See \code{\link{magcutout}} for details).
+}
+  \item{cores}{
+Integer scalar; how many cores should be used to calculate sky properties of the image. Given the overhead for parallel computing, this should probably only be above 1 for larger images. 
 }
 }
 \details{

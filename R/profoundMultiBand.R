@@ -325,5 +325,5 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, iters_
   
   output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, cat_grp=cat_grp, detectbands=detectbands, multibands=multibands, call=call, date=date(), time=proc.time()[3]-timestart)
   class(output)='profoundmulti'
-  return=output
+  invisible(output)
 }

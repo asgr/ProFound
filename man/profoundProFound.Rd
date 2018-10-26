@@ -13,7 +13,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
 pixcut=3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, SBlim, size = 5,
 shape = "disc", iters = 6, threshold = 1.05, converge = 'flux', magzero = 0, gain = NULL,
 pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
-redoskysize = 21, box = c(100,100), grid = box, type = "bilinear", skytype = "median",
+redoskysize = 21, box = c(100,100), grid = box, type = "bicubic", skytype = "median",
 skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2,
 boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE,
 doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE,
@@ -103,7 +103,7 @@ Integer vector; the dimensions of the box car filter to estimate the sky with. F
 Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}.
 }
   \item{type}{
-Character scalar; either "bilinear" for bilinear interpolation (default) or "bicubic" for bicubic interpolation. The former is safer, especially near edges where bicubic interpolation can go a bit crazy.  
+Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default). The former creates sharper edges. 
 }
   \item{skytype}{
 Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 

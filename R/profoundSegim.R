@@ -8,7 +8,7 @@
   wt[wt<0]=0
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   if(is.null(xcen)){xcen=.meanwt(x, wt)}
-  return=(sum((x-xcen)^2*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE))
+  invisible((sum((x-xcen)^2*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
 }
 
 .covarwt=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
@@ -16,23 +16,23 @@
   if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   if(is.null(xcen)){xcen=.meanwt(x, wt)}
   if(is.null(ycen)){ycen=.meanwt(y, wt)}
-  return=(sum((x-xcen)*(y-ycen)*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE))
+  invisible((sum((x-xcen)*(y-ycen)*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
 }
 
 .cov2eigval=function(sx=NULL, sy=NULL, sxy=NULL){
   b=-sx^2-sy^2
   c=sx^2*sy^2-sxy^2
-  return=(list(hi=(-b+sqrt(b^2-4*c))/2,lo=(-b-sqrt(b^2-4*c))/2))
+  invisible((list(hi=(-b+sqrt(b^2-4*c))/2,lo=(-b-sqrt(b^2-4*c))/2)))
 }
 
 .cov2eigvec=function(sx=NULL, sy=NULL, sxy=NULL){
   eigval=.cov2eigval(sx,sy,sxy)$hi
   eigvec=(sx^2-eigval)/sxy
-  return=eigvec
+  invisible(eigvec)
 }
 
 .eigvec2ang=function(eigvec=NULL){
-  return=(90-atan(eigvec)*180/pi)%%180
+  invisible((90-atan(eigvec)*180/pi)%%180)
 }
 
 .asymm=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
@@ -45,7 +45,7 @@
   comp=merge(frame1,frame2,by=c('x','y'), all=TRUE)
   overlap=which(comp$wt1>0 & comp$wt2>0)
   asymm=sum(abs(comp[overlap,'wt1']-comp[overlap,'wt2']), na.rm=TRUE)/sum(abs(comp[overlap,'wt1']+comp[overlap,'wt2']), na.rm=TRUE)
-  return=asymm
+  invisible(asymm)
 }
 
 .reflect=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
@@ -60,17 +60,17 @@
   asymm=2*sum(abs(comp[overlap,'wt1']-comp[overlap,'wt2']), na.rm=TRUE)/sum(comp[overlap,'wt1'], comp[overlap,'wt2'], na.rm=TRUE)
   len=dim(frame1)[1]
   flux_reflect=sum(comp[overlap,'wt1'], na.rm=TRUE)+2*sum(frame1[is.na(comp$wt2),'wt1'], na.rm=TRUE)
-  return=flux_reflect
+  invisible(flux_reflect)
 }
 
 #Not currently used:
 .nser2ccon=function(nser=0.5, lo=0.5, hi=0.9){
-  return=(((qgamma(lo, 2 * nser)/qgamma(hi, 2 * nser))^nser)^2)
+  invisible((((qgamma(lo, 2 * nser)/qgamma(hi, 2 * nser))^nser)^2))
 }
 
 #Not currently used (too slow):
 .match2col=function(tab1, tab2){
-  return(which( outer(tab1[,1], tab2[,1], "==") & outer(tab1[,2], tab2[,2], "=="), arr.ind=TRUE))
+  invisible(which(outer(tab1[,1], tab2[,1], "==") & outer(tab1[,2], tab2[,2], "=="), arr.ind=TRUE))
 }
 
 .fluxcalc=function(flux){
@@ -122,7 +122,7 @@
   #N50seg=sum(temp>=0.5)
   #N90seg=sum(temp>=0.1)
   
-  return=list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac)
+  invisible(list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
 profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
@@ -262,7 +262,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   
   if(verbose){message(paste(" - MakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  return=list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)
+  invisible(list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call))
 }
 
 profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL, skycut=1, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
@@ -414,7 +414,7 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   
   if(verbose){message(paste(" - profoundMakeSegimExpand is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  return=list(segim=segim_new, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)
+  invisible(list(segim=segim_new, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call))
 }
 
 profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shape='disc', expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, skyRMS=0, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
@@ -496,7 +496,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(verbose){message(paste(" - profoundMakeSegimDilate is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  return=list(segim=segim_new, objects=objects, segstats=segstats, header=header, call=call)
+  invisible(list(segim=segim_new, objects=objects, segstats=segstats, header=header, call=call))
 }
 
 profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, sky=0, lambda=1e-4, plot=FALSE, ...){
@@ -557,7 +557,7 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
     profoundSegimPlot(image=image_sky, segim=propim, mask=mask, ...)
   }
   
-  return=list(propim=propim, propim_sky=propim_sky)
+  invisible(list(propim=propim, propim_sky=propim_sky))
 }
 
 profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=0, skyRMS=0, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1){
@@ -873,7 +873,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=0, skyRMS=0, 
   }
   
   segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, cenfrac=fluxout$cenfrac, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, semimaj=rad$hi, semimin=rad$lo, axrat=axrat, ang=ang, signif=signif, FPlim=FPlim, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
-  return=as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),])
+  invisible(as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),]))
 }
 
 profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=0, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, ...){
@@ -980,7 +980,7 @@ profoundSegimNear=function(segim=NULL, offset=1){
   
   tabnear=tabcomb[,list(nearID=list(sort(setdiff(unique(c(down,left,up,right)),c(0,segID))))),by=segID]
   tabnear[,Nnear:=length(unlist(nearID)),by=segID]
-  return=as.data.frame(tabnear)
+  invisible(as.data.frame(tabnear))
 }
 
 profoundSegimGroup=function(segim=NULL){
@@ -1007,7 +1007,7 @@ profoundSegimGroup=function(segim=NULL){
   groupsegID=groupsegID[groupID %in% which(tabulate(unlist(groupsegID$segID))==1),]
   groupsegID[,Ngroup:=length(unlist(segID)),by=groupID]
   groupim[!groupim %in% groupsegID$groupID]=0
-  return=list(groupim=groupim, groupsegID=as.data.frame(groupsegID[,list(groupID, segID, Ngroup, Npix)]))
+  invisible(list(groupim=groupim, groupsegID=as.data.frame(groupsegID[,list(groupID, segID, Ngroup, Npix)])))
 }
 
 profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NULL, sky=0){
@@ -1029,11 +1029,11 @@ profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NU
   segim_merge=segim_base
   segim_merge[segim_add>0]=segim_add[segim_add>0]
   
-  return=segim_merge
+  invisible(segim_merge)
 }
 
 profoundSegimWarp=function(segim_in=NULL, header_in=NULL, header_out=NULL){
-  return=magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')$image
+  invisible(magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')$image)
 }
 
 profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_merge=NULL, clean=FALSE){
@@ -1062,5 +1062,5 @@ profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_m
     segim_out[whichpix]=pixsel
   }
   
-  return=segim_out
+  invisible(segim_out)
 }

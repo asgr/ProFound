@@ -1,7 +1,7 @@
 .ellipsesd=function(par=c(1,0,0,0), x, y, xcen, ycen, wt=1){
   x=(x-xcen)/par[1]
   y=(y-ycen)/par[1]
-  return=.varwt(x=.profoundEllipse(x=x, y=y, flux=1, xcen=0, ycen=0, ang=par[2], axrat=10^par[3], box=par[4])[,1], xcen=1, wt=wt)
+  invisible(.varwt(x=.profoundEllipse(x=x, y=y, flux=1, xcen=0, ycen=0, ang=par[2], axrat=10^par[3], box=par[4])[,1], xcen=1, wt=wt))
 }
 
 .profoundEllipse=function(x, y, flux, xcen=0, ycen=0, ang=0, axrat=1, box=0){
@@ -23,7 +23,7 @@
   xmod=xmod/axrat
   radmod=(abs(xmod)^(2+box)+abs(ymod)^(2+box))^(1/(2+box))
   output=cbind(rad=radmod, flux=flux)
-  return(output)
+  invisible(output)
 }
 
 profoundGetEllipse=function(x, y, z, xcen=NULL, ycen=NULL, scale=sqrt(2), pixscale=1, dobox=FALSE, plot=FALSE, ...){
@@ -67,7 +67,7 @@ profoundGetEllipse=function(x, y, z, xcen=NULL, ycen=NULL, scale=sqrt(2), pixsca
   if(plot){
     profoundDrawEllipse(xcen=xcen, ycen=ycen, rad=rad$hi*scale, axrat=axrat, ang=ang, box=box, ...)
   }
-  return=c(xcen=xcen, ycen=ycen, radhi=rad$hi*scale*pixscale, radlo=rad$lo*scale*pixscale, radav=radav*pixscale, axrat=axrat, ang=ang, box=box, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy)
+  invisible(c(xcen=xcen, ycen=ycen, radhi=rad$hi*scale*pixscale, radlo=rad$lo*scale*pixscale, radav=radav*pixscale, axrat=axrat, ang=ang, box=box, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy))
 }
 
 profoundGetEllipses=function(image=NULL, segim=NULL, segID=1, levels=10, magzero=0, pixscale=1, fixcen=TRUE, dobox=FALSE, plot=TRUE, ...){
@@ -110,7 +110,7 @@ profoundGetEllipses=function(image=NULL, segim=NULL, segID=1, levels=10, magzero
   if(plot){
     profoundGetEllipsesPlot(image=image, ellipses=tempellipses, segim=segim, segID=segID, pixscale=pixscale, ...)
   }
-  return=list(ellipses=tempellipses, segellipses=segelllipses)
+  invisible(list(ellipses=tempellipses, segellipses=segelllipses))
 }
 
 profoundGetEllipsesPlot=function(image=NULL, ellipses=NULL, segim=NULL, segID=1, segellipseID='all', pixscale=1, col=rep(rainbow(10,s=0.5),4), border='auto', lty='auto', lwd='auto', ...){

@@ -67,5 +67,5 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mag
       skyRMS=NULL
     }
   }
-return=list(image=stack, skyRMS=skyRMS, magzero=magzero_out)
+invisible(list(image=stack, skyRMS=skyRMS, magzero=magzero_out))
 }

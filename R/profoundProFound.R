@@ -29,10 +29,10 @@
   #   }
   #   tempout=c(tempout, tempsel)
   # }
-  return=tempout
+  invisible(tempout)
 }
 
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bilinear', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -419,7 +419,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=NULL, skyRMS=NULL, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
-  return=output
+  invisible(output)
 }
 
 plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
@@ -453,7 +453,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   segdiff=x$segim-x$segim_orig
   segdiff[segdiff<0]=0
   
-  image=x$image-x$sky
+  image = (x$image-x$sky)/x$skyRMS
   cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
   maximg = quantile(abs(image), 0.995, na.rm=TRUE)
   stretchscale = 1/median(abs(image), na.rm=TRUE)
@@ -463,7 +463,6 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   if(!is.null(x$header)){
   
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale=stretchscale = 1/median(abs(image), na.rm=TRUE)
     magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
@@ -474,7 +473,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(image/x$skyRMS, x$header)
+    magimageWCS(image, x$header)
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)}
     
@@ -506,11 +505,12 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }else if(hist=='sky'){
       try({
         if(!is.null(x$objects_redo)){
-          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+          tempsky=image[x$objects_redo==0]
         }else{
-          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects==0]
+          tempsky=image[x$objects==0]
         }
-        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        tempsky=tempsky[tempsky> -6 & tempsky<6]
+        magplot(density(tempsky, bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
         })
@@ -530,7 +530,6 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   }else{
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale=stretchscale = 1/median(abs(image), na.rm=TRUE)
     magimage(image, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(v=0,alpha=0.2)), add=TRUE)}
     
@@ -541,7 +540,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(h=c(0,dim(image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage(image/x$skyRMS)
+    magimage(image)
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)}
 
@@ -567,11 +566,12 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }else if(hist=='sky'){
       try({
         if(!is.null(x$objects_redo)){
-          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects_redo==0]
+          tempsky=image[x$objects_redo==0]
         }else{
-          tempsky=((x$image-x$sky)/x$skyRMS)[x$objects==0]
+          tempsky=image[x$objects==0]
         }
-        magplot(density(tempsky), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        tempsky=tempsky[tempsky> -6 & tempsky<6]
+        magplot(density(tempsky, bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
         })
