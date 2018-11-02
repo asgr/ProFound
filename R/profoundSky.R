@@ -138,10 +138,12 @@ profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2, cuth
   temprad=sqrt((tempref[,1]-xcen)^2+(tempref[,2]-ycen)^2)
   #Keep only pixels inside the radius bounds given by cutlo and cuthi
   if(!is.null(mask)){
-    keep=which(temprad>=cutlo & temprad<=cuthi & mask==0)
+    keep=temprad>=cutlo & temprad<=cuthi & mask==0
+  }else{
+    keep=TRUE
   }
   if(!is.null(objects)){
-    keep=which(temprad>=cutlo & temprad<=cuthi & objects==0)
+    keep=temprad>=cutlo & temprad<=cuthi & objects==0 & keep
   }
   tempref=tempref[keep,]
   tempval=image[tempref]

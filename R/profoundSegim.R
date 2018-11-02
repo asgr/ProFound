@@ -197,23 +197,25 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   xlen=dim(image)[1]
   ylen=dim(image)[2]
   if(!is.null(SBlim) & !missing(magzero)){
-    image[image<skycut | image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
-  }else{
-    image[image<skycut]=0
-  }
+    #image[image<skycut | image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
+    image[image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
+  }#else{
+    #image[image<skycut]=0
+  #}
   if(!is.null(mask)){
     image[mask!=0]=0
   }
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
-    segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
+    #segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
+    segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, ext=ext, skycut=skycut, pixcut=pixcut)
   }else{
     segim=image
   }
   mode(segim)='integer'
   
-  segtab=tabulate(segim)
-  segim[segim %in% which(segtab<pixcut)]=0L
+  #segtab=tabulate(segim)
+  #segim[segim %in% which(segtab<pixcut)]=0L
 
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}

@@ -1,4 +1,7 @@
 exportPattern("^[[:alpha:]]+")
+
+useDynLib(ProFound, .registration=TRUE)
+
 import("FITSio")
 import("magicaxis")
 import("data.table")
@@ -9,6 +12,7 @@ import("grDevices")
 import("foreach")
 import("doParallel")
 
+importFrom("Rcpp", "evalCpp")
 importFrom("utils", "relist", "packageVersion")
 importFrom("RColorBrewer", "brewer.pal")
 
