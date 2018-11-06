@@ -125,7 +125,7 @@
   invisible(list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
-profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
+profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, watershed = 'EBImage', ...){
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
     invisible(gc())
@@ -136,9 +136,6 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   # if(!requireNamespace("imager", quietly = TRUE)){
   #   stop('The imager package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
   # }
-  if(!requireNamespace("EBImage", quietly = TRUE)){
-    stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
-  }
   
   #Treat image NAs as masked regions:
   
@@ -199,23 +196,29 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   if(!is.null(SBlim) & !missing(magzero)){
     #image[image<skycut | image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
     image[image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
-  }#else{
-    #image[image<skycut]=0
-  #}
+  }
   if(!is.null(mask)){
     image[mask!=0]=0
   }
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
-    #segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
-    segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, ext=ext, skycut=skycut, pixcut=pixcut)
+    if(watershed=='EBImage'){
+      if(!requireNamespace("EBImage", quietly = TRUE)){
+        stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
+      }
+      image[image<skycut]=0
+      segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
+      segtab=tabulate(segim)
+      segim[segim %in% which(segtab<pixcut)]=0L
+      mode(segim)='integer'
+    }else if(watershed=='ProFound'){
+      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, ext=ext, skycut=skycut, pixcut=pixcut)
+    }else{
+      stop('watershed option must either be EBImage or ProFound!')
+    }
   }else{
     segim=image
   }
-  mode(segim)='integer'
-  
-  #segtab=tabulate(segim)
-  #segim[segim %in% which(segtab<pixcut)]=0L
 
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}

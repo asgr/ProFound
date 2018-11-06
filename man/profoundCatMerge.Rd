@@ -45,6 +45,7 @@ Aaron Robotham
 \code{\link{profoundSegimKeep}}
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound=profoundProFound(image, skycut=1.5, magzero=30, groupstats=TRUE, verbose=TRUE)
 
@@ -53,6 +54,7 @@ profound$group$groupsegID, 1)
 
 profound$segstats[1,'mag']
 merge[1,'mag'] #The merged object is brighter, as we should expect.
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -20,7 +20,7 @@ doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = 
 stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
 groupstats = boundstats, group = NULL, groupby = 'segim_orig', offset = 1,
 haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
-keepim = TRUE, R50clean=0, ...)
+keepim = TRUE, R50clean=0, watershed = 'EBImage', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -88,7 +88,7 @@ User provided estimate of the absolute sky level. If this is not provided then i
 User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{redosegim}{
-Logical; should the segmentation map be re-computed based using the interim "better sky"? This is usually only required if the sky subtraction was radically poor and complex in the first place, and can be quite computationally expensive since the watershed deblend will need to be redone too. Will be forced to FALSE if the user supplies a segmentation map. If the user wants to flag object pixels they should pass it to option{objects}.
+Logical; should the segmentation map be modified based using the interim "better sky"?  This means pixels falling below the new \option{skycut} would be excluded from the final segmentation map. This is usually only required if the sky subtraction was radically poor and complex in the first place. Will be forced to FALSE if the user supplies a segmentation map. If the user wants to flag object pixels they should pass it to \option{objects}.
 }
   \item{redosky}{
 Logical; should the sky and sky RMS grids be re-computed using the final segmentation map? This uses \code{\link{profoundMakeSkyGrid}} to compute the sky and sky RMS grids. If \option{redosky}=TRUE then the output will include the aggressively masked \option{objects_redo} image, if \option{redosky}=FALSE then \option{objects_redo} will be NA.
@@ -197,6 +197,9 @@ Logical; if TRUE then the input \option{image} and \option{mask} matrices are pa
 }
 \item{R50clean}{
 Numeric scalar; setting this to more than 0 cleans sources for spuriously small objects. This value should be in arc-seconds if pixel scale is provided or detected, and in pixels otherwise (or if \option{pixscale}=1 is explictly set).
+}
+  \item{watershed}{
+Character; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

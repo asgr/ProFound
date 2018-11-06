@@ -12,7 +12,7 @@ profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut 
 tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, SBlim = NULL, magzero = 0, gain = NULL,
 pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL, verbose = FALSE, plot = FALSE,
 stats = TRUE, rotstats = FALSE, boundstats = FALSE, offset = 1, sortcol = "segID",
-decreasing = FALSE, ...)
+decreasing = FALSE, watershed = 'EBImage', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -87,6 +87,9 @@ Character; name of the output column that the returned segmentation statistics d
 }
   \item{decreasing}{
 Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.
+}
+  \item{watershed}{
+Character; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

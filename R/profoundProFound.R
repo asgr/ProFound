@@ -32,7 +32,7 @@
   invisible(tempout)
 }
 
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed = 'EBImage', ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -148,13 +148,21 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }
     if(hassky==FALSE){
       sky=roughsky$sky
-      if(verbose){message(' - Sky statistics :')}
-      if(verbose){print(summary(as.numeric(sky)))}
+      if(rembig==FALSE){
+        if(verbose){message(' - Sky statistics :')}
+        if(verbose){print(summary(as.numeric(sky)))}
+      }
     }
     if(hasskyRMS==FALSE){
       skyRMS=roughsky$skyRMS
-      if(verbose){message(' - Sky-RMS statistics :')}
-      if(verbose){print(summary(as.numeric(skyRMS)))}
+      if(rembig==FALSE){
+        if(verbose){message(' - Sky-RMS statistics :')}
+        if(verbose){print(summary(as.numeric(skyRMS)))}
+      }
+    }
+    if(rembig){
+      rm(roughsky)
+      gc()
     }
   }else{
     if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS, or user provided segim")}
@@ -164,7 +172,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(is.null(segim)){
     if(verbose){message(paste('Making initial segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
-    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, plot=FALSE, stats=FALSE)
+    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
     objects=segim$objects
     segim=segim$segim
   }else{
@@ -545,7 +553,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)}
 
     par(mar=c(3.5,3.5,0.5,0.5))
-    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE)
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.6, 0.6, col='red')
