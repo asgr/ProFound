@@ -9,10 +9,10 @@ A high level utility to achieve decent quality image segmentation. It uses a mix
 }
 \usage{
 profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut = 3,
-tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, SBlim = NULL, magzero = 0, gain = NULL,
-pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL, verbose = FALSE, plot = FALSE,
-stats = TRUE, rotstats = FALSE, boundstats = FALSE, offset = 1, sortcol = "segID",
-decreasing = FALSE, watershed = 'EBImage', ...)
+tolerance = 4, ext = 2, reltol = 0, sigma = 1, smooth = TRUE, SBlim = NULL, magzero = 0,
+gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL, verbose = FALSE,
+plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE, offset = 1,
+sortcol = "segID", decreasing = FALSE, watershed = 'EBImage', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,10 +32,13 @@ Numeric scalar; the lowest threshold to make on the \option{image} in units of t
 Integer scalar; the number of pixels required to identify an object. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{tolerance}{
-Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually.
+Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. This is passed to \option{tolerance} in 'EBImage', or \option{abstol} in 'ProFound' (see \option{watershed}).
 }
   \item{ext}{
 Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects.
+}
+  \item{reltol}{
+Numeric scalar; only relevant for \option{watershed}='ProFound'. A modifier to the \option{abstol}, modifying it by the ratio of the segment peak flux divided by the saddle point flux to the power \option{reltol}. The default means the \option{reltol} has no effect since this modifier becomes 1. A larger value of \option{reltol} means segments are more aggressively merged together.
 }
   \item{sigma}{
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE.

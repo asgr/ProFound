@@ -10,7 +10,7 @@ This is the highest level source detection function provided in \code{ProFit}, c
 }
 \usage{
 profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut=1,
-pixcut=3, tolerance = 4, ext = 2, sigma = 1, smooth = TRUE, SBlim, size = 5,
+pixcut=3, tolerance = 4, ext = 2, reltol = 0, sigma = 1, smooth = TRUE, SBlim, size = 5,
 shape = "disc", iters = 6, threshold = 1.05, converge = 'flux', magzero = 0, gain = NULL,
 pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
 redoskysize = 21, box = c(100,100), grid = box, type = "bicubic", skytype = "median",
@@ -47,6 +47,9 @@ Numeric scalar; the minimum height of the object in the units of skyRMS between 
 }
   \item{ext}{
 Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects. Passed to \code{\link{profoundMakeSegim}}.
+}
+  \item{reltol}{
+Numeric scalar; only relevant for \option{watershed}='ProFound'. A modifier to the \option{abstol}, modifying it by the ratio of the segment peak flux divided by the saddle point flux to the power \option{reltol}. The default means the \option{reltol} has no effect since this modifier becomes 1. A larger value of \option{reltol} means segments are more aggressively merged together.
 }
   \item{sigma}{
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Passed to \code{\link{profoundMakeSegim}}.
