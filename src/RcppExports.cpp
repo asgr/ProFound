@@ -17,13 +17,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // tabulate_cpp
-IntegerVector tabulate_cpp(const IntegerVector& x, const unsigned max);
+IntegerVector tabulate_cpp(const IntegerVector& x, const int max);
 RcppExport SEXP _ProFound_tabulate_cpp(SEXP xSEXP, SEXP maxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const IntegerVector& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const unsigned >::type max(maxSEXP);
+    Rcpp::traits::input_parameter< const int >::type max(maxSEXP);
     rcpp_result_gen = Rcpp::wrap(tabulate_cpp(x, max));
     return rcpp_result_gen;
 END_RCPP

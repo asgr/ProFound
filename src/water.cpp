@@ -9,7 +9,7 @@ IntegerVector order_cpp(NumericVector x) {
 }
   
 // [[Rcpp::export(".tabulate_cpp")]]
-IntegerVector tabulate_cpp(const IntegerVector& x, const unsigned max) {
+IntegerVector tabulate_cpp(const IntegerVector& x, const int max) {
     IntegerVector counts(max);
     int lim = x.size();
     for (int i = 0; i < lim; i++) {
@@ -89,7 +89,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
         x_offset = x_current + j;
         y_offset = y_current + k;
         // check we are not at the edge of the image
-        if(x_offset >= 0 & x_offset < nx & y_offset >= 0 & y_offset < ny) {
+        if((x_offset >= 0 & x_offset < nx) & (y_offset >= 0 & y_offset < ny)) {
           // apply conversion to absolute pixel ref
           offset_pos = x_offset + y_offset*nx;
           offset_seg = segim[offset_pos];
