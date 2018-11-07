@@ -89,7 +89,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
         x_offset = x_current + j;
         y_offset = y_current + k;
         // check we are not at the edge of the image
-        if((x_offset >= 0 & x_offset < nx) & (y_offset >= 0 & y_offset < ny)) {
+        if((x_offset >= 0) & (x_offset < nx) & (y_offset >= 0) & (y_offset < ny)) {
           // apply conversion to absolute pixel ref
           offset_pos = x_offset + y_offset*nx;
           offset_seg = segim[offset_pos];
