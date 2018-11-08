@@ -1,5 +1,6 @@
 #include <Rcpp.h>
 #include <cmath>
+#include <unistd.h>
 using namespace Rcpp;
 
 // [[Rcpp::export(".order_cpp")]]
@@ -20,7 +21,7 @@ IntegerVector tabulate_cpp(const IntegerVector& x, const int max) {
 }
 
 // [[Rcpp::export]]
-IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const int ny = 1, const double abstol = 1, const double reltol = 0, const int ext = 1, const double skycut = 0, const int pixcut = 1){
+IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const int ny = 1, const double abstol = 1, const double reltol = 0, const int ext = 1, const double skycut = 0, const int pixcut = 1, const bool verbose = false, const int Ncheck = 1000000){
   //sanity check
   if(image.size() != nx*ny){
     stop("image size does not equate to nx.ny!");
@@ -55,6 +56,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
   imvec = imvec[imord-1]; // here we order the pixels, and therefore assess brightest first
   IntegerMatrix segim(nx,ny); // the segim map we want at the end
   IntegerVector seg_max_pos(imvec.size()/pixcut); // containing for maximum pixel flux for a segment
+  IntegerVector seg_max_i(imvec.size()/pixcut);
   int seg_id = 0; // current segment ID
   int x_current; // current x position in image
   int y_current; // current y position in image
@@ -72,6 +74,19 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
   // loop over important pixels only
   ilim = imvec.size();
   for (int i = 0; i < ilim; ++i) {
+    if((i % Ncheck)==0){
+      try{
+        Rcpp::checkUserInterrupt();
+      }
+      catch (Rcpp::internal::InterruptedException& e)
+      {
+        Rcout << "Caught an interrupt!" << std::endl;
+        i=ilim-1;
+      }
+      if(verbose == true){
+        Rcout << "  - Segmented pixel " << i << " out of " << ilim-1 << std::endl;
+      }
+    }
     segmerge_count=0;
     // reset segmerge vector
     segmerge = rep(0, Nmerge);
@@ -121,7 +136,8 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
           for (int m = 1; m < segmerge.size(); ++m) {
             // loop over pixels segmented to date
             if(image[seg_max_pos[segmerge[m]-1]] - image[current_pos] < abstol * pow(image[seg_max_pos[segmerge[m]-1]]/image[current_pos],reltol)){
-              for (int n = 0; n <= i; ++n) {
+              for (int n = seg_max_i[segmerge[m]-1]; n <= i; ++n) {
+              // for (int n = 0; n <= i; ++n) {
                 merge_loc = imvec[n];
                 // if pixel is flagged for merging, set to lowest segment value (brightest peak flux segment)
                 if(segim[merge_loc] == segmerge[m]){
@@ -138,6 +154,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
     if(segim[current_pos] == 0){
       seg_id++;
       segim[current_pos] = seg_id;
+      seg_max_i(seg_id-1)=i;
       seg_max_pos(seg_id-1) = current_pos;
     }
   }
@@ -158,14 +175,3 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
 }
 
 // Rcout << "comment=" << output << std::endl;
-
-      
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically 
-// run after the compilation.
-//
-
-/*** R
-pixoffsets = as.matrix(expand.grid(-1:1,-1:1)[-5,])
-water_cpp(im=matrix(c(5,4,2,1,3,1,5,6,8),3,3), nx=3, ny=3)
-*/

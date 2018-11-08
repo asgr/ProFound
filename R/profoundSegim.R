@@ -212,7 +212,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
       segim[segim %in% which(segtab<pixcut)]=0L
       mode(segim)='integer'
     }else if(watershed=='ProFound'){
-      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, ext=ext, skycut=skycut, pixcut=pixcut)
+      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else{
       stop('watershed option must either be EBImage or ProFound!')
     }
