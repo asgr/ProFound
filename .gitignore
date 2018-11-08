@@ -35,3 +35,7 @@ vignettes/rsconnect
 *.utf8.md
 *.knit.md
 .Rproj.user
+
+# Rcp stuff
+src/*.so
+src/*.o
