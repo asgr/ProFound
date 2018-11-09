@@ -75,7 +75,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
         Rcout << "Caught an interrupt!" << std::endl;
         i=ilim-1;
       }
-      if(verbose == true){
+      if(verbose == true & i > 0){
         Rcout << "  - Segmented pixel " << i << " out of " << ilim-1 << std::endl;
       }
     }
