@@ -58,8 +58,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
   IntegerVector imord =  order_int(image[imvec], Named("decreasing",true), Named("na.last",NA_REAL));
   imvec = imvec[imord-1]; // here we order the pixels, and therefore assess brightest first
   IntegerMatrix segim(nx,ny); // the segim map we want at the end
-  // IntegerVector seg_max_pos(imvec.size()/pixcut); // containing for maximum pixel flux for a segment
-  IntegerVector seg_max_i(imvec.size()/pixcut); // i offset
+  IntegerVector seg_max_i; // i offset
   IntegerVector segmerge(Nmerge); // empty vector of segments that might need merging
   
   int seg_id = 0; // current segment ID
@@ -150,8 +149,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
     if(segim[current_pos] == 0){
       seg_id++;
       segim[current_pos] = seg_id;
-      seg_max_i(seg_id-1)=i;
-      //seg_max_pos(seg_id-1) = current_pos;
+      seg_max_i.push_back(i);
     }
   }
   
