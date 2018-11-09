@@ -21,7 +21,10 @@ IntegerVector tabulate_cpp(const IntegerVector& x, const int max) {
 }
 
 // [[Rcpp::export]]
-IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const int ny = 1, const double abstol = 1, const double reltol = 0, const int ext = 1, const double skycut = 0, const int pixcut = 1, const bool verbose = false, const int Ncheck = 1000000){
+IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const int ny = 1,
+                        const double abstol = 1, const double reltol = 0, const int ext = 1, 
+                        const double skycut = 0, const int pixcut = 1, const bool verbose = false,
+                        const int Ncheck = 1000000){
   //sanity check
   if(image.size() != nx*ny){
     stop("image size does not equate to nx.ny!");
@@ -55,22 +58,14 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
   IntegerVector imord =  order_int(image[imvec], Named("decreasing",true), Named("na.last",NA_REAL));
   imvec = imvec[imord-1]; // here we order the pixels, and therefore assess brightest first
   IntegerMatrix segim(nx,ny); // the segim map we want at the end
-  IntegerVector seg_max_pos(imvec.size()/pixcut); // containing for maximum pixel flux for a segment
-  IntegerVector seg_max_i(imvec.size()/pixcut);
-  int seg_id = 0; // current segment ID
-  int x_current; // current x position in image
-  int y_current; // current y position in image
-  int current_pos; // current element position, given as x_current + y_current*nx
-  int x_offset; // current x position in image
-  int y_offset; // current y position in image
-  int offset_pos; // offset element position, given as x_offset + y_offset*nx
-  int offset_seg; // offset segment ID
-  int merge_loc; // location of pixel to be merged
-  int comp_pos; // comparison position when checking for merging
+  // IntegerVector seg_max_pos(imvec.size()/pixcut); // containing for maximum pixel flux for a segment
+  IntegerVector seg_max_i(imvec.size()/pixcut); // i offset
   IntegerVector segmerge(Nmerge); // empty vector of segments that might need merging
+  
+  int seg_id = 0; // current segment ID
   int segmerge_count = 0; // counter for merging
   bool merge_flag = false;
-  // 
+  
   // loop over important pixels only
   ilim = imvec.size();
   for (int i = 0; i < ilim; ++i) {
@@ -92,29 +87,30 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
     segmerge = rep(0, Nmerge);
     // reset merge_flag
     merge_flag = false;
-    current_pos = imvec[i];
-    x_current = current_pos % nx;
-    y_current = current_pos / nx;
-    comp_pos = current_pos;
+    int current_pos = imvec[i];
+    int x_current = current_pos % nx; // current x position in image
+    int y_current = current_pos / nx; // current y position in image
+    int comp_pos = current_pos;
     for (int j = -ext; j <= ext; ++j) {
       for (int k = -ext; k <= ext; ++k) {
         if(j == 0 && k == 0){
           ++k;
         }
-        x_offset = x_current + j;
-        y_offset = y_current + k;
+        int x_offset = x_current + j; // current x position in image
+        int y_offset = y_current + k; // current y position in image
         // check we are not at the edge of the image
         if((x_offset >= 0) & (x_offset < nx) & (y_offset >= 0) & (y_offset < ny)) {
           // apply conversion to absolute pixel ref
-          offset_pos = x_offset + y_offset*nx;
-          offset_seg = segim[offset_pos];
+          int offset_pos = x_offset + y_offset*nx;
+          int offset_seg = segim[offset_pos];
           if(offset_seg > 0){
             // if the offset position if brighter consider doing something
             if(image[offset_pos] > image[comp_pos]){
               // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
               segmerge[segmerge_count] = offset_seg;
               segmerge_count++;
-              if(image[seg_max_pos[offset_seg-1]] - image[current_pos] < abstol * pow(image[seg_max_pos[offset_seg-1]]/image[current_pos],reltol)){
+              double imref = image[imvec[seg_max_i[offset_seg-1]]];
+              if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol)){
                 merge_flag=true;
               }
               comp_pos = offset_pos;
@@ -135,12 +131,14 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
           // looper over flagged segments that are not the brightest
           for (int m = 1; m < segmerge.size(); ++m) {
             // loop over pixels segmented to date
-            if(image[seg_max_pos[segmerge[m]-1]] - image[current_pos] < abstol * pow(image[seg_max_pos[segmerge[m]-1]]/image[current_pos],reltol)){
-              for (int n = seg_max_i[segmerge[m]-1]; n <= i; ++n) {
+            int segcheck = segmerge[m];
+            double imref = image[imvec[seg_max_i[segcheck-1]]];
+            if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol)){
+              for (int n = seg_max_i[segcheck-1]; n <= i; ++n) {
               // for (int n = 0; n <= i; ++n) {
-                merge_loc = imvec[n];
+                int merge_loc = imvec[n];
                 // if pixel is flagged for merging, set to lowest segment value (brightest peak flux segment)
-                if(segim[merge_loc] == segmerge[m]){
+                if(segim[merge_loc] == segcheck){
                   segim[merge_loc] = segmerge[0];
                 }
               }
@@ -155,7 +153,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
       seg_id++;
       segim[current_pos] = seg_id;
       seg_max_i(seg_id-1)=i;
-      seg_max_pos(seg_id-1) = current_pos;
+      //seg_max_pos(seg_id-1) = current_pos;
     }
   }
   
