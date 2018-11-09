@@ -1,5 +1,6 @@
 #include <Rcpp.h>
 #include <cmath>
+#include <vector>
 #include <unistd.h>
 using namespace Rcpp;
 
@@ -58,8 +59,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
   IntegerVector imord =  order_int(image[imvec], Named("decreasing",true), Named("na.last",NA_REAL));
   imvec = imvec[imord-1]; // here we order the pixels, and therefore assess brightest first
   IntegerMatrix segim(nx,ny); // the segim map we want at the end
-  IntegerVector seg_max_i; // i offset
-  IntegerVector segmerge(Nmerge); // empty vector of segments that might need merging
+  std::vector<int> seg_max_i; // i offset
   
   int seg_id = 0; // current segment ID
 
@@ -79,10 +79,10 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
         Rcout << "  - Segmented pixel " << i << " out of " << ilim-1 << std::endl;
       }
     }
-    int segmerge_count=0; // counter for merging
+    // int segmerge_count=0; // counter for merging
     bool merge_flag = false; // do we have any merging
     // reset segmerge vector
-    segmerge = rep(0, Nmerge);
+    IntegerVector segmerge; // empty vector of segments that might need merging
     // reset merge_flag
     int current_pos = imvec[i];
     int x_current = current_pos % nx; // current x position in image
@@ -104,8 +104,8 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
             // if the offset position if brighter consider doing something
             if(image[offset_pos] > image[comp_pos]){
               // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
-              segmerge[segmerge_count] = offset_seg;
-              segmerge_count++;
+              segmerge.push_back(offset_seg);
+              //segmerge_count++;
               double imref = image[imvec[seg_max_i[offset_seg-1]]];
               if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol)){
                 merge_flag=true;
@@ -129,11 +129,11 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
           for (int m = 1; m < segmerge.size(); ++m) {
             // loop over pixels segmented to date
             int segcheck = segmerge[m];
-            double imref = image[imvec[seg_max_i[segcheck-1]]];
+            double imref = image[imvec[seg_max_i[segcheck-1]]]; // reference flux for the brightest pixel in the relevant segment
             if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol)){
+              // loop round all pixels that could need re-allocating
               for (int n = seg_max_i[segcheck-1]; n <= i; ++n) {
-              // for (int n = 0; n <= i; ++n) {
-                int merge_loc = imvec[n];
+                int merge_loc = imvec[n]; // current location of interest
                 // if pixel is flagged for merging, set to lowest segment value (brightest peak flux segment)
                 if(segim[merge_loc] == segcheck){
                   segim[merge_loc] = segmerge[0];
@@ -149,7 +149,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
     if(segim[current_pos] == 0){
       seg_id++;
       segim[current_pos] = seg_id;
-      seg_max_i.push_back(i);
+      seg_max_i.push_back(i); // since segments start at 1, and index starts at 0, will need to subtract 1 to get from segment to index
     }
   }
   
