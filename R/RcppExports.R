@@ -9,7 +9,7 @@
     .Call(`_ProFound_tabulate_cpp`, x, max)
 }
 
-water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L) {
-    .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, ext, skycut, pixcut, verbose, Ncheck)
+water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1000000, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L) {
+    .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck)
 }
 

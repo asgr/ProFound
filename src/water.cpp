@@ -23,9 +23,9 @@ IntegerVector tabulate_cpp(const IntegerVector& x, const int max) {
 
 // [[Rcpp::export]]
 IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const int ny = 1,
-                        const double abstol = 1, const double reltol = 0, const int ext = 1, 
-                        const double skycut = 0, const int pixcut = 1, const bool verbose = false,
-                        const int Ncheck = 1000000){
+                        const double abstol = 1, const double reltol = 0, const double cliptol = 1000000,
+                        const int ext = 1, const double skycut = 0, const int pixcut = 1,
+                        const bool verbose = false, const int Ncheck = 1000000){
   //sanity check
   if(image.size() != nx*ny){
     stop("image size does not equate to nx.ny!");
@@ -103,12 +103,14 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
           if(offset_seg > 0){
             // if the offset position if brighter consider doing something
             if(image[offset_pos] > image[comp_pos]){
-              // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
               segmerge.push_back(offset_seg);
               //segmerge_count++;
-              double imref = image[imvec[seg_max_i[offset_seg-1]]];
-              if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol)){
-                merge_flag=true;
+              if(merge_flag==false){
+                // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
+                double imref = image[imvec[seg_max_i[offset_seg-1]]];
+                if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || imref > cliptol){
+                  merge_flag=true;
+                }
               }
               comp_pos = offset_pos;
               segim[current_pos] = offset_seg;
@@ -130,7 +132,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
             // loop over pixels segmented to date
             int segcheck = segmerge[m];
             double imref = image[imvec[seg_max_i[segcheck-1]]]; // reference flux for the brightest pixel in the relevant segment
-            if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol)){
+            if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || imref > cliptol){
               // loop round all pixels that could need re-allocating
               for (int n = seg_max_i[segcheck-1]; n <= i; ++n) {
                 int merge_loc = imvec[n]; // current location of interest

@@ -9,10 +9,10 @@ A high level utility to achieve decent quality image segmentation. It uses a mix
 }
 \usage{
 profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut = 3,
-tolerance = 4, ext = 2, reltol = 0, sigma = 1, smooth = TRUE, SBlim = NULL, magzero = 0,
-gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL, verbose = FALSE,
-plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE, offset = 1,
-sortcol = "segID", decreasing = FALSE, watershed = 'EBImage', ...)
+tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE, SBlim = NULL,
+magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL,
+verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
+offset = 1, sortcol = "segID", decreasing = FALSE, watershed = 'EBImage', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,19 +26,22 @@ Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
   \item{skycut}{
-Numeric scalar; the lowest threshold to make on the \option{image} in units of the skyRMS. Passed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; the lowest threshold to make on the \option{image} in units of the sky RMS. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{pixcut}{
 Integer scalar; the number of pixels required to identify an object. Passed to \code{\link{profoundMakeSegim}}.
 }
   \item{tolerance}{
-Numeric scalar; the minimum height of the object in the units of skyRMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. This is passed to \option{tolerance} in 'EBImage', or \option{abstol} in 'ProFound' (see \option{watershed}).
+Numeric scalar; the minimum height of the object in the units of sky RMS between its highest point (seed) and the point where it contacts another object (checked for every contact pixel). If the height is smaller than the tolerance, the object will be combined with one of its neighbours, which is the highest. The range 1-5 offers decent results usually. This is passed to \option{tolerance} in 'EBImage', or \option{abstol} in 'ProFound' (see \option{watershed}).
 }
   \item{ext}{
 Numeric scalar; radius of the neighbourhood in pixels for the detection of neighbouring objects. Higher value smooths out small objects.
 }
   \item{reltol}{
 Numeric scalar; only relevant for \option{watershed}='ProFound'. A modifier to the \option{abstol}, modifying it by the ratio of the segment peak flux divided by the saddle point flux to the power \option{reltol}. The default means the \option{reltol} has no effect since this modifier becomes 1. A larger value of \option{reltol} means segments are more aggressively merged together.
+}
+  \item{cliptol}{
+Numeric scalar; only relevant for \option{watershed}='ProFound'. If (\option{image}-\option{sky})/option{skyRMS} is above this level where segments touch then they are always merged, regardless of other criteria. When thinking in terms of sky RMS, values between 20-100 are probably appropriate for merging very bright parts of stars back together in optical data.
 }
   \item{sigma}{
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE.

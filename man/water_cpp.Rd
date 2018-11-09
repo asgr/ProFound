@@ -8,8 +8,8 @@ Rcpp Watershed Function
 This is a standalone implementation of a watershed deblend, with some astronomy specific tweeks. E.g. it is possible to both adapt the extent of the saddlepoint search, and it can be modified by both an absolute and relative tolerance. Defaults behave much like EBImage's watershed function. In general it is a factor of a few faster than the EBImage implementation, especially for large images with lots of deblending required.
 }
 \usage{
-water_cpp(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, ext = 1L, skycut = 0,
-pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
+water_cpp(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06, ext = 1L,
+skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +27,9 @@ Numeric scalar; the minimum height of the object in the units of image intensity
 }
   \item{reltol}{
 Numeric scalar; a modifier to the \option{abstol}, modifying it by the ratio of the segment peak flux divided by the saddle point flux to the power \option{reltol}. The default means the \option{reltol} has no effect since this modifier becomes 1. A larger value of \option{reltol} means segments are more aggressively merged together.
+}
+  \item{cliptol}{
+Numeric scalar; if \option{image} is above this level where segments touch then they are always merged, regardless of other criteria. When thinking in terms of sky RMS, values between 20-100 are probably appropriate for merging very bright parts of stars back together in optical data.
 }
   \item{ext}{
 Integer scalar; square offset of the neighborhood in pixels for the detection of neighboring objects. Higher value smoothes out small objects.

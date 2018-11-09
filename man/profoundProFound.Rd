@@ -10,17 +10,17 @@ This is the highest level source detection function provided in \code{ProFit}, c
 }
 \usage{
 profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut=1,
-pixcut=3, tolerance = 4, ext = 2, reltol = 0, sigma = 1, smooth = TRUE, SBlim, size = 5,
-shape = "disc", iters = 6, threshold = 1.05, converge = 'flux', magzero = 0, gain = NULL,
-pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
-redoskysize = 21, box = c(100,100), grid = box, type = "bicubic", skytype = "median",
-skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE,
-doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE,
-stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
-groupstats = boundstats, group = NULL, groupby = 'segim_orig', offset = 1,
-haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
-keepim = TRUE, R50clean=0, watershed = 'EBImage', ...)
+pixcut=3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
+SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05, converge = 'flux',
+magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE,
+redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bicubic",
+skytype = "median", skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1,
+skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3,
+radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
+verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
+nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
+offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
+lowmemory = FALSE, keepim = TRUE, R50clean=0, watershed = 'EBImage', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -50,6 +50,9 @@ Numeric scalar; radius of the neighbourhood in pixels for the detection of neigh
 }
   \item{reltol}{
 Numeric scalar; only relevant for \option{watershed}='ProFound'. A modifier to the \option{abstol}, modifying it by the ratio of the segment peak flux divided by the saddle point flux to the power \option{reltol}. The default means the \option{reltol} has no effect since this modifier becomes 1. A larger value of \option{reltol} means segments are more aggressively merged together.
+}
+  \item{cliptol}{
+Numeric scalar; only relevant for \option{watershed}='ProFound'. If (\option{image}-\option{sky})/option{skyRMS} is above this level where segments touch then they are always merged, regardless of other criteria. When thinking in terms of sky RMS, values between 20-100 are probably appropriate for merging very bright parts of stars back together in optical data.
 }
   \item{sigma}{
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Passed to \code{\link{profoundMakeSegim}}.
