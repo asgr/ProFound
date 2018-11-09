@@ -63,9 +63,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
   IntegerVector segmerge(Nmerge); // empty vector of segments that might need merging
   
   int seg_id = 0; // current segment ID
-  int segmerge_count = 0; // counter for merging
-  bool merge_flag = false;
-  
+
   // loop over important pixels only
   ilim = imvec.size();
   for (int i = 0; i < ilim; ++i) {
@@ -82,11 +80,11 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
         Rcout << "  - Segmented pixel " << i << " out of " << ilim-1 << std::endl;
       }
     }
-    segmerge_count=0;
+    int segmerge_count=0; // counter for merging
+    bool merge_flag = false; // do we have any merging
     // reset segmerge vector
     segmerge = rep(0, Nmerge);
     // reset merge_flag
-    merge_flag = false;
     int current_pos = imvec[i];
     int x_current = current_pos % nx; // current x position in image
     int y_current = current_pos / nx; // current y position in image
