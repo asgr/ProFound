@@ -108,7 +108,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
               if(merge_flag==false){
                 // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
                 double imref = image[imvec[seg_max_i[offset_seg-1]]];
-                if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || imref > cliptol){
+                if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || image[current_pos] > cliptol){
                   merge_flag=true;
                 }
               }
@@ -132,7 +132,7 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
             // loop over pixels segmented to date
             int segcheck = segmerge[m];
             double imref = image[imvec[seg_max_i[segcheck-1]]]; // reference flux for the brightest pixel in the relevant segment
-            if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || imref > cliptol){
+            if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || image[current_pos] > cliptol){
               // loop round all pixels that could need re-allocating
               for (int n = seg_max_i[segcheck-1]; n <= i; ++n) {
                 int merge_loc = imvec[n]; // current location of interest
