@@ -213,10 +213,10 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
       mode(segim)='integer'
     }else if(watershed=='ProFound'){
       segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
-    }else if(watershed=='ProFound-new'){
-      segim=water_cpp_new(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
+    }else if(watershed=='ProFound-old'){
+      segim=water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else{
-      stop('watershed option must either be EBImage/ProFound/ProFound-new!')
+      stop('watershed option must either be EBImage/ProFound/ProFound-old!')
     }
   }else{
     segim=image
