@@ -1,169 +1,63 @@
-#include <Rcpp.h>
-#include <cmath>
-#include <vector>
-#include <unistd.h>
-using namespace Rcpp;
+//
+// Binding the watershed implementation to R using Rcpp
+//
+// ICRAR - International Centre for Radio Astronomy Research
+// (c) UWA - The University of Western Australia, 2018
+// Copyright by UWA (in the framework of the ICRAR)
+// All rights reserved
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA 02111-1307  USA
+//
 
-// [[Rcpp::export(".order_cpp")]]
-IntegerVector order_cpp(NumericVector x) {
-  // NumericVector sorted = clone(x).sort(true);
-  return match(clone(x).sort(true), x) - 1;
-}
-  
-// [[Rcpp::export(".tabulate_cpp")]]
-IntegerVector tabulate_cpp(const IntegerVector& x, const int max) {
-    IntegerVector counts(max);
-    int lim = x.size();
-    for (int i = 0; i < lim; i++) {
-        if (x[i] > 0 && x[i] <= max)
-            counts[x[i] - 1]++;
-    }
-    return counts;
-}
+#include <Rcpp.h>
+#include "water.hpp"
 
 // [[Rcpp::export]]
-IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const int ny = 1,
-                        const double abstol = 1, const double reltol = 0, const double cliptol = 1000000,
-                        const int ext = 1, const double skycut = 0, const int pixcut = 1,
-                        const bool verbose = false, const int Ncheck = 1000000){
-  //sanity check
-  if(image.size() != nx*ny){
-    stop("image size does not equate to nx.ny!");
-  }
-  
-  Function order_int("order");
-  
-  // check required vector size
-  int size_count = 0;
-  int ilim = image.size();
-  for (int i = 0; i < ilim; ++i) {
-    if(image[i]>= skycut){
-      ++size_count;
-    }
-  }
-  // assign and fill up with IDs
-  // checking the required size first is faster than making it too big and cutting down
-  IntegerVector imvec(size_count,-1);
-  size_count = 0;
-  for (int i = 0; i < ilim; ++i) {
-    if(image[i]>= skycut){
-      imvec(size_count) = i;
-      ++size_count;
-    }
-  }
-
-  // variables
-  IntegerVector imord =  order_int(image[imvec], Named("decreasing",true), Named("na.last",NA_REAL));
-  imvec = imvec[imord-1]; // here we order the pixels, and therefore assess brightest first
-  IntegerMatrix segim(nx,ny); // the segim map we want at the end
-  std::vector<int> seg_max_i; // i offset
-  
-  int seg_id = 0; // current segment ID
-
-  // loop over important pixels only
-  ilim = imvec.size();
-  for (int i = 0; i < ilim; ++i) {
-    if((i % Ncheck)==0){
-      try{
-        Rcpp::checkUserInterrupt();
-      }
-      catch (Rcpp::internal::InterruptedException& e)
-      {
-        Rcout << "Caught an interrupt!" << std::endl;
-        i=ilim-1;
-      }
-      if(verbose == true & i > 0){
-        Rcout << "  - Segmented pixel " << i << " out of " << ilim-1 << std::endl;
-      }
-    }
-    // int segmerge_count=0; // counter for merging
-    bool merge_flag = false; // do we have any merging
-    // reset segmerge vector
-    IntegerVector segmerge; // empty vector of segments that might need merging
-    // reset merge_flag
-    int current_pos = imvec[i];
-    int x_current = current_pos % nx; // current x position in image
-    int y_current = current_pos / nx; // current y position in image
-    int comp_pos = current_pos;
-    for (int j = -ext; j <= ext; ++j) {
-      for (int k = -ext; k <= ext; ++k) {
-        if(j == 0 && k == 0){
-          ++k;
-        }
-        int x_offset = x_current + j; // current x position in image
-        int y_offset = y_current + k; // current y position in image
-        // check we are not at the edge of the image
-        if((x_offset >= 0) & (x_offset < nx) & (y_offset >= 0) & (y_offset < ny)) {
-          // apply conversion to absolute pixel ref
-          int offset_pos = x_offset + y_offset*nx;
-          int offset_seg = segim[offset_pos];
-          if(offset_seg > 0){
-            //segmerge_count++;
-            // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
-            segmerge.push_back(offset_seg);
-            if(merge_flag==false){
-              double imref = image[imvec[seg_max_i[offset_seg-1]]];
-              if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || image[current_pos] > cliptol){
-                merge_flag=true;
-              }
+Rcpp::IntegerMatrix water_cpp(
+    Rcpp::NumericVector image = 0, const int nx = 1, const int ny = 1,
+    const double abstol = 1, const double reltol = 0, const double cliptol = 1000000,
+    const int ext = 1, const double skycut = 0, const int pixcut = 1,
+    const bool verbose = false, const int Ncheck = 1000000)
+{
+    // Use Rcpp for checking interruptions
+    auto interrupt_checker = [Ncheck, verbose](const std::size_t i, const std::size_t total) {
+        if ((i % Ncheck) == 0) {
+            try {
+                Rcpp::checkUserInterrupt();
             }
-            // if the offset position if brighter consider doing something
-            if(image[offset_pos] > image[comp_pos]){
-              comp_pos = offset_pos;
-              segim[current_pos] = offset_seg;
-            }
-          }
-        }
-      }
-    }
-    
-    // is there anything to consider merging?
-    if(merge_flag){
-      if(is_true(any(segmerge>0)) && abstol > 0){
-        segmerge=sort_unique(segmerge);
-        // are there at least two unique segments flagged?
-        if(segmerge.size()>1){
-          // looper over flagged segments that are not the brightest
-          for (int m = 1; m < segmerge.size(); ++m) {
-            // loop over pixels segmented to date
-            int segcheck = segmerge[m];
-            double imref = image[imvec[seg_max_i[segcheck-1]]]; // reference flux for the brightest pixel in the relevant segment
-            if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || image[current_pos] > cliptol){
-              // loop round all pixels that could need re-allocating
-              for (int n = seg_max_i[segcheck-1]; n <= i; ++n) {
-                int merge_loc = imvec[n]; // current location of interest
-                // if pixel is flagged for merging, set to lowest segment value (brightest peak flux segment)
-                if(segim[merge_loc] == segcheck){
-                  segim[merge_loc] = segmerge[0];
+            catch (Rcpp::internal::InterruptedException& e)
+            {
+                if (verbose) {
+                    Rcpp::Rcout << "Caught an interrupt!\n";
                 }
-              }
+                return true;
             }
-          }
+            if (verbose == true & i > 0) {
+                Rcpp::Rcout << "  - Segmented pixel " << i << " out of " << total << '\n';
+            }
         }
-      }
-    }
+        return false;
+    };
 
-    // if nothing has a segment value in the surrounding pixels then create a new segment seed
-    if(segim[current_pos] == 0){
-      seg_id++;
-      segim[current_pos] = seg_id;
-      seg_max_i.push_back(i); // since segments start at 1, and index starts at 0, will need to subtract 1 to get from segment to index
+    // Add 1 to segments so first segment is 1 and no-segments are 0
+    // (since profound::watershed uses 0 and -1 respectively)
+    Rcpp::IntegerMatrix segments(nx, ny);
+    profound::watershed(&(image[0]), &(segments[0]), nx, ny, ext, abstol, reltol, cliptol, skycut, pixcut, interrupt_checker);
+    for (std::size_t i = 0; i != nx * ny; i++) {
+        segments[i]++;
     }
-  }
-  
-  if(pixcut>1){
-    IntegerVector tabulate_seg = tabulate_cpp(segim, max(segim));
-    ilim = segim.size();
-    for (int i = 0; i < ilim; ++i) {
-      if(segim[i] > 0){
-        if(tabulate_seg[segim[i]-1] < pixcut){
-          segim[i] = 0;
-        }
-      }
-    }
-  }
-  return segim;
-  //return imvec;
+    return segments;
 }
-
-// Rcout << "comment=" << output << std::endl;

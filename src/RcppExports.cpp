@@ -28,13 +28,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// water_cpp
-IntegerVector water_cpp(const NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck);
-RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP) {
+// water_cpp_old
+IntegerVector water_cpp_old(const NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck);
+RcppExport SEXP _ProFound_water_cpp_old(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector >::type image(imageSEXP);
+    Rcpp::traits::input_parameter< const int >::type nx(nxSEXP);
+    Rcpp::traits::input_parameter< const int >::type ny(nySEXP);
+    Rcpp::traits::input_parameter< const double >::type abstol(abstolSEXP);
+    Rcpp::traits::input_parameter< const double >::type reltol(reltolSEXP);
+    Rcpp::traits::input_parameter< const double >::type cliptol(cliptolSEXP);
+    Rcpp::traits::input_parameter< const int >::type ext(extSEXP);
+    Rcpp::traits::input_parameter< const double >::type skycut(skycutSEXP);
+    Rcpp::traits::input_parameter< const int >::type pixcut(pixcutSEXP);
+    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const int >::type Ncheck(NcheckSEXP);
+    rcpp_result_gen = Rcpp::wrap(water_cpp_old(image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck));
+    return rcpp_result_gen;
+END_RCPP
+}
+// water_cpp
+Rcpp::IntegerMatrix water_cpp(Rcpp::NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck);
+RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type image(imageSEXP);
     Rcpp::traits::input_parameter< const int >::type nx(nxSEXP);
     Rcpp::traits::input_parameter< const int >::type ny(nySEXP);
     Rcpp::traits::input_parameter< const double >::type abstol(abstolSEXP);
@@ -53,6 +74,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_order_cpp", (DL_FUNC) &_ProFound_order_cpp, 1},
     {"_ProFound_tabulate_cpp", (DL_FUNC) &_ProFound_tabulate_cpp, 2},
+    {"_ProFound_water_cpp_old", (DL_FUNC) &_ProFound_water_cpp_old, 11},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
     {NULL, NULL, 0}
 };
