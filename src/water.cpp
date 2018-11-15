@@ -51,9 +51,6 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
       ++size_count;
     }
   }
-  
-  // constants
-  const int Nmerge = (ext*2+1)*(ext*2+1)-1;
 
   // variables
   IntegerVector imord =  order_int(image[imvec], Named("decreasing",true), Named("na.last",NA_REAL));
@@ -101,17 +98,17 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
           int offset_pos = x_offset + y_offset*nx;
           int offset_seg = segim[offset_pos];
           if(offset_seg > 0){
+            //segmerge_count++;
+            // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
+            segmerge.push_back(offset_seg);
+            if(merge_flag==false){
+              double imref = image[imvec[seg_max_i[offset_seg-1]]];
+              if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || image[current_pos] > cliptol){
+                merge_flag=true;
+              }
+            }
             // if the offset position if brighter consider doing something
             if(image[offset_pos] > image[comp_pos]){
-              segmerge.push_back(offset_seg);
-              //segmerge_count++;
-              if(merge_flag==false){
-                // if the brightest pixel in the offset segment is not brighter than the abstol flag for merging
-                double imref = image[imvec[seg_max_i[offset_seg-1]]];
-                if(imref - image[current_pos] < abstol * pow(imref/image[current_pos],reltol) || image[current_pos] > cliptol){
-                  merge_flag=true;
-                }
-              }
               comp_pos = offset_pos;
               segim[current_pos] = offset_seg;
             }
@@ -119,11 +116,10 @@ IntegerVector water_cpp(const NumericVector image = 0, const int nx = 1, const i
         }
       }
     }
-
+    
     // is there anything to consider merging?
     if(merge_flag){
       if(is_true(any(segmerge>0)) && abstol > 0){
-        segmerge=segmerge[segmerge>0];
         segmerge=sort_unique(segmerge);
         // are there at least two unique segments flagged?
         if(segmerge.size()>1){
