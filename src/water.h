@@ -195,7 +195,7 @@ void watershed_cetered_at(Problem &p, int i, int ext)
             }
             int off_x = x + k;
             int off_y = y + j;
-            if (off_x < 0 || off_x >= p.width || off_y < 0 || off_y >= p.height) {
+            if (off_x < 0 || (unsigned)off_x >= p.width || off_y < 0 || (unsigned)off_y >= p.height) {
                 continue;
             }
 
