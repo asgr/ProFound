@@ -1,5 +1,6 @@
 \name{water_cpp}
 \alias{water_cpp}
+\alias{water_cpp_old}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Rcpp Watershed Function
@@ -10,6 +11,8 @@ This is a standalone implementation of a watershed deblend, with some astronomy 
 \usage{
 water_cpp(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06, ext = 1L,
 skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
+water_cpp_old(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06,
+ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -49,6 +52,8 @@ Integer scalar; the pixel scanning interval to check for interupts and for print
 }
 \details{
 This was hand written from scratch by A Robotham, but in the end the approach is somewhat similar to \code{EBImage::watershed}. There do seem to be fairly large speed improvements for more sparse images though, since only pixels above the background \option{skycut} are ever looked at. This knowledge of sparcity does not exist in \code{EBImage::watershed}.
+
+\code{water_cpp} is the newer variant re-writeen by R Tobar based on the Rcpp implentation. The older Rcpp one is still available as \code{water_cpp_old}.
 }
 \value{
 Integer matrix; the segmentation map matched pixel by pixel to \option{image}.
