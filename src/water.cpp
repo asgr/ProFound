@@ -56,7 +56,7 @@ Rcpp::IntegerMatrix water_cpp(
     // (since profound::watershed uses 0 and -1 respectively)
     Rcpp::IntegerMatrix segments(nx, ny);
     profound::watershed(&(image[0]), &(segments[0]), nx, ny, ext, abstol, reltol, cliptol, skycut, pixcut, interrupt_checker);
-    for (std::size_t i = 0; i != nx * ny; i++) {
+    for (R_xlen_t i = 0; i != segments.size(); i++) {
         segments[i]++;
     }
     return segments;
