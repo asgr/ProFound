@@ -57,72 +57,72 @@
   invisible(tempgrid)
 }
 
-.interp.2d.akima=function (x, y, z, xo, yo, ncp = 0, extrap = FALSE, duplicate = "error", 
-    dupfun = NULL){
-    if (!(all(is.finite(x)) && all(is.finite(y)) && all(is.finite(z)))) 
-        stop("missing values and Infs not allowed")
-    if (is.null(xo)) 
-        stop("xo missing")
-    if (is.null(yo)) 
-        stop("yo missing")
-    if (ncp > 25) {
-        ncp <- 25
-        cat("ncp too large, using ncp=25\n")
-    }
-    drx <- diff(range(x))
-    dry <- diff(range(y))
-    if (drx == 0 || dry == 0) 
-        stop("all data collinear")
-    if (drx/dry > 10000 || drx/dry < 1e-04) 
-        stop("scales of x and y are too dissimilar")
-    n <- length(x)
-    np <- length(xo)
-    if (length(yo) != np) 
-        stop("length of xo and yo differ")
-    if (length(y) != n || length(z) != n) 
-        stop("Lengths of x, y, and z do not match")
-    xy <- paste(x, y, sep = ",")
-    i <- match(xy, xy)
-    if (duplicate == "user" && !is.function(dupfun)) 
-        stop("duplicate=\"user\" requires dupfun to be set to a function")
-    if (duplicate != "error") {
-        centre <- function(x) {
-            switch(duplicate, mean = mean(x), median = median(x), 
-                user = dupfun(x))
-        }
-        if (duplicate != "strip") {
-            z <- unlist(lapply(split(z, i), centre))
-            ord <- !duplicated(xy)
-            x <- x[ord]
-            y <- y[ord]
-            n <- length(x)
-        }
-        else {
-            ord <- (hist(i, plot = FALSE, freq = TRUE, breaks = seq(0.5, 
-                max(i) + 0.5, 1))$counts == 1)
-            x <- x[ord]
-            y <- y[ord]
-            z <- z[ord]
-            n <- length(x)
-        }
-    }
-    else if (any(duplicated(xy))) 
-        stop("duplicate data points")
-    zo <- rep(0, np)
-    storage.mode(zo) <- "double"
-    miss <- !extrap
-    misso <- seq(miss, np)
-    if (extrap & ncp == 0) 
-        warning("Cannot extrapolate with linear option")
-    ans <- .Fortran("idbvip", as.integer(1), as.integer(ncp), 
-        as.integer(n), as.double(x), as.double(y), as.double(z), 
-        as.integer(np), x = as.double(xo), y = as.double(yo), 
-        z = zo, integer((31 + ncp) * n + np), double(8 * n), 
-        misso = as.logical(misso), PACKAGE = "akima")
-    temp <- ans[c("x", "y", "z", "misso")]
-    temp$z[temp$misso] <- NA
-    temp[c("x", "y", "z")]
-}
+# .interp.2d.akima=function (x, y, z, xo, yo, ncp = 0, extrap = FALSE, duplicate = "error", 
+#     dupfun = NULL){
+#     if (!(all(is.finite(x)) && all(is.finite(y)) && all(is.finite(z)))) 
+#         stop("missing values and Infs not allowed")
+#     if (is.null(xo)) 
+#         stop("xo missing")
+#     if (is.null(yo)) 
+#         stop("yo missing")
+#     if (ncp > 25) {
+#         ncp <- 25
+#         cat("ncp too large, using ncp=25\n")
+#     }
+#     drx <- diff(range(x))
+#     dry <- diff(range(y))
+#     if (drx == 0 || dry == 0) 
+#         stop("all data collinear")
+#     if (drx/dry > 10000 || drx/dry < 1e-04) 
+#         stop("scales of x and y are too dissimilar")
+#     n <- length(x)
+#     np <- length(xo)
+#     if (length(yo) != np) 
+#         stop("length of xo and yo differ")
+#     if (length(y) != n || length(z) != n) 
+#         stop("Lengths of x, y, and z do not match")
+#     xy <- paste(x, y, sep = ",")
+#     i <- match(xy, xy)
+#     if (duplicate == "user" && !is.function(dupfun)) 
+#         stop("duplicate=\"user\" requires dupfun to be set to a function")
+#     if (duplicate != "error") {
+#         centre <- function(x) {
+#             switch(duplicate, mean = mean(x), median = median(x), 
+#                 user = dupfun(x))
+#         }
+#         if (duplicate != "strip") {
+#             z <- unlist(lapply(split(z, i), centre))
+#             ord <- !duplicated(xy)
+#             x <- x[ord]
+#             y <- y[ord]
+#             n <- length(x)
+#         }
+#         else {
+#             ord <- (hist(i, plot = FALSE, freq = TRUE, breaks = seq(0.5, 
+#                 max(i) + 0.5, 1))$counts == 1)
+#             x <- x[ord]
+#             y <- y[ord]
+#             z <- z[ord]
+#             n <- length(x)
+#         }
+#     }
+#     else if (any(duplicated(xy))) 
+#         stop("duplicate data points")
+#     zo <- rep(0, np)
+#     storage.mode(zo) <- "double"
+#     miss <- !extrap
+#     misso <- seq(miss, np)
+#     if (extrap & ncp == 0) 
+#         warning("Cannot extrapolate with linear option")
+#     ans <- .Fortran("idbvip", as.integer(1), as.integer(ncp), 
+#         as.integer(n), as.double(x), as.double(y), as.double(z), 
+#         as.integer(np), x = as.double(xo), y = as.double(yo), 
+#         z = zo, integer((31 + ncp) * n + np), double(8 * n), 
+#         misso = as.logical(misso), PACKAGE = "akima")
+#     temp <- ans[c("x", "y", "z", "misso")]
+#     temp$z[temp$misso] <- NA
+#     temp[c("x", "y", "z")]
+# }
 
 .quickclip=function(flux){
   sel=magclip(flux, estimate='lo')$x
@@ -354,14 +354,14 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     
     if(type=='bilinear'){
       #The below seems fastest and uses least memory for linear. Still need akima!
-      if(useakima){
-        tempgrid=expand.grid(xseq, yseq)
-        temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
-        temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
-      }else{
+      # if(useakima){
+      #   tempgrid=expand.grid(xseq, yseq)
+      #   temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
+      #   temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
+      # }else{
         temp_bi_sky=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_sky))
         temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
-      }
+      # }
       #temp_bi_sky=akima::bilinear(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
       #temp_bi_skyRMS=akima::bilinear(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
     }else if(type=='bicubic'){
