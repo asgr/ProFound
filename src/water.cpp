@@ -45,7 +45,7 @@ Rcpp::IntegerMatrix water_cpp(
                 }
                 return true;
             }
-            if (verbose == true & i > 0) {
+            if (verbose == true && i > 0) {
                 Rcpp::Rcout << "  - Segmented pixel " << i << " out of " << total << '\n';
             }
         }
