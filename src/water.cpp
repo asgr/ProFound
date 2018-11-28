@@ -23,7 +23,7 @@
 //
 
 #include <Rcpp.h>
-#include "water.hpp"
+#include "water.h"
 
 // [[Rcpp::export]]
 Rcpp::IntegerMatrix water_cpp(
