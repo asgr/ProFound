@@ -211,14 +211,18 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
       if(!is.null(objects)){
         tempcomb=magcutout(image=objects, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0
         if(!is.null(mask)){
-          tempcomb=tempcomb+(magcutout(image=mask, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0)
+          tempcomb=tempcomb & (magcutout(image=mask, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0)
         }
       }else{
         tempcomb=magcutout(image=mask, loc=loc, box=box, shiftloc=shiftloc, paddim=paddim)$image==0
       }
       tempcomb[is.na(tempcomb)]=FALSE
-      tempcomb=which(tempcomb)
-      skyN=length(tempcomb)
+      if(!is.null(tempcomb)){
+        tempcomb=which(tempcomb)
+        skyN=length(tempcomb)
+      }else{
+        skyN=0
+      }
       box=box+boxadd
       iterN=iterN+1
     }
