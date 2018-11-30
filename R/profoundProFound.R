@@ -82,6 +82,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   #Treat image NAs as masked regions:
   
   if(!is.null(mask)){
+    mask=mask*1 #Looks silly, but this ensures a logical mask becomes integer.
     if(length(mask)==1){
       maskflag=mask
       mask=matrix(0L,dim(image)[1],dim(image)[2])
@@ -132,6 +133,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects[objects != 0] = 1
       mode(objects)='integer'
     }
+  }else{
+    objects=objects*1 #Looks silly, but this ensures a logical mask becomes integer.
   }
   
   #Check for user provided sky, and compute if missing:

@@ -315,7 +315,9 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky - User provided sky")}
   }
+  
   image_sky=image-sky
+  
   if(hasskyRMS==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
     skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
