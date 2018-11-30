@@ -567,7 +567,7 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   invisible(list(propim=propim, propim_sky=propim_sky))
 }
 
-profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=0, skyRMS=0, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1){
+profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1){
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
@@ -578,25 +578,24 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=0, skyRMS=0, 
     pixscale=getpixscale(header)
   }
   
-  if(!missing(sky)){
+  if(!is.null(sky)){
     hassky=any(is.finite(sky))
+    if(hassky & length(sky)==1){
+      sky=rep(sky,length(image))
+    }
   }else{
     hassky=FALSE
   }
   if(hassky){
-    if(length(hassky)==1 & sky[1]==0){
-      hassky=FALSE
-    }else{
-      image=image-sky
-    }
+    image=image-sky
   }
-  if(!missing(skyRMS)){
+  if(!is.null(skyRMS)){
     hasskyRMS=any(is.finite(skyRMS))
+    if(hasskyRMS & length(skyRMS)==1){
+      skyRMS=rep(skyRMS,length(image))
+    }
   }else{
     hasskyRMS=FALSE
-  }
-  if(hasskyRMS){
-    if(length(hasskyRMS)==1 & skyRMS[1]==0){hasskyRMS=FALSE}
   }
   
   #Treat image NAs as masked regions:
@@ -883,12 +882,12 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=0, skyRMS=0, 
   invisible(as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),]))
 }
 
-profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=0, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, ...){
+profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, ...){
   if(!is.null(image)){
     if(class(image)=='profound'){
       if(is.null(segim)){segim=image$segim}
       if(is.null(mask)){mask=image$mask}
-      if(missing(sky)){sky=image$sky}
+      if(is.null(sky)){sky=image$sky}
       if(is.null(header)){header=image$header}
       image=image$image
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
@@ -902,7 +901,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=0, header=NULL
     if(is.null(image)){stop('Need image in profound object to be non-Null')}
     if(is.null(segim)){segim=profound$segim}
     if(is.null(mask)){mask=profound$mask}
-    if(missing(sky)){sky=profound$sky}
+    if(is.null(sky)){sky=profound$sky}
     if(is.null(header)){header=profound$header}
   }
   if(!is.null(image)){

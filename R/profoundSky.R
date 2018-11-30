@@ -294,8 +294,8 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
   }
   tempmat_sky=matrix(tempsky[,1],length(xseq))
   tempmat_skyRMS=matrix(tempsky[,2],length(xseq))
-  tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
-  tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
+  #tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
+  #tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
   invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS)))
 }
 
@@ -379,11 +379,16 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
       invisible(gc())
     }
   
-    temp_bi_sky=matrix(temp_bi_sky, dim(image)[1])
-    temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1])
+    temp_bi_sky=matrix(temp_bi_sky, dim(image)[1], dim(image)[2])
+    temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1], dim(image)[2])
   }else{
     temp_bi_sky=matrix(tempmat_sky[1,1], dim(image)[1], dim(image)[2])
     temp_bi_skyRMS=matrix(tempmat_skyRMS[1,1], dim(image)[1], dim(image)[2])
+  }
+  
+  if(!is.null(mask)){
+    temp_bi_sky[mask==1]=NA
+    temp_bi_skyRMS[mask==1]=NA
   }
   
   invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS))

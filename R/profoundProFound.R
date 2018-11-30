@@ -462,8 +462,11 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   segdiff[segdiff<0]=0
   
   image = (x$image-x$sky)/x$skyRMS
+  if(!is.null(x$mask)){
+    image[x$mask==1]=NA
+  }
   cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
-  maximg = quantile(abs(image), 0.995, na.rm=TRUE)
+  maximg = quantile(abs(image[is.finite(image)]), 0.995, na.rm=TRUE)
   stretchscale = 1/median(abs(image), na.rm=TRUE)
   
   layout(matrix(1:9, 3, byrow=TRUE))
@@ -501,7 +504,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
       
     par(mar=c(3.5,3.5,0.5,0.5))
     stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
-    magimageWCS(x$sky, x$header, locut=-max(abs(x$sky)), hicut=max(abs(x$sky)), range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
+    maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
+    magimageWCS(x$sky, x$header, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -518,7 +522,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky> -6 & tempsky<6]
-        magplot(density(tempsky, bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
         })
@@ -562,7 +566,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     
     par(mar=c(3.5,3.5,0.5,0.5))
     stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
-    magimage(x$sky, locut=-max(abs(x$sky)), hicut=max(abs(x$sky)), range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+    maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
+    magimage(x$sky, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -579,7 +584,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky> -6 & tempsky<6]
-        magplot(density(tempsky, bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
         })
