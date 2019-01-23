@@ -52,7 +52,7 @@ Numeric scalar; radius of the neighbourhood in pixels for the detection of neigh
 Numeric scalar; only relevant for \option{watershed}='ProFound'. A modifier to the \option{abstol}, modifying it by the ratio of the segment peak flux divided by the saddle point flux to the power \option{reltol}. The default means the \option{reltol} has no effect since this modifier becomes 1. A larger value of \option{reltol} means segments are more aggressively merged together.
 }
   \item{cliptol}{
-Numeric scalar; only relevant for \option{watershed}='ProFound'. If (\option{image}-\option{sky})/option{skyRMS} is above this level where segments touch then they are always merged, regardless of other criteria. When thinking in terms of sky RMS, values between 20-100 are probably appropriate for merging very bright parts of stars back together in optical data.
+Numeric scalar; only relevant for \option{watershed}='ProFound'. If (\option{image}-\option{sky})/\option{skyRMS} is above this level where segments touch then they are always merged, regardless of other criteria. When thinking in terms of sky RMS, values between 20-100 are probably appropriate for merging very bright parts of stars back together in optical data.
 }
   \item{sigma}{
 Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. Passed to \code{\link{profoundMakeSegim}}.
