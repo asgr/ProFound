@@ -928,7 +928,9 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
     }
   }
   
-  image=image-sky
+  if(!is.null(sky)){
+    image=image-sky
+  }
   
   segim[is.na(segim)]=0L
   

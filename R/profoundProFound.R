@@ -175,7 +175,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(is.null(segim)){
     if(verbose){message(paste('Making initial segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
-    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
+    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, magzero=magzero, pixscale=pixscale, verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
     objects=segim$objects
     segim=segim$segim
   }else{
@@ -408,9 +408,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(!missing(SBlim)){
       SBlimtemp=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-      SBlim[SBlimtemp>SBlim]=SBlim
-      #SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
-    }else if(missing(SBlim) & skycut>0){
+      SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
+      SBlim[which(SBlimtemp>SBlim)]=SBlim
+    }else if(missing(SBlim) & skycut> -Inf){
       SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
       #SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
     }else{

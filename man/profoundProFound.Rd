@@ -136,13 +136,13 @@ Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
 }
   \item{df}{
-Integer scalar; degrees of freedom for the non-parametric spline fitting. See \code{\link{profoundFluxDeblend}}.
+Integer scalar; degrees of freedom for the non-parametric spline fitting. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{radtrunc}{
-Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group. See \code{\link{profoundFluxDeblend}}.
+Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{iterative}{
-Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top. See \code{\link{profoundFluxDeblend}}.
+Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.
