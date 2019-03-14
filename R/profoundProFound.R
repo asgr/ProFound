@@ -1,37 +1,3 @@
-.selectCoG=function(diffmat, threshold=1.05){
-  IDmat=matrix(rep(1:dim(diffmat)[2],each=dim(diffmat)[1]),nrow=dim(diffmat)[1])
-  logmat=diffmat>1 & diffmat<threshold
-  IDfin=IDmat
-  IDfin[logmat==FALSE]=NA
-  NegFlux=which(diffmat<threshold^0.2,arr.ind=TRUE)
-  if(length(NegFlux)>0){
-    NegFlux[,2]=NegFlux[,2]-1
-    IDfin[NegFlux]=IDmat[NegFlux]
-    IDfin[NegFlux[NegFlux[,2]==0,1],1]=0
-  }
-  tempout=suppressWarnings(apply(IDfin,1,min,na.rm=TRUE))
-  tempout[is.infinite(tempout)]=dim(diffmat)[2]
-  tempout=tempout+1
-  # tempout={}
-  # for(i in 1:dim(diffmat)[1]){
-  #   tempsel=which(diffmat[i,]>(threshold^0.1) & diffmat[i,]<threshold)+1
-  #   if(length(tempsel)==0){
-  #     if(any(diffmat[i,]<1, na.rm=TRUE)){
-  #       tempsel=min(which(diffmat[i,]<1))
-  #     }else{
-  #       tempsel=which.min(diffmat[i,])
-  #       if(length(tempsel)==0){
-  #         tempsel=1
-  #       }
-  #     }
-  #   }else{
-  #     tempsel=min(tempsel)
-  #   }
-  #   tempout=c(tempout, tempsel)
-  # }
-  invisible(tempout)
-}
-
 profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed = 'EBImage', ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
@@ -246,6 +212,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
       
       diffmat=rbind(compmat[,2:(iters+1)]/compmat[,1:(iters)])
+      diffdiffmat=rbind(diffmat[,2:(iters)]/diffmat[,1:(iters-1)])
+      diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
       selseg=.selectCoG(diffmat, threshold)
       
       segim=segim$segim
@@ -501,7 +469,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     #magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
-    abline(ymax - xmax*0.6, 0.6, col='red')
+    abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
@@ -563,7 +531,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
-    abline(ymax - xmax*0.6, 0.6, col='red')
+    abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
     
@@ -605,4 +573,20 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     magplot(x$segstats$SB_N90, fluxrat, pch='.', col=hsv(alpha=0.5), ylim=c(0.5,max(fluxrat, 1, na.rm=TRUE)), cex=3, xlab='SB90 / mag/pix-sq', ylab='Flux/Flux-Error', grid=TRUE, log='y')
   }
   
+}
+
+.selectCoG=function(diffmat, threshold=1.05){
+  IDmat=matrix(rep(1:dim(diffmat)[2],each=dim(diffmat)[1]),nrow=dim(diffmat)[1])
+  logmat=diffmat>1 & diffmat<threshold
+  IDfin=IDmat
+  IDfin[logmat==FALSE]=NA
+  NegFlux=which(diffmat<threshold^0.2,arr.ind=TRUE)
+  if(length(NegFlux)>0){
+    NegFlux[,2]=NegFlux[,2]-1
+    IDfin[NegFlux]=IDmat[NegFlux]
+    IDfin[NegFlux[NegFlux[,2]==0,1],1]=0
+  }
+  tempout=suppressWarnings(apply(IDfin,1,min,na.rm=TRUE))
+  tempout[is.infinite(tempout)]=dim(diffmat)[2]
+  tempout+1
 }
