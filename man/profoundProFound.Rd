@@ -20,7 +20,7 @@ radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
 offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
-lowmemory = FALSE, keepim = TRUE, R50clean=0, watershed = 'EBImage', ...)
+lowmemory = FALSE, keepim = TRUE, R50clean=0, watershed = 'ProFound', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

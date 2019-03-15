@@ -125,7 +125,7 @@
   invisible(list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
-profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, watershed = 'EBImage', ...){
+profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, watershed = 'ProFound', ...){
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
     invisible(gc())
