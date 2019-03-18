@@ -106,7 +106,7 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 \details{
 The basic behaviour of \code{profoundMakeSegimExpand} and  \code{profoundMakeSegimDilate} is to intelligently expand out image segments already identified by, e.g., \code{\link{profoundMakeSegim}}.
 
-The \code{profoundMakeSegimExpand} defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{dim}, \option{expandsigma}, \option{sigma}.
+The \code{profoundMakeSegimExpand} defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut} (or \option{SBlim}), \option{expandsigma}, \option{sigma}.
 
 \code{profoundMakeSegimDilate} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{\link{profoundProFound}} is not trivially replicated by other astronomy tools.
 
