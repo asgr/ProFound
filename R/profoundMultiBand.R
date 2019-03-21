@@ -24,12 +24,12 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, iters_
   dotsignoremulti=c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats')
   
   if(length(dots)>0){
-  dotsdetect=dots[! names(dots) %in% dotsignoredetect]
-  dotsmulti=dots[! names(dots) %in% dotsignoremulti]
-}else{
-  dotsdetect={}
-  dotsmulti={}
-}
+    dotsdetect=dots[! names(dots) %in% dotsignoredetect]
+    dotsmulti=dots[! names(dots) %in% dotsignoremulti]
+  }else{
+    dotsdetect={}
+    dotsmulti={}
+  }
   
   # Restrict outselves to data actually present (no matter what is asked for)
   

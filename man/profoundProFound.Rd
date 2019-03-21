@@ -11,12 +11,12 @@ This is the highest level source detection function provided in \code{ProFit}, c
 \usage{
 profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut=1,
 pixcut=3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
-SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05, converge = 'flux',
-magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE,
-redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box, type = "bicubic",
-skytype = "median", skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1,
-skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, deblend = FALSE, df = 3,
-radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
+SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05, magzero = 0, gain = NULL,
+pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
+redoskysize = 21, box = c(100,100), grid = box, type = "bicubic", skytype = "median",
+skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2,
+boxadd = box/2, boxiters = 0, dolocalsky = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
+iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
 offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
@@ -75,9 +75,6 @@ Integer scalar; the maximum number of curve of growth dilations that should be m
   \item{threshold}{
 Numeric scalar; After the curve of growth dilations, \option{threshold} is the relative change of the converging property (see \option{converge}) that flags convergence. If consecutive iterations have a relative difference within this ratio then the dilation is stopped, and this iteration is used to define the segmentation of the object. The effect of this is that different objects will be dilated for a different number of iterations. Usually fainter sources require more. Note from v1.4: covergence has to be monotonically decreasing as dilation occurs, i.e. the flux can grow from x1.4 to x1.1 (next iteration), but not x1.4 to x2. Dilations with increasing growth rate are ignored.
 }
-  \item{converge}{
-Character scalar; the segmentation property to compare for relative convergence. The options are in principle any column that is output by \code{\link{profoundSegimStats}}, but in practice it should be something that increases slowly with dilation and tends to converge when the total flux is being captured. Good options are therefore 'flux' (default), 'R50' and 'R90'. Note from v1.4: covergence has to be monotonically decreasing as dilation occurs, i.e. the flux can grow from x1.4 to x1.1 (next iteration), but not x1.4 to x2. Dilations with increasing growth rate are ignored.
-}
   \item{magzero}{
   Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
@@ -131,6 +128,9 @@ Integer vector; the dimensions to add to the \option{box} to capture more pixels
 }
   \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
+}
+  \item{dolocalsky}{
+Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional skyseg_mean column in the segstats output provided.
 }
   \item{deblend}{
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
@@ -306,7 +306,8 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{iter}{The iteration number when the source was flagged as having convergent flux}
   \item{origfrac}{The ratio between the final converged flux and the initial \code{\link{profoundMakeSegim}} iso-contour estimate}
   \item{Norig}{Number of pixels in the non-dilated (i.e. original) segment. This will be >= \option{pixcut} by construction.}
-  \item{flag_keep}{A suggested flag for selecting good objects. Objects flagged FALSE have hit the iteration limit and have grown their flux by more than the median for all objects at the iteration limit.}
+  \item{skyseg_mean}{This only has a value if \option{dolocalsky}=TRUE (otherwise NA). If provided it represents the mean sky for the outer dilation annulus created when dilating, i.e. a very local estimate of the sky. To use it the fluxes and mags provided need to have the current sky (\option{sky_sum}) added back on and the new sky (\option{skyseg_mean} x \option{N100}) subtracted.}
+  \item{flag_keep}{A suggested flag for selecting good objects. Objects flagged FALSE have hit the iteration limit and have grown their flux by more than the median for all objects at the iteration limit. This tends to suggest a problem with the sky in the location of the segment.}
 }
 \author{
 Aaron Robotham

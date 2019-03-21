@@ -1,8 +1,10 @@
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, converge='flux', magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed='ProFound', ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, dolocalsky=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed='ProFound', ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
   call=match.call()
+  
+  converge='flux' #As of ProFound v1.5 this is hardcoded
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   
@@ -194,22 +196,35 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segstats=segstats[which(!badseg),]
       }
       
-      compmat=cbind(segstats[,converge])
+      compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1)
+      Nmat=compmat
+      compmat[,1]=segstats[,'flux']
+      Nmat[,1]=segstats[,'N100']
+      
       segim_array=array(0L, dim=c(dim(segim),iters+1))
       segim_array[,,1]=segim
       
       segim_orig=segim
       
       if(verbose){message('Doing dilations:')}
-      
+        
       for(i in 1:iters){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim=profoundMakeSegimDilate(image=image-sky, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
-        compmat=cbind(compmat, segim$segstats[,converge])
+        compmat[,i+1]=segim$segstats[,'flux']
+        Nmat[,i+1]=segim$segstats[,'N100']
         segim_array[,,i+1]=segim$segim
       }
       
       if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
+      
+      if(dolocalsky){
+        skyseg_mean=(compmat[,iters+1]-compmat[,iters])/(Nmat[,iters+1]-Nmat[,iters])
+        skyseg_mean[!is.finite(skyseg_mean)]=0
+        compmat=compmat-skyseg_mean*Nmat
+      }else{
+        skyseg_mean=NA
+      }
       
       diffmat=rbind(compmat[,2:(iters+1)]/compmat[,1:(iters)])
       diffdiffmat=rbind(diffmat[,2:(iters)]/diffmat[,1:(iters-1)])
@@ -293,7 +308,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste(' - rotstats =', rotstats))}
       if(verbose){message(paste(' - boundstats =', boundstats))}
       segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
-      segstats=cbind(segstats, iter=selseg, origfrac=origfrac, Norig=Norig[segstats$segID])
+      segstats=cbind(segstats, iter=selseg, origfrac=origfrac, Norig=Norig[segstats$segID], skyseg_mean=skyseg_mean)
       segstats=cbind(segstats, flag_keep=segstats$origfrac>= median(segstats$origfrac[segstats$iter==iters]) | segstats$iter<iters)
     }else{
       if(verbose){message("Skipping segmentation statistics - segstats set to FALSE")}
