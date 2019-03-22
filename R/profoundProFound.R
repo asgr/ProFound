@@ -184,9 +184,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       }
     }else{
       if(verbose){message("Skipping making better sky map - User provided sky and sky RMS")}
+      sky=0
     }
     
-    if(iters>0){
+    if(iters>0 | dolocalsky){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
       segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
       
@@ -232,22 +233,37 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         skyseg_mean=NA
       }
       
-      diffmat=rbind(compmat[,2:(iters+1)]/compmat[,1:(iters)])
-      diffdiffmat=rbind(diffmat[,2:(iters)]/diffmat[,1:(iters-1)])
-      diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
-      selseg=.selectCoG(diffmat, threshold)
+      if(iters>0){
+        diffmat=rbind(compmat[,2:(iters+1)]/compmat[,1:(iters)])
+        diffdiffmat=rbind(diffmat[,2:(iters)]/diffmat[,1:(iters-1)])
+        diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
+        selseg=.selectCoG(diffmat, threshold)
+        
+        segim=segim$segim
+        segim[]=0L
+        
+        if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
+        for(i in 1:(iters+1)){
+          select=segim_array[,,i] %in% segstats[selseg==i,'segID']
+          segim[select]=segim_array[,,i][select]
+        }
+        
+        if(!is.null(mask)){
+          segim[mask!=0]=segim_orig[mask!=0]
+        }
+        
+        origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
       
-      segim=segim$segim
-      segim[]=0L
+        objects=segim
+        objects[objects!=0]=1L
+        mode(objects)='integer'
       
-      if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
-      for(i in 1:(iters+1)){
-        select=segim_array[,,i] %in% segstats[selseg==i,'segID']
-        segim[select]=segim_array[,,i][select]
-      }
-      
-      if(!is.null(mask)){
-        segim[mask!=0]=segim_orig[mask!=0]
+        selseg=selseg-1
+      }else{
+        if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
+        segim=segim_orig
+        selseg=0
+        origfrac=1
       }
       
       if(rembig){
@@ -255,15 +271,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         rm(segim_array)
         invisible(gc())
       }
-      
-      origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
-      
-      objects=segim
-      objects[objects!=0]=1L
-      mode(objects)='integer'
-      
-      selseg=selseg-1
-      
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       segim_orig=segim
