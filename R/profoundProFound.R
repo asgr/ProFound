@@ -196,20 +196,26 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segstats=segstats[which(!badseg),]
       }
       
-      compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1)
+      if(dolocalsky){
+        localadd=1
+      }else{
+        localadd=0
+      }
+      
+      compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
       Nmat=compmat
       compmat[,1]=segstats[,'flux']
       Nmat[,1]=segstats[,'N100']
       
-      segim_array=array(0L, dim=c(dim(segim),iters+1))
+      segim_array=array(0L, dim=c(dim(segim),iters+1+localadd))
       segim_array[,,1]=segim
       
       segim_orig=segim
       
       if(verbose){message('Doing dilations:')}
         
-      for(i in 1:iters){
-        if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
+      for(i in 1:(iters+localadd)){
+        if(verbose){message(paste('Iteration',i,'of',iters+localadd,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim=profoundMakeSegimDilate(image=image-sky, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
         compmat[,i+1]=segim$segstats[,'flux']
         Nmat[,i+1]=segim$segstats[,'N100']
@@ -219,7 +225,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
       
       if(dolocalsky){
-        skyseg_mean=(compmat[,iters+1]-compmat[,iters])/(Nmat[,iters+1]-Nmat[,iters])
+        skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
         skyseg_mean[!is.finite(skyseg_mean)]=0
         compmat=compmat-skyseg_mean*Nmat
       }else{

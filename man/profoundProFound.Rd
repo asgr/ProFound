@@ -130,7 +130,7 @@ Integer vector; the dimensions to add to the \option{box} to capture more pixels
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
 }
   \item{dolocalsky}{
-Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional skyseg_mean column in the segstats output provided.
+Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}.
 }
   \item{deblend}{
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
