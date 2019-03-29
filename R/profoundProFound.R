@@ -1,4 +1,4 @@
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, dolocalsky=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed='ProFound', ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed='ProFound', ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -187,7 +187,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       sky=0
     }
     
-    if(iters>0 | dolocalsky){
+    if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
       segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
       
@@ -197,10 +197,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segstats=segstats[which(!badseg),]
       }
       
-      if(dolocalsky){
+      if(iterskyloc){
         localadd=1
+        skydilate=0
       }else{
         localadd=0
+        skydilate=sky
       }
       
       compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
@@ -217,7 +219,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         
       for(i in 1:(iters+localadd)){
         if(verbose){message(paste('Iteration',i,'of',iters+localadd,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profoundMakeSegimDilate(image=image-sky, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
+        segim=profoundMakeSegimDilate(image=image-skydilate, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
         compmat[,i+1]=segim$segstats[,'flux']
         Nmat[,i+1]=segim$segstats[,'N100']
         segim_array[,,i+1]=segim$segim
@@ -225,7 +227,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       
       if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
       
-      if(dolocalsky){
+      if(iterskyloc){
         skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
         skyseg_mean[!is.finite(skyseg_mean)]=0
         compmat=compmat-skyseg_mean*Nmat

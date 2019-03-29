@@ -54,6 +54,9 @@ A data.frame containing deblended flux information:
   \item{flux_db}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
   \item{mag_db}{Total flux converted to mag using \option{magzero}}
   \item{N100_db}{Total number of pixels in this segment, i.e. contains 100\% of the flux}
+  \item{flux_segfrac}{Fraction of group flux in this segment. If this is very low then it is likely harder to extract good quality fluxes (with or without deblending).}
+  \item{Qseg_db}{Quality flag for deblended segment. This represents what fraction of the segment image flux is in our deblend model. Negative means the model misses flux, postive means it has too much.  Nearer to 0 is better.}
+  \item{Qgroup_db}{Quality flag for deblended group. This represents what fraction of the group image flux is in our deblend model. Negative means the model misses flux, postive means it has too much.  Nearer to 0 is better.}
   
   The below are only returned if \option{doallstats}=TRUE:
   

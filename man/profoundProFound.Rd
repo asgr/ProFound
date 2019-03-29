@@ -15,7 +15,7 @@ SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05, magzero = 0, gain 
 pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
 redoskysize = 21, box = c(100,100), grid = box, type = "bicubic", skytype = "median",
 skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiters = 0, dolocalsky = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
+boxadd = box/2, boxiters = 0, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
 iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
@@ -129,7 +129,7 @@ Integer vector; the dimensions to add to the \option{box} to capture more pixels
   \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
 }
-  \item{dolocalsky}{
+  \item{iterskyloc}{
 Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}.
 }
   \item{deblend}{
@@ -306,7 +306,7 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{iter}{The iteration number when the source was flagged as having convergent flux}
   \item{origfrac}{The ratio between the final converged flux and the initial \code{\link{profoundMakeSegim}} iso-contour estimate}
   \item{Norig}{Number of pixels in the non-dilated (i.e. original) segment. This will be >= \option{pixcut} by construction.}
-  \item{skyseg_mean}{This only has a value if \option{dolocalsky}=TRUE (otherwise NA). If provided it represents the mean sky for the outer dilation annulus created when dilating, i.e. a very local estimate of the sky. To use it the fluxes and mags provided need to have the current sky (\option{sky_sum}) added back on and the new sky (\option{skyseg_mean} x \option{N100}) subtracted.}
+  \item{skyseg_mean}{This only has a value if \option{iterskyloc}=TRUE (otherwise NA). If provided it represents the mean sky for the outer dilation annulus created when dilating, i.e. a very local estimate of the sky. To use it the fluxes and mags provided need to have the current sky (\option{sky_sum}) added back on and the new sky (\option{skyseg_mean} x \option{N100}) subtracted.}
   \item{flag_keep}{A suggested flag for selecting good objects. Objects flagged FALSE have hit the iteration limit and have grown their flux by more than the median for all objects at the iteration limit. This tends to suggest a problem with the sky in the location of the segment.}
 }
 \author{

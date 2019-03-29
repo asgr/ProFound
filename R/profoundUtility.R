@@ -193,27 +193,38 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
     tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
     weightmatrix=matrix(0,length(tempgridgroup[,1]),length(segIDlist))
+    Qseg_db=rep(0,length(segIDlist))
+    fluxfrac=rep(0,length(segIDlist))
     
-    for(i in 1:length(segIDlist)){
-      tempgridseg=which(segim[tempgridgroup]==segIDlist[i])
-  
-      groupout=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[i],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[i],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[i],"ang"],axrat=segstats[segstats$segID==segIDlist[i],"axrat"])
-      segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[i],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[i],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[i],"ang"],axrat=segstats[segstats$segID==segIDlist[i],"axrat"])
-    #tempspline=smooth.spline(segout[segout[,2]>0,1],log10(segout[segout[,2]>0,2]), df=df)
+    groupsum=sum(image[tempgridgroup],na.rm=TRUE)
+    
+    for(j in 1:length(segIDlist)){
+      tempgridseg=which(segim[tempgridgroup]==segIDlist[j])
+      segsum=sum(image_temp[tempgridgroup[tempgridseg,]],na.rm=TRUE)
+      fluxfrac[j]=segsum/groupsum
+      groupout=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
+      segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
       select=which(segout[,2]>0)
       if(length(unique(segout[select,1]))>df){
-        weightmatrix[,i]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, groupout[,1])$y
-        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),i]=0
+        weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, groupout[,1])$y
+        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
+        Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
       }else{
-        weightmatrix[,i]=0
+        weightmatrix[,j]=0
       }
       if(iterative){
-        image_temp[tempgridgroup]=image_temp[tempgridgroup]-weightmatrix[,i]
+        image_temp[tempgridgroup]=image_temp[tempgridgroup]-weightmatrix[,j]
       }
     }
-    weightmatrix=weightmatrix/.rowSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    
+    normmat=.rowSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    Qgroup_db=sum(normmat-image[tempgridgroup])/groupsum
+    weightmatrix=weightmatrix/normmat
     output[Npad:(Npad+Ngroup-1),"flux_db"]=.colSums(weightmatrix*image[tempgridgroup], dim(weightmatrix)[1], dim(weightmatrix)[2])
     output[Npad:(Npad+Ngroup-1),"N100_db"]=.colSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    output[Npad:(Npad+Ngroup-1),"flux_segfrac"]=fluxfrac
+    output[Npad:(Npad+Ngroup-1),"Qseg_db"]=Qseg_db
+    output[Npad:(Npad+Ngroup-1),"Qgroup_db"]=Qgroup_db
     Npad=Npad+Ngroup
   }
   output[,"mag_db"]=profoundFlux2Mag(flux=output[,'flux_db'], magzero=magzero)
