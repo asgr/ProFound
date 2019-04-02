@@ -204,14 +204,23 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
       fluxfrac[j]=segsum/groupsum
       groupout=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
       segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
+      
       select=which(segout[,2]>0)
-      if(length(unique(segout[select,1]))>df){
+      #Try various levels of segment fitting: spline, linear, flat
+      if(length(unique(segout[select,1]))>max(3,df)){
         weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, groupout[,1])$y
         weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
         Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
+      }else if(length(unique(segout[select,1]))>1){
+        weightmatrix[,j]=10^predict(lm(segout[select,1],log10(segout[select,2])), groupout[,1])
+        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
+        Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
       }else{
-        weightmatrix[,j]=0
+        weightmatrix[groupout[,1]<=radtrunc*max(segout[,1]),j]=segsum/length(which(groupout[,1]<=radtrunc*max(segout[,1])))
+        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
+        Qseg_db[j]=0
       }
+      
       if(iterative){
         image_temp[tempgridgroup]=image_temp[tempgridgroup]-weightmatrix[,j]
       }
