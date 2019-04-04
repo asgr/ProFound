@@ -169,7 +169,7 @@ profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, group
   invisible(segstats)
 }
 
-profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE){
+profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE){
   if(class(image)=='profound'){
     if(is.null(segim)){segim=image$segim}
     if(is.null(segstats)){segstats=image$segstats}
@@ -179,6 +179,11 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     image=image$image-image$sky
   }
   groupsegID=groupsegID[groupsegID$Ngroup>1,,drop=FALSE]
+  if(lowmemory==FALSE){
+    groupID=Var1=Var2=NULL
+    groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]))
+    groupref[groupID %in% groupsegID$groupID]
+  }
   output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
   if(iterative){
     output[,"flux_db"]=segstats[match(output$segID, segstats$segID),"flux"]
@@ -187,11 +192,17 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   Npad=1
   image_temp=image
   for(i in 1:dim(groupsegID)[1]){
+    #print(paste(i,'in',dim(groupsegID)[1]))
     Ngroup=groupsegID[i,"Ngroup"]
     segIDlist=output[output[,'groupID']==groupsegID[i,"groupID"],"segID"]
     segIDlist=segIDlist[segIDlist>0]
   
-    tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
+    if(lowmemory){
+      tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
+    }else{
+      tempgridgroup=as.matrix(cbind(groupref[groupID==groupsegID[i,"groupID"],list(Var1,Var2)])) 
+    }
+    
     weightmatrix=matrix(0,length(tempgridgroup[,1]),length(segIDlist))
     Qseg_db=rep(0,length(segIDlist))
     fluxfrac=rep(0,length(segIDlist))
@@ -202,22 +213,26 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
       tempgridseg=which(segim[tempgridgroup]==segIDlist[j])
       segsum=sum(image_temp[tempgridgroup[tempgridseg,]],na.rm=TRUE)
       fluxfrac[j]=segsum/groupsum
-      groupout=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
+      groupellip=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
       segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
       
-      select=which(segout[,2]>0)
+      select=which(segout[,2]>0 & is.finite(segout[,1] & is.finite(segout[,2])))
       #Try various levels of segment fitting: spline, linear, flat
       if(length(unique(segout[select,1]))>max(3,df)){
-        weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, groupout[,1])$y
-        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
+        weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y
+        weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
         Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
       }else if(length(unique(segout[select,1]))>1){
-        weightmatrix[,j]=10^predict(lm(segout[select,1],log10(segout[select,2])), groupout[,1])
-        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
+        weightmatrix[,j]=10^predict(lm(y~x, data=list(x=segout[select,1],y=log10(segout[select,2]))), newdata=list(x=groupellip[,1]))
+        weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
         Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
       }else{
-        weightmatrix[groupout[,1]<=radtrunc*max(segout[,1]),j]=segsum/length(which(groupout[,1]<=radtrunc*max(segout[,1])))
-        weightmatrix[groupout[,1]>radtrunc*max(segout[,1]),j]=0
+        if(segsum>0){
+          weightmatrix[groupellip[,1]<=radtrunc*max(segout[,1]),j]=segsum/length(which(groupellip[,1]<=radtrunc*max(segout[,1])))
+          weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
+        }else{
+          weightmatrix[,j]=0
+        }
         Qseg_db[j]=0
       }
       

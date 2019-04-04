@@ -10,7 +10,7 @@ Given a target image, a segmentation map, image segstats and group properties, t
 \usage{
 profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
 groupsegID = NULL, magzero = 0,  df = 3, radtrunc = 2, iterative = FALSE,
-doallstats = TRUE) 
+doallstats = TRUE, lowmemory = FALSE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,6 +43,9 @@ Logical; should each segment profile fit be subtracted as it goes along? TRUE te
 }
   \item{doallstats}{
 Logical; specifies whether the output catalogue is matched against all rows of the supplied \option{segstats} (TRUE), or only the rows containing grouped (and therefore deblended) galaxies are returned and the core flux columns (see below)s.
+}
+\item{lowmemory}{
+Logical; if TRUE then a low memory mode of FluxDeblend will be used. This is quite a bit slower, so the default of FALSE is usually preferred unless you are running into serious memory issues.
 }
 }
 \details{
