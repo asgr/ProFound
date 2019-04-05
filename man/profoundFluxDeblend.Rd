@@ -18,16 +18,16 @@ iterative = FALSE, doallstats = TRUE, lowmemory = FALSE)
 Numeric matrix; required, the image we want to analyse. As a convenience you can supply the output of \code{\link{profoundProFound}} of class profound, in which case any required input that is not explicitly set via the arguments will be inherited from the \code{\link{profoundProFound}} list.
 }
   \item{segim}{
-Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{\link{profoundProFound}} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
+Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied.
 }
   \item{segstats}{
 Data.frame, segmentation catalogue output from \option{profoundProFound}.
 }
   \item{groupim}{
-Integer matrix; the grouped segmentation map. This matrix *must* be the same dimensions as \option{image}.
+Integer matrix; the grouped segmentation map. This matrix *must* be the same dimensions as \option{image}. If missing then this is computed using \code{\link{profoundSegimGroup}} using the supplied \option{segim}.
 }
   \item{groupsegID}{
-List; group information as output by \option{profoundSegimGroup} or \option{profoundProFound}. Must correspond to the supplied \option{segstats}.
+List; group information as output by \option{profoundSegimGroup} or \option{profoundProFound}. Must correspond to the supplied \option{segstats}. If missing then this is computed using \code{\link{profoundSegimGroup}} using the supplied \option{segim}.
 }
   \item{sky}{
 Numeric; the absolute sky level. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).  
@@ -93,11 +93,12 @@ Given the large number of inputs required, this function effectively needs \code
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
-profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
+profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE, groupstats=TRUE)
 
 deblend=profoundFluxDeblend(profound)
 
-plot(profound$segstats$mag, deblend$mag_db)
+magplot(profound$segstats$mag, profound$segstats$mag-deblend$mag_db, ylim=c(-0.3,0.3),
+grid=TRUE, xlab='mag', ylab='mag_orig - mag_deblend')
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

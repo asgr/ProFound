@@ -178,7 +178,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
       if(is.null(groupim)){groupim=image$group$groupim}
       if(is.null(groupsegID)){groupsegID=image$group$groupsegID}
       if(missing(sky)){sky=image$sky}
-      if(is.null(magzero)){magzero=image$magzero}
+      if(missing(magzero)){magzero=image$magzero}
       image=image$image
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
     }
@@ -193,7 +193,13 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     if(is.null(segstats)){segstats=profound$segstats}
     if(is.null(groupim)){groupim=profound$group$groupim}
     if(is.null(groupsegID)){groupsegID=profound$group$groupsegID}
-    if(is.null(magzero)){magzero=profound$magzero}
+    if(missing(magzero)){magzero=profound$magzero}
+  }
+  
+  if(is.null(groupim) | is.null(groupsegID)){
+    group=profoundSegimGroup(segim)
+    groupim=group$groupim
+    groupsegID=group$groupsegID
   }
   
   image=image-sky
@@ -202,7 +208,8 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   if(lowmemory==FALSE){
     groupID=Var1=Var2=NULL
-    groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]))
+    groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]), keyby='groupID')
+    setkey(groupref, groupID)
     groupref[groupID %in% groupsegID$groupID]
   }else{
     rm(sky)
@@ -237,7 +244,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     
     for(j in 1:length(segIDlist)){
       tempgridseg=which(segim[tempgridgroup]==segIDlist[j])
-      segsum=sum(image_temp[tempgridgroup[tempgridseg,]],na.rm=TRUE)
+      segsum=sum(image_temp[tempgridgroup[tempgridseg,,drop=FALSE]],na.rm=TRUE)
       if(segsum<0){segsum=0}
       fluxfrac[j]=segsum/groupsum
       groupellip=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
