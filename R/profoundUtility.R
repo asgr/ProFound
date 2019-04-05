@@ -169,22 +169,48 @@ profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, group
   invisible(segstats)
 }
 
-profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE){
-  if(class(image)=='profound'){
-    if(is.null(segim)){segim=image$segim}
-    if(is.null(segstats)){segstats=image$segstats}
-    if(is.null(groupim)){groupim=image$group$groupim}
-    if(is.null(groupsegID)){groupsegID=image$group$groupsegID}
-    if(is.null(magzero)){magzero=image$magzero}
-    image=image$image-image$sky
+profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE){
+  
+  if(!is.null(image)){
+    if(class(image)=='profound'){
+      if(is.null(segim)){segim=image$segim}
+      if(is.null(segstats)){segstats=image$segstats}
+      if(is.null(groupim)){groupim=image$group$groupim}
+      if(is.null(groupsegID)){groupsegID=image$group$groupsegID}
+      if(missing(sky)){sky=image$sky}
+      if(is.null(magzero)){magzero=image$magzero}
+      image=image$image
+      if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    }
   }
+  
+  if(!is.null(profound)){
+    if(class(profound) != 'profound'){
+      stop('Class of profound input must be of type \'profound\'')
+    }
+    if(is.null(image)){image=profound$image}
+    if(is.null(segim)){segim=profound$segim}
+    if(is.null(segstats)){segstats=profound$segstats}
+    if(is.null(groupim)){groupim=profound$group$groupim}
+    if(is.null(groupsegID)){groupsegID=profound$group$groupsegID}
+    if(is.null(magzero)){magzero=profound$magzero}
+  }
+  
+  image=image-sky
+  
   groupsegID=groupsegID[groupsegID$Ngroup>1,,drop=FALSE]
+  
   if(lowmemory==FALSE){
     groupID=Var1=Var2=NULL
     groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]))
     groupref[groupID %in% groupsegID$groupID]
+  }else{
+    rm(sky)
+    invisible(gc())
   }
+  
   output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
+  
   if(iterative){
     output[,"flux_db"]=segstats[match(output$segID, segstats$segID),"flux"]
     output=output[order(output[,"groupID"],-output[,"flux_db"]),]
@@ -212,11 +238,12 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     for(j in 1:length(segIDlist)){
       tempgridseg=which(segim[tempgridgroup]==segIDlist[j])
       segsum=sum(image_temp[tempgridgroup[tempgridseg,]],na.rm=TRUE)
+      if(segsum<0){segsum=0}
       fluxfrac[j]=segsum/groupsum
       groupellip=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
       segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
       
-      select=which(segout[,2]>0 & is.finite(segout[,1] & is.finite(segout[,2])))
+      select=which(segout[,2]>0 & is.finite(segout[,1]) & is.finite(segout[,2]))
       #Try various levels of segment fitting: spline, linear, flat
       if(length(unique(segout[select,1]))>max(3,df)){
         weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y
@@ -251,6 +278,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     output[Npad:(Npad+Ngroup-1),"Qgroup_db"]=Qgroup_db
     Npad=Npad+Ngroup
   }
+  
   output[,"mag_db"]=profoundFlux2Mag(flux=output[,'flux_db'], magzero=magzero)
   
   if(doallstats){

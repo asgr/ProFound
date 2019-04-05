@@ -9,8 +9,8 @@ Given a target image, a segmentation map, image segstats and group properties, t
 }
 \usage{
 profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
-groupsegID = NULL, magzero = 0,  df = 3, radtrunc = 2, iterative = FALSE,
-doallstats = TRUE, lowmemory = FALSE) 
+groupsegID = NULL, sky = 0, profound = NULL, magzero = 0,  df = 3, radtrunc = 2,
+iterative = FALSE, doallstats = TRUE, lowmemory = FALSE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,6 +28,12 @@ Integer matrix; the grouped segmentation map. This matrix *must* be the same dim
 }
   \item{groupsegID}{
 List; group information as output by \option{profoundSegimGroup} or \option{profoundProFound}. Must correspond to the supplied \option{segstats}.
+}
+  \item{sky}{
+Numeric; the absolute sky level. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).  
+}
+  \item{profound}{
+List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples). As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
   \item{magzero}{
 Numeric scalar; the magnitude zero point.
@@ -54,6 +60,8 @@ This routine only deblends with detected groups, so it is quite fast if the numb
 \value{
 A data.frame containing deblended flux information:
 
+  \item{groupID}{The group ID reference for the deblend (as taken from groupsegID)}
+  \item{segID}{The segment ID reference for the deblend (as taken from groupsegID)}
   \item{flux_db}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
   \item{mag_db}{Total flux converted to mag using \option{magzero}}
   \item{N100_db}{Total number of pixels in this segment, i.e. contains 100\% of the flux}
