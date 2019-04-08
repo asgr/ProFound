@@ -152,7 +152,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   }
   
   if(any(segim>0)){
-    if((hassky==FALSE | hasskyRMS==FALSE) & iters>0){
+    if((hassky==FALSE | hasskyRMS==FALSE)){
       if(verbose){message(paste('Doing initial aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
       objects_redo=profoundMakeSegimDilate(image=image, segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
@@ -184,7 +184,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       }
     }else{
       if(verbose){message("Skipping making better sky map - User provided sky and sky RMS")}
-      sky=0
     }
     
     if(iters>0 | iterskyloc){
