@@ -1074,3 +1074,15 @@ profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_m
   
   invisible(segim_out)
 }
+
+profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
+  if(is.null(image)){stop('Missing image - this is a required input!')}
+  if(is.null(segim)){stop('Missing segim - this is a required input!')}
+  
+  segimadd=profoundProFound(image=image, mask=mask, ...)$segim
+  newloc=which(segimadd>0)
+  segimadd[newloc]=segimadd[newloc]+max(segim)
+  segim=segim+segimadd
+  
+  invisible(segim)
+}

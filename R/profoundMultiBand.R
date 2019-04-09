@@ -20,7 +20,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, iters_
   
   dots=list(...)
   
-  dotsignoredetect=c('iters', 'sky', 'skyRMS', 'deblend', 'plot', 'stats', 'haralickstats')
+  dotsignoredetect=c('iters', 'sky', 'skyRMS', 'plot', 'stats', 'haralickstats')
   dotsignoremulti=c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats')
   
   if(length(dots)>0){
@@ -285,11 +285,11 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, iters_
         if(dotot){
           #pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
+          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, sky=pro_multi_tot$sky, skyRMS=pro_multi_tot$skyRMS, redosky=FALSE, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=deblend, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }else{
           #pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
+          pro_multi_col=do.call("profoundProFound", c(list(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, groupstats=FALSE, iters=0, deblend=deblend, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }
         
         # Append column names and concatenate cat_col together

@@ -14,6 +14,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(missing(boxadd)){boxadd=box/2}
     if(missing(skypixmin)){skypixmin=prod(box)/2}
   }
+  if(length(grid)==1){
+    grid=rep(grid,2)
+  }
+  if(length(boxadd)==1){
+    boxadd=rep(boxadd,2)
+  }
   
   #Split out image and header parts of input:
   
@@ -43,6 +49,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message('Supplied image contains image and header but using specified header')}
       image=image$image
     }
+  }else{
+    stop('Missing image - this is a required input!')
   }
   
   if(verbose){message(paste('Supplied image is',dim(image)[1],'x',dim(image)[2],'pixels'))}
@@ -148,7 +156,19 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     segim=segim$segim
   }else{
     redosegim=FALSE
+    # Commented out. New profoundExtendSegim function made instead.
+    # if(extendsegim){
+    #   if(verbose){message("Finding additional sources - User provided segim")}
+    #   segimadd=profoundMakeSegim(image=image, mask=objects, tolerance=tolerance, ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, magzero=magzero, pixscale=pixscale, verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
+    #   newloc=which(segimadd$segim>0)
+    #   segimadd$segim[newloc]=segimadd$segim[newloc]+max(segim)
+    #   segim=segim+segimadd$segim
+    #   objects[newloc]=1
+    #   rm(newloc)
+    #   rm(segimadd)
+    # }else{
     if(verbose){message("Skipping making an initial segmentation image - User provided segim")}
+    #}
   }
   
   if(any(segim>0)){
