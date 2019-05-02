@@ -90,10 +90,10 @@ A list containing three objects:
     \item lag: The pixel lag
     \item corx: The correlation in the x-dimension
     \item cory: The correlation in the y-dimension
-    \item corx_neg: The correlation of sub sky versus sky pixels in x
-    \item cory_neg: The correlation of sub sky sversus ky pixels in y
-    \item corx_pos: The correlation of excess sky versus sky pixels in x
-    \item cory_pos: The correlation of excess sky versus sky pixels in y
+    \item corx_neg: The correlation of +ve-sky versus +ve-sky pixels in x
+    \item cory_neg: The correlation of +ve-sky versus +ve-sky pixels in y
+    \item corx_pos: The correlation of -ve-sky sky versus -ve-sky sky pixels in x
+    \item cory_pos: The correlation of -ve-sky sky versus -ve-sky sky pixels in y
     \item corx_diff: corx_pos - corx_neg
     \item cory_diff: cory_pos - cory_neg
     \item relsdx: The pixel lag implied relative standard-deviation in x
@@ -101,6 +101,7 @@ A list containing three objects:
   }
   \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in units of (2.pi)/(L.pix), where L is the original dimensions of the image being Fourier transformed in x and y respectively. z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. We use the optical representation, where the DC (or k=0) mode is in the absolute centre. This means larger scale produce power in the central parts of the FFT image, and smaller scales produce power in the outer parts of the FFT image.
   \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
+  \item cor_err_func: the error function between \option{N100} (the number of pixels in the segment) and the relative flux error. This will never be less than 0, and can be near 1 for small segments in highly correlated data (which is what should be expected).
   
 \code{profoundSkySplitFFT}:
 

@@ -36,7 +36,7 @@ Integer vector; the dimensions of the box car filter to estimate the sky with.
 Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}.
 }
   \item{type}{
-Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default). The former creates sharper edges.
+Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default, requires \code{akima} package). The former creates sharper edges.
 }
   \item{skytype}{
 Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 

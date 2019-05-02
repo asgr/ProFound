@@ -11,7 +11,7 @@ Basic summary statistics for image segments, e.g. aperture parameters, fluxes an
 \usage{
 profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS = NULL,
 magzero = 0, gain = NULL, pixscale = 1, header, sortcol = "segID", decreasing = FALSE,
-rotstats = FALSE, boundstats = FALSE, offset = 1)
+rotstats = FALSE, boundstats = FALSE, offset = 1, cor_err_func = NULL)
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, header = NULL,
 col = rainbow(max(segim), end=2/3), profound = NULL, ...)
 }
@@ -64,6 +64,9 @@ Colour palette; the colours to map the segment IDs against. This is by default t
 }
   \item{profound}{
 List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure. As an added convenience, you can assign the profound object directly to the \option{image} input.
+}
+  \item{cor_err_func}{
+Function; the error function between \option{N100} (the number of pixels in the segment) and the relative flux error. Most likely the \option{cor_err_func} output of \code{\link{profoundPixelCorrelation}}.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.
@@ -121,6 +124,7 @@ A data.frame with columns:
   \item{flux_err_sky}{Sky subtraction component of the flux error}
   \item{flux_err_skyRMS}{Sky RMS component of the flux error}
   \item{flux_err_shot}{Object shot-noise component of the flux error (only if \option{gain} is provided)}
+  \item{flux_err_cor}{Error component due to pixel correlation}
   \item{sky_mean}{Mean flux of the sky over all segment pixels}
   \item{sky_sum}{Total flux of the sky over all segment pixels}
   \item{skyRMS_mean}{Mean value of the sky RMS over all segment pixels}

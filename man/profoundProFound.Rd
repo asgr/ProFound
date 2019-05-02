@@ -20,7 +20,9 @@ iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
 offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
-lowmemory = FALSE, keepim = TRUE, R50clean=0, watershed = 'ProFound', ...)
+lowmemory = FALSE, keepim = TRUE, R50clean = 0, watershed = 'ProFound', pixelcov = FALSE,
+deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
+convmode = 'extended', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -163,7 +165,7 @@ Logical; should verbose output be displayed to the user? Since big image can tak
 Logical; should a diagnostic plot be generated? This is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot!
 }
   \item{stats}{
-Logical; should statistics on the segmented objects be returned? If \option{magzero} and \option{pixscale} have been provided then some of the outputs are computed in terms of magnitude and mag/asec^2 rather than flux and flux/pix^2 (see Value).
+Logical; should statistics on the segmented objects be returned using \code{\link{profoundSegimStats}}? If \option{magzero} and \option{pixscale} have been provided then some of the outputs are computed in terms of magnitude and mag/asec^2 rather than flux and flux/pix^2 (see Value).
 }
   \item{rotstats}{
 Logical; if TRUE then the \option{asymm}, \option{flux_reflect} and \option{mag_reflect} are computed, else they are set to NA. This is because they are very expensive to compute compared to other photometric properties.
@@ -206,6 +208,24 @@ Numeric scalar; setting this to more than 0 cleans sources for spuriously small 
 }
   \item{watershed}{
 Character; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
+}
+  \item{pixelcov}{
+Logical, should pixel covariance be considered when computing errors? TRUE uses \code{\link{profoundPixelCorrelation}} and the \option{cor_err_func} output which is then passed into \code{\link{profoundSegimStats}}.
+}
+  \item{deblendtype}{
+Scalar character, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+}
+  \item{psf}{
+Numeric matrix; must be provided if \option{deblendtype}='psf'. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+}
+  \item{fluxweight}{
+Numeric scalar; only relevent when \option{deblendtype}='psf'. Either 'sum' (where the sum of the current segment weights the deblend solution), 'peak' (where only the peak pixel flux in the segment it used) or 'none' (no additional weighting is used). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+}
+  \item{convtype}{
+Scalar character, only relevent when \option{deblendtype}='psf'. Specifies the type on convolver to use. Available options are displayed by running \code{profitAvailableConvolvers}, but usually one of 'brute' or 'fftw'. The latter tends to be fastest when the supplied \option{psf} is much smaller than the \option{image} (factor greater than 4 in each dimension). As the sizes become comparable, fftw becomes faster since it scales better with the product of \option{psf} and \option{image} pixels.
+}
+  \item{convmode}{
+Scalar character, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
@@ -292,6 +312,7 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{flux_err_sky}{Sky subtraction component of the flux error}
   \item{flux_err_skyRMS}{Sky RMS component of the flux error}
   \item{flux_err_shot}{Object shot-noise component of the flux error (only if \option{gain} is provided)}
+  \item{flux_err_cor}{Error component due to pixel correlation}
   \item{sky_mean}{Mean flux of the sky over all segment pixels}
   \item{sky_sum}{Total flux of the sky over all segment pixels}
   \item{skyRMS_mean}{Mean value of the sky RMS over all segment pixels}

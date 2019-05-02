@@ -10,7 +10,8 @@ Given a target image, a segmentation map, image segstats and group properties, t
 \usage{
 profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
 groupsegID = NULL, sky = 0, profound = NULL, magzero = 0,  df = 3, radtrunc = 2,
-iterative = FALSE, doallstats = TRUE, lowmemory = FALSE) 
+iterative = FALSE, doallstats = TRUE, lowmemory = FALSE, deblendtype = 'fit', psf = NULL,
+fluxweight = 'sum', convtype = 'brute', convmode = 'extended') 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -50,12 +51,33 @@ Logical; should each segment profile fit be subtracted as it goes along? TRUE te
   \item{doallstats}{
 Logical; specifies whether the output catalogue is matched against all rows of the supplied \option{segstats} (TRUE), or only the rows containing grouped (and therefore deblended) galaxies are returned and the core flux columns (see below)s.
 }
-\item{lowmemory}{
+  \item{lowmemory}{
 Logical; if TRUE then a low memory mode of FluxDeblend will be used. This is quite a bit slower, so the default of FALSE is usually preferred unless you are running into serious memory issues.
+}
+  \item{deblendtype}{
+Scalar character, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend.
+}
+  \item{psf}{
+Numeric matrix; must be provided if \option{deblendtype}='psf'. This should be a small image (usually square) of the image PSF/beam to use for deblending.
+}
+  \item{fluxweight}{
+Numeric scalar; only relevent when \option{deblendtype}='psf'. Either 'sum' (where the sum of the current segment weights the deblend solution), 'peak' (where only the peak pixel flux in the segment it used) or 'none' (no additional weighting is used). For very well resolved images 'sum' makes more sense, for barely resolved images 'peak' should be the safer option. Basically, you should pick the option that likely correlates best with the true (deblended) flux. This requires some thought on the user side (sorry!), but it might be a good idea to try both options and check the deblend quality.
+}
+  \item{convtype}{
+Scalar character, only relevent when \option{deblendtype}='psf'. Specifies the type on convolver to use. Available options are displayed by running \code{profitAvailableConvolvers}, but usually one of 'brute' or 'fftw'. The latter tends to be fastest when the supplied \option{psf} is much smaller than the \option{image} (factor greater than 4 in each dimension). As the sizes become comparable, fftw becomes faster since it scales better with the product of \option{psf} and \option{image} pixels.
+}
+  \item{convmode}{
+Scalar character, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
 }
 }
 \details{
 This routine only deblends with detected groups, so it is quite fast if the number of groups is quite low. If the image is more confused then this process can be quite slow.
+
+Since there are a few ways to run it, here is some advice:
+
+For clearly extended sources you probably want to run with deblendtype='fit', iterative=TRUE / deblendtype='psf', fluxweight='sum', convtype='extend'. The former works better for very complex source geometry (since it fits it), the latter might be a bit more stable though.
+
+For poorly resolved images you probably want to run with deblendtype='psf', fluxweight='peak', convtype='psf'.
 }
 \value{
 A data.frame containing deblended flux information:
@@ -68,6 +90,7 @@ A data.frame containing deblended flux information:
   \item{flux_segfrac}{Fraction of group flux in this segment. If this is very low then it is likely harder to extract good quality fluxes (with or without deblending).}
   \item{Qseg_db}{Quality flag for deblended segment. This represents what fraction of the segment image flux is in our deblend model. Negative means the model misses flux, postive means it has too much.  Nearer to 0 is better.}
   \item{Qgroup_db}{Quality flag for deblended group. This represents what fraction of the group image flux is in our deblend model. Negative means the model misses flux, postive means it has too much.  Nearer to 0 is better.}
+  \item{beamcorrect}{Maximal beam correction. This is not applied, but for isolated sources this is the amount you should multiply the flux (and mag etc) given the beam PSF. In crowded fields this will not work well since flux will not be conserved globally!}
   
   The below are only returned if \option{doallstats}=TRUE:
   

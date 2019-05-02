@@ -1,44 +1,3 @@
-.interp.2d=function(x, y, obj){
-    if(length(x)>1e6){rembig=TRUE}else{rembig=FALSE}
-    xobj = obj$x
-    yobj = obj$y
-    zobj = obj$z
-    nx = length(xobj)
-    ny = length(yobj)
-    lx = approx(xobj, 1:nx, x, rule = 2)$y
-    if(rembig){
-      rm(x)
-      invisible(gc())
-    }
-    ly = approx(yobj, 1:ny, y, rule = 2)$y
-    if(rembig){
-      rm(y)
-      invisible(gc())
-    }
-    lx1 = floor(lx)
-    ly1 = floor(ly)
-    ex = lx - lx1
-    if(rembig){
-      rm(lx)
-      invisible(gc())
-    }
-    ey = ly - ly1
-    if(rembig){
-      rm(ly)
-      invisible(gc())
-    }
-    ex[lx1 == nx] = 1
-    ey[ly1 == ny] = 1
-    lx1[lx1 == nx] = nx - 1
-    ly1[ly1 == ny] = ny - 1
-    temp=rep(0,length(lx1))
-    temp=zobj[cbind(lx1, ly1)] * (1 - ex) * (1 - ey)
-    temp=temp+zobj[cbind(lx1 + 1, ly1)] * ex * (1 - ey)
-    temp=temp+zobj[cbind(lx1, ly1 + 1)] * (1 - ex) * ey
-    temp=temp+zobj[cbind(lx1 + 1, ly1 + 1)] * ex * ey
-    invisible(temp)
-}
-
 # .subgrid=function(dim=c(100,100), grid=c(10,10)){
 #   xhimult=ceiling(dim[1]/grid[1])
 #   yhimult=ceiling(dim[2]/grid[2])
@@ -57,72 +16,72 @@
 #   invisible(tempgrid)
 # }
 
-# .interp.2d.akima=function (x, y, z, xo, yo, ncp = 0, extrap = FALSE, duplicate = "error", 
-#     dupfun = NULL){
-#     if (!(all(is.finite(x)) && all(is.finite(y)) && all(is.finite(z)))) 
-#         stop("missing values and Infs not allowed")
-#     if (is.null(xo)) 
-#         stop("xo missing")
-#     if (is.null(yo)) 
-#         stop("yo missing")
-#     if (ncp > 25) {
-#         ncp <- 25
-#         cat("ncp too large, using ncp=25\n")
-#     }
-#     drx <- diff(range(x))
-#     dry <- diff(range(y))
-#     if (drx == 0 || dry == 0) 
-#         stop("all data collinear")
-#     if (drx/dry > 10000 || drx/dry < 1e-04) 
-#         stop("scales of x and y are too dissimilar")
-#     n <- length(x)
-#     np <- length(xo)
-#     if (length(yo) != np) 
-#         stop("length of xo and yo differ")
-#     if (length(y) != n || length(z) != n) 
-#         stop("Lengths of x, y, and z do not match")
-#     xy <- paste(x, y, sep = ",")
-#     i <- match(xy, xy)
-#     if (duplicate == "user" && !is.function(dupfun)) 
-#         stop("duplicate=\"user\" requires dupfun to be set to a function")
-#     if (duplicate != "error") {
-#         centre <- function(x) {
-#             switch(duplicate, mean = mean(x), median = median(x), 
-#                 user = dupfun(x))
-#         }
-#         if (duplicate != "strip") {
-#             z <- unlist(lapply(split(z, i), centre))
-#             ord <- !duplicated(xy)
-#             x <- x[ord]
-#             y <- y[ord]
-#             n <- length(x)
-#         }
-#         else {
-#             ord <- (hist(i, plot = FALSE, freq = TRUE, breaks = seq(0.5, 
-#                 max(i) + 0.5, 1))$counts == 1)
-#             x <- x[ord]
-#             y <- y[ord]
-#             z <- z[ord]
-#             n <- length(x)
-#         }
-#     }
-#     else if (any(duplicated(xy))) 
-#         stop("duplicate data points")
-#     zo <- rep(0, np)
-#     storage.mode(zo) <- "double"
-#     miss <- !extrap
-#     misso <- seq(miss, np)
-#     if (extrap & ncp == 0) 
-#         warning("Cannot extrapolate with linear option")
-#     ans <- .Fortran("idbvip", as.integer(1), as.integer(ncp), 
-#         as.integer(n), as.double(x), as.double(y), as.double(z), 
-#         as.integer(np), x = as.double(xo), y = as.double(yo), 
-#         z = zo, integer((31 + ncp) * n + np), double(8 * n), 
-#         misso = as.logical(misso), PACKAGE = "akima")
-#     temp <- ans[c("x", "y", "z", "misso")]
-#     temp$z[temp$misso] <- NA
-#     temp[c("x", "y", "z")]
-# }
+.interp.2d.akima=function (x, y, z, xo, yo, ncp = 0, extrap = FALSE, duplicate = "error",
+    dupfun = NULL){
+    if (!(all(is.finite(x)) && all(is.finite(y)) && all(is.finite(z))))
+        stop("missing values and Infs not allowed")
+    if (is.null(xo))
+        stop("xo missing")
+    if (is.null(yo))
+        stop("yo missing")
+    if (ncp > 25) {
+        ncp <- 25
+        cat("ncp too large, using ncp=25\n")
+    }
+    drx <- diff(range(x))
+    dry <- diff(range(y))
+    if (drx == 0 || dry == 0)
+        stop("all data collinear")
+    if (drx/dry > 10000 || drx/dry < 1e-04)
+        stop("scales of x and y are too dissimilar")
+    n <- length(x)
+    np <- length(xo)
+    if (length(yo) != np)
+        stop("length of xo and yo differ")
+    if (length(y) != n || length(z) != n)
+        stop("Lengths of x, y, and z do not match")
+    xy <- paste(x, y, sep = ",")
+    i <- match(xy, xy)
+    if (duplicate == "user" && !is.function(dupfun))
+        stop("duplicate=\"user\" requires dupfun to be set to a function")
+    if (duplicate != "error") {
+        centre <- function(x) {
+            switch(duplicate, mean = mean(x), median = median(x),
+                user = dupfun(x))
+        }
+        if (duplicate != "strip") {
+            z <- unlist(lapply(split(z, i), centre))
+            ord <- !duplicated(xy)
+            x <- x[ord]
+            y <- y[ord]
+            n <- length(x)
+        }
+        else {
+            ord <- (hist(i, plot = FALSE, freq = TRUE, breaks = seq(0.5,
+                max(i) + 0.5, 1))$counts == 1)
+            x <- x[ord]
+            y <- y[ord]
+            z <- z[ord]
+            n <- length(x)
+        }
+    }
+    else if (any(duplicated(xy)))
+        stop("duplicate data points")
+    zo <- rep(0, np)
+    storage.mode(zo) <- "double"
+    miss <- !extrap
+    misso <- seq(miss, np)
+    if (extrap & ncp == 0)
+        warning("Cannot extrapolate with linear option")
+    ans <- .Fortran("idbvip", as.integer(1), as.integer(ncp),
+        as.integer(n), as.double(x), as.double(y), as.double(z),
+        as.integer(np), x = as.double(xo), y = as.double(yo),
+        z = zo, integer((31 + ncp) * n + np), double(8 * n),
+        misso = as.logical(misso), PACKAGE = "akima")
+    temp <- ans[c("x", "y", "z", "misso")]
+    temp$z[temp$misso] <- NA
+    temp[c("x", "y", "z")]
+}
 
 # .quickclip=function(flux){
 #   sel=magclip(flux, estimate='lo')$x
@@ -315,6 +274,11 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     useakima=TRUE
   }
   
+  if(box[1]>dim(image)[1]){box[1]=dim(image)[1]}
+  if(box[2]>dim(image)[2]){box[2]=dim(image)[2]}
+  if(grid[1]>dim(image)[1]){grid[1]=dim(image)[1]}
+  if(grid[2]>dim(image)[2]){grid[2]=dim(image)[2]}
+  
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
@@ -323,6 +287,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
     profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
   }
+  tempsky=rbind(tempsky)
   
   xseq=c(-grid[1]/2,xseq,max(xseq)+grid[1]/2)
   yseq=c(-grid[2]/2,yseq,max(yseq)+grid[2]/2)
@@ -335,15 +300,20 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
   tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
   
-  tempmat_sky[1,]=tempmat_sky[2,]*2-tempmat_sky[3,]
-  tempmat_sky[length(xseq),]=tempmat_sky[length(xseq)-1,]*2-tempmat_sky[length(xseq)-2,]
-  tempmat_sky[,1]=tempmat_sky[,2]*2-tempmat_sky[,3]
-  tempmat_sky[,length(yseq)]=tempmat_sky[,length(yseq)-1]*2-tempmat_sky[,length(yseq)-2]
+  xstart=min(3,dim(tempmat_sky)[1]-1)
+  ystart=min(3,dim(tempmat_sky)[2]-1)
+  xend=max(length(xseq)-2,2)
+  yend=max(length(yseq)-2,2)
   
-  tempmat_skyRMS[1,]=tempmat_skyRMS[2,]*2-tempmat_skyRMS[3,]
-  tempmat_skyRMS[length(xseq),]=tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[length(xseq)-2,]
-  tempmat_skyRMS[,1]=tempmat_skyRMS[,2]*2-tempmat_skyRMS[,3]
-  tempmat_skyRMS[,length(yseq)]=tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,length(yseq)-2]
+  tempmat_sky[1,]=tempmat_sky[2,]*2-tempmat_sky[xstart,]
+  tempmat_sky[length(xseq),]=tempmat_sky[length(xseq)-1,]*2-tempmat_sky[xend,]
+  tempmat_sky[,1]=tempmat_sky[,2]*2-tempmat_sky[,ystart]
+  tempmat_sky[,length(yseq)]=tempmat_sky[,length(yseq)-1]*2-tempmat_sky[,yend]
+  
+  tempmat_skyRMS[1,]=tempmat_skyRMS[2,]*2-tempmat_skyRMS[xstart,]
+  tempmat_skyRMS[length(xseq),]=tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[xend,]
+  tempmat_skyRMS[,1]=tempmat_skyRMS[,2]*2-tempmat_skyRMS[,ystart]
+  tempmat_skyRMS[,length(yseq)]=tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,yend]
   
   if(rembig){
     invisible(gc())
@@ -357,20 +327,19 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
     
     if(type=='bilinear'){
-      #The below seems fastest and uses least memory for linear. Still need akima!
-      # if(useakima){
-      #   tempgrid=expand.grid(xseq, yseq)
-      #   temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
-      #   temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
-      # }else{
+      if(useakima){
+        tempgrid=expand.grid(xseq, yseq)
+        temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
+        temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
+      }else{
         temp_bi_sky=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_sky))
         temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
-      # }
-      #temp_bi_sky=akima::bilinear(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
-      #temp_bi_skyRMS=akima::bilinear(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
+      }
     }else if(type=='bicubic'){
       temp_bi_sky=akima::bicubic(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
       temp_bi_skyRMS=akima::bicubic(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
+    }else{
+      stop('type must be one of bilinear / bicubic !')
     }
     
     if(rembig){

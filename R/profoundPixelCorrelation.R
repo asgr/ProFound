@@ -24,20 +24,29 @@ profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, sk
   image_pos[flag_pos==FALSE]=NA #image is left with positive pixels only
   
   
-  corx={}; cory={}; corx_neg={}; cory_neg={}; corx_pos={}; cory_pos={}; relsdx={}; relsdy={}
+  corx=cory=corx_neg=cory_neg=corx_pos=cory_pos=relsdx=relsdy=cor_err=rep(0,length(lag))
   
-  for(i in lag){
-    corx=c(corx,cor(as.numeric(image[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="na.or.complete"))
-    cory=c(cory,cor(as.numeric(image[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="na.or.complete"))
-    corx_neg=c(corx_neg,cor(as.numeric(image_neg[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="na.or.complete"))
-    cory_neg=c(cory_neg,cor(as.numeric(image_neg[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="na.or.complete"))
-    corx_pos=c(corx_pos,cor(as.numeric(image_pos[1:(xlen-i),]), as.numeric(image[1:(xlen-i)+i,]), use="na.or.complete"))
-    cory_pos=c(cory_pos,cor(as.numeric(image_pos[,1:(ylen-i)]), as.numeric(image[,1:(ylen-i)+i]), use="na.or.complete"))
-    relsdx=c(relsdx,sd(as.numeric(image[1:(xlen-i),])-as.numeric(image[1:(xlen-i)+i,]), na.rm=TRUE)/sqrt(2))
-    relsdy=c(relsdy,sd(as.numeric(image[,1:(ylen-i)])-as.numeric(image[,1:(ylen-i)+i]), na.rm=TRUE)/sqrt(2))
+  for(i in 1:length(lag)){
+    laguse=lag[i]
+    corx[i]=cor(as.numeric(image[1:(xlen-laguse),]), as.numeric(image[1:(xlen-laguse)+laguse,]), use="na.or.complete")
+    cory[i]=cor(as.numeric(image[,1:(ylen-laguse)]), as.numeric(image[,1:(ylen-laguse)+laguse]), use="na.or.complete")
+    corx_neg[i]=cor(as.numeric(image_neg[1:(xlen-laguse),]), as.numeric(image[1:(xlen-laguse)+laguse,]), use="na.or.complete")
+    cory_neg[i]=cor(as.numeric(image_neg[,1:(ylen-laguse)]), as.numeric(image[,1:(ylen-laguse)+laguse]), use="na.or.complete")
+    corx_pos[i]=cor(as.numeric(image_pos[1:(xlen-laguse),]), as.numeric(image[1:(xlen-laguse)+laguse,]), use="na.or.complete")
+    cory_pos[i]=cor(as.numeric(image_pos[,1:(ylen-laguse)]), as.numeric(image[,1:(ylen-laguse)+laguse]), use="na.or.complete")
+    relsdx[i]=sd(as.numeric(image[1:(xlen-laguse),])-as.numeric(image[1:(xlen-laguse)+laguse,]), na.rm=TRUE)/sqrt(2)
+    relsdy[i]=sd(as.numeric(image[,1:(ylen-laguse)])-as.numeric(image[,1:(ylen-laguse)+laguse]), na.rm=TRUE)/sqrt(2)
   }
   
   output_cortab=data.frame(lag=lag, corx=corx, cory=cory, corx_neg=corx_neg, cory_neg=cory_neg, corx_pos=corx_pos, cory_pos=cory_pos, corx_diff=corx_pos-corx_neg, cory_diff=cory_pos-cory_neg, relsdx=relsdx, relsdy=relsdy)
+  
+  tempapprox=approxfun(c(0,output_cortab$lag), abs(c(1,output_cortab$corx*output_cortab$cory)*c(0,output_cortab$lag)*pi*2), yleft=0, yright=0)
+  
+  for(i in 1:length(lag)){
+    cor_err[i]=integrate(tempapprox,0,lag[i], stop.on.error=FALSE)$value/(pi*lag[i]^2)
+  }
+  cor_err[lag==1]=1
+  cor_err_func=approxfun(pi*lag^2,cor_err, yleft=1, yright=1)
   
   if(fft){
     xlenpad=xlen+xlen%%2
@@ -81,7 +90,7 @@ profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, sk
     legend('topright', legend=c('x-cor','y-cor','x-cor-diff','y-cor-diff','x-rel-sd','y-rel-sd'), col=c('blue','red'), lty=c(1,1,2,2,3,3), bg='white')
   }
   
-  invisible(list(cortab=output_cortab, fft=output_FFT, image_sky=image))
+  invisible(list(cortab=output_cortab, fft=output_FFT, image_sky=image, cor_err_func=cor_err_func))
 }
 
 profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, skyscale=100, profound=NULL){

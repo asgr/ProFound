@@ -169,215 +169,96 @@ profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, group
   invisible(segstats)
 }
 
-profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE){
+profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic', fluxscale='image', recentre=FALSE){
+  xseq=1:dim(image)[1]-dim(image)[1]/2-0.5
+  yseq=1:dim(image)[2]-dim(image)[2]/2-0.5
   
-  if(!is.null(image)){
-    if(class(image)=='profound'){
-      if(is.null(segim)){segim=image$segim}
-      if(is.null(segstats)){segstats=image$segstats}
-      if(is.null(groupim)){groupim=image$group$groupim}
-      if(is.null(groupsegID)){groupsegID=image$group$groupsegID}
-      if(missing(sky)){sky=image$sky}
-      if(missing(magzero)){magzero=image$magzero}
-      image=image$image
-      if(is.null(image)){stop('Need image in profound object to be non-Null')}
+  relscale=pixscale_new/pixscale_old
+  
+  xout=seq(relscale,xseq[length(xseq)],by=relscale)
+  xout=c(-rev(xout),0,xout)
+  yout=seq(relscale,yseq[length(yseq)],by=relscale)
+  yout=c(-rev(yout),0,yout)
+  bigrid=expand.grid(xout,yout)
+  
+  output=matrix(0,length(xout),length(yout))
+  
+  if(type=='bilinear'){
+    output[]=.interp.2d(bigrid[,1], bigrid[,2], list(x=xseq, y=yseq, z=image))
+  }else if(type=='bicubic'){
+    if(!requireNamespace("akima", quietly = TRUE)){
+      stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
     }
-  }
-  
-  if(!is.null(profound)){
-    if(class(profound) != 'profound'){
-      stop('Class of profound input must be of type \'profound\'')
-    }
-    if(is.null(image)){image=profound$image}
-    if(is.null(segim)){segim=profound$segim}
-    if(is.null(segstats)){segstats=profound$segstats}
-    if(is.null(groupim)){groupim=profound$group$groupim}
-    if(is.null(groupsegID)){groupsegID=profound$group$groupsegID}
-    if(missing(magzero)){magzero=profound$magzero}
-  }
-  
-  if(is.null(groupim) | is.null(groupsegID)){
-    group=profoundSegimGroup(segim)
-    groupim=group$groupim
-    groupsegID=group$groupsegID
-  }
-  
-  image=image-sky
-  
-  groupsegID=groupsegID[groupsegID$Ngroup>1,,drop=FALSE]
-  
-  if(lowmemory==FALSE){
-    groupID=Var1=Var2=NULL
-    groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]), keyby='groupID')
-    setkey(groupref, groupID)
-    groupref[groupID %in% groupsegID$groupID]
+    output[]=akima::bicubic(xseq, yseq, image,bigrid[,1], bigrid[,2])$z
   }else{
-    rm(sky)
-    invisible(gc())
+    stop('type must be one of bilinear / bicubic !')
   }
   
-  output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
-  
-  if(iterative){
-    output[,"flux_db"]=segstats[match(output$segID, segstats$segID),"flux"]
-    output=output[order(output[,"groupID"],-output[,"flux_db"]),]
-  }
-  Npad=1
-  image_temp=image
-  for(i in 1:dim(groupsegID)[1]){
-    #print(paste(i,'in',dim(groupsegID)[1]))
-    Ngroup=groupsegID[i,"Ngroup"]
-    segIDlist=output[output[,'groupID']==groupsegID[i,"groupID"],"segID"]
-    segIDlist=segIDlist[segIDlist>0]
-  
-    if(lowmemory){
-      tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
+  if(recentre){
+    maxloc=as.numeric(bigrid[which.max(output),])
+    xout=xout+maxloc[1]
+    yout=yout+maxloc[2]
+    bigrid=expand.grid(xout,yout)
+    
+    if(type=='bilinear'){
+      output[]=.interp.2d(bigrid[,1], bigrid[,2], list(x=xseq, y=yseq, z=image))
     }else{
-      tempgridgroup=as.matrix(cbind(groupref[groupID==groupsegID[i,"groupID"],list(Var1,Var2)])) 
+      output[]=akima::bicubic(xseq, yseq, image,bigrid[,1], bigrid[,2])$z
     }
-    
-    weightmatrix=matrix(0,length(tempgridgroup[,1]),length(segIDlist))
-    Qseg_db=rep(0,length(segIDlist))
-    fluxfrac=rep(0,length(segIDlist))
-    
-    groupsum=sum(image[tempgridgroup],na.rm=TRUE)
-    
-    for(j in 1:length(segIDlist)){
-      tempgridseg=which(segim[tempgridgroup]==segIDlist[j])
-      segsum=sum(image_temp[tempgridgroup[tempgridseg,,drop=FALSE]],na.rm=TRUE)
-      if(segsum<0){segsum=0}
-      fluxfrac[j]=segsum/groupsum
-      groupellip=.profoundEllipse(x=tempgridgroup[,1],y=tempgridgroup[,2],flux=image_temp[tempgridgroup],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
-      segout=.profoundEllipse(x=tempgridgroup[tempgridseg,1],y=tempgridgroup[tempgridseg,2],flux=image_temp[tempgridgroup[tempgridseg,]],xcen=segstats[segstats$segID==segIDlist[j],"xmax"]+0.5,ycen=segstats[segstats$segID==segIDlist[j],"ymax"]+0.5,ang=segstats[segstats$segID==segIDlist[j],"ang"],axrat=segstats[segstats$segID==segIDlist[j],"axrat"])
-      
-      select=which(segout[,2]>0 & is.finite(segout[,1]) & is.finite(segout[,2]))
-      #Try various levels of segment fitting: spline, linear, flat
-      if(length(unique(segout[select,1]))>max(3,df)){
-        weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y
-        weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
-        Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
-      }else if(length(unique(segout[select,1]))>1){
-        weightmatrix[,j]=10^predict(lm(y~x, data=list(x=segout[select,1],y=log10(segout[select,2]))), newdata=list(x=groupellip[,1]))
-        weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
-        Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
-      }else{
-        if(segsum>0){
-          weightmatrix[groupellip[,1]<=radtrunc*max(segout[,1]),j]=segsum/length(which(groupellip[,1]<=radtrunc*max(segout[,1])))
-          weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
-        }else{
-          weightmatrix[,j]=0
-        }
-        Qseg_db[j]=0
-      }
-      
-      if(iterative){
-        image_temp[tempgridgroup]=image_temp[tempgridgroup]-weightmatrix[,j]
-      }
-    }
-    
-    normmat=.rowSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
-    Qgroup_db=sum(normmat-image[tempgridgroup])/groupsum
-    weightmatrix=weightmatrix/normmat
-    output[Npad:(Npad+Ngroup-1),"flux_db"]=.colSums(weightmatrix*image[tempgridgroup], dim(weightmatrix)[1], dim(weightmatrix)[2])
-    output[Npad:(Npad+Ngroup-1),"N100_db"]=.colSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
-    output[Npad:(Npad+Ngroup-1),"flux_segfrac"]=fluxfrac
-    output[Npad:(Npad+Ngroup-1),"Qseg_db"]=Qseg_db
-    output[Npad:(Npad+Ngroup-1),"Qgroup_db"]=Qgroup_db
-    Npad=Npad+Ngroup
   }
   
-  output[,"mag_db"]=profoundFlux2Mag(flux=output[,'flux_db'], magzero=magzero)
-  
-  if(doallstats){
-    output=output[match(segstats$segID,output$segID),]
-    output[is.na(output[,"flux_db"]),c("segID", "flux_db", "mag_db", "N100_db")]=segstats[is.na(output[,"flux_db"]),c("segID", "flux","mag","N100")]
-    output=cbind(output, flux_err_sky_db=segstats[,"flux_err_sky"]*sqrt(output[,'N100_db']/segstats[,'N100']))
-    output=cbind(output, flux_err_skyRMS_db=segstats[,"flux_err_skyRMS"]*sqrt(output[,'N100_db']/segstats[,'N100']))
-    output=cbind(output, flux_err_shot_db=segstats[,"flux_err_shot"]*suppressWarnings(sqrt(output[,'flux_db']/segstats[,'flux'])))
-    output=cbind(output, flux_err_db=sqrt(output[,'flux_err_sky_db']^2+output[,'flux_err_skyRMS_db']^2+output[,'flux_err_shot_db']^2))
-    output=cbind(output, mag_err_db=(2.5/log(10))*abs(output[,'flux_err_db']/output[,'flux_db']))
-  }else if(iterative){
-    output=output[order(output[,'groupID'],output[,'segID']),]
+  if(fluxscale=='image'){
+    output=output*sum(image)/sum(output)
+  }else if(fluxscale=='pixscale'){
+    output=output*relscale^2
+  }else if(fluxscale=='norm'){
+    output=output/sum(output)
+  }else{
+    stop('fluxscale must be one of image / pixscale / norm !')
   }
   
-  invisible(output)
+  return(invisible(output))
 }
 
-### Deprecated Functions ###
+# Hidden utility functions
 
-# profoundGetPixScale=function(header, CD1_1=1, CD1_2=0, CD2_1=0, CD2_2=1){
-#   if(!is.null(header)){
-#     if(is.data.frame(header) | is.matrix(header)){
-#       locs=match(c('CD1_1','CD1_2','CD2_1','CD2_2'),header[,1])
-#       headerWCS=data.frame(header[locs,1],as.numeric(header[locs,2]))
-#       if('CD1_1' %in% headerWCS[,1]){
-#         CD1_1=headerWCS[headerWCS[,1]=='CD1_1',2]
-#         if('CD1_2' %in% headerWCS[,1]){CD1_2=headerWCS[headerWCS[,1]=='CD1_2',2]}else{message('Missing CD1_2')}
-#       }else{
-#         if('CDELT1' %in% headerWCS[,1]){
-#           CD1_1=headerWCS[headerWCS[,1]=='CDELT1',2]
-#         }else{
-#           message("Missing CD1_1 and CDELT1")
-#         }
-#       }
-#       if('CD2_2' %in% headerWCS[,1]){
-#         CD2_2=headerWCS[headerWCS[,1]=='CD2_2',2]
-#         if('CD2_1' %in% headerWCS[,1]){CD2_1=headerWCS[headerWCS[,1]=='CD2_1',2]}else{message('Missing CD2_1')}
-#       }else{
-#         if('CDELT2' %in% headerWCS[,1]){
-#           CD2_2=headerWCS[headerWCS[,1]=='CDELT2',2]
-#         }else{
-#           message("Missing CD2_2 and CDELT2")
-#         }
-#       }
-#     }else{
-#       if('CD1_1' %in% header){
-#         CD1_1=as.numeric(header[which(header=='CD1_1')+1])
-#         if('CD1_2' %in% header){CD1_2=as.numeric(header[which(header=='CD1_2')+1])}else{message('Missing CD1_2')}
-#       }else{
-#         if('CDELT1' %in% header){
-#           CD1_1=as.numeric(header[which(header=='CDELT1')+1])
-#         }else{
-#           message("Missing CD1_1 and CDELT1")
-#         }
-#       }
-#       if('CD2_2' %in% header){
-#         CD2_2=as.numeric(header[which(header=='CD2_2')+1])
-#         if('CD2_1' %in% header){CD2_1=as.numeric(header[which(header=='CD2_1')+1])}else{message('Missing CD2_1')}
-#       }else{
-#         if('CDELT1' %in% header){
-#           CD2_2=as.numeric(header[which(header=='CDELT2')+1])
-#         }else{
-#           message("Missing CD2_2 and CDELT2")
-#         }
-#       }
-#     }
-#   }
-#   return(3600*(sqrt(CD1_1^2+CD1_2^2)+sqrt(CD2_1^2+CD2_2^2))/2)
-# }
-
-# profoundInterp2d=function(x,y,image){
-#     scale=sum(image)
-#     imagelist=list(x=seq(-dim(image)[1]/2,dim(image)[1]/2,len=dim(image)[1]),y=seq(-dim(image)[2]/2,dim(image)[2]/2,len=dim(image)[2]),z=image)
-#     ximage = seq(-dim(image)[1]/2,dim(image)[1]/2,len=dim(image)[1])
-#     yimage = seq(-dim(image)[2]/2,dim(image)[2]/2,len=dim(image)[2])
-#     zimage = image
-#     nx = length(ximage)
-#     ny = length(yimage)
-#     lx = approx(ximage, 1:nx, x, rule=2)$y
-#     ly = approx(yimage, 1:ny, y, rule=2)$y
-#     lx1 = floor(lx)
-#     ly1 = floor(ly)
-#     ex = lx - lx1
-#     ey = ly - ly1
-#     ex[lx1 == nx] = 1
-#     ey[ly1 == ny] = 1
-#     lx1[lx1 == nx] = nx - 1
-#     ly1[ly1 == ny] = ny - 1
-#     z=
-# 	zimage[cbind(lx1, ly1)] * (1 - ex) * (1 - ey) +
-# 	zimage[cbind(lx1 + 1, ly1)] * ex * (1 - ey) +
-# 	zimage[cbind(lx1, ly1 + 1)] * (1 - ex) * ey +
-# 	zimage[cbind(lx1 + 1, ly1 + 1)] * ex * ey
-#   return = cbind(X=x,Y=y,Z=z)
-# }
+.interp.2d=function(x, y, obj){
+    if(length(x)>1e6){rembig=TRUE}else{rembig=FALSE}
+    xobj = obj$x
+    yobj = obj$y
+    zobj = obj$z
+    nx = length(xobj)
+    ny = length(yobj)
+    lx = approx(xobj, 1:nx, x, rule = 2)$y
+    if(rembig){
+      rm(x)
+      invisible(gc())
+    }
+    ly = approx(yobj, 1:ny, y, rule = 2)$y
+    if(rembig){
+      rm(y)
+      invisible(gc())
+    }
+    lx1 = floor(lx)
+    ly1 = floor(ly)
+    ex = lx - lx1
+    if(rembig){
+      rm(lx)
+      invisible(gc())
+    }
+    ey = ly - ly1
+    if(rembig){
+      rm(ly)
+      invisible(gc())
+    }
+    ex[lx1 == nx] = 1
+    ey[ly1 == ny] = 1
+    lx1[lx1 == nx] = nx - 1
+    ly1[ly1 == ny] = ny - 1
+    temp=rep(0,length(lx1))
+    temp=zobj[cbind(lx1, ly1)] * (1 - ex) * (1 - ey)
+    temp=temp+zobj[cbind(lx1 + 1, ly1)] * ex * (1 - ey)
+    temp=temp+zobj[cbind(lx1, ly1 + 1)] * (1 - ex) * ey
+    temp=temp+zobj[cbind(lx1 + 1, ly1 + 1)] * ex * ey
+    invisible(temp)
+}

@@ -8,10 +8,12 @@ Multi Band ProFound Photometry
 Run multiband \code{ProFound} photometry either with loaded data, or images on a local disk.
 }
 \usage{
-profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL, iters_det = 6,
-iters_tot = 0, detectbands = "r", multibands = c("u", "g", "r", "i", "z"), magzero = 0,
-gain = NULL, bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g',
-dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE, ...)
+profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL,
+detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6, iters_tot = 0,
+sizes_tot = 5, magzero = 0, gain = NULL, box = 100, bandappend = multibands,
+totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE, docol = TRUE,
+dogrp = TRUE, deblend = FALSE, groupstats = FALSE, groupby_det = 'segim_orig',
+groupby_mul = 'segim_orig', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,23 +29,29 @@ Integer matrix; a specified segmentation map of the image. This matrix *must* be
   \item{mask}{
 Boolean matrix or integer scalar; optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis. if a scalar is provided it indicates the exact \option{image} values that should be treated as masked (e.g. by setting masked pixels to 0 or -999). The latter achieves the same effect as setting masked \option{image} pixels to NA, but allows for the fact not all programs can produce \code{R} legal NA values. 
 }
-  \item{iters_det}{
-Integer scalar; the maximum number of curve of growth dilations that should be made to the detection image. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to 0 then the undilated \option{segim} image, whether provided or computed internally via \code{\link{profoundMakeSegim}}, will be used instead.
-}
-  \item{iters_tot}{
-Integer vector; the maximum number of curve of additional growth dilations that should be made above the dilated detection segmentation map for multi band total colour photometry. This is only relevant if \option{dotot}=TRUE. This should not be set too high (and might even be 0, the default) since the detection image should generally be fairly deep. \option{iters_tot} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}.
-}
   \item{detectbands}{
 Character vector; the names of the detection bands that will be stacked using \code{\link{profoundMakeStack}} and then analysed with the provided settings with \code{\link{profoundProFound}} to make a reference segmentation map for further multi band photometry. These bands must be present in \option{multibands}. Can be a scalar (i.e. a single band is used). If set to 'get' then it will use all legal FITS files in the target directory. If set to 'all' then it will use all \option{multibands} inputs.
 }
   \item{multibands}{
 Character vector; the names of the target multi band photometry images. If set to 'get' then it will use all legal FITS files in the target directory. If using the \option{inputlist} parameter the length of the list must be the same length as \option{multibands}. \option{magzero} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. If specified, \option{gain} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. If specified, \option{catappend} must either the same length and order as \option{multibands}.
 }
+  \item{iters_det}{
+Integer scalar; the maximum number of curve of growth dilations that should be made to the detection image. This needs to be large enough to capture all the flux for sources of interest, but increasing this will increase the computation time for \code{profoundProFound}. If this is set to 0 then the undilated \option{segim} image, whether provided or computed internally via \code{\link{profoundMakeSegim}}, will be used instead.
+}
+  \item{iters_tot}{
+Integer vector; the maximum number of curve of additional growth dilations that should be made above the dilated detection segmentation map for multi band total colour photometry. This is only relevant if \option{dotot}=TRUE. This should not be set too high (and might even be 0, the default) since the detection image should generally be fairly deep. \option{iters_tot} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}.
+}
+  \item{sizes_tot}{
+Integer vector;  the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}. \option{sizes_tot} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}.
+}
   \item{magzero}{
 Numeric vector; the magnitude zero point of the images being used. \option{magzero} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
 }
   \item{gain}{
 Numeric vector; the gain of the images being used. \option{gain} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
+}
+  \item{box}{
+Numeric vector; the sky estimate box size of the images being used. \option{box} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
 }
   \item{bandappend}{
 Character vector; characters to be appended per band in the output multi band photometry catalogues. The default will create columns with names like mag_ut (total) and mag_uc (colour).
@@ -71,6 +79,12 @@ Logical; should total segment flux be deblended using \code{\link{profoundFluxDe
 }
   \item{groupstats}{
 Logical; if TRUE then the IDs of grouped segments is calculated for the detection image via \code{\link{profoundSegimGroup}} and output to the returned object \option{group}. By default this option is linked to \option{boundstats}, i.e. it is assumed if you want boundary statistics then you probably also want grouped object IDs returned.
+}
+  \item{groupby_det}{
+Character scalar; How should the grouped segmentation map be formed that will be used to produce the \option{cat_grp} output? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
+}
+  \item{groupby_mul}{
+Character scalar; How should the grouped segmentation map be formed that will be used to produce the multi-band deblending for \option{cat_tot} and \option{cat_col} outputs? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
 }
   \item{\dots}{
 Further arguments to be passed to all instances of \code{\link{profoundProFound}}. E.g. if the sky \option{box} is set to a non-default value (default is \option{box}=c(100,100)), this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}.
