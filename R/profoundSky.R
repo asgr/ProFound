@@ -282,12 +282,20 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
-  registerDoParallel(cores=cores)
-  i=NULL
-  tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
-    profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
+  
+  if(cores>1){
+    registerDoParallel(cores=cores)
+    i=NULL
+    tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
+      profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
+    }
+    tempsky=rbind(tempsky)
+  }else{
+    tempsky=matrix(0,dim(tempgrid)[1],2)
+    for(i in 1:dim(tempgrid)[1]){
+      tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)$val
+    }
   }
-  tempsky=rbind(tempsky)
   
   xseq=c(-grid[1]/2,xseq,max(xseq)+grid[1]/2)
   yseq=c(-grid[2]/2,yseq,max(yseq)+grid[2]/2)
