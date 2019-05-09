@@ -75,8 +75,13 @@
 
 .fluxcalc=function(flux){
   
-  good=which(!is.na(flux))
-  N100seg=length(good)
+  if(anyNA(flux)){
+    good=which(!is.na(flux))
+    N100seg=length(good)
+  }else{
+    good=TRUE
+    N100seg=length(flux)
+  }
   
   if(N100seg>0){
     
@@ -115,10 +120,24 @@
     mode(cenfrac)='numeric'
   }
   
-  #N50seg=sum(temp>=0.5)
-  #N90seg=sum(temp>=0.1)
-  
   invisible(list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
+}
+
+.fluxcalcmin=function(flux){
+  
+  if(anyNA(flux)){
+    good=which(!is.na(flux))
+    N100seg=length(good)
+  }else{
+    good=TRUE
+    N100seg=length(flux)
+  }
+  
+  if(N100seg>0){
+    return(list(flux=sum(flux[good], na.rm=TRUE),N100=N100seg))
+  }else{
+    return(list(flux=NA,N100=NA))
+  }
 }
 
 profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, watershed = 'ProFound', ...){
@@ -136,9 +155,11 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   #Treat image NAs as masked regions:
   
   if(!is.null(mask)){
-    mask[is.na(image)]=1L
+    if(anyNA(image)){
+      mask[is.na(image)]=1L
+    }
   }else{
-    if(any(is.na(image))){
+    if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1L
     }
@@ -287,9 +308,11 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   #Treat image NAs as masked regions:
   
   if(!is.null(mask)){
-    mask[is.na(image)]=1L
+    if(anyNA(image)){
+      mask[is.na(image)]=1L
+    }
   }else{
-    if(any(is.na(image))){
+    if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1L
     }
@@ -443,7 +466,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   if(!is.null(mask)){
     mask[is.na(image)]=1L
   }else{
-    if(any(is.na(image))){
+    if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1L
     }
@@ -460,16 +483,20 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(expand=='all'){
     segim_new=segim
-    maxorig=max(segim_new, na.rm=TRUE)
-    segim_new[segim_new>0]=maxorig+1L-segim_new[segim_new>0]
+    maxorig=max(segim_new, na.rm=TRUE)+1L
+    replace=which(segim_new>0)
+    segim_new[replace]=maxorig-segim_new[replace]
     segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern))
-    segim_new[segim_new>0]=maxorig+1L-segim_new[segim_new>0]
+    replace=which(segim_new>0)
+    segim_new[replace]=maxorig-segim_new[replace]
   }else{
     segim_new=segim
     segim_new[!(segim_new %in% expand)]=0L
     segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern))
   }
-  segim_new[segim!=0]=segim[segim!=0]
+  replace=which(segim!=0)
+  segim_new[replace]=segim[replace]
+  rm(replace)
   mode(segim_new)='integer'
   
   if(rembig){
@@ -518,7 +545,7 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   if(!is.null(mask)){
     mask[is.na(image)]=1L
   }else{
-    if(any(is.na(image))){
+    if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1L
     }
@@ -601,7 +628,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   if(!is.null(mask)){
     mask[is.na(image)]=1L
   }else{
-    if(any(is.na(image))){
+    if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])
       mask[is.na(image)]=1L
     }
@@ -1140,4 +1167,37 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   segim=segim+segimadd
   
   invisible(segim)
+}
+
+.profoundFluxCalcMin=function(image=NULL, segim=NULL, mask=NULL){
+  
+  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
+  if(rembig){
+    invisible(gc())
+  }
+  
+  #Set masked things to NA, to be safe:
+  
+  if(!is.null(mask)){
+    image[mask!=0]=NA
+  }
+  
+  segvec=which(tabulate(segim)>0)
+  segvec=segvec[segvec>0]
+  
+  segsel=which(segim>0)
+  
+  segID=flux=NULL
+  
+  tempDT=data.table(segID=as.integer(segim[segsel]),flux=as.numeric(image[segsel]))
+  
+  setkey(tempDT, segID)
+  
+  if(rembig){
+    rm(image)
+    rm(segim)
+    invisible(gc())
+  }
+  
+  return(as.data.frame(tempDT[,.fluxcalcmin(flux), by=segID]))
 }

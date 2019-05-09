@@ -110,7 +110,7 @@ Given the large number of inputs required, this function effectively needs \code
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{profoundProFound}}, \code{\link{smooth.spline}}
+\code{\link{profoundProFound}}, \code{\link{smooth.spline}}, \code{\link{profoundFitMagPSF}}
 }
 \examples{
 \dontrun{

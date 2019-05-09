@@ -58,7 +58,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   #Treat image NAs as masked regions:
   
   if(!is.null(mask)){
-    mask=mask*1 #Looks silly, but this ensures a logical mask becomes integer.
+    mask=mask*1L #Looks silly, but this ensures a logical mask becomes integer.
     if(length(mask)==1){
       maskflag=mask
       mask=matrix(0L,dim(image)[1],dim(image)[2])
@@ -76,7 +76,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }
   }else{
     if(anyNA(image)){
-      mask=matrix(0,dim(image)[1],dim(image)[2])
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
       badpix=is.na(image)
       mask[badpix]=1L
       image[badpix]=0
@@ -242,14 +242,13 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         
       for(i in 1:(iters+localadd)){
         if(verbose){message(paste('Iteration',i,'of',iters+localadd,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profoundMakeSegimDilate(image=image-skydilate, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=TRUE, rotstats=FALSE)
-        compmat[,i+1]=segim$segstats[,'flux']
-        Nmat[,i+1]=segim$segstats[,'N100']
-        segim_array[,,i+1]=segim$segim
+        segim=profoundMakeSegimDilate(image=image-skydilate, segim=segim_array[,,i], mask=mask, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segstats=.profoundFluxCalcMin(image=image-skydilate, segim=segim, mask=mask)
+        compmat[,i+1]=segstats$flux
+        Nmat[,i+1]=segstats$N100
+        segim_array[,,i+1]=segim
       }
-      
       if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
-      
       if(iterskyloc){
         skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
         skyseg_mean[!is.finite(skyseg_mean)]=0
@@ -266,9 +265,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         }
         selseg=.selectCoG(diffmat, threshold)
         
-        segim=segim$segim
         segim[]=0L
-        
         if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
         
         for(i in 1:(iters+1)){

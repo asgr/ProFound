@@ -213,3 +213,157 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   invisible(output)
 }
+
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, magzero=0, modelout=TRUE, verbose=FALSE){
+  
+  if(!requireNamespace("ProFit", quietly = TRUE)){
+    stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
+  }
+  
+  if(is.null(xcen)){stop('Need xcen!')}
+  if(is.null(ycen)){stop('Need ycen!')}
+  if(is.null(mag)){stop('Need mag!')}
+  if(is.null(image)){stop('Need image!')}
+  if(is.null(sigma)){stop('Need sigma!')}
+  if(is.null(psf)){stop('Need psf!')}
+  
+  if(!is.null(mask)){
+    image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
+  }
+  
+  image_orig=image
+  
+  Nmodels=length(mag)
+  if(Nmodels != length(xcen)){
+    stop('xcen must be the same length as mag!')
+  }
+  if(Nmodels != length(ycen)){
+    stop('ycen must be the same length as mag!')
+  }
+  
+  if(modxy){
+    xygrid=expand.grid(1:dim(psf)[1],1:dim(psf)[2])-0.5
+  }
+  
+  diffmag=rep(0,Nmodels)
+  mag_err=rep(0,Nmodels)
+  psfLL=rep(0,Nmodels)
+  
+  for(j in 1:iters){
+    if(verbose){message(paste('Iteration',i,'of',iters))}
+    modellist = list(
+      pointsource = list(
+        xcen = xcen,
+        ycen = ycen,
+        mag = mag
+      )
+    )
+    fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+    image=image_orig-fullmodel
+    
+    if(j==1){
+      if(modelout){
+        origmodel=fullmodel
+        origLL= sum(-0.5*(image_orig-fullmodel)^2/(sigma^2))
+      }else{
+        origmodel=NA
+        origLL=NA
+      }
+    }
+    
+    for(i in 1:Nmodels){
+      image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
+      sigma_cut=magcutout(sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
+      
+      singlist = list(
+        pointsource = list(
+          xcen = image_cut$loc[1],
+          ycen = image_cut$loc[2],
+          mag = mag[i]
+        )
+      )
+      
+      singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+      
+      if(modxy){
+        if(anyNA(image_cut$image)){
+          selNA=which(is.na(image_cut$image))
+          image_cut$image[selNA]=image_cut$image[length(image_cut$image)+1-selNA]
+          sigma_cut[selNA]=sigma_cut[length(image_cut$image)+1-selNA]
+        }
+        
+        select=which(image_cut$image+singmodel > sigma_cut*sigthresh)
+        
+        if(length(select)>0){
+          weights=(singmodel*(image_cut$image+singmodel))[select]
+          newx=.meanwt(xygrid[select,1], weights)
+          newy=.meanwt(xygrid[select,2], weights)
+          if(newx-image_cut$loc[1] > 0.5){newx=image_cut$loc[1]+0.5}
+          if(newx-image_cut$loc[1] < -0.5){newx=image_cut$loc[1]-0.5}
+          if(newy-image_cut$loc[2] > 0.5){newy=image_cut$loc[2]+0.5}
+          if(newy-image_cut$loc[2] < -0.5){newy=image_cut$loc[2]-0.5}
+          
+          image_cut$loc=c(newx,newy)
+          xcen[i]=image_cut$loc[1]+image_cut$loc.diff[1]
+          ycen[i]=image_cut$loc[2]+image_cut$loc.diff[2]
+          
+          singlist = list(
+          pointsource = list(
+            xcen = image_cut$loc[1],
+            ycen = image_cut$loc[2],
+            mag = mag[i]
+          )
+        )
+        
+        if(anyNA(image_cut)){
+          image_cut[selNA]=NA
+          sigma_cut[selNA]=NA
+        }
+        
+        singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+        
+        }
+      }
+      
+      if(j<iters){
+        diffmag[i] = optim(0, .minlike, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
+      }else{
+        finaloptim=optim(0, .minlike, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff, hessian=TRUE)
+        diffmag[i]=finaloptim$par
+        mag_err[i]=sqrt(1/abs(as.numeric(finaloptim$hessian)))
+        psfLL[i]=-0.5*finaloptim$value
+      }
+    }
+    mag=mag+diffmag
+  }
+  
+  if(modelout){
+    modellist = list(
+      pointsource = list(
+        xcen = xcen,
+         ycen = ycen,
+        mag = mag
+      )
+    )
+    fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+    finalLL= -0.5*sum((image_orig-fullmodel)^2/(sigma^2))
+  }else{
+    fullmodel=NA
+    finalLL=NA
+  }
+  
+  mag_err=sqrt(diffmag^2+mag_err^2)
+  flux=profoundMag2Flux(mag=mag, magzero=magzero)
+  flux_err=flux*mag_err/(2.5/log(10))
+  
+  pchi=pchisq((flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
+  signif=qnorm(pchi, log.p=TRUE)
+  
+  psfstats=data.frame(xcen=xcen, ycen=ycen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
+  
+  return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel))
+}
+
+.minlike=function(par,singmodel,image,sigma){
+  sum((image-(singmodel*(10^(-0.4*par)-1)))^2/sigma^2,na.rm = TRUE)
+}

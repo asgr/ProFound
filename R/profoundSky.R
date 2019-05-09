@@ -107,9 +107,9 @@ profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2, cuth
   tempref=tempref[keep,]
   tempval=image[tempref]
   temprad=temprad[keep]
-  clip=magclip(tempval, sigma=skycut, estimate='lo')
-  tempval=tempval[clip$clip]
-  temprad=temprad[clip$clip]
+  clip=magclip(tempval, sigma=skycut, estimate='lo')$clip
+  tempval=tempval[clip]
+  temprad=temprad[clip]
   #Find the running medians for the data
   tempmedian=magrun(x=temprad,y=tempval,ranges=NULL,binaxis='x',Nscale=T)
   if(plot){magplot(density(tempval),...)}
@@ -206,13 +206,17 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
     }
   }
   if(doclip){
-    suppressWarnings({clip=magclip(select, sigmasel=sigmasel, estimate = 'lo')$x})
+    suppressWarnings({clip=magclip(select, sigmasel=sigmasel, estimate = 'lo', extra=FALSE)$x})
   }else{
     clip=select
   }
   
   if(skytype=='median'){
-    skyloc=median(clip, na.rm=TRUE)
+    if('Rfast' %in% .packages()){
+      skyloc=Rfast::med(clip, na.rm=TRUE)
+    }else{
+      skyloc=stats::median(clip, na.rm=TRUE)
+    }
   }else if(skytype=='mean'){
     skyloc=mean(clip, na.rm=TRUE)
   }else if(skytype=='mode'){
@@ -223,17 +227,17 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   if(skyRMStype=='quanlo'){
     temp=clip-skyloc
     temp=temp[temp<0]
-    skyRMSloc=abs(as.numeric(quantile(temp, pnorm(-sigmasel)*2, na.rm=TRUE)))/sigmasel
+    skyRMSloc=abs(quantile(temp, pnorm(-sigmasel)*2))/sigmasel
   }else if(skyRMStype=='quanhi'){
     temp=clip-skyloc
     temp=temp[temp>0]
-    skyRMSloc=abs(as.numeric(quantile(temp, (pnorm(sigmasel)-0.5)*2, na.rm=TRUE)))/sigmasel
+    skyRMSloc=abs(quantile(temp, (pnorm(sigmasel)-0.5)*2))/sigmasel
   }else if(skyRMStype=='quanboth'){
     temp=clip-skyloc
     templo=temp[temp<0]
     temphi=temp[temp>0]
-    skyRMSloclo=abs(as.numeric(quantile(templo, pnorm(-sigmasel)*2, na.rm=TRUE)))/sigmasel
-    skyRMSlochi=abs(as.numeric(quantile(temphi, (pnorm(sigmasel)-0.5)*2, na.rm=TRUE)))/sigmasel
+    skyRMSloclo=abs(quantile(templo, pnorm(-sigmasel)*2))/sigmasel
+    skyRMSlochi=abs(quantile(temphi, (pnorm(sigmasel)-0.5)*2))/sigmasel
     skyRMSloc=(skyRMSloclo+skyRMSlochi)/2
   }else if(skyRMStype=='sd'){
     skyRMSloc=sqrt(.varwt(clip, wt=1, xcen=skyloc))
@@ -302,11 +306,19 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   
   tempmat_sky=matrix(0,length(xseq),length(yseq))
   tempmat_sky[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,1]
-  tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
+  if('Rfast' %in% .packages()){
+    tempmat_sky[is.na(tempmat_sky)]= Rfast::med(tempmat_sky, na.rm = TRUE)
+  }else{
+    tempmat_sky[is.na(tempmat_sky)]= stats::median(tempmat_sky, na.rm = TRUE)
+  }
   
   tempmat_skyRMS=matrix(0,length(xseq),length(yseq))
   tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
-  tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
+  if('Rfast' %in% .packages()){
+    tempmat_skyRMS[is.na(tempmat_skyRMS)]=Rfast::med(tempmat_skyRMS, na.rm = TRUE)
+  }else{
+    tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempmat_skyRMS, na.rm = TRUE)
+  }
   
   xstart=min(3,dim(tempmat_sky)[1]-1)
   ystart=min(3,dim(tempmat_sky)[2]-1)
