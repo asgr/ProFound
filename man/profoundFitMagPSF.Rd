@@ -10,7 +10,7 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 \usage{
 profoundFitMagPSF(xcen = NULL, ycen = NULL, mag = NULL, image = NULL, sigma = NULL,
 mask = NULL, psf = NULL, iters = 5, magdiff = 1, modxy = FALSE, sigthresh = 0,
-magzero = 0, modelout = TRUE)
+magzero = 0, modelout = TRUE, verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -53,6 +53,9 @@ Numeric scalar; the magnitude zero point. What this implies depends on the magni
   \item{modelout}{
 Logical; should the full model image be output?
 }
+  \item{verbose}{
+Logical; should verbose output be displayed to the user? Since a big \option{image} can take a long time to run, you might want to monitor progress.  
+}
 }
 \details{
 This function uses \code{ProFit} to make a full model image. It then makes a model image for each indiviual PSF component and optimises just this alone. This means a maximum likelihood solution is converged on very efficiently, and is inspired by Expectation Maximisation which is often used for mixture model problems (which this basically is) for the reason of fast convergence. Here we use \code{\link{optim}} with \option{method} Brent to achieve the individual PSF optimisations.
@@ -78,7 +81,7 @@ The \option{psfstats} data.frame has the following columns:
 \item{signif}{Numeric vector; approximate singificance of the detection using the Chi-Square distribution.}
 }
 \references{
-Expectation Maximisation \href{en.wikipedia.org/wiki/Expectation–maximization_algorithm}{Wikipedia}.
+Expectation Maximisation \href{http://en.wikipedia.org/wiki/Expectation–maximization_algorithm}{Wikipedia}.
 }
 \author{
 Aaron Robotham
