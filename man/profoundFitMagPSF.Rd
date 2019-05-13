@@ -10,7 +10,7 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 \usage{
 profoundFitMagPSF(xcen = NULL, ycen = NULL, mag = NULL, image = NULL, sigma = NULL,
 mask = NULL, psf = NULL, iters = 5, magdiff = 1, modxy = FALSE, sigthresh = 0,
-magzero = 0, modelout = TRUE, verbose = FALSE)
+itersub = TRUE, magzero = 0, modelout = TRUE, verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -47,6 +47,9 @@ Logical; should \option{xcen} and \option{ycen} positions be adjusted during fit
   \item{sigthresh}{
 Numeric scalar; the cut level to apply before re-estimating the \option{xcen} and \option{ycen} positions. Higher means only brighter pixels are considered so is more robust, but it means fainter sources might not be adjusted at all. Only relevant if \option{modxy}=TRUE.
 }
+  \item{itersub}{
+Logical; should each marginalised source profile be subtracted as we loop around the sources within a given iteration? The reason to perhaps set this to FALSE is that the source order will then affect the results (the earlier source will collect more flux where they overlap), but the overall solution will always be better with this set to TRUE (default).
+}
   \item{magzero}{
 Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega).  
 }
@@ -81,7 +84,7 @@ The \option{psfstats} data.frame has the following columns:
 \item{signif}{Numeric vector; approximate singificance of the detection using the Chi-Square distribution.}
 }
 \references{
-Expectation Maximisation \href{http://en.wikipedia.org/wiki/Expectation–maximization_algorithm}{Wikipedia}.
+Expectation Maximisation \href{http://en.wikipedia.org/wiki/Expectation-maximization_algorithm}{Wikipedia}.
 }
 \author{
 Aaron Robotham

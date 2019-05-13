@@ -214,7 +214,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   invisible(output)
 }
 
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, magzero=0, modelout=TRUE, verbose=FALSE){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, verbose=FALSE){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
@@ -250,7 +250,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   psfLL=rep(0,Nmodels)
   
   for(j in 1:iters){
-    if(verbose){message(paste('Iteration',i,'of',iters))}
+    if(verbose){message(paste('Iteration',j,'of',iters))}
     modellist = list(
       pointsource = list(
         xcen = xcen,
@@ -258,8 +258,16 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
         mag = mag
       )
     )
-    fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
-    image=image_orig-fullmodel
+    
+    if(itersub){
+      if(j==1){
+        fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+        image=image_orig-fullmodel
+      }
+    }else{
+      fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+      image=image_orig-fullmodel
+    }
     
     if(j==1){
       if(modelout){
@@ -272,6 +280,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
     }
     
     for(i in 1:Nmodels){
+      #if(i==417){browser()}
       image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
       sigma_cut=magcutout(sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
       
@@ -333,6 +342,10 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
         mag_err[i]=sqrt(1/abs(as.numeric(finaloptim$hessian)))
         psfLL[i]=-0.5*finaloptim$value
       }
+      if(itersub){
+        rescale=10^(-0.4*diffmag[i])-1
+        image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
+      }
     }
     mag=mag+diffmag
   }
@@ -356,7 +369,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   flux=profoundMag2Flux(mag=mag, magzero=magzero)
   flux_err=flux*mag_err/(2.5/log(10))
   
-  pchi=pchisq((flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
+  pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
   signif=qnorm(pchi, log.p=TRUE)
   
   psfstats=data.frame(xcen=xcen, ycen=ycen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
