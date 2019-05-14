@@ -375,7 +375,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }
     
     if(groupstats){
-      if(verbose){message(' - groupstats = TRUE')}
+      if(verbose){message(paste(' - groupstats = TRUE - ',round(proc.time()[3]-timestart,3),'sec'))}
       if(groupby=='segim'){
         if(is.null(group)){
           group=profoundSegimGroup(segim)
@@ -405,7 +405,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }
     
     if(deblend & stats & !is.null(image) & any(group$groupsegID$Ngroup>1)){
-      if(verbose){message(' - deblend = TRUE')}
+      if(verbose){message(paste(' - deblend = TRUE - ',round(proc.time()[3]-timestart,3),'sec'))}
       tempblend=profoundFluxDeblend(image=image-sky, segim=segim, segstats=segstats, groupim=group$groupim, groupsegID=group$groupsegID, magzero=magzero, df=df, radtrunc=radtrunc, iterative=iterative, doallstats=TRUE, deblendtype=deblendtype, psf=psf, fluxweight=fluxweight, convtype=convtype, convmode=convmode)
       segstats=cbind(segstats,tempblend[,-2])
     }else{

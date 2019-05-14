@@ -126,7 +126,7 @@ Numeric scalar; the quantile to use when trying to estimate the true standard-de
 Numeric scalar; the minimum number of sky pixels desired in our cutout. The default is that we need half the original number of pixels in the \option{box} to be sky.
 }
   \item{boxadd}{
-Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
+Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved. By default this is set to be the same as the \option{box}/2.
 }
   \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.

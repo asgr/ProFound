@@ -10,10 +10,10 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 \usage{
 profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL,
 detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6, iters_tot = 0,
-sizes_tot = 5, magzero = 0, gain = NULL, box = 100, bandappend = multibands,
-totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE, docol = TRUE,
-dogrp = TRUE, deblend = FALSE, groupstats = FALSE, groupby_det = 'segim_orig',
-groupby_mul = 'segim_orig', ...)
+sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box, boxadd=box/2,
+bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
+docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE,
+groupby_det = 'segim_orig', groupby_mul = 'segim_orig', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -52,6 +52,12 @@ Numeric vector; the gain of the images being used. \option{gain} must either be 
 }
   \item{box}{
 Numeric vector; the sky estimate box size of the images being used. \option{box} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
+}
+  \item{grid}{
+Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}. \option{grid} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
+}
+  \item{boxadd}{
+Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved. By default this is set to be the same as the \option{box}/2. \option{boxadd} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. See also \code{\link{profoundProFound}}.
 }
   \item{bandappend}{
 Character vector; characters to be appended per band in the output multi band photometry catalogues. The default will create columns with names like mag_ut (total) and mag_uc (colour).
