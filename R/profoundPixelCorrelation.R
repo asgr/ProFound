@@ -127,6 +127,12 @@ profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=
   
   image=image-sky
   
+  if(!is.null(mask)){
+    if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for mask padding')}
+    sel_mask=mask>0
+    skyRMS[sel_mask]=mean(skyRMS[!sel_mask])
+  }
+  
   if(!is.null(objects)){
     if(is.null(objects)==FALSE){
       if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for object padding')}
@@ -134,7 +140,7 @@ profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=
       image[sel_objects]=rnorm(length(which(sel_objects)),mean=0,sd=skyRMS[sel_objects])
     }
   }
-    
+  
   if(!is.null(mask)){
     if(!hassky | !hasskyRMS){stop('Need sky and skyRMS for mask padding')}
     sel_mask=mask>0

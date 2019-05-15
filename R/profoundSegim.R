@@ -134,9 +134,9 @@
   }
   
   if(N100seg>0){
-    return(list(flux=sum(flux[good], na.rm=TRUE),N100=N100seg))
+    return(list(flux=as.numeric(sum(flux[good], na.rm=TRUE)),N100=as.integer(N100seg)))
   }else{
-    return(list(flux=NA,N100=NA))
+    return(list(flux=as.numeric(0),N100=as.integer(0)))
   }
 }
 

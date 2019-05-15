@@ -415,7 +415,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(haralickstats){
       if(requireNamespace("EBImage", quietly = TRUE)){
         scale=10^(0.4*(30-magzero))
-        haralick=as.data.frame(EBImage::computeFeatures.haralick(segim,(image-sky)*scale))
+        temphara=(image-sky)*scale
+        if(!is.null(mask)){
+          temphara[mask!=0]=0
+        }
+        temphara[!is.finite(temphara)]=0
+        haralick=as.data.frame(EBImage::computeFeatures.haralick(segim,temphara))
         haralick=haralick[segstats$segID,]
       }else{
         if(verbose){
@@ -497,10 +502,16 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   segdiff=x$segim-x$segim_orig
   segdiff[segdiff<0]=0
   
-  image = (x$image-x$sky)/x$skyRMS
+  if(all(x$skyRMS>0)){
+    image = (x$image-x$sky)/x$skyRMS
+  }else{
+    image = (x$image-x$sky)
+  }
+  
   if(!is.null(x$mask)){
     image[x$mask==1]=NA
   }
+  
   cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
   maximg = quantile(abs(image[is.finite(image)]), 0.995, na.rm=TRUE)
   stretchscale = 1/median(abs(image), na.rm=TRUE)
@@ -530,7 +541,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }else{
       skyarea=x$skyarea
     }
-    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$skyarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/deg-sq/d',dmag,'mag',sep=''), grid=TRUE)
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$skyarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/deg-sq/d',dmag,'mag',sep=''), grid=TRUE, verbose=FALSE)
     #magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
@@ -539,9 +550,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
-    maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
-    magimageWCS(x$sky, x$header, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
+    #stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
+    #maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
+    #magimageWCS(x$sky, x$header, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
+    magimageWCS(x$sky, x$header, qdiff=TRUE)
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -549,7 +561,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     legend('topleft',legend='skyRMS',bg='white')
     
     if(hist=='iters'){
-      maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+      maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#', verbose=FALSE)
     }else if(hist=='sky'){
       try({
         if(!is.null(x$objects_redo)){
@@ -593,7 +605,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     if(!is.null(x$mask)){magimage(x$mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)}
 
     par(mar=c(3.5,3.5,0.5,0.5))
-    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE)
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag), breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/d',dmag,'mag',sep=''), grid=TRUE, verbose=FALSE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.4, 0.4, col='red')
@@ -601,9 +613,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
-    maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
-    magimage(x$sky, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+    #stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
+    #maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
+    #magimage(x$sky, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+    magimage(x$sky, qdiff=TRUE)
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
@@ -611,7 +624,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     legend('topleft',legend='skyRMS',bg='white')
     
     if(hist=='iters'){
-      maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#')
+      maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#', verbose=FALSE)
     }else if(hist=='sky'){
       try({
         if(!is.null(x$objects_redo)){
