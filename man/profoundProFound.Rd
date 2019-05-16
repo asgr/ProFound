@@ -192,7 +192,7 @@ Integer scalar; the distance to offset when searching for nearby segments (used 
 Logical; if TRUE then the Haralick texture statistics are computed using the \code{EBImage} function \code{computeFeatures.haralick}. For more detail see the original paper: http://haralick.org/journals/TexturalFeatures.pdf, and a useful online \code{EBImage} document: http://earlglynn.github.io/RNotes/package/EBImage/Haralick-Textural-Features.html.
 }
   \item{sortcol}{
-Character; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
+Character scalar; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
 }
   \item{decreasing}{
 Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.
@@ -207,13 +207,13 @@ Logical; if TRUE then the input \option{image} and \option{mask} matrices are pa
 Numeric scalar; setting this to more than 0 cleans sources for spuriously small objects. This value should be in arc-seconds if pixel scale is provided or detected, and in pixels otherwise (or if \option{pixscale}=1 is explictly set).
 }
   \item{watershed}{
-Character; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
+Character scalar; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
 }
   \item{pixelcov}{
 Logical, should pixel covariance be considered when computing errors? TRUE uses \code{\link{profoundPixelCorrelation}} and the \option{cor_err_func} output which is then passed into \code{\link{profoundSegimStats}}.
 }
   \item{deblendtype}{
-Scalar character, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Character scalar, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{psf}{
 Numeric matrix; must be provided if \option{deblendtype}='psf'. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
@@ -222,10 +222,10 @@ Numeric matrix; must be provided if \option{deblendtype}='psf'. Only relevant if
 Numeric scalar; only relevent when \option{deblendtype}='psf'. Either 'sum' (where the sum of the current segment weights the deblend solution), 'peak' (where only the peak pixel flux in the segment it used) or 'none' (no additional weighting is used). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{convtype}{
-Scalar character, only relevent when \option{deblendtype}='psf'. Specifies the type on convolver to use. Available options are displayed by running \code{profitAvailableConvolvers}, but usually one of 'brute' or 'fftw'. The latter tends to be fastest when the supplied \option{psf} is much smaller than the \option{image} (factor greater than 4 in each dimension). As the sizes become comparable, fftw becomes faster since it scales better with the product of \option{psf} and \option{image} pixels.
+Character scalar, only relevent when \option{deblendtype}='psf'. Specifies the type on convolver to use. Available options are displayed by running \code{profitAvailableConvolvers}, but usually one of 'brute' or 'fftw'. The latter tends to be fastest when the supplied \option{psf} is much smaller than the \option{image} (factor greater than 4 in each dimension). As the sizes become comparable, fftw becomes faster since it scales better with the product of \option{psf} and \option{image} pixels.
 }
   \item{convmode}{
-Scalar character, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
+Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

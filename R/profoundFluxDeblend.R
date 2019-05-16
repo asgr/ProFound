@@ -75,7 +75,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     if(lowmemory){
       tempgridgroup=which(groupim==groupsegID[i,"groupID"], arr.ind=TRUE)
     }else{
-      tempgridgroup=as.matrix(cbind(groupref[groupID==groupsegID[i,"groupID"],list(Var1,Var2)])) 
+      tempgridgroup=groupref[groupID==groupsegID[i,"groupID"],matrix(c(Var1,Var2),ncol=2)]
     }
     
     weightmatrix=matrix(0,length(tempgridgroup[,1]),length(segIDlist))

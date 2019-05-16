@@ -261,6 +261,10 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     
     pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, deblend=FALSE, groupstats=(groupstats | dogrp), groupby=groupby_det, pixelcov=FALSE), dotsdetect))
     
+    if(is.null(pro_detect$segim)){
+      stop('STOPPING: detection segmentation map appears to be empty! Please check input image data.')
+    }
+    
     # Delete and clean up
     
     rm(detect_image_stack)

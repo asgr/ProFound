@@ -215,7 +215,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     image[image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
   }
   if(!is.null(mask)){
-    image[mask!=0]=0
+    image[mask>0]=0
   }
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
@@ -263,7 +263,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     if(verbose){message(paste(" - Making final local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
     skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects, plot=FALSE)$skyRMS
   }else{
-    if(verbose){message(" - Skipping making initial local estimate of the sky RMS - User provided sky RMS")}
+    if(verbose){message(" - Skipping making final local estimate of the sky RMS - User provided sky RMS")}
   }
   
   if(stats & any(image>0)){
@@ -701,14 +701,14 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   if(hassky){
     #With one version of data.table sd doesn't work when all numbers are identical (complains about gsd and negative length vectors). Fixed with explicit sd caclulation until this gets fixed.
-    flux_err_sky=tempDT[,sd(sky, na.rm=FALSE)*1, by=segID]$V1*fluxout$N100seg
+    flux_err_sky=tempDT[,sd(sky, na.rm=TRUE)*1, by=segID]$V1*fluxout$N100seg
     #flux_err_sky=tempDT[,sqrt(sum((sky-mean(sky, na.rm=TRUE))^2)/(.N-1)), by=segID]$V1*fluxout$N100seg
   }else{
     flux_err_sky=0
   }
   
   if(hasskyRMS){
-    flux_err_skyRMS=tempDT[,sqrt(sum(skyRMS^2, na.rm=FALSE)), by=segID]$V1
+    flux_err_skyRMS=tempDT[,sqrt(sum(skyRMS^2, na.rm=TRUE)), by=segID]$V1
     pchi=pchisq(tempDT[,sum((flux/skyRMS)^2, na.rm=TRUE), by=segID]$V1, df=fluxout$N100seg, log.p=TRUE)
     signif=qnorm(pchi, log.p=TRUE)
     FPlim=qnorm(1-fluxout$N100seg/(xlen*ylen))
@@ -741,13 +741,13 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   mag_err=(2.5/log(10))*abs(flux_err/fluxout$flux)
   
   if(hassky){
-    sky_mean=tempDT[,mean(sky, na.rm=FALSE), by=segID]$V1
+    sky_mean=tempDT[,mean(sky, na.rm=TRUE), by=segID]$V1
   }else{
     sky_mean=0
   }
   
   if(hasskyRMS){
-    skyRMS_mean=tempDT[,mean(skyRMS, na.rm=FALSE), by=segID]$V1
+    skyRMS_mean=tempDT[,mean(skyRMS, na.rm=TRUE), by=segID]$V1
   }else{
     skyRMS_mean=0
   }
@@ -1059,7 +1059,7 @@ profoundSegimGroup=function(segim=NULL){
 
 profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NULL, sky=0){
   
-  segim_add[segim_add>0]=segim_add[segim_add>0]+max(segim_base, na.rm=FALSE)
+  segim_add[segim_add>0]=segim_add[segim_add>0]+max(segim_base, na.rm=TRUE)
   
   image=image-sky
   

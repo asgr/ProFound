@@ -502,7 +502,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   segdiff=x$segim-x$segim_orig
   segdiff[segdiff<0]=0
   
-  if(all(x$skyRMS>0)){
+  if(all(x$skyRMS>0, na.rm=TRUE)){
     image = (x$image-x$sky)/x$skyRMS
   }else{
     image = (x$image-x$sky)
