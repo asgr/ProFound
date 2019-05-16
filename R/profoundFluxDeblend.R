@@ -248,6 +248,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   diffmag=rep(0,Nmodels)
   mag_err=rep(0,Nmodels)
   psfLL=rep(0,Nmodels)
+  flux=rep(0,Nmodels)
+  flux_err=rep(0,Nmodels)
   
   for(j in 1:iters){
     if(verbose){message(paste('Iteration',j,'of',iters))}
@@ -272,7 +274,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
     if(j==1){
       if(modelout){
         origmodel=fullmodel
-        origLL= sum(-0.5*(image_orig-fullmodel)^2/(sigma^2))
+        origLL= -0.5*sum((image_orig-fullmodel)^2/(sigma^2))
       }else{
         origmodel=NA
         origLL=NA
@@ -335,12 +337,15 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
       }
       
       if(j<iters){
-        diffmag[i] = optim(0, .minlike, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
+        diffmag[i] = optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
       }else{
-        finaloptim=optim(0, .minlike, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff, hessian=TRUE)
+        finaloptim=optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff, hessian=TRUE)
         diffmag[i]=finaloptim$par
         mag_err[i]=sqrt(1/abs(as.numeric(finaloptim$hessian)))
-        psfLL[i]=-0.5*finaloptim$value
+        psfLL[i]=-finaloptim$value
+        flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
+        fluxhess=hessian(.minlike_flux, x0=flux[i]*(10^(-0.4*diffmag[i])-1), singmodel = singmodel, image=image_cut$image, sigma = sigma_cut)
+        flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
       }
       if(itersub){
         rescale=10^(-0.4*diffmag[i])-1
@@ -366,8 +371,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   }
   
   mag_err=sqrt(diffmag^2+mag_err^2)
-  flux=profoundMag2Flux(mag=mag, magzero=magzero)
-  flux_err=flux*mag_err/(2.5/log(10))
+  #flux=profoundMag2Flux(mag=mag, magzero=magzero)
+  #flux_err=flux*mag_err/(2.5/log(10))
   
   pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
   signif=qnorm(pchi, log.p=TRUE)
@@ -377,6 +382,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel))
 }
 
-.minlike=function(par,singmodel,image,sigma){
-  sum((image-(singmodel*(10^(-0.4*par)-1)))^2/sigma^2,na.rm = TRUE)
+.minlike_mag=function(par,singmodel,image,sigma){
+  0.5*sum((image-(singmodel*(10^(-0.4*par)-1)))^2/sigma^2, na.rm=TRUE)
+}
+
+.minlike_flux=function(par,singmodel,image,sigma){
+  flux=sum(singmodel, na.rm=TRUE)
+  0.5*sum((image-(singmodel*(1+par/flux)))^2/sigma^2, na.rm=TRUE)
 }
