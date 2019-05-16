@@ -134,6 +134,12 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   box=box[which(multibands %in% presentbands)]
   box=box[!is.na(box)]
   
+  grid=grid[which(multibands %in% presentbands)]
+  grid=grid[!is.na(grid)]
+  
+  boxadd=boxadd[which(multibands %in% presentbands)]
+  boxadd=boxadd[!is.na(boxadd)]
+  
   multibands=multibands[which(multibands %in% presentbands)]
   multibands=multibands[!is.na(multibands)]
   
