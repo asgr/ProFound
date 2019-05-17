@@ -244,12 +244,14 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   if(modxy){
     xygrid=expand.grid(1:dim(psf)[1],1:dim(psf)[2])-0.5
   }
+
+  beamscale=(sum(psf, na.rm=TRUE)/sum(psf^2, na.rm=TRUE))^2
   
   diffmag=rep(0,Nmodels)
-  mag_err=rep(0,Nmodels)
   psfLL=rep(0,Nmodels)
   flux=rep(0,Nmodels)
   flux_err=rep(0,Nmodels)
+  beam_err=rep(0,Nmodels)
   
   for(j in 1:iters){
     if(verbose){message(paste('Iteration',j,'of',iters))}
@@ -339,13 +341,13 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
       if(j<iters){
         diffmag[i] = optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
       }else{
-        finaloptim=optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff, hessian=TRUE)
+        finaloptim=optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)
         diffmag[i]=finaloptim$par
-        mag_err[i]=sqrt(1/abs(as.numeric(finaloptim$hessian)))
         psfLL[i]=-finaloptim$value
         flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
         fluxhess=hessian(.minlike_flux, x0=flux[i]*(10^(-0.4*diffmag[i])-1), singmodel = singmodel, image=image_cut$image, sigma = sigma_cut)
         flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
+        beam_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
       }
       if(itersub){
         rescale=10^(-0.4*diffmag[i])-1
@@ -369,10 +371,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
     fullmodel=NA
     finalLL=NA
   }
-  
-  mag_err=sqrt(diffmag^2+mag_err^2)
-  #flux=profoundMag2Flux(mag=mag, magzero=magzero)
-  #flux_err=flux*mag_err/(2.5/log(10))
+  flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
+  flux_err[flux_err<beam_err]=beam_err[flux_err<beam_err]
+  mag_err=(2.5/log(10))*flux_err/flux
   
   pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
   signif=qnorm(pchi, log.p=TRUE)

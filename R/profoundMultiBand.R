@@ -209,6 +209,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     detect_sky=list()
     detect_skyRMS=list()
     detect_magzero={}
+    detect_box={}
+    detect_grid={}
+    detect_boxadd={}
     
     for(i in 1:length(detectbands)){
       
@@ -221,13 +224,17 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       }else{
         detect=inputlist[[which(multibands==detectbands[i])]]
       }
+      
       temp_magzero=magzero[multibands==detectbands[i]]
+      temp_box=box[multibands==detectbands[i]]
+      temp_grid=grid[multibands==detectbands[i]]
+      temp_boxadd=boxadd[multibands==detectbands[i]]
       
       # Run ProFound on current detection band with input parameters
       
       # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, ...)
       
-      pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=FALSE, pixelcov=FALSE), dotsdetect))
+      pro_detect=do.call("profoundProFound", c(list(image=detect, segim=segim, mask=mask, iters=iters_det, magzero=temp_magzero, box=temp_box, grid=temp_grid, boxadd=temp_boxadd, deblend=FALSE, groupstats=FALSE, pixelcov=FALSE), dotsdetect))
       
       # Append to lists for stacking
       
@@ -235,6 +242,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       detect_sky=c(detect_sky,list(pro_detect$sky))
       detect_skyRMS=c(detect_skyRMS,list(pro_detect$skyRMS))
       detect_magzero=c(detect_magzero, temp_magzero)
+      detect_box=c(detect_box, temp_box)
+      detect_grid=c(detect_grid, temp_grid)
+      detect_boxadd=c(detect_boxadd, temp_boxadd)
     }
     
     # Grab the current header
@@ -265,7 +275,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     
     #pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, deblend=FALSE, groupstats=(groupstats | dogrp), groupby=groupby_det, pixelcov=FALSE), dotsdetect))
+    pro_detect=do.call("profoundProFound", c(list(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=mask, header=header, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, box=max(detect_box), grid=min(detect_grid), boxadd=max(detect_boxadd), redosky=FALSE, deblend=FALSE, groupstats=(groupstats | dogrp), groupby=groupby_det, pixelcov=FALSE), dotsdetect))
     
     if(is.null(pro_detect$segim)){
       stop('STOPPING: detection segmentation map appears to be empty! Please check input image data.')

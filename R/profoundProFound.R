@@ -59,7 +59,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(!is.null(mask)){
     mask=mask*1L #Looks silly, but this ensures a logical mask becomes integer.
-    if(length(mask)==1){
+    if(length(mask)==1 & !is.na(mask[1])){
       maskflag=mask
       mask=matrix(0L,dim(image)[1],dim(image)[2])
       mask[image==maskflag]=1L
