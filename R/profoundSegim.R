@@ -395,6 +395,10 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   mode(segim_new)='integer'
   segim_new[segim>0]=segim[segim>0]
   
+  if(!is.null(mask)){
+    segim_new[mask!=0]=0
+  }
+  
   objects=segim_new
   objects[objects!=0]=1L
   mode(objects)='integer'
@@ -505,6 +509,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   }
   
   if(!is.null(mask)){
+    segim_new[mask!=0]=0
     image[mask!=0]=NA
   }
   
@@ -985,7 +990,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
   if(!is.null(mask)){
     if(!is.null(mask)){
-      magimage(mask, locut=0, hicut=1, col=c(NA,hsv(alpha=0.2)), add=TRUE)
+      magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
     }
   }
 }
@@ -1149,7 +1154,8 @@ profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_m
     for(i in 1:length(segID_merge)){
       tempID=segID_merge[[i]]
       #tempID=tempID[tempID %in% pixsel]
-      pixsel[pixsel %in% tempID]=min(tempID)
+      #pixsel[pixsel %in% tempID]=min(tempID)
+      pixsel[fmatch(pixsel, tempID, nomatch = 0L) > 0L]=min(tempID)
     }
     segim_out[whichpix]=pixsel
   }

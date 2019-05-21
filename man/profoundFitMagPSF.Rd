@@ -107,15 +107,13 @@ newmag=profoundFitMagPSF(xcen=pro_s250$segstats$xcen, ycen=pro_s250$segstats$yce
 mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
 psf=s250_psf_cut)
 
-magimage(s250_im$imDat-newmag$origmodel, magmap=FALSE, col=topo.colors(1e3),
-zlim=c(-0.02,0.02))
-magimage(s250_im$imDat-newmag$finalmodel, magmap=FALSE, col=topo.colors(1e3),
-zlim=c(-0.02,0.02))
+magimage(s250_im$imDat-newmag$origmodel, qdiff=TRUE)
+magimage(s250_im$imDat-newmag$finalmodel, qdiff=TRUE)
 
-magplot(pro_s250$segstats$mag, newmag$mag,xlim=c(-1,6),ylim=c(-1,6),xlab='Start Mag',
-ylab='End Mag', asp=1, grid=TRUE)
-magerr(pro_s250$segstats$mag, newmag$mag, xlo=pro_s250$segstats$mag_err,
-ylo=newmag$magerr)
+magplot(pro_s250$segstats$mag, newmag$psfstats$mag, xlim=c(-1,6), ylim=c(-1,6),
+xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
+magerr(pro_s250$segstats$mag, newmag$psfstats$mag, xlo=pro_s250$segstats$mag_err,
+ylo=newmag$psfstats$mag_err)
 abline(0,1, col='red')
 
 #We can also run slightly adjusting the xcen and ycen as we go:
@@ -124,20 +122,20 @@ newmag2=profoundFitMagPSF(xcen=pro_s250$segstats$xcen, ycen=pro_s250$segstats$yc
 mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
 psf=s250_psf_cut, modxy=TRUE)
 
-magimage(s250_im$imDat-newmag2$finalmodel, magmap=FALSE, col=topo.colors(1e3),
-zlim=c(-0.02,0.02))
+magimage(s250_im$imDat-newmag2$finalmodel, qdiff=TRUE)
 
-magplot(pro_s250$segstats$mag, newmag2$mag,xlim=c(-1,6),ylim=c(-1,6),xlab='Start Mag',
-ylab='End Mag', asp=1, grid=TRUE)
-magerr(pro_s250$segstats$mag, newmag$mag, xlo=pro_s250$segstats$mag_err,
-ylo=newmag2$magerr)
+magplot(pro_s250$segstats$mag, newmag2$psfstats$mag,xlim=c(-1,6), ylim=c(-1,6),
+xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
+magerr(pro_s250$segstats$mag, newmag2$psfstats$mag, xlo=pro_s250$segstats$mag_err,
+ylo=newmag2$psfstats$mag_err)
 abline(0,1, col='red')
 
 # The two profoundFitMagPSF approaches agree well within the error:
 
-magplot(newmag$mag, newmag2$mag,xlim=c(-1,6),ylim=c(-1,6),xlab='Start Mag',
-ylab='End Mag', asp=1, grid=TRUE)
-magerr(newmag$mag, newmag2$mag, xlo=newmag$magerr, ylo=newmag2$magerr)
+magplot(newmag$psfstats$mag, newmag2$psfstats$mag,xlim=c(-1,6), ylim=c(-1,6),
+xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
+magerr(newmag$psfstats$mag, newmag2$psfstats$mag, xlo=newmag$psfstats$mag_err,
+ylo=newmag2$psfstats$mag_err)
 abline(0,1, col='red')
 }
 }

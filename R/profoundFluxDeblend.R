@@ -100,7 +100,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
         #Try various levels of segment fitting: spline, linear, flat
         uniq_xlen=length(unique(round(segout[select,1],6)))
         if(uniq_xlen>max(3,df)){
-          weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y
+          weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df, spar=0.5)$fit, x=groupellip[,1])$y
           weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
           Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
         }else if(uniq_xlen>1){
@@ -244,8 +244,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   if(modxy){
     xygrid=expand.grid(1:dim(psf)[1],1:dim(psf)[2])-0.5
   }
-
-  beamscale=(sum(psf, na.rm=TRUE)/sum(psf^2, na.rm=TRUE))^2
+  
+  psf=psf/sum(psf,na.rm=TRUE)
+  beamscale=sqrt(1/sum(psf^2,na.rm=TRUE))
   
   diffmag=rep(0,Nmodels)
   psfLL=rep(0,Nmodels)
@@ -284,7 +285,6 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
     }
     
     for(i in 1:Nmodels){
-      #if(i==417){browser()}
       image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
       sigma_cut=magcutout(sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
       
@@ -339,13 +339,13 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
       }
       
       if(j<iters){
-        diffmag[i] = optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
+        diffmag[i] = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
       }else{
-        finaloptim=optim(0, .minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)
+        finaloptim=optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)
         diffmag[i]=finaloptim$par
         psfLL[i]=-finaloptim$value
         flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
-        fluxhess=hessian(.minlike_flux, x0=flux[i]*(10^(-0.4*diffmag[i])-1), singmodel = singmodel, image=image_cut$image, sigma = sigma_cut)
+        fluxhess=optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, sigma = sigma_cut)
         flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
         beam_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
       }
