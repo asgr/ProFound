@@ -1153,9 +1153,11 @@ profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_m
     pixsel=segim_out[whichpix]
     for(i in 1:length(segID_merge)){
       tempID=segID_merge[[i]]
-      #tempID=tempID[tempID %in% pixsel]
-      #pixsel[pixsel %in% tempID]=min(tempID)
-      pixsel[fmatch(pixsel, tempID, nomatch = 0L) > 0L]=min(tempID)
+      if('fastmatch' %in% .packages()){
+        pixsel[fastmatch::fmatch(pixsel, tempID, nomatch = 0L) > 0L]=min(tempID)
+      }else{
+        pixsel[pixsel %in% tempID]=min(tempID)
+      }
     }
     segim_out[whichpix]=pixsel
   }

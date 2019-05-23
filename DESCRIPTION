@@ -8,8 +8,8 @@ Maintainer: Aaron Robotham <aaron.robotham@uwa.edu.au>
 Description: Core package containing all the tools for simple and advanced source extraction. This is used to create inputs for 'ProFit', or for source detection, extraction and photometry in its own right.
 License: LGPL-3
 Depends: R (>= 3.1), FITSio, magicaxis (>= 2.0.8)
-Imports: RColorBrewer, data.table, celestial (>= 1.4.1), foreach, doParallel, Rcpp, fastmatch
-Suggests: ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon, Rfast
+Imports: RColorBrewer, data.table, celestial (>= 1.4.1), foreach, doParallel, Rcpp
+Suggests: ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon, Rfast, fastmatch
 VignetteBuilder: knitr
 SystemRequirements: C++11
 LinkingTo: Rcpp

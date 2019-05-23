@@ -264,12 +264,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
       )
     )
     
-    if(itersub){
-      if(j==1){
-        fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
-        image=image_orig-fullmodel
-      }
-    }else{
+    if(itersub | j==1){
       fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
       image=image_orig-fullmodel
     }
