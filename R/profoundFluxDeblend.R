@@ -214,18 +214,35 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   invisible(output)
 }
 
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, verbose=FALSE){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, header=NULL, verbose=FALSE){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
   }
   
-  if(is.null(xcen)){stop('Need xcen!')}
-  if(is.null(ycen)){stop('Need ycen!')}
+  if((is.null(xcen) & !is.null(ycen))){stop('Need xcen/ycen pair!')}
+  if((!is.null(xcen) & is.null(ycen))){stop('Need xcen/ycen pair!')}
+  if((is.null(xcen) & is.null(ycen)) & (is.null(RAcen) | is.null(Deccen))){stop('Need RAcen/Decen pair!')}
   if(is.null(mag)){stop('Need mag!')}
   if(is.null(image)){stop('Need image!')}
   if(is.null(sigma)){stop('Need sigma!')}
   if(is.null(psf)){stop('Need psf!')}
+  
+  if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(header)){
+    RAdeccoords=magWCSxy2radec(x = xcen, y = ycen, header=header)
+    RAcen=RAdeccoords[,'RA']
+    Deccen=RAdeccoords[,'Dec']
+  }
+  
+  if((is.null(xcen) & is.null(ycen)) & (!is.null(RAcen) & !is.null(Deccen))){
+    if(is.null(header)){stop('Need header if using RAcen and Deccec input')}
+    xycoords=magWCSradec2xy(RA = RAcen, Dec = Deccen, header=header)
+    xcen=xycoords[,'x']
+    ycen=xycoords[,'y']
+  }
+  
+  if(is.null(RAcen)){RAcen=rep(NA,length(mag))}
+  if(is.null(Deccen)){Deccen=rep(NA,length(mag))}
   
   if(!is.null(mask)){
     image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
@@ -373,7 +390,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, mag=NULL, image=NULL, sigma=NUL
   pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
   signif=qnorm(pchi, log.p=TRUE)
   
-  psfstats=data.frame(xcen=xcen, ycen=ycen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
+  psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   
   return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel))
 }

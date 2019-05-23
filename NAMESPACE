@@ -15,6 +15,5 @@ import("doParallel")
 importFrom("Rcpp", "evalCpp")
 importFrom("utils", "relist", "packageVersion")
 importFrom("RColorBrewer", "brewer.pal")
-importFrom("fastmatch", "fmatch")
 
 S3method("plot","profound")

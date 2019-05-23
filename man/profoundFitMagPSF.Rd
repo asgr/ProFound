@@ -8,17 +8,24 @@ Fit PSF Magnitudes to an Image
 Fits PSF mags to an image with known source positions. This is the best deblend option in the regime where the sources are not well resolved, but the source positions are reasonably well defined.
 }
 \usage{
-profoundFitMagPSF(xcen = NULL, ycen = NULL, mag = NULL, image = NULL, sigma = NULL,
-mask = NULL, psf = NULL, iters = 5, magdiff = 1, modxy = FALSE, sigthresh = 0,
-itersub = TRUE, magzero = 0, modelout = TRUE, verbose = FALSE)
+profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen=NULL, Deccen=NULL, mag = NULL,
+image = NULL, sigma = NULL, mask = NULL, psf = NULL, iters = 5, magdiff = 1,
+modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE, header = NULL,
+verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{xcen}{
-Numeric vector; required, x centres. Must be the same length as \option{mag}. These values remain fixed during the fitting.
+Numeric vector; x centres. If provided, must be the same length as \option{mag}, and be paired with \option{ycen}.
 }
   \item{ycen}{
-Numeric vector; required, y centres. Must be the same length as \option{mag}. These values remain fixed during the fitting.
+Numeric vector; y centres. If provided, must be the same length as \option{mag}, and be paired with \option{xcen}.
+}
+  \item{RAcen}{
+Numeric vector; right ascension centres in degrees.  If provided, must be the same length as \option{mag}, and be paired with \option{Deccen}.
+}
+  \item{Deccen}{
+Numeric vector; declination centres in degrees.  If provided, must be the same length as \option{mag}, and be paired with \option{RAcen}.
 }
   \item{mag}{
 Numeric vector; required, initial PSF mags. This is what will be fitted.
@@ -55,6 +62,9 @@ Numeric scalar; the magnitude zero point. What this implies depends on the magni
 }
   \item{modelout}{
 Logical; should the full model image be output?
+}
+  \item{header}{
+Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since a big \option{image} can take a long time to run, you might want to monitor progress.  
@@ -103,9 +113,9 @@ pro_s250=profoundProFound(s250_im, pixcut=1, skycut=2, ext=1, redosky=FALSE, ite
 tolerance=0, sigma=0)
 pro_s250$segstats=pro_s250$segstats[!is.na(pro_s250$segstats$mag),]
 
-newmag=profoundFitMagPSF(xcen=pro_s250$segstats$xcen, ycen=pro_s250$segstats$ycen,
+newmag=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
 mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
-psf=s250_psf_cut)
+psf=s250_psf_cut, header=pro_s250$header)
 
 magimage(s250_im$imDat-newmag$origmodel, qdiff=TRUE)
 magimage(s250_im$imDat-newmag$finalmodel, qdiff=TRUE)
@@ -118,9 +128,9 @@ abline(0,1, col='red')
 
 #We can also run slightly adjusting the xcen and ycen as we go:
 
-newmag2=profoundFitMagPSF(xcen=pro_s250$segstats$xcen, ycen=pro_s250$segstats$ycen,
+newmag2=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
 mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
-psf=s250_psf_cut, modxy=TRUE)
+psf=s250_psf_cut, modxy=TRUE, header=pro_s250$header)
 
 magimage(s250_im$imDat-newmag2$finalmodel, qdiff=TRUE)
 
