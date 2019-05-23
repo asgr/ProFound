@@ -244,6 +244,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if(is.null(RAcen)){RAcen=rep(NA,length(mag))}
   if(is.null(Deccen)){Deccen=rep(NA,length(mag))}
   
+  mag[is.na(mag)]=Inf
+  
   if(!is.null(mask)){
     image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
   }
@@ -273,15 +275,25 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   for(j in 1:iters){
     if(verbose){message(paste('Iteration',j,'of',iters))}
-    modellist = list(
-      pointsource = list(
-        xcen = xcen,
-        ycen = ycen,
-        mag = mag
-      )
-    )
     
-    if(itersub | j==1){
+    if(itersub){
+      if(j==1){
+        dofull=TRUE
+      }else{
+        dofull=FALSE
+      }
+    }else{
+      dofull=TRUE
+    }
+    
+    if(dofull){
+      modellist = list(
+        pointsource = list(
+          xcen = xcen,
+          ycen = ycen,
+          mag = mag
+        )
+      )
       fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
       image=image_orig-fullmodel
     }

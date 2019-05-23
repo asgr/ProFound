@@ -117,8 +117,8 @@ newmag=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats
 mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
 psf=s250_psf_cut, header=pro_s250$header)
 
-magimage(s250_im$imDat-newmag$origmodel, qdiff=TRUE)
-magimage(s250_im$imDat-newmag$finalmodel, qdiff=TRUE)
+magimage(s250_im$imDat-pro_s250$sky-newmag$origmodel, qdiff=TRUE)
+magimage(s250_im$imDat-pro_s250$sky-newmag$finalmodel, qdiff=TRUE)
 
 magplot(pro_s250$segstats$mag, newmag$psfstats$mag, xlim=c(-1,6), ylim=c(-1,6),
 xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
@@ -132,7 +132,7 @@ newmag2=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstat
 mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
 psf=s250_psf_cut, modxy=TRUE, header=pro_s250$header)
 
-magimage(s250_im$imDat-newmag2$finalmodel, qdiff=TRUE)
+magimage(s250_im$imDat-pro_s250$sky-newmag2$finalmodel, qdiff=TRUE)
 
 magplot(pro_s250$segstats$mag, newmag2$psfstats$mag,xlim=c(-1,6), ylim=c(-1,6),
 xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
