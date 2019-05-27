@@ -343,6 +343,7 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   }else{
     if(verbose){message(" - Skipping making initial local estimate of the sky RMS - User provided sky RMS")}
   }
+  
   image=image_sky/skyRMS
   image[!is.finite(image)]=0
 

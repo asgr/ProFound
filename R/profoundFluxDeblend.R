@@ -100,7 +100,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
         #Try various levels of segment fitting: spline, linear, flat
         uniq_xlen=length(unique(round(segout[select,1],6)))
         if(uniq_xlen>max(3,df)){
-          weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df, spar=0.5)$fit, x=groupellip[,1])$y
+          weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df, lambda=0.1)$fit, x=groupellip[,1])$y
           weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
           Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
         }else if(uniq_xlen>1){
@@ -167,11 +167,15 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     }
     
     normmat=.rowSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
-    Qgroup_db=sum(normmat-image[tempgridgroup])/groupsum
     weightmatrix=weightmatrix/normmat
+    weightmatrix[weightmatrix<0.1]=0
+    normmat=.rowSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    weightmatrix=weightmatrix/normmat
+    Qgroup_db=sum(normmat-image[tempgridgroup])/groupsum
+    
     beamcorrect[beamcorrect<1]=1
-    output[Npad:(Npad+Ngroup-1),"flux_db"]=.colSums(weightmatrix*image[tempgridgroup], dim(weightmatrix)[1], dim(weightmatrix)[2])
-    output[Npad:(Npad+Ngroup-1),"N100_db"]=.colSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2])
+    output[Npad:(Npad+Ngroup-1),"flux_db"]=.colSums(weightmatrix*image[tempgridgroup], dim(weightmatrix)[1], dim(weightmatrix)[2], na.rm=TRUE)
+    output[Npad:(Npad+Ngroup-1),"N100_db"]=.colSums(weightmatrix, dim(weightmatrix)[1], dim(weightmatrix)[2], na.rm=TRUE)
     output[Npad:(Npad+Ngroup-1),"flux_segfrac"]=fluxfrac
     output[Npad:(Npad+Ngroup-1),"Qseg_db"]=Qseg_db
     output[Npad:(Npad+Ngroup-1),"Qgroup_db"]=Qgroup_db
