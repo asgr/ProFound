@@ -57,6 +57,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   #Treat image NAs as masked regions:
   
+  badpix=NULL
   if(!is.null(mask)){
     mask=mask*1L #Looks silly, but this ensures a logical mask becomes integer.
     if(length(mask)==1 & !is.na(mask[1])){
@@ -65,24 +66,16 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       mask[image==maskflag]=1L
     }
     if(anyNA(image)){
-      badpix=is.na(image)
+      badpix=which(is.na(image))
       mask[badpix]=1L
       image[badpix]=0
-      if(rembig){
-        rm(badpix)
-        gc()
-      }
     }
   }else{
     if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])
-      badpix=is.na(image)
+      badpix=which(is.na(image))
       mask[badpix]=1L
       image[badpix]=0
-      if(rembig){
-        rm(badpix)
-        gc()
-      }
     }
   }
   
@@ -458,13 +451,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(is.null(mask)){mask=NULL}
-    if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
+    if(!is.null(badpix)){image[badpix]=NA}
     row.names(segstats)=NULL
+    if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }else{
     if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(is.null(mask)){mask=NULL}
+    if(!is.null(badpix)){image[badpix]=NA}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
