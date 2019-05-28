@@ -21,7 +21,11 @@
   xmod=rad*sin(angmod)
   ymod=rad*cos(angmod)
   xmod=xmod/axrat
-  radmod=(abs(xmod)^(2+box)+abs(ymod)^(2+box))^(1/(2+box))
+  if(box==0){
+    radmod=sqrt(xmod^2 + ymod^2)
+  }else{
+    radmod=(abs(xmod)^(2+box)+abs(ymod)^(2+box))^(1/(2+box))
+  }
   output=cbind(rad=radmod, flux=flux)
   invisible(output)
 }

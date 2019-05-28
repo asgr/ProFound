@@ -121,8 +121,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
     roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=0, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     if(roughpedestal){
-      roughsky$sky=median(roughsky$sky)
-      roughsky$skyRMS=median(roughsky$skyRMS)
+      roughsky$sky=median(roughsky$sky,na.rm=TRUE)
+      roughsky$skyRMS=median(roughsky$skyRMS,na.rm=TRUE)
     }
     if(hassky==FALSE){
       sky=roughsky$sky
