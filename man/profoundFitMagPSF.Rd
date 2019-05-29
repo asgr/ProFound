@@ -11,7 +11,7 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen=NULL, Deccen=NULL, mag = NULL,
 image = NULL, sigma = NULL, mask = NULL, psf = NULL, iters = 5, magdiff = 1,
 modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE, header = NULL,
-verbose = FALSE)
+doProFound = FALSE, findextra = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -66,8 +66,17 @@ Logical; should the full model image be output?
   \item{header}{
 Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
 }
+  \item{doProFound}{
+Logical; if TRUE then \code{\link{profoundProFound}} will be run with the arguments provided by \dots. This will be used to determine \option{xcen}, \option{ycen} and \option{mag} blindly.
+}
+  \item{findextra}{
+Logical; if TRUE then after an initial run of \code{profoundFitMagPSF} \code{\link{profoundProFound}} is used to find additional sources that cannot be well modelled. The combined set if the initial sources and the new extra sources are then passed back into \code{profoundFitMagPSF} for a final run. The main source list is output to \option{psfstats}, and the extra sources are output to \option{psfstats_extra}. \option{psfstats_extra} is otherwise NULL.
+}
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since a big \option{image} can take a long time to run, you might want to monitor progress.  
+}
+  \item{\dots}{
+Arguments to be passed on to \code{\link{profoundProFound}}. Only relevant if \option{doProFound}=TRUE or \option{findextra}=TRUE.
 }
 }
 \details{
@@ -76,13 +85,14 @@ This function uses \code{ProFit} to make a full model image. It then makes a mod
 \value{
 List containing:
 
-\item{psfstats}{A data.frame of photometric properties (see below).}
+\item{psfstats}{A data.frame of main source photometric properties (see below).}
 \item{origmodel}{The original model image before optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{finalmodel}{The final model image after optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{origLL}{The original data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{finalLL}{The final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
+\item{psfstats_extra}{A data.frame of extra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
 
-The \option{psfstats} data.frame has the following columns:
+\option{psfstats} \option{psfstats_extra} data.frames have the following columns:
 
 \item{xcen}{Numeric vector; x centres. If \option{modxy}=FALSE these will be the same as the input \option{xcen}, but if \option{modxy}=TRUE they will be adjusted.}
 \item{ycen}{Numeric vector; y centres. If \option{modxy}=FALSE these will be the same as the input \option{ycen}, but if \option{modxy}=TRUE they will be adjusted.}

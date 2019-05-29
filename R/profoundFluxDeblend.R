@@ -218,7 +218,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   invisible(output)
 }
 
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, header=NULL, verbose=FALSE){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
@@ -227,9 +227,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if((is.null(xcen) & !is.null(ycen))){stop('Need xcen/ycen pair!')}
   if((!is.null(xcen) & is.null(ycen))){stop('Need xcen/ycen pair!')}
   if((is.null(xcen) & is.null(ycen)) & (is.null(RAcen) | is.null(Deccen))){stop('Need RAcen/Decen pair!')}
-  if(is.null(mag)){stop('Need mag!')}
   if(is.null(image)){stop('Need image!')}
-  if(is.null(sigma)){stop('Need sigma!')}
   if(is.null(psf)){stop('Need psf!')}
   
   if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(header)){
@@ -244,6 +242,22 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     xcen=xycoords[,'x']
     ycen=xycoords[,'y']
   }
+  
+  if(doProFound){
+    protemp=profoundProFound(image, mask=mask, magzero=magzero, header=header, verbose=verbose, ...)
+    image=image-protemp$sky
+    if(is.null(xcen) & is.null(ycen) & is.null(mag)){
+      xcen=protemp$segstats$xcen
+      ycen=protemp$segstats$ycen
+      mag=protemp$segstats$mag
+    }
+    if(is.null(sigma)){
+      sigma=protemp$skyRMS
+    }
+  }
+  
+  if(is.null(mag)){stop('Need mag!')}
+  if(is.null(sigma)){stop('Need sigma!')}
   
   if(is.null(RAcen)){RAcen=rep(NA,length(mag))}
   if(is.null(Deccen)){Deccen=rep(NA,length(mag))}
@@ -406,9 +420,51 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
   signif=qnorm(pchi, log.p=TRUE)
   
+  if(doProFound & findextra){
+    protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, header=header, verbose=verbose, ...)
+    if(!is.null(protemp$segstats)){
+      xcen=c(xcen, protemp$segstats$xcen)
+      ycen=c(ycen, protemp$segstats$ycen)
+      mag=c(mag, protemp$segstats$mag)
+
+      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, sigma=sigma, mask=mask, psf=psf, iters=iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
+      
+      seltarget=1:Nmodels
+      xcen=rerun$psfstats$xcen[seltarget]
+      ycen=rerun$psfstats$ycen[seltarget]
+      RAcen=rerun$psfstats$RAcen[seltarget]
+      Deccen=rerun$psfstats$Deccen[seltarget]
+      flux=rerun$psfstats$flux[seltarget]
+      flux_err=rerun$psfstats$flux_err[seltarget]
+      mag=rerun$psfstats$mag[seltarget]
+      mag_err=rerun$psfstats$mag_err[seltarget]
+      psfLL=rerun$psfstats$psfLL[seltarget]
+      signif=rerun$psfstats$signif[seltarget]
+      
+      selextra=(Nmodels+1):(dim(rerun$psfstats)[1])
+      xcen_extra=rerun$psfstats$xcen[selextra]
+      ycen_extra=rerun$psfstats$ycen[selextra]
+      RAcen_extra=rerun$psfstats$RAcen[selextra]
+      Deccen_extra=rerun$psfstats$Deccen[selextra]
+      flux_extra=rerun$psfstats$flux[selextra]
+      flux_err_extra=rerun$psfstats$flux_err[selextra]
+      mag_extra=rerun$psfstats$mag[selextra]
+      mag_err_extra=rerun$psfstats$mag_err[selextra]
+      psfLL_extra=rerun$psfstats$psfLL[selextra]
+      signif_extra=rerun$psfstats$signif[selextra]
+      psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, signif=signif_extra)
+      
+      fullmodel=rerun$finalmodel
+    }else{
+      psfstats_extra=NULL
+    }
+  }else{
+    psfstats_extra=NULL
+  }
+  
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   
-  return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel))
+  return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, psfstats_extra=psfstats_extra))
 }
 
 .minlike_mag=function(par,singmodel,image,sigma){

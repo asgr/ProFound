@@ -468,7 +468,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   #Treat image NAs as masked regions:
   
-  if(!is.null(mask)){
+  if(!is.null(mask) & !is.null(image)){
     mask[is.na(image)]=1L
   }else{
     if(anyNA(image)){
@@ -509,7 +509,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     invisible(gc())
   }
   
-  if(!is.null(mask)){
+  if(!is.null(mask) & !is.null(image)){
     segim_new[mask!=0]=0
     image[mask!=0]=NA
   }
@@ -526,7 +526,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   objects[objects!=0]=1L
   mode(objects)='integer'
   
-  if(plot){
+  if(plot & !is.null(image)){
     profoundSegimPlot(image=image, segim=segim_new, mask=mask, sky=sky, ...)
   }
   
