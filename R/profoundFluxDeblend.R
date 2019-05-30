@@ -100,7 +100,12 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
         #Try various levels of segment fitting: spline, linear, flat
         uniq_xlen=length(unique(round(segout[select,1],6)))
         if(uniq_xlen>max(3,df)){
-          weightmatrix[,j]=10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df, lambda=0.1)$fit, x=groupellip[,1])$y
+          tempsafe=try(10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y)
+          if(class(tempsafe)=="try-error"){
+            weightmatrix[,j]=10^predict(lm(y~x, data=list(x=segout[select,1],y=log10(segout[select,2]))), newdata=list(x=groupellip[,1]))
+          }else{
+            weightmatrix[,j]=tempsafe
+          }
           weightmatrix[groupellip[,1]>radtrunc*max(segout[,1]),j]=0
           Qseg_db[j]=(sum(weightmatrix[,j])-sum(segout[select,2]))/sum(segout[select,2])
         }else if(uniq_xlen>1){
@@ -218,7 +223,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   invisible(output)
 }
 
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, sigma=NULL, mask=NULL, psf=NULL, iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
@@ -229,6 +234,16 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if((is.null(xcen) & is.null(ycen)) & (is.null(RAcen) | is.null(Deccen))){stop('Need RAcen/Decen pair!')}
   if(is.null(image)){stop('Need image!')}
   if(is.null(psf)){stop('Need psf!')}
+  
+  fluxtype=tolower(fluxtype)
+  
+  if(fluxtype=='raw'){
+    fluxscale=1
+  }else if (fluxtype=='jansky'){
+    fluxscale=10^(-0.4*(magzero-8.9))
+  }else{
+    stop('fluxtype must be Jansky / Raw!')
+  }
   
   if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(header)){
     RAdeccoords=magWCSxy2radec(x = xcen, y = ycen, header=header)
@@ -244,20 +259,28 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }
   
   if(doProFound){
-    protemp=profoundProFound(image, mask=mask, magzero=magzero, header=header, verbose=verbose, ...)
+    if(verbose){message('Running initial ProFound')}
+    protemp=profoundProFound(image, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+    if(verbose){message('- subtracting ProFound sky model from input image')}
     image=image-protemp$sky
     if(is.null(xcen) & is.null(ycen) & is.null(mag)){
+      if(verbose){message('- using ProFound xcen / ycen / mag for source properties')}
       xcen=protemp$segstats$xcen
       ycen=protemp$segstats$ycen
       mag=protemp$segstats$mag
     }
-    if(is.null(sigma)){
-      sigma=protemp$skyRMS
+    if(is.null(im_sigma)){
+      if(verbose){message('- using ProFound skyRMS model for im_sigma')}
+      im_sigma=protemp$skyRMS
     }
   }
   
-  if(is.null(mag)){stop('Need mag!')}
-  if(is.null(sigma)){stop('Need sigma!')}
+  if(is.null(mag)){
+    tempflux=image[cbind(ceiling(xcen),ceiling(ycen))]
+    tempflux=tempflux*sum(image, na.rm=TRUE)/sum(tempflux, na.rm=TRUE)
+    mag=profoundFlux2Mag(flux=tempflux, magzero=magzero)
+  }
+  if(is.null(im_sigma)){stop('Need im_sigma!')}
   
   if(is.null(RAcen)){RAcen=rep(NA,length(mag))}
   if(is.null(Deccen)){Deccen=rep(NA,length(mag))}
@@ -278,6 +301,16 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     stop('ycen must be the same length as mag!')
   }
   
+  #sort vectors by flux
+  
+  fluxorder=order(mag)
+  
+  xcen=xcen[fluxorder]
+  ycen=ycen[fluxorder]
+  RAcen=RAcen[fluxorder]
+  Deccen=Deccen[fluxorder]
+  mag=mag[fluxorder]
+  
   if(modxy){
     xygrid=expand.grid(1:dim(psf)[1],1:dim(psf)[2])-0.5
   }
@@ -291,8 +324,10 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   flux_err=rep(0,Nmodels)
   beam_err=rep(0,Nmodels)
   
-  for(j in 1:iters){
-    if(verbose){message(paste('Iteration',j,'of',iters))}
+  if(verbose){message('Iterating over source model')}
+  
+  for(j in 1:fit_iters){
+    if(verbose){message(paste('- iteration',j,'of',fit_iters))}
     
     if(itersub){
       if(j==1){
@@ -319,16 +354,16 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     if(j==1){
       if(modelout){
         origmodel=fullmodel
-        origLL= -0.5*sum((image_orig-fullmodel)^2/(sigma^2))
+        origLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
       }else{
-        origmodel=NA
-        origLL=NA
+        origmodel=NULL
+        origLL=NULL
       }
     }
     
     for(i in 1:Nmodels){
       image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
-      sigma_cut=magcutout(sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
+      sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
       
       singlist = list(
         pointsource = list(
@@ -380,14 +415,14 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         }
       }
       
-      if(j<iters){
-        diffmag[i] = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
+      if(j<fit_iters){
+        diffmag[i] = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
       }else{
-        finaloptim=optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, sigma = sigma_cut, lower=-magdiff, upper=magdiff)
+        finaloptim=optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)
         diffmag[i]=finaloptim$par
         psfLL[i]=-finaloptim$value
         flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
-        fluxhess=optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, sigma = sigma_cut)
+        fluxhess=optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut)
         flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
         beam_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
       }
@@ -408,10 +443,10 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       )
     )
     fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
-    finalLL= -0.5*sum((image_orig-fullmodel)^2/(sigma^2))
+    finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
   }else{
-    fullmodel=NA
-    finalLL=NA
+    fullmodel=NULL
+    finalLL=NULL
   }
   flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
   flux_err[flux_err<beam_err]=beam_err[flux_err<beam_err]
@@ -420,14 +455,17 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
   signif=qnorm(pchi, log.p=TRUE)
   
-  if(doProFound & findextra){
-    protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, header=header, verbose=verbose, ...)
+  if(findextra){
+    if(verbose){message('Finding extra sources with ProFound')}
+    protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
     if(!is.null(protemp$segstats)){
       xcen=c(xcen, protemp$segstats$xcen)
       ycen=c(ycen, protemp$segstats$ycen)
       mag=c(mag, protemp$segstats$mag)
-
-      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, sigma=sigma, mask=mask, psf=psf, iters=iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
+      
+      if(verbose){message('Rerunning source model with extra sources')}
+      
+      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype=fluxtype, header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
       
       seltarget=1:Nmodels
       xcen=rerun$psfstats$xcen[seltarget]
@@ -462,16 +500,20 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     psfstats_extra=NULL
   }
   
-  psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
+  flux=flux*fluxscale
+  flux_err=flux_err*fluxscale
   
-  return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, psfstats_extra=psfstats_extra))
+  psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
+  psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
+  
+  return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, psfstats_extra=psfstats_extra))
 }
 
-.minlike_mag=function(par,singmodel,image,sigma){
-  0.5*sum((image-(singmodel*(10^(-0.4*par)-1)))^2/sigma^2, na.rm=TRUE)
+.minlike_mag=function(par,singmodel,image,im_sigma){
+  0.5*sum((image-(singmodel*(10^(-0.4*par)-1)))^2/im_sigma^2, na.rm=TRUE)
 }
 
-.minlike_flux=function(par,singmodel,image,sigma){
+.minlike_flux=function(par,singmodel,image,im_sigma){
   flux=sum(singmodel, na.rm=TRUE)
-  0.5*sum((image-(singmodel*(1+par/flux)))^2/sigma^2, na.rm=TRUE)
+  0.5*sum((image-(singmodel*(1+par/flux)))^2/im_sigma^2, na.rm=TRUE)
 }

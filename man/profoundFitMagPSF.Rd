@@ -9,9 +9,10 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 }
 \usage{
 profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen=NULL, Deccen=NULL, mag = NULL,
-image = NULL, sigma = NULL, mask = NULL, psf = NULL, iters = 5, magdiff = 1,
-modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE, header = NULL,
-doProFound = FALSE, findextra = FALSE, verbose = FALSE, ...)
+image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
+modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
+fluxtype = 'Raw', header = NULL, doProFound = FALSE, findextra = FALSE, verbose = FALSE,
+...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,8 +34,8 @@ Numeric vector; required, initial PSF mags. This is what will be fitted.
   \item{image}{
 Numeric matrix; required, the image we want to analyse.
 }
-  \item{sigma}{
-Sigma matrix; required, the measurement errors per pixel (expressed in terms of sigma).
+  \item{im_sigma}{
+Numeric matrix; required, the measurement errors per pixel (expressed in terms of sigma).
 }
   \item{mask}{
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
@@ -42,7 +43,7 @@ Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 
   \item{psf}{
 Numeric matrix; required, an empirical point spread function (PSF) image matrix that \code{ProFit} will use to convolve the model.
 }
-  \item{iters}{
+  \item{fit_iters}{
 Integer scalar; how many iterations should be run? Usually converges quite quickly, so rarely needs to be much larger than 5 (default).
 }
   \item{magdiff}{
@@ -62,6 +63,9 @@ Numeric scalar; the magnitude zero point. What this implies depends on the magni
 }
   \item{modelout}{
 Logical; should the full model image be output?
+}
+  \item{fluxtype}{
+Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image units ('Raw', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
 }
   \item{header}{
 Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
@@ -85,19 +89,20 @@ This function uses \code{ProFit} to make a full model image. It then makes a mod
 \value{
 List containing:
 
-\item{psfstats}{A data.frame of main source photometric properties (see below).}
-\item{origmodel}{The original model image before optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
-\item{finalmodel}{The final model image after optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
-\item{origLL}{The original data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
-\item{finalLL}{The final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
-\item{psfstats_extra}{A data.frame of extra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
+\item{psfstats}{Data.frame; main source photometric properties (see below).}
+\item{origmodel}{Numeric matric; the original model image before optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
+\item{finalmodel}{Numeric matric; the final model image after optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
+\item{origLL}{Numeric scalar; the original data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
+\item{finalLL}{Numeric scalar; the final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
+\item{image}{Numeric matric; the image used for fitting. This might have an additional sky component removed (if \option{doProFound}=TRUE) and NAs for masked regions.}
+\item{psfstats_extra}{Data.frame; xtra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
 
 \option{psfstats} \option{psfstats_extra} data.frames have the following columns:
 
 \item{xcen}{Numeric vector; x centres. If \option{modxy}=FALSE these will be the same as the input \option{xcen}, but if \option{modxy}=TRUE they will be adjusted.}
 \item{ycen}{Numeric vector; y centres. If \option{modxy}=FALSE these will be the same as the input \option{ycen}, but if \option{modxy}=TRUE they will be adjusted.}
-\item{flux}{Numeric vector; the final fitted PSF fluxes. This will be the same length as the input \option{mag} vector.}
-\item{flux_err}{Numeric vector; the final fitted PSF flux errors. This will be the same length as the input \option{mag} vector.}
+\item{flux}{Numeric vector; the final fitted PSF fluxes (either Jansky or raw, depending on \option{fluxtype}). This will be the same length as the input \option{mag} vector.}
+\item{flux_err}{Numeric vector; the final fitted PSF flux errors (either Jansky or raw, depending on \option{fluxtype}). This will be the same length as the input \option{mag} vector.}
 \item{mag}{Numeric vector; the final fitted PSF magnitudes. This will be the same length as the input \option{mag} vector.}
 \item{mag_err}{Numeric vector; the final fitted PSF magnitude errors. This will be the same length as the input \option{mag} vector.}
 \item{psf}{Numeric vector; the log-likelihood of the individual source fit.}
@@ -124,7 +129,7 @@ tolerance=0, sigma=0)
 pro_s250$segstats=pro_s250$segstats[!is.na(pro_s250$segstats$mag),]
 
 newmag=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
+mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS,
 psf=s250_psf_cut, header=pro_s250$header)
 
 magimage(s250_im$imDat-pro_s250$sky-newmag$origmodel, qdiff=TRUE)
@@ -139,7 +144,7 @@ abline(0,1, col='red')
 #We can also run slightly adjusting the xcen and ycen as we go:
 
 newmag2=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, sigma=pro_s250$skyRMS,
+mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS,
 psf=s250_psf_cut, modxy=TRUE, header=pro_s250$header)
 
 magimage(s250_im$imDat-pro_s250$sky-newmag2$finalmodel, qdiff=TRUE)
