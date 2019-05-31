@@ -10,8 +10,9 @@ Basic summary statistics for image segments, e.g. aperture parameters, fluxes an
 }
 \usage{
 profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS = NULL,
-magzero = 0, gain = NULL, pixscale = 1, header, sortcol = "segID", decreasing = FALSE,
-rotstats = FALSE, boundstats = FALSE, offset = 1, cor_err_func = NULL)
+magzero = 0, gain = NULL, pixscale = 1, header = NULL, sortcol = "segID",
+decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1, cor_err_func = NULL,
+app_diam = 1)
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, header = NULL,
 col = rainbow(max(segim), end=2/3), profound = NULL, ...)
 }
@@ -68,6 +69,9 @@ List; object of class 'profound'. If this is provided then missing input argumen
   \item{cor_err_func}{
 Function; the error function between \option{N100} (the number of pixels in the segment) and the relative flux error. Most likely the \option{cor_err_func} output of \code{\link{profoundPixelCorrelation}}.
 }
+  \item{app_diam}{
+Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
+}
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.
 }
@@ -95,6 +99,8 @@ A data.frame with columns:
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
   \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
   \item{mag}{Total flux converted to mag using \option{magzero}}
+  \item{flux_app}{Pseudo aperture (as specified by \option{Napp}) flux (calculated using \option{image}-\option{sky}) in ADUs or Jansky}
+  \item{mag_app}{Pseudo aperture (as specified by \option{Napp}) flux converted to mag using \option{magzero}}
   \item{cenfrac}{Fraction of flux in the brightest pixel}
   \item{N50}{Number of brightest pixels containing 50\% of the flux}
   \item{N90}{Number of brightest pixels containing 90\% of the flux}

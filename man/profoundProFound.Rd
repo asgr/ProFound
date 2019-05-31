@@ -22,7 +22,7 @@ nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_
 offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
 lowmemory = FALSE, keepim = TRUE, R50clean = 0, watershed = 'ProFound', pixelcov = FALSE,
 deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
-convmode = 'extended', ...)
+convmode = 'extended', fluxtype = 'Raw', app_diam = 1, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -225,7 +225,13 @@ Numeric scalar; only relevent when \option{deblendtype}='psf'. Either 'sum' (whe
 Character scalar, only relevent when \option{deblendtype}='psf'. Specifies the type on convolver to use. Available options are displayed by running \code{profitAvailableConvolvers}, but usually one of 'brute' or 'fftw'. The latter tends to be fastest when the supplied \option{psf} is much smaller than the \option{image} (factor greater than 4 in each dimension). As the sizes become comparable, fftw becomes faster since it scales better with the product of \option{psf} and \option{image} pixels.
 }
   \item{convmode}{
-Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
+Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominates the uncertainty of the deblend. 
+}
+  \item{fluxtype}{
+Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+}
+  \item{app_diam}{
+Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
@@ -281,8 +287,10 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{RAmax}{Right Ascension of maximum flux (only present if a \option{header} is provided)}
   \item{Decmax}{Declination of maximum flux (only present if a \option{header} is provided)}
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
-  \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
+  \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs or Jansky}
   \item{mag}{Total flux converted to mag using \option{magzero}}
+  \item{flux_app}{Pseudo aperture (as specified by \option{app_rad}) flux (calculated using \option{image}-\option{sky}) in ADUs or Jansky}
+  \item{mag_app}{Pseudo aperture (as specified by \option{app_rad}) flux converted to mag using \option{magzero}}
   \item{cenfrac}{Fraction of flux in the brightest pixel}
   \item{N50}{Number of brightest pixels containing 50\% of the flux}
   \item{N90}{Number of brightest pixels containing 90\% of the flux}

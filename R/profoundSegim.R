@@ -73,7 +73,7 @@
   invisible(which(outer(tab1[,1], tab2[,1], "==") & outer(tab1[,2], tab2[,2], "=="), arr.ind=TRUE))
 }
 
-.fluxcalc=function(flux){
+.fluxcalc=function(flux, Napp=0){
   
   if(anyNA(flux)){
     good=which(!is.na(flux))
@@ -83,9 +83,27 @@
     N100seg=length(flux)
   }
   
+  if(Napp>0){
+    Nsel=N100seg:(N100seg-Napp+1)
+    Nsel=Nsel[Nsel>0]
+  }else{
+    Nsel=0
+  }
+  
   if(N100seg>0){
     
-    sumflux=sum(flux[good], na.rm=TRUE)
+    sumflux=sum(flux[good])
+    
+    if(length(Nsel)>0){
+      if(Nsel[1]>0){
+        sumflux_app=sum(flux[good][Nsel])
+      }else{
+        sumflux_app=0
+      }
+    }else{
+      sumflux_app=0
+    }
+    
     temp=cumsum(flux[good])/sumflux
   
     if(sumflux>0){
@@ -112,6 +130,7 @@
     
   }else{
     sumflux=NA
+    sumflux_app=NA
     N100seg=length(flux)
     N50seg=N100seg*0.5
     N90seg=N100seg*0.9
@@ -120,7 +139,7 @@
     mode(cenfrac)='numeric'
   }
   
-  invisible(list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
+  invisible(list(flux=sumflux, flux_app=sumflux_app, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
 .fluxcalcmin=function(flux){
@@ -598,7 +617,7 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   invisible(list(propim=propim, propim_sky=propim_sky))
 }
 
-profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, cor_err_func=NULL){
+profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, cor_err_func=NULL, app_diam=1){
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   if(rembig){
@@ -608,6 +627,8 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   if(missing(pixscale) & !is.null(header)){
     pixscale=getpixscale(header)
   }
+  
+  Napp=ceiling(pi*(app_diam/2/pixscale)^2)
   
   if(!is.null(sky)){
     hassky=any(is.finite(sky))
@@ -697,8 +718,10 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
-  fluxout=tempDT[,.fluxcalc(flux), by=segID]
+  fluxout=tempDT[,.fluxcalc(flux,Napp=Napp), by=segID]
+  fluxout$flux_app[which(fluxout$flux_app>fluxout$flux)]=fluxout$flux[which(fluxout$flux_app>fluxout$flux)]
   mag=profoundFlux2Mag(flux=fluxout$flux, magzero=magzero)
+  mag_app=profoundFlux2Mag(flux=fluxout$flux_app, magzero=magzero)
   
   if(any(fluxout$flux==0, na.rm=TRUE)){
     fluxout$N50seg[fluxout$flux==0]=fluxout$N100seg[fluxout$flux==0]
@@ -922,7 +945,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     edge_excess[bad]=NA
   }
   
-  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, cenfrac=fluxout$cenfrac, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, semimaj=rad$hi, semimin=rad$lo, axrat=axrat, ang=ang, signif=signif, FPlim=FPlim, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, flux_err_cor=flux_err_cor, cor_seg=cor_seg, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
+  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, flux_app=fluxout$flux_app, mag_app=mag_app, cenfrac=fluxout$cenfrac, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, semimaj=rad$hi, semimin=rad$lo, axrat=axrat, ang=ang, signif=signif, FPlim=FPlim, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, flux_err_cor=flux_err_cor, cor_seg=cor_seg, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
   invisible(as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),]))
 }
 

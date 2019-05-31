@@ -237,7 +237,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   fluxtype=tolower(fluxtype)
   
-  if(fluxtype=='raw'){
+  if(fluxtype=='raw' | fluxtype=='adu' | fluxtype=='adus'){
     fluxscale=1
   }else if (fluxtype=='jansky'){
     fluxscale=10^(-0.4*(magzero-8.9))
