@@ -123,9 +123,6 @@
       N50seg=NA
       N90seg=NA
       cenfrac=NA
-      mode(N50seg)='numeric'
-      mode(N90seg)='numeric'
-      mode(cenfrac)='numeric'
     }
     
   }else{
@@ -135,10 +132,15 @@
     N50seg=N100seg*0.5
     N90seg=N100seg*0.9
     cenfrac=NA
-    mode(sumflux)='numeric'
-    mode(cenfrac)='numeric'
   }
   
+  mode(sumflux)='numeric'
+  mode(sumflux_app)='numeric'
+  mode(N50seg)='numeric'
+  mode(N90seg)='numeric'
+  mode(cenfrac)='numeric'
+  mode(cenfrac)='numeric'
+    
   invisible(list(flux=sumflux, flux_app=sumflux_app, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
