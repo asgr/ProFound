@@ -453,8 +453,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(!missing(SBlim)){
       SBlimtemp=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-      SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
-      SBlim[which(SBlimtemp>SBlim)]=SBlim
+      SBlimtemp=matrix(SBlimtemp,dim(skyRMS)[1],dim(skyRMS)[2])
+      SBlimtemp[which(SBlimtemp>SBlim)]=SBlim
+      SBlim=SBlimtemp
     }else if(missing(SBlim) & skycut> -Inf){
       SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
       #SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])

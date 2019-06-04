@@ -1205,10 +1205,10 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
 
 .profoundFluxCalcMin=function(image=NULL, segim=NULL, mask=NULL){
   
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
+  #if(length(image)>1e8){rembig=TRUE}else{rembig=FALSE}
+  #if(rembig){
+  #  invisible(gc())
+  #}
   
   #Set masked things to NA, to be safe:
   
@@ -1227,11 +1227,11 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   
   setkey(tempDT, segID)
   
-  if(rembig){
-    rm(image)
-    rm(segim)
-    invisible(gc())
-  }
+  #if(rembig){
+  #  rm(image)
+  #  rm(segim)
+  #  invisible(gc())
+  #}
   
   return(as.data.frame(tempDT[,.fluxcalcmin(flux), by=segID]))
 }
