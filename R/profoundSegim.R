@@ -1225,7 +1225,7 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   
   tempDT=data.table(segID=as.integer(segim[segsel]),flux=as.numeric(image[segsel]))
   
-  setkey(tempDT, segID)
+  #setkey(tempDT, segID)
   
   #if(rembig){
   #  rm(image)
@@ -1233,5 +1233,8 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   #  invisible(gc())
   #}
   
-  return(as.data.frame(tempDT[,.fluxcalcmin(flux), by=segID]))
+  output=tempDT[,.fluxcalcmin(flux), by=segID]
+  setkey(output, segID)
+  
+  return(as.data.frame(output))
 }

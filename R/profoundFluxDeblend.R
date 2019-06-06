@@ -99,7 +99,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
         select=which(segout[,2]>0 & is.finite(segout[,1]) & is.finite(segout[,2]))
         #Try various levels of segment fitting: spline, linear, flat
         uniq_xlen=length(unique(round(segout[select,1],6)))
-        if(uniq_xlen>max(3,df)){
+        if(uniq_xlen>max(3,df) & df>=2){
           tempsafe=try(10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y)
           if(class(tempsafe)=="try-error"){
             weightmatrix[,j]=10^predict(lm(y~x, data=list(x=segout[select,1],y=log10(segout[select,2]))), newdata=list(x=groupellip[,1]))
