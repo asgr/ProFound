@@ -65,7 +65,7 @@ Numeric scalar; the magnitude zero point. What this implies depends on the magni
 Logical; should the full model image be output?
 }
   \item{fluxtype}{
-Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image units ('Raw', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
 }
   \item{header}{
 Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.

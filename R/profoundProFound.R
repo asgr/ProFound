@@ -1,4 +1,4 @@
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, R50clean=0, watershed='ProFound', pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype = 'brute', convmode = 'extended', ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound', pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype = 'brute', convmode = 'extended', fluxtype='Raw', app_diam=1, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -19,6 +19,18 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   }
   if(length(boxadd)==1){
     boxadd=rep(boxadd,2)
+  }
+  
+  fluxtype=tolower(fluxtype)
+  
+  if(fluxtype=='raw' | fluxtype=='adu' | fluxtype=='adus'){
+    if(verbose){message('Using raw flux units')}
+    fluxscale=1
+  }else if (fluxtype=='jansky'){
+    if(verbose){message('Using Jansky flux units (WARNING: magzero must take system to AB)')}
+    fluxscale=10^(-0.4*(magzero-8.9))
+  }else{
+    stop('fluxtype must be Jansky / Raw!')
   }
   
   #Split out image and header parts of input:
@@ -204,13 +216,14 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
+      #segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
+      segstats=.profoundFluxCalcMin(image=image-sky, segim=segim, mask=mask)
       
-      if(R50clean[1]!=0){
-        badseg=segstats$R50<=R50clean
-        segim[segim %in% segstats[badseg,'segID']]=0
-        segstats=segstats[which(!badseg),]
-      }
+      # if(R50clean[1]!=0){
+      #   badseg=segstats$R50<=R50clean
+      #   segim[segim %in% segstats[badseg,'segID']]=0
+      #   segstats=segstats[which(!badseg),]
+      # }
       
       if(iterskyloc){
         localadd=1
@@ -348,7 +361,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste(' - pixscale =', round(pixscale,3)))}
       if(verbose){message(paste(' - rotstats =', rotstats))}
       if(verbose){message(paste(' - boundstats =', boundstats))}
-      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset, cor_err_func=cor_err_func)
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, app_diam=app_diam)
       segstats=cbind(segstats, iter=selseg, origfrac=origfrac, Norig=Norig[segstats$segID], skyseg_mean=skyseg_mean)
       segstats=cbind(segstats, flag_keep=segstats$origfrac>= median(segstats$origfrac[segstats$iter==iters]) | segstats$iter<iters)
     }else{
@@ -388,7 +401,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       }
 
       if(stats & !is.null(image) & !is.null(group)){
-        groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset, cor_err_func=cor_err_func)
+        groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, app_diam=app_diam)
         colnames(groupstats)[1]='groupID'
       }else{
         groupstats=NULL
@@ -440,8 +453,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(!missing(SBlim)){
       SBlimtemp=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-      SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
-      SBlim[which(SBlimtemp>SBlim)]=SBlim
+      SBlimtemp=matrix(SBlimtemp,dim(skyRMS)[1],dim(skyRMS)[2])
+      SBlimtemp[which(SBlimtemp>SBlim)]=SBlim
+      SBlim=SBlimtemp
     }else if(missing(SBlim) & skycut> -Inf){
       SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
       #SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
@@ -453,6 +467,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(is.null(mask)){mask=NULL}
     if(!is.null(badpix)){image[badpix]=NA}
     row.names(segstats)=NULL
+    
+    segstats[,grep('flux',colnames(segstats))]=fluxscale*segstats[,grep('flux',colnames(segstats))]
+    
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }else{

@@ -20,9 +20,9 @@ iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
 verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
 nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
 offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
-lowmemory = FALSE, keepim = TRUE, R50clean = 0, watershed = 'ProFound', pixelcov = FALSE,
+lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE,
 deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
-convmode = 'extended', ...)
+convmode = 'extended', fluxtype = 'Raw', app_diam = 1, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -138,13 +138,13 @@ Logical; should the last segment dilation be used to estimate a local sky value?
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
 }
   \item{df}{
-Integer scalar; degrees of freedom for the non-parametric spline fitting. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Integer scalar; degrees of freedom for the non-parametric spline fitting. Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{radtrunc}{
-Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to consider when deblending. Keeping this low (1-3) ensures segments do not gather flux from very distant regions of the group. Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{iterative}{
-Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top. Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.
@@ -203,9 +203,6 @@ Logical; if TRUE then a low memory mode of ProFound will be used. This limits th
 \item{keepim}{
 Logical; if TRUE then the input \option{image} and \option{mask} matrices are passed through to the image output of the function. If FALSE then this is set to NULL.
 }
-\item{R50clean}{
-Numeric scalar; setting this to more than 0 cleans sources for spuriously small objects. This value should be in arc-seconds if pixel scale is provided or detected, and in pixels otherwise (or if \option{pixscale}=1 is explictly set).
-}
   \item{watershed}{
 Character scalar; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
 }
@@ -213,19 +210,25 @@ Character scalar; the funciton to use to achieve the watershed deblend. Allowed 
 Logical, should pixel covariance be considered when computing errors? TRUE uses \code{\link{profoundPixelCorrelation}} and the \option{cor_err_func} output which is then passed into \code{\link{profoundSegimStats}}.
 }
   \item{deblendtype}{
-Character scalar, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Character scalar, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{psf}{
-Numeric matrix; must be provided if \option{deblendtype}='psf'. Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Numeric matrix; must be provided if \option{deblendtype}='psf'. Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{fluxweight}{
-Numeric scalar; only relevent when \option{deblendtype}='psf'. Either 'sum' (where the sum of the current segment weights the deblend solution), 'peak' (where only the peak pixel flux in the segment it used) or 'none' (no additional weighting is used). Only relevant if \option{deblend}=TRUUE, see \code{\link{profoundFluxDeblend}}.
+Numeric scalar; only relevent when \option{deblendtype}='psf'. Either 'sum' (where the sum of the current segment weights the deblend solution), 'peak' (where only the peak pixel flux in the segment it used) or 'none' (no additional weighting is used). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{convtype}{
 Character scalar, only relevent when \option{deblendtype}='psf'. Specifies the type on convolver to use. Available options are displayed by running \code{profitAvailableConvolvers}, but usually one of 'brute' or 'fftw'. The latter tends to be fastest when the supplied \option{psf} is much smaller than the \option{image} (factor greater than 4 in each dimension). As the sizes become comparable, fftw becomes faster since it scales better with the product of \option{psf} and \option{image} pixels.
 }
   \item{convmode}{
-Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
+Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominates the uncertainty of the deblend. 
+}
+  \item{fluxtype}{
+Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+}
+  \item{app_diam}{
+Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
@@ -281,8 +284,10 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{RAmax}{Right Ascension of maximum flux (only present if a \option{header} is provided)}
   \item{Decmax}{Declination of maximum flux (only present if a \option{header} is provided)}
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
-  \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
+  \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs or Jansky}
   \item{mag}{Total flux converted to mag using \option{magzero}}
+  \item{flux_app}{Pseudo aperture (as specified by \option{app_rad}) flux (calculated using \option{image}-\option{sky}) in ADUs or Jansky}
+  \item{mag_app}{Pseudo aperture (as specified by \option{app_rad}) flux converted to mag using \option{magzero}}
   \item{cenfrac}{Fraction of flux in the brightest pixel}
   \item{N50}{Number of brightest pixels containing 50\% of the flux}
   \item{N90}{Number of brightest pixels containing 90\% of the flux}
