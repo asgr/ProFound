@@ -22,7 +22,7 @@ nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_
 offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
 lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE,
 deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
-convmode = 'extended', fluxtype = 'Raw', app_diam = 1, ...)
+convmode = 'extended', fluxtype = 'Raw', app_diam = 1, Ndeblendlim = Inf, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -229,6 +229,9 @@ Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), 
 }
   \item{app_diam}{
 Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
+}
+  \item{Ndeblendlim}{
+Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

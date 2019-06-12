@@ -1,6 +1,7 @@
 \name{profoundMakeSkyMap}
 \alias{profoundMakeSkyMap}
 \alias{profoundMakeSkyGrid}
+\alias{profoundMakeSkyBlur}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Calculate Sky Maps
@@ -17,6 +18,7 @@ profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
 grid = box, type = 'bicubic', skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
 skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
 paddim = TRUE, cores = 1)
+profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100, sigma = box*(4/pi)/sqrt(12))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -47,13 +49,13 @@ Character scalar; the type of sky level estimator used. Allowed options are 'qua
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
 }
-\item{skypixmin}{
+  \item{skypixmin}{
 Numeric scalar; the minimum number of sky pixels desired in our cutout. The default is that we need half the original number of pixels in the \option{box} to be sky.
 }
-\item{boxadd}{
+  \item{boxadd}{
 Integer vector; the dimensions to add to the \option{box} to capture more pixels if \option{skypixmin} has not been achieved.
 }
-\item{boxiters}{
+  \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
 }
   \item{doclip}{
@@ -68,14 +70,19 @@ Logical; should the cutout be padded with image data until it meets the desired 
   \item{cores}{
 Integer scalar; how many cores should be used to calculate sky properties of the image. Given the overhead for parallel computing, this should probably only be above 1 for larger images. 
 }
+  \item{sigma}{
+Numeric scalar; the standard deviation of the blur (positive) used for smoothing the sky pixels to make a sky map (see \code{isoblur} in \code{imager} package).
+}
 }
 \details{
 The matrix generated will have many fewer pixels than the original \option{image}, so it will need to be interpolated back onto the full grid by some mechanism in order to have 1-1 values for the sky and sky RMS.
 }
 \value{
-\code{profoundMakeSkyMap} produces a list of two lists. The first (called sky) contains a list of x,y,z values for the absolute sky, and second (called skyRMS) contains a list of x,y,z values for the sky RMS. The grids returned are as coarse as the \option{box} option provided.
+\code{profoundMakeSkyMap} produces a list of two lists. The first (called \option{sky}) contains a list of x,y,z values for the absolute sky, and second (called \option{skyRMS}) contains a list of x,y,z values for the sky RMS. The grids returned are as coarse as the \option{grid} option provided.
 
-\code{profoundMakeSkyGrid} produces a list of two lists. The first (called sky) is a matrix of values for the absolute sky. The second (called skyRMS) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
+\code{profoundMakeSkyGrid} produces a list of two lists. The first (called \option{sky}) is a matrix of values for the absolute sky. The second (called \option{skyRMS}) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
+
+\code{profoundMakeSkyBlur} produces a matrix of the sky map (there is no sky RMS component). To work well sources must be well masked either with NA in the \option{image}, or using the \option{objects} matrix. Since this function can only provide the additive sky, it cannot be used in isolation to computer the necessary sky information (we need the sky RMS map for \code{\link{profoundProFound}}), but it might offer a better smoother sky (so replacing the sky component of \code{profoundMakeSkyGrid}.
 }
 \author{
 Aaron Robotham

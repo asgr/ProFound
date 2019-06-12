@@ -11,7 +11,7 @@ Given a target image, a segmentation map, image segstats and group properties, t
 profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
 groupsegID = NULL, sky = 0, profound = NULL, magzero = 0,  df = 3, radtrunc = 2,
 iterative = FALSE, doallstats = TRUE, lowmemory = FALSE, deblendtype = 'fit', psf = NULL,
-fluxweight = 'sum', convtype = 'brute', convmode = 'extended') 
+fluxweight = 'sum', convtype = 'brute', convmode = 'extended', Ndeblendlim = Inf) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -68,6 +68,9 @@ Scalar character, only relevent when \option{deblendtype}='psf'. Specifies the t
 }
   \item{convmode}{
 Scalar character, only relevent when \option{deblendtype}='psf'. Either 'extended' (the whole segment is convolved with the target PSF when determining the deblend) or 'psf' (the provided PSF is centred at the peak flux for deblending). Only relevent when \option{deblendtype}='psf'. The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend. 
+}
+  \item{Ndeblendlim}{
+Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments).
 }
 }
 \details{

@@ -1,4 +1,4 @@
-profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype='brute', convmode='extended'){
+profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype='brute', convmode='extended', Ndeblendlim=Inf){
   
   if(!is.null(image)){
     if(class(image)=='profound'){
@@ -26,6 +26,9 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   }
   
   if(is.null(groupim) | is.null(groupsegID)){
+    if(is.null(segim)){
+      stop('Need segim if missing groupim or groupsegID!')
+    }
     group=profoundSegimGroup(segim)
     groupim=group$groupim
     groupsegID=group$groupsegID
@@ -33,16 +36,20 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   image=image-sky
   
-  groupsegID=groupsegID[groupsegID$Ngroup>1,,drop=FALSE]
+  groupsegID=groupsegID[groupsegID$Ngroup>1 & groupsegID$Npix*groupsegID$Ngroup<Ndeblendlim,,drop=FALSE]
   
-  if(lowmemory==FALSE){
+  if(dim(groupsegID)[1]==0){
+    return(NULL)
+  }
+  
+  if(lowmemory){
+    rm(sky)
+    invisible(gc())
+  }else{
     groupID=Var1=Var2=NULL
     groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]), keyby='groupID')
     setkey(groupref, groupID)
     groupref[groupID %in% groupsegID$groupID]
-  }else{
-    rm(sky)
-    invisible(gc())
   }
   
   output=data.frame(groupID=rep(groupsegID$groupID,groupsegID$Ngroup), segID=unlist(groupsegID$segID), flux_db=NA, mag_db=NA, N100_db=NA)
@@ -465,7 +472,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       
       if(verbose){message('Rerunning source model with extra sources')}
       
-      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype=fluxtype, header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
+      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
       
       seltarget=1:Nmodels
       xcen=rerun$psfstats$xcen[seltarget]
@@ -502,6 +509,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   flux=flux*fluxscale
   flux_err=flux_err*fluxscale
+  
+  if(findextra & !is.null(psfstats_extra)){
+    psfstats_extra$flux=psfstats_extra$flux*fluxscale
+    psfstats_extra$flux_err=psfstats_extra$flux_err*fluxscale
+  }
   
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input

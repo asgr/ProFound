@@ -394,6 +394,17 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS))
 }
 
+profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=box*(4/pi)/sqrt(12)){
+  if(!is.null(objects)){
+    image[objects==1]=NA
+  }
+  if(requireNamespace("imager", quietly = TRUE)){
+    invisible(as.matrix(imager::isoblur(imager::as.cimg(image), sigma=sigma, na.rm=TRUE)))
+  }else{
+    stop('The imager package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+  }
+}
+
 #Alas, the quick function does not appear to be quicker than the current profoundMakeSkyGrid function. Oh well, worth try.
 
 # .profoundQuickSky=function(image, box=c(100,100)){
