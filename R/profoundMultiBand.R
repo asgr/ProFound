@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', keepsegims=FALSE, ...){
   
   # The most important thing is that all of the input images must be pixel matched via SWarp or magwarp etc
   # detectbands and multibands are the names of the target bands, which should be the names of the images ignoring the .fits ending
@@ -142,6 +142,8 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   
   multibands=multibands[which(multibands %in% presentbands)]
   multibands=multibands[!is.na(multibands)]
+  
+  segimlist=NULL
   
   # Some safety checks
   
@@ -350,6 +352,10 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         setnames(pro_multi_tot$segstats, paste0(names(pro_multi_tot$segstats), '_', bandappend[i], totappend))
         cat_tot=cbind(cat_tot, pro_multi_tot$segstats)
         
+        if(keepsegims){
+          segimlist=c(segimlist, list(pro_multi_tot$segim))
+        }
+        
       }
       
       if(docol){
@@ -402,7 +408,11 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   
   # Return all of the things!
   
-  output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, cat_grp=cat_grp, detectbands=detectbands, multibands=multibands, call=call, date=date(), time=proc.time()[3]-timestart)
+  if(keepsegims){
+    names(segimlist)=multibands
+  }
+  
+  output=list(pro_detect=pro_detect, cat_tot=cat_tot, cat_col=cat_col, cat_grp=cat_grp, segimlist=segimlist, detectbands=detectbands, multibands=multibands, call=call, date=date(), time=proc.time()[3]-timestart)
   class(output)='profoundmulti'
   invisible(output)
 }

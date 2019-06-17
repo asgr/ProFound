@@ -13,7 +13,7 @@ detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6, iters
 sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box, boxadd=box/2,
 bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
 docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE,
-groupby_det = 'segim_orig', groupby_mul = 'segim_orig', ...)
+groupby_det = 'segim_orig', groupby_mul = 'segim_orig', keepsegims=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -92,6 +92,9 @@ Character scalar; How should the grouped segmentation map be formed that will be
   \item{groupby_mul}{
 Character scalar; How should the grouped segmentation map be formed that will be used to produce the multi-band deblending for \option{cat_tot} and \option{cat_col} outputs? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
 }
+  \item{keepsegims}{
+Logical; if TRUE then \code{profoundMultiBand} will return a list of per band segmentation maps in \option{segimlist}. This is useful since they can be slightly different per band.
+}
   \item{\dots}{
 Further arguments to be passed to all instances of \code{\link{profoundProFound}}. E.g. if the sky \option{box} is set to a non-default value (default is \option{box}=c(100,100)), this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}.
 }
@@ -108,6 +111,7 @@ An object list of class 'profoundmulti' containing:
 \item{cat_tot}{If \option{dotot}=TRUE, the dilated total photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$segim}.}
 \item{cat_col}{If \option{docol}=TRUE, the non-dilated colour photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$segim_orig}.}
 \item{cat_grp}{If \option{dogrp}=TRUE, the group segment photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$group$groupim}.}
+\item{segimlist}{If \option{keepsegims}=TRUE then this object contains a list of per band total segmentation maps. This is useful since they can be slightly different per band.}
 \item{detectbands}{Character vector; the names of the detection bands used.}
 \item{multibands}{Character vector; the names of the target multi band photometry images used.}
 \item{call}{The original function call.}
