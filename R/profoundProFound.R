@@ -218,6 +218,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
       #segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
       segstats=.profoundFluxCalcMin(image=image-sky, segim=segim, mask=mask)
+      origfrac=segstats$flux
       
       # if(R50clean[1]!=0){
       #   badseg=segstats$R50<=R50clean
@@ -246,11 +247,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       segim_orig=segim
       expand_segID=segstats[,'segID']
       lastgrow=rep(Inf,length(expand_segID))
+      selseg=rep(0,length(expand_segID))
       
       if(verbose){message('Doing dilations:')}
         
-      for(i in 1:(iters+localadd)){
-        if(verbose){message(paste('Iteration',i,'of',iters+localadd,'-',round(proc.time()[3]-timestart,3),'sec'))}
+      for(i in 1:(iters)){
+        if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
         segstats_new=.profoundFluxCalcMin(image=image-skydilate, segim=segim_new, mask=mask)
         
@@ -261,28 +263,34 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold,'segID']
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
-        lastgrow[updateID] = lastgrow[updateID] - (segstats_new[updateID,'flux'] - segstats[updateID,'flux'])
-        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold & lastgrow>0,'segID']
+        lastgrow[updateID] = lastgrow[updateID] - (segstats_new[updateID,'flux'] / segstats[updateID,'flux'])
+        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold & lastgrow > 0,'segID']
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
-        lastgrow[updateID] = segstats_new[updateID,'flux'] - segstats[updateID,'flux']
-        
-        segim[segim_new %in% expand_segID]=segim_new[segim_new %in% expand_segID]
+        lastgrow[updateID] = segstats_new[updateID,'flux'] / segstats[updateID,'flux']
+        selseg[updateID] = i
+        selpix = which(segim_new %in% expand_segID)
+        segim[selpix]=segim_new[selpix]
         
         segstats[updateID,] = segstats_new[updateID,]
-        
-        if(iterskyloc){
-           #something something
-        }
-        
       }
+      
+      if(iterskyloc){
+        segim_skyloc=profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_skyloc, mask=mask)
+        skyseg_mean=(segstats_new$flux-segstats$flux)/(segstats_new$N100-segstats$N100)
+        skyseg_mean[!is.finite(skyseg_mean)]=0
+      }else{
+        skyseg_mean=NA
+      }
+      
       #if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
       #if(iterskyloc){
       #  skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
       #  skyseg_mean[!is.finite(skyseg_mean)]=0
       #  compmat=compmat-skyseg_mean*Nmat
       #}else{
-        skyseg_mean=NA
+      #  skyseg_mean=NA
       #}
       
       # if(iters>0){
@@ -320,8 +328,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       # }else{
       #  if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       #  segim=segim_orig
-        selseg=0
-        origfrac=1
+      #  selseg=0
+        origfrac=origfrac/segstats$flux
       #}
       
       if(rembig){
