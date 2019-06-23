@@ -245,6 +245,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       
       segim_orig=segim
       expand_segID=segstats[,'segID']
+      lastgrow=rep(Inf,length(expand_segID))
       
       if(verbose){message('Doing dilations:')}
         
@@ -257,9 +258,18 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         #Nmat[,i+1]=segstats$N100
         #segim_array[,,i+1]=segim
         
-          expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold,'segID']
-          segim[segim_new %in% expand_segID]=segim_new[segim_new %in% expand_segID]
-          segstats[segstats$segID %in% expand_segID,]=segstats_new[segstats_new$segID %in% expand_segID,]
+        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold,'segID']
+        if(length(expand_segID)==0){break}
+        updateID=which(segstats$segID %in% expand_segID)
+        lastgrow[updateID] = lastgrow[updateID] - (segstats_new[updateID,'flux'] - segstats[updateID,'flux'])
+        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold & lastgrow>0,'segID']
+        if(length(expand_segID)==0){break}
+        updateID=which(segstats$segID %in% expand_segID)
+        lastgrow[updateID] = segstats_new[updateID,'flux'] - segstats[updateID,'flux']
+        
+        segim[segim_new %in% expand_segID]=segim_new[segim_new %in% expand_segID]
+        
+        segstats[updateID,] = segstats_new[updateID,]
         
         if(iterskyloc){
            #something something
