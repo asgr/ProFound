@@ -233,73 +233,86 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         skydilate=sky
       }
       
-      compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
-      Nmat=compmat
-      compmat[,1]=segstats[,'flux']
-      Nmat[,1]=segstats[,'N100']
+      #compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
+      #Nmat=compmat
+      #compmat[,1]=segstats[,'flux']
+      #Nmat[,1]=segstats[,'N100']
+      #flux_old=segstats[,'flux']
+      #N100_old=segstats[,'N100']
       
-      segim_array=array(0L, dim=c(dim(segim),iters+1+localadd))
-      segim_array[,,1]=segim
+      #segim_array=array(0L, dim=c(dim(segim),iters+1+localadd))
+      #segim_array[,,1]=segim
       
       segim_orig=segim
+      expand_segID=segstats[,'segID']
       
       if(verbose){message('Doing dilations:')}
         
       for(i in 1:(iters+localadd)){
         if(verbose){message(paste('Iteration',i,'of',iters+localadd,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profoundMakeSegimDilate(segim=segim_array[,,i], size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats=.profoundFluxCalcMin(image=image-skydilate, segim=segim, mask=mask)
-        compmat[,i+1]=segstats$flux
-        Nmat[,i+1]=segstats$N100
-        segim_array[,,i+1]=segim
+        segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segstats_new=.profoundFluxCalcMin(image=image-skydilate, segim=segim_new, mask=mask)
+        
+        #compmat[,i+1]=segstats$flux
+        #Nmat[,i+1]=segstats$N100
+        #segim_array[,,i+1]=segim
+        
+          expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold,'segID']
+          segim[segim_new %in% expand_segID]=segim_new[segim_new %in% expand_segID]
+          segstats[segstats$segID %in% expand_segID,]=segstats_new[segstats_new$segID %in% expand_segID,]
+        
+        if(iterskyloc){
+           #something something
+        }
+        
       }
-      if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
-      if(iterskyloc){
-        skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
-        skyseg_mean[!is.finite(skyseg_mean)]=0
-        compmat=compmat-skyseg_mean*Nmat
-      }else{
+      #if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
+      #if(iterskyloc){
+      #  skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
+      #  skyseg_mean[!is.finite(skyseg_mean)]=0
+      #  compmat=compmat-skyseg_mean*Nmat
+      #}else{
         skyseg_mean=NA
-      }
+      #}
       
-      if(iters>0){
-        diffmat=compmat[,2:(iters+1),drop=FALSE]/compmat[,1:(iters)]
-        if(iters>1){
-          diffdiffmat=diffmat[,2:(iters),drop=FALSE]/diffmat[,1:(iters-1),drop=FALSE]
-          diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
-        }
-        selseg=.selectCoG(diffmat, threshold)
-        
-        segim[]=0L
-        if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
-        
-        for(i in 1:(iters+1)){
-          select=which(segim_array[,,i] %in% segstats[selseg==i,'segID'])
-          segim[select]=segim_array[,,i][select]
-        }
-        
-        if(rembig){
-          rm(select)
-          invisible(gc())
-        }
-        
-        if(!is.null(mask)){
-          segim[mask!=0]=segim_orig[mask!=0]
-        }
-        
-        origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
-      
-        objects=segim
-        objects[objects!=0]=1L
-        mode(objects)='integer'
-      
-        selseg=selseg-1
-      }else{
-        if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
-        segim=segim_orig
+      # if(iters>0){
+      #   diffmat=compmat[,2:(iters+1),drop=FALSE]/compmat[,1:(iters)]
+      #   if(iters>1){
+      #     diffdiffmat=diffmat[,2:(iters),drop=FALSE]/diffmat[,1:(iters-1),drop=FALSE]
+      #     diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
+      #   }
+      #   selseg=.selectCoG(diffmat, threshold)
+      #   
+      #   segim[]=0L
+      #   if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
+      #   
+      #   for(i in 1:(iters+1)){
+      #     select=which(segim_array[,,i] %in% segstats[selseg==i,'segID'])
+      #     segim[select]=segim_array[,,i][select]
+      #   }
+      #   
+      #   if(rembig){
+      #     rm(select)
+      #     invisible(gc())
+      #   }
+      #   
+      #   if(!is.null(mask)){
+      #     segim[mask!=0]=segim_orig[mask!=0]
+      #   }
+      #   
+      #   origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
+      # 
+         objects=segim
+         objects[objects!=0]=1L
+         mode(objects)='integer'
+      # 
+      #   selseg=selseg-1
+      # }else{
+      #  if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
+      #  segim=segim_orig
         selseg=0
         origfrac=1
-      }
+      #}
       
       if(rembig){
         rm(segim_array)

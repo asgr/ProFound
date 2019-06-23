@@ -507,7 +507,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(verbose){message(paste(" - Dilating segments -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  if(expand=='all'){
+  if(expand[1]=='all'){
     segim_new=segim
     maxorig=max(segim_new, na.rm=TRUE)+1L
     replace=which(segim_new>0)
