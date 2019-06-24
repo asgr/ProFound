@@ -109,9 +109,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(is.null(objects)){
     if(!is.null(segim)){
-      objects=segim
-      objects[objects != 0] = 1
-      mode(objects)='integer'
+      objects=matrix(0L,dim(segim_new)[1],dim(segim_new)[2])
+      objects[]=as.logical(segim_new)
     }
   }else{
     objects=objects*1 #Looks silly, but this ensures a logical mask becomes integer.
@@ -320,9 +319,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       #   
       #   origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
       # 
-         objects=segim
-         objects[objects!=0]=1L
-         mode(objects)='integer'
+      objects=matrix(0L,dim(segim_new)[1],dim(segim_new)[2])
+      objects[]=as.logical(segim_new)
       # 
       #   selseg=selseg-1
       # }else{
@@ -332,10 +330,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         origfrac=origfrac/segstats$flux
       #}
       
-      if(rembig){
-        rm(segim_array)
-        invisible(gc())
-      }
+      #if(rembig){
+      #  rm(segim_array)
+      #  invisible(gc())
+      #}
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       segim_orig=segim
@@ -484,17 +482,17 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message("Skipping segmentation plot - plot = FALSE")}
     }
     
-    if(!missing(SBlim)){
+    if(is.null(SBlim)){
+      SBlim=NULL
+    }else if(is.numeric(SBlim)){
       SBlimtemp=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
       SBlimtemp=matrix(SBlimtemp,dim(skyRMS)[1],dim(skyRMS)[2])
       SBlimtemp[which(SBlimtemp>SBlim)]=SBlim
       SBlim=SBlimtemp
-    }else if(missing(SBlim) & skycut> -Inf){
+    }else if(SBlim[1]=='get' & skycut> -Inf){
       SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-      #SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
-    }else{
-      SBlim=NULL
     }
+    
     if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(is.null(mask)){mask=NULL}

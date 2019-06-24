@@ -267,9 +267,8 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     if(verbose){message(" - Skipping segmentation plot - plot set to FALSE")}
   }
   
-  objects=segim
-  objects[objects!=0]=1L
-  mode(objects)='integer'
+  objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+  objects[]=as.logical(segim)
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making final local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -421,9 +420,8 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
     segim_new[mask!=0]=0
   }
   
-  objects=segim_new
-  objects[objects!=0]=1L
-  mode(objects)='integer'
+  objects=matrix(0L,dim(segim_new)[1],dim(segim_new)[2])
+  objects[]=as.logical(segim_new)
   
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -512,17 +510,22 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     maxorig=max(segim_new, na.rm=TRUE)+1L
     replace=which(segim_new>0)
     segim_new[replace]=maxorig-segim_new[replace]
-    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern))
+    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
     replace=which(segim_new>0)
     segim_new[replace]=maxorig-segim_new[replace]
   }else{
     segim_new=segim
-    segim_new[!(segim_new %in% expand)]=0L
-    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern))
+    segim_new[!(segim_new %in% expand)]=0L #remove things that will not be dilated
+    maxorig=max(segim_new, na.rm=TRUE)+1L
+    replace=which(segim_new>0)
+    segim_new[replace]=maxorig-segim_new[replace]
+    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
+    replace=which(segim_new>0)
+    segim_new[replace]=maxorig-segim_new[replace]
+    replace=which(segim!=0) #put back non-dilated segments
+    segim_new[replace]=segim[replace] #put back non-dilated segments
+    rm(replace)
   }
-  replace=which(segim!=0)
-  segim_new[replace]=segim[replace]
-  rm(replace)
   mode(segim_new)='integer'
   
   if(rembig){
@@ -543,9 +546,8 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     segstats=NULL
   }
   
-  objects=segim_new
-  objects[objects!=0]=1L
-  mode(objects)='integer'
+  objects=matrix(0L,dim(segim_new)[1],dim(segim_new)[2])
+  objects[]=as.logical(segim_new)
   
   if(plot & !is.null(image)){
     profoundSegimPlot(image=image, segim=segim_new, mask=mask, sky=sky, ...)
@@ -580,9 +582,8 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   
   if(is.null(objects)){
     if(!is.null(segim)){
-      objects=segim
-      objects[objects != 0] = 1L
-      mode(objects)='integer'
+      objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+      objects[]=as.logical(segim)
     }
   }
   
