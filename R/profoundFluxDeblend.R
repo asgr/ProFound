@@ -36,7 +36,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   image=image-sky
   
-  groupsegID=groupsegID[groupsegID$Ngroup>1 & groupsegID$Npix*groupsegID$Ngroup<Ndeblendlim,,drop=FALSE]
+  groupsegID=groupsegID[groupsegID$Ngroup>1 & as.numeric(groupsegID$Npix)*groupsegID$Ngroup<Ndeblendlim,,drop=FALSE]
   
   if(dim(groupsegID)[1]==0){
     return(NULL)
