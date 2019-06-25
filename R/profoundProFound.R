@@ -220,10 +220,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       
       if(iterskyloc){
         localadd=1
-        skydilate=0
       }else{
         localadd=0
-        skydilate=sky
       }
       
       #compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
@@ -238,7 +236,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       
       segim_orig=segim
       expand_segID=segstats[,'segID']
-      lastgrow=rep(Inf,length(expand_segID))
+      SBlast=rep(Inf,length(expand_segID))
       selseg=rep(0,length(expand_segID))
       
       if(verbose){message('Doing dilations:')}
@@ -246,20 +244,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       for(i in 1:(iters)){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats_new=.profoundFluxCalcMin(image=image-skydilate, segim=segim_new, mask=mask)
-        
-        #compmat[,i+1]=segstats$flux
-        #Nmat[,i+1]=segstats$N100
-        #segim_array[,,i+1]=segim
-        
+        segstats_new=.profoundFluxCalcMin(image=image-sky, segim=segim_new, mask=mask)
         expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold,'segID']
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
-        lastgrow[updateID] = lastgrow[updateID] - (segstats_new[updateID,'flux'] / segstats[updateID,'flux'])
-        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold & lastgrow > 0,'segID']
+        SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100)
+        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold & SBnew < SBlast/threshold,'segID']
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
-        lastgrow[updateID] = segstats_new[updateID,'flux'] / segstats[updateID,'flux']
+        SBlast[updateID] = SBnew[updateID]
         selseg[updateID] = i
         if('fastmatch' %in% .packages()){ #remove things that will not be dilated
           selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
