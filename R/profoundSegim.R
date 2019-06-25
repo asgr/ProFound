@@ -508,19 +508,26 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   if(expand[1]=='all'){
     segim_new=segim
     maxorig=max(segim_new, na.rm=TRUE)+1L
-    replace=which(segim_new>0)
+    replace=which(segim_new!=0)
     segim_new[replace]=maxorig-segim_new[replace]
     segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    replace=which(segim_new>0)
+    replace=which(segim_new!=0)
     segim_new[replace]=maxorig-segim_new[replace]
+    replace=which(segim!=0) #put back non-dilated segments
+    segim_new[replace]=segim[replace] #put back non-dilated segments
   }else{
     segim_new=segim
-    segim_new[!(segim_new %in% expand)]=0L #remove things that will not be dilated
+    #segim_new[!(segim_new %in% expand)]=0L #remove things that will not be dilated
+    if('fastmatch' %in% .packages()){ #remove things that will not be dilated
+      segim_new[fastmatch::fmatch(segim_new, expand, nomatch = 0L) == 0L] = 0L
+    }else{
+      segim_new[!(segim_new %in% expand)] = 0L
+    }
     maxorig=max(segim_new, na.rm=TRUE)+1L
-    replace=which(segim_new>0)
+    replace=which(segim_new!=0)
     segim_new[replace]=maxorig-segim_new[replace]
     segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    replace=which(segim_new>0)
+    replace=which(segim_new!=0)
     segim_new[replace]=maxorig-segim_new[replace]
     replace=which(segim!=0) #put back non-dilated segments
     segim_new[replace]=segim[replace] #put back non-dilated segments
@@ -673,8 +680,8 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   xlen=dim(image)[1]
   ylen=dim(image)[2]
-  segvec=which(tabulate(segim)>0)
-  segvec=segvec[segvec>0]
+  #segvec=which(tabulate(segim)>0)
+  #segvec=segvec[segvec>0]
   
   segsel=which(segim>0)
   
@@ -1217,8 +1224,8 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
     image[mask!=0]=NA
   }
   
-  segvec=which(tabulate(segim)>0)
-  segvec=segvec[segvec>0]
+  #segvec=which(tabulate(segim)>0)
+  #segvec=segvec[segvec>0]
   
   segsel=which(segim>0)
   

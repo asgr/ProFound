@@ -4,7 +4,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   call=match.call()
   
-  converge='flux' #As of ProFound v1.5 this is hardcoded
+  #converge='flux' #As of ProFound v1.5 this is hardcoded
   
   if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
   
@@ -109,8 +109,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(is.null(objects)){
     if(!is.null(segim)){
-      objects=matrix(0L,dim(segim_new)[1],dim(segim_new)[2])
-      objects[]=as.logical(segim_new)
+      objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+      objects[]=as.logical(segim)
     }
   }else{
     objects=objects*1 #Looks silly, but this ensures a logical mask becomes integer.
@@ -215,15 +215,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      #segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
       segstats=.profoundFluxCalcMin(image=image-sky, segim=segim, mask=mask)
       origfrac=segstats$flux
-      
-      # if(R50clean[1]!=0){
-      #   badseg=segstats$R50<=R50clean
-      #   segim[segim %in% segstats[badseg,'segID']]=0
-      #   segstats=segstats[which(!badseg),]
-      # }
       
       if(iterskyloc){
         localadd=1
@@ -268,7 +261,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         updateID=which(segstats$segID %in% expand_segID)
         lastgrow[updateID] = segstats_new[updateID,'flux'] / segstats[updateID,'flux']
         selseg[updateID] = i
-        selpix = which(segim_new %in% expand_segID)
+        if('fastmatch' %in% .packages()){ #remove things that will not be dilated
+          selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
+        }else{
+          selpix = which(segim_new %in% expand_segID)
+        }
         segim[selpix]=segim_new[selpix]
         
         segstats[updateID,] = segstats_new[updateID,]
@@ -283,57 +280,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         skyseg_mean=NA
       }
       
-      #if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
-      #if(iterskyloc){
-      #  skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
-      #  skyseg_mean[!is.finite(skyseg_mean)]=0
-      #  compmat=compmat-skyseg_mean*Nmat
-      #}else{
-      #  skyseg_mean=NA
-      #}
+      objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+      objects[]=as.logical(segim)
       
-      # if(iters>0){
-      #   diffmat=compmat[,2:(iters+1),drop=FALSE]/compmat[,1:(iters)]
-      #   if(iters>1){
-      #     diffdiffmat=diffmat[,2:(iters),drop=FALSE]/diffmat[,1:(iters-1),drop=FALSE]
-      #     diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
-      #   }
-      #   selseg=.selectCoG(diffmat, threshold)
-      #   
-      #   segim[]=0L
-      #   if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
-      #   
-      #   for(i in 1:(iters+1)){
-      #     select=which(segim_array[,,i] %in% segstats[selseg==i,'segID'])
-      #     segim[select]=segim_array[,,i][select]
-      #   }
-      #   
-      #   if(rembig){
-      #     rm(select)
-      #     invisible(gc())
-      #   }
-      #   
-      #   if(!is.null(mask)){
-      #     segim[mask!=0]=segim_orig[mask!=0]
-      #   }
-      #   
-      #   origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
-      # 
-      objects=matrix(0L,dim(segim_new)[1],dim(segim_new)[2])
-      objects[]=as.logical(segim_new)
-      # 
-      #   selseg=selseg-1
-      # }else{
-      #  if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
-      #  segim=segim_orig
-      #  selseg=0
-        origfrac=origfrac/segstats$flux
-      #}
-      
-      #if(rembig){
-      #  rm(segim_array)
-      #  invisible(gc())
-      #}
+      origfrac=origfrac/segstats$flux
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       segim_orig=segim
