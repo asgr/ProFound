@@ -162,10 +162,7 @@
 }
 
 profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, watershed = 'ProFound', ...){
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
+  
   call=match.call()
   if(verbose){message(' - Running MakeSegim:')}
   timestart = proc.time()[3]
@@ -313,11 +310,6 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   
   if(verbose){message(' - Running MakeSegimExpand:')}
   timestart = proc.time()[3]
-  
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
   
   call=match.call()
   
@@ -474,11 +466,6 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   if(verbose){message(' - Running MakeSegimDilate:')}
   timestart = proc.time()[3]
   
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
-  
   call=match.call()
   
   if(!requireNamespace("EBImage", quietly = TRUE)){
@@ -535,10 +522,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   }
   mode(segim_new)='integer'
   
-  if(rembig){
-    rm(segim)
-    invisible(gc())
-  }
+  rm(segim)
   
   if(!is.null(mask) & !is.null(image)){
     segim_new[mask!=0]=0
@@ -573,11 +557,6 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
     stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
   }
   
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
-  
   if(!is.null(mask)){
     mask[is.na(image)]=1L
   }else{
@@ -596,11 +575,8 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   
   image_sky=image-sky
   
-  if(rembig){
-    rm(image)
-    rm(sky)
-    invisible(gc())
-  }
+  rm(image)
+  rm(sky)
   
   if(is.null(mask)){
     propim=EBImage::imageData(EBImage::propagate(image_sky, seeds=segim, lambda=lambda))
@@ -610,11 +586,8 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   }
   mode(propim)='integer'
   
-  if(rembig){
-    rm(segim)
-    rm(mask)
-    invisible(gc())
-  }
+  rm(segim)
+  rm(mask)
   
   propim_sky=propim
   propim_sky[objects>0]=0L
@@ -628,11 +601,6 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
 }
 
 profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, cor_err_func=NULL, app_diam=1){
-  
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
   
   if(missing(pixscale) & !is.null(header)){
     pixscale=getpixscale(header)
@@ -690,25 +658,16 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   if(hassky & hasskyRMS){
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), sky=as.numeric(sky[segsel]), skyRMS=as.numeric(skyRMS[segsel]))
-    if(rembig){
-      rm(sky)
-      rm(skyRMS)
-      invisible(gc())
-    }
+    rm(sky)
+    rm(skyRMS)
   }
   if(hassky & hasskyRMS==FALSE){
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), sky=as.numeric(sky[segsel]))
-    if(rembig){
       rm(sky)
-      invisible(gc())
-    }
   }
   if(hassky==FALSE & hasskyRMS){
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), skyRMS=as.numeric(skyRMS[segsel]))
-    if(rembig){
-      rm(skyRMS)
-      invisible(gc())
-    }
+    rm(skyRMS)
   }
   if(hassky==FALSE & hasskyRMS==FALSE){
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]))
@@ -716,12 +675,9 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   setkey(tempDT, segID, flux)
   
-  if(rembig){
-    rm(xloc)
-    rm(yloc)
-    rm(image)
-    invisible(gc())
-  }
+  rm(xloc)
+  rm(yloc)
+  rm(image)
   
   #tempDT[is.na(tempDT)]=0
   segID=tempDT[,.BY,by=segID]$segID
@@ -875,15 +831,12 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     tab_sky=cbind(1:max(segID),tab_sky)
     Nsky=tab_sky[match(segID,tab_sky[,1]),2]
     
-    if(rembig){
-      rm(off_down)
-      rm(off_left)
-      rm(off_up)
-      rm(off_right)
-      rm(tab_edge)
-      rm(tab_sky)
-      invisible(gc())
-    }
+    rm(off_down)
+    rm(off_left)
+    rm(off_up)
+    rm(off_right)
+    rm(tab_edge)
+    rm(tab_sky)
     
     BorderBottom=segim[segim[,1]>0,1]
     BorderLeft=segim[1,segim[1,]>0]
@@ -912,11 +865,9 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
       tab_mask=cbind(1:max(segID),tab_mask)
       Nmask=tab_mask[match(segID,tab_mask[,1]),2]
       
-      if(rembig){
-        rm(segim_inner)
-        rm(tab_mask)
-        invisible(gc())
-      }
+      rm(segim_inner)
+      rm(tab_mask)
+      
     }else{
       Nmask=0
     }
@@ -1030,12 +981,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
 }
 
 profoundSegimNear=function(segim=NULL, offset=1){
-  
-  if(length(segim)>1e6){rembig=TRUE}else{rembig=FALSE}
-  if(rembig){
-    invisible(gc())
-  }
-  
+
   xlen=dim(segim)[1]
   ylen=dim(segim)[2]
   
@@ -1047,14 +993,11 @@ profoundSegimNear=function(segim=NULL, offset=1){
   
   tabcomb=data.table(segID=as.integer(segim_inner), down=as.integer(off_down), left=as.integer(off_left), up=as.integer(off_up), right=as.integer(off_right))
   
-  if(rembig){
-      rm(segim_inner)
-      rm(off_down)
-      rm(off_left)
-      rm(off_up)
-      rm(off_right)
-      invisible(gc())
-    }
+  rm(segim_inner)
+  rm(off_down)
+  rm(off_left)
+  rm(off_up)
+  rm(off_right)
   
   tabcomb=tabcomb[segID>0,]
   setorder(tabcomb,segID)
@@ -1213,33 +1156,15 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
 
 .profoundFluxCalcMin=function(image=NULL, segim=NULL, mask=NULL){
   
-  #if(length(image)>1e8){rembig=TRUE}else{rembig=FALSE}
-  #if(rembig){
-  #  invisible(gc())
-  #}
-  
   #Set masked things to NA, to be safe:
   
   if(!is.null(mask)){
     image[mask!=0]=NA
   }
   
-  #segvec=which(tabulate(segim)>0)
-  #segvec=segvec[segvec>0]
-  
   segsel=which(segim>0)
-  
   segID=flux=NULL
-  
   tempDT=data.table(segID=as.integer(segim[segsel]),flux=as.numeric(image[segsel]))
-  
-  #setkey(tempDT, segID)
-  
-  #if(rembig){
-  #  rm(image)
-  #  rm(segim)
-  #  invisible(gc())
-  #}
   
   output=tempDT[,.fluxcalcmin(flux), by=segID]
   setkey(output, segID)

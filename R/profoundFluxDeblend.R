@@ -44,7 +44,6 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   if(lowmemory){
     rm(sky)
-    invisible(gc())
   }else{
     groupID=Var1=Var2=NULL
     groupref=data.table(groupID=as.integer(groupim), expand.grid(1:dim(groupim)[1],1:dim(groupim)[2]), keyby='groupID')

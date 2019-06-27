@@ -223,34 +223,21 @@ profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic',
 # Hidden utility functions
 
 .interp.2d=function(x, y, obj){
-    if(length(x)>1e6){rembig=TRUE}else{rembig=FALSE}
     xobj = obj$x
     yobj = obj$y
     zobj = obj$z
     nx = length(xobj)
     ny = length(yobj)
     lx = approx(xobj, 1:nx, x, rule = 2)$y
-    if(rembig){
-      rm(x)
-      invisible(gc())
-    }
+    rm(x)
     ly = approx(yobj, 1:ny, y, rule = 2)$y
-    if(rembig){
-      rm(y)
-      invisible(gc())
-    }
+    rm(y)
     lx1 = floor(lx)
     ly1 = floor(ly)
     ex = lx - lx1
-    if(rembig){
-      rm(lx)
-      invisible(gc())
-    }
+    rm(lx)
     ey = ly - ly1
-    if(rembig){
-      rm(ly)
-      invisible(gc())
-    }
+    rm(ly)
     ex[lx1 == nx] = 1
     ey[ly1 == ny] = 1
     lx1[lx1 == nx] = nx - 1

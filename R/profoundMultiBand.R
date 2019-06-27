@@ -263,7 +263,6 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     
     rm(detect)
     rm(pro_detect)
-    gc()
     
     # Stack!!!
     # We first stack the image then the sky.
@@ -275,7 +274,6 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     
     rm(detect_image)
     rm(detect_skyRMS)
-    gc()
     
     message('*** Currently processing stacked detection image ***')
     
@@ -300,7 +298,6 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     
     rm(detect_image_stack)
     rm(detect_sky_stack)
-    gc()
   }
   
   #pro_detect$call=NULL

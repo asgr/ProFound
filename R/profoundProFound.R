@@ -4,10 +4,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   call=match.call()
   
-  #converge='flux' #As of ProFound v1.5 this is hardcoded
-  
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  
   if(length(box)==1){
     box=rep(box,2)
     if(missing(grid)){grid=box}
@@ -130,22 +126,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }
     if(hassky==FALSE){
       sky=roughsky$sky
-      if(rembig==FALSE){
-        if(verbose){message(' - Sky statistics :')}
-        if(verbose){print(summary(as.numeric(sky)))}
-      }
+      if(verbose){message(' - Sky statistics :')}
+      if(verbose){print(summary(as.numeric(sky)))}
     }
     if(hasskyRMS==FALSE){
       skyRMS=roughsky$skyRMS
-      if(rembig==FALSE){
-        if(verbose){message(' - Sky-RMS statistics :')}
-        if(verbose){print(summary(as.numeric(skyRMS)))}
-      }
+      if(verbose){message(' - Sky-RMS statistics :')}
+      if(verbose){print(summary(as.numeric(skyRMS)))}
     }
-    if(rembig){
       rm(roughsky)
-      gc()
-    }
   }else{
     if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS, or user provided segim")}
   }
@@ -317,7 +306,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       segim_orig=NULL
       objects=NULL
       objects_redo=NULL
-      invisible(gc())
     }
     
     if(stats & !is.null(image)){
