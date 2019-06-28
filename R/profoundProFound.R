@@ -204,8 +204,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      segstats=.profoundFluxCalcMin(image=image-sky, segim=segim, mask=mask)
-      origfrac=segstats$flux
+      segstats=.profoundFluxCalcMin(image=image, segim=segim, mask=mask)
+      skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask)
+      skystats=skystats$flux/skystats$N100
+      skymed=median(skystats, na.rm=TRUE)
+      origfrac=segstats$flux - skystats
       
       if(iterskyloc){
         localadd=1
@@ -233,24 +236,22 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       for(i in 1:(iters)){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats_new=.profoundFluxCalcMin(image=image-sky, segim=segim_new, mask=mask)
-        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold,'segID']
-        if(length(expand_segID)==0){break}
-        updateID=which(segstats$segID %in% expand_segID)
+        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask)
         SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100)
-        expand_segID=segstats[segstats_new$flux>0 & segstats_new$flux/segstats$flux>threshold & SBnew < SBlast/threshold,'segID']
+        fluxgrowth = (segstats_new$flux - skystats * segstats_new$N100) / (segstats$flux - skystats * segstats$N100) #account for sky growth
+        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux))
+        expand_segID=segstats[segstats_new$flux>0 & fluxgrowth > threshold & SBnew < (SBlast/threshold) & skyfrac < 0.5 & selseg==(i-1),'segID']
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
-        SBlast[updateID] = SBnew[updateID]
         selseg[updateID] = i
+        segstats[updateID,] = segstats_new[updateID,]
+        SBlast = SBnew
         if('fastmatch' %in% .packages()){ #remove things that will not be dilated
           selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
         }else{
           selpix = which(segim_new %in% expand_segID)
         }
         segim[selpix]=segim_new[selpix]
-        
-        segstats[updateID,] = segstats_new[updateID,]
       }
       
       if(iterskyloc){
