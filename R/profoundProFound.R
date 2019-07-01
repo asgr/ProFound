@@ -208,7 +208,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask)
       skystats=skystats$flux/skystats$N100
       skymed=median(skystats, na.rm=TRUE)
-      origfrac=segstats$flux - skystats
+      origfrac=segstats$flux - (skystats*segstats$N100)
       
       if(iterskyloc){
         localadd=1
@@ -238,15 +238,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
         segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask)
         SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100)
-        fluxgrowth = (segstats_new$flux - skystats * segstats_new$N100) / (segstats$flux - skystats * segstats$N100) #account for sky growth
-        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux))
+        fluxgrowth = (segstats_new$flux - skystats * segstats_new$N100) / (segstats$flux - skystats * segstats$N100) #account for flux growth
+        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #account for sky growth
         expand_segID=segstats[segstats_new$flux>0 & fluxgrowth > threshold & SBnew < (SBlast/threshold) & skyfrac < 0.5 & selseg==(i-1),'segID']
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
         selseg[updateID] = i
         segstats[updateID,] = segstats_new[updateID,]
         SBlast = SBnew
-        if('fastmatch' %in% .packages()){ #remove things that will not be dilated
+        if('fastmatch' %in% .packages()){ #dilate segments that pass tests
           selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
         }else{
           selpix = which(segim_new %in% expand_segID)
@@ -266,7 +266,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects=matrix(0L,dim(segim)[1],dim(segim)[2])
       objects[]=as.logical(segim)
       
-      origfrac=origfrac/segstats$flux
+      origfrac = origfrac / (segstats$flux - (skystats * segstats$N100))
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       segim_orig=segim
