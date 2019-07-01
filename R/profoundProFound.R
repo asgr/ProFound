@@ -4,10 +4,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   call=match.call()
   
-  converge='flux' #As of ProFound v1.5 this is hardcoded
-  
-  if(length(image)>1e6){rembig=TRUE}else{rembig=FALSE}
-  
   if(length(box)==1){
     box=rep(box,2)
     if(missing(grid)){grid=box}
@@ -109,9 +105,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(is.null(objects)){
     if(!is.null(segim)){
-      objects=segim
-      objects[objects != 0] = 1
-      mode(objects)='integer'
+      objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+      objects[]=as.logical(segim)
     }
   }else{
     objects=objects*1 #Looks silly, but this ensures a logical mask becomes integer.
@@ -131,22 +126,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }
     if(hassky==FALSE){
       sky=roughsky$sky
-      if(rembig==FALSE){
-        if(verbose){message(' - Sky statistics :')}
-        if(verbose){print(summary(as.numeric(sky)))}
-      }
+      if(verbose){message(' - Sky statistics :')}
+      if(verbose){print(summary(as.numeric(sky)))}
     }
     if(hasskyRMS==FALSE){
       skyRMS=roughsky$skyRMS
-      if(rembig==FALSE){
-        if(verbose){message(' - Sky-RMS statistics :')}
-        if(verbose){print(summary(as.numeric(skyRMS)))}
-      }
+      if(verbose){message(' - Sky-RMS statistics :')}
+      if(verbose){print(summary(as.numeric(skyRMS)))}
     }
-    if(rembig){
       rm(roughsky)
-      gc()
-    }
   }else{
     if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS, or user provided segim")}
   }
@@ -216,95 +204,69 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      #segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, pixscale=pixscale)
-      segstats=.profoundFluxCalcMin(image=image-sky, segim=segim, mask=mask)
-      
-      # if(R50clean[1]!=0){
-      #   badseg=segstats$R50<=R50clean
-      #   segim[segim %in% segstats[badseg,'segID']]=0
-      #   segstats=segstats[which(!badseg),]
-      # }
+      segstats=.profoundFluxCalcMin(image=image, segim=segim, mask=mask)
+      skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask)
+      skystats=skystats$flux/skystats$N100
+      skymed=median(skystats, na.rm=TRUE)
+      origfrac=segstats$flux - (skystats*segstats$N100)
       
       if(iterskyloc){
         localadd=1
-        skydilate=0
       }else{
         localadd=0
-        skydilate=sky
       }
       
-      compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
-      Nmat=compmat
-      compmat[,1]=segstats[,'flux']
-      Nmat[,1]=segstats[,'N100']
+      #compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
+      #Nmat=compmat
+      #compmat[,1]=segstats[,'flux']
+      #Nmat[,1]=segstats[,'N100']
+      #flux_old=segstats[,'flux']
+      #N100_old=segstats[,'N100']
       
-      segim_array=array(0L, dim=c(dim(segim),iters+1+localadd))
-      segim_array[,,1]=segim
+      #segim_array=array(0L, dim=c(dim(segim),iters+1+localadd))
+      #segim_array[,,1]=segim
       
       segim_orig=segim
+      expand_segID=segstats[,'segID']
+      SBlast=rep(Inf,length(expand_segID))
+      selseg=rep(0,length(expand_segID))
       
       if(verbose){message('Doing dilations:')}
         
-      for(i in 1:(iters+localadd)){
-        if(verbose){message(paste('Iteration',i,'of',iters+localadd,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim=profoundMakeSegimDilate(segim=segim_array[,,i], size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats=.profoundFluxCalcMin(image=image-skydilate, segim=segim, mask=mask)
-        compmat[,i+1]=segstats$flux
-        Nmat[,i+1]=segstats$N100
-        segim_array[,,i+1]=segim
+      for(i in 1:(iters)){
+        if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
+        segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask)
+        SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100)
+        fluxgrowth = (segstats_new$flux - skystats * segstats_new$N100) / (segstats$flux - skystats * segstats$N100) #account for flux growth
+        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #account for sky growth
+        expand_segID=segstats[segstats_new$flux>0 & fluxgrowth > threshold & SBnew < (SBlast/threshold) & skyfrac < 0.5 & selseg==(i-1),'segID']
+        if(length(expand_segID)==0){break}
+        updateID=which(segstats$segID %in% expand_segID)
+        selseg[updateID] = i
+        segstats[updateID,] = segstats_new[updateID,]
+        SBlast = SBnew
+        if('fastmatch' %in% .packages()){ #dilate segments that pass tests
+          selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
+        }else{
+          selpix = which(segim_new %in% expand_segID)
+        }
+        segim[selpix]=segim_new[selpix]
       }
-      if(verbose){message(paste('Finding CoG convergence -',round(proc.time()[3]-timestart,3),'sec'))}
+      
       if(iterskyloc){
-        skyseg_mean=(compmat[,iters+2]-compmat[,iters+1])/(Nmat[,iters+2]-Nmat[,iters+1])
+        segim_skyloc=profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_skyloc, mask=mask)
+        skyseg_mean=(segstats_new$flux-segstats$flux)/(segstats_new$N100-segstats$N100)
         skyseg_mean[!is.finite(skyseg_mean)]=0
-        compmat=compmat-skyseg_mean*Nmat
       }else{
         skyseg_mean=NA
       }
       
-      if(iters>0){
-        diffmat=compmat[,2:(iters+1),drop=FALSE]/compmat[,1:(iters)]
-        if(iters>1){
-          diffdiffmat=diffmat[,2:(iters),drop=FALSE]/diffmat[,1:(iters-1),drop=FALSE]
-          diffmat[,2:(iters)][diffdiffmat>1 | diffdiffmat<0]=0
-        }
-        selseg=.selectCoG(diffmat, threshold)
-        
-        segim[]=0L
-        if(verbose){message(paste('Constructing final segim -',round(proc.time()[3]-timestart,3),'sec'))}
-        
-        for(i in 1:(iters+1)){
-          select=which(segim_array[,,i] %in% segstats[selseg==i,'segID'])
-          segim[select]=segim_array[,,i][select]
-        }
-        
-        if(rembig){
-          rm(select)
-          invisible(gc())
-        }
-        
-        if(!is.null(mask)){
-          segim[mask!=0]=segim_orig[mask!=0]
-        }
-        
-        origfrac=compmat[,1]/compmat[cbind(1:length(selseg),selseg)]
+      objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+      objects[]=as.logical(segim)
       
-        objects=segim
-        objects[objects!=0]=1L
-        mode(objects)='integer'
-      
-        selseg=selseg-1
-      }else{
-        if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
-        segim=segim_orig
-        selseg=0
-        origfrac=1
-      }
-      
-      if(rembig){
-        rm(segim_array)
-        invisible(gc())
-      }
+      origfrac = origfrac / (segstats$flux - (skystats * segstats$N100))
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       segim_orig=segim
@@ -345,7 +307,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       segim_orig=NULL
       objects=NULL
       objects_redo=NULL
-      invisible(gc())
     }
     
     if(stats & !is.null(image)){
@@ -453,17 +414,17 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message("Skipping segmentation plot - plot = FALSE")}
     }
     
-    if(!missing(SBlim)){
+    if(is.null(SBlim)){
+      SBlim=NULL
+    }else if(is.numeric(SBlim)){
       SBlimtemp=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
       SBlimtemp=matrix(SBlimtemp,dim(skyRMS)[1],dim(skyRMS)[2])
       SBlimtemp[which(SBlimtemp>SBlim)]=SBlim
       SBlim=SBlimtemp
-    }else if(missing(SBlim) & skycut> -Inf){
+    }else if(SBlim[1]=='get' & skycut> -Inf){
       SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-      #SBlim=matrix(SBlim,dim(skyRMS)[1],dim(skyRMS)[2])
-    }else{
-      SBlim=NULL
     }
+    
     if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
     if(is.null(mask)){mask=NULL}

@@ -63,7 +63,7 @@ Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. P
 Logical; should smoothing be done on the target \option{image}? Passed to \code{\link{profoundMakeSegim}}. If present, this will use the \code{imblur} function from the \code{imager} package. Otherwise it will use the \code{gblur} function from the \code{EBImage} package with a warning. These functions are very similar in output, but not strictly identical.
 }
   \item{SBlim}{
-Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. Passed to \code{\link{profoundMakeSegim}}.
+Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. If a matrix is provided, this matrix *must* be the same dimensions as \option{image}. Passed to \code{\link{profoundMakeSegim}}. If set to 'get' then the output \option{SBlim} is calculated from the \option{skyRMS} and \option{magzero} automatically.
 }
   \item{size}{
 Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}.
@@ -263,7 +263,7 @@ An object list of class 'profound' containing:
   \item{group}{If \option{groupstats}=TRUE then contains the output of \code{\link{profoundSegimGroup}}.}
   \item{groupstats}{If \option{groupstats}=TRUE and \option{stats}=TRUE then contains the output of \code{\link{profoundSegimStats}} run using the final \option{group$groupim} (see below), otherwise NULL.}
   \item{header}{The header provided, if missing this is NULL.}
-  \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
+  \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL.}
   \item{magzero}{The assumed magnitude zero point. This is relevant to various outputs returned by the segmentation statistics.}
   \item{dim}{The dimensions of the processed image.}
   \item{pixscale}{The assumed pixel scale. This is relevant to various outputs returned by the segmentation statistics.}
