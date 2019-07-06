@@ -233,7 +233,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       
       if(verbose){message('Doing dilations:')}
         
-      for(i in 1:(iters)){
+      for(i in 1:(iters) & length(expand_segID)>0){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
         segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask)
