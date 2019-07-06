@@ -105,7 +105,7 @@
     }
     
     temp=cumsum(flux[good])/sumflux
-  
+    
     if(sumflux>0){
       loc50=min(which(temp>=0.5))
       loc50cumsumhi=temp[loc50]
@@ -116,7 +116,7 @@
       loc90cumsumhi=temp[loc90]
       loc90cumsumlo=temp[loc90-1]
       N90seg=N100seg-(loc90-1)+(0.1-loc90cumsumlo)/(loc90cumsumhi-loc90cumsumlo)
-    
+      
       cenfrac=temp[N100seg]-temp[N100seg-1]
     }else{
       N100seg=length(flux)
@@ -140,7 +140,7 @@
   mode(N90seg)='numeric'
   mode(cenfrac)='numeric'
   mode(cenfrac)='numeric'
-    
+  
   invisible(list(flux=sumflux, flux_app=sumflux_app, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
@@ -211,14 +211,14 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   
   image=image_sky/skyRMS
   image[!is.finite(image)]=0
- 
+  
   if(smooth){
     if(verbose){message(paste(" - Smoothing the image -", round(proc.time()[3]-timestart,3), "sec"))}
     if(requireNamespace("imager", quietly = TRUE)){
       image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
     }else{
       if(!requireNamespace("EBImage", quietly = TRUE)){
-      stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+        stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
       }
       message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
       image=as.matrix(EBImage::gblur(image,sigma))
@@ -256,7 +256,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   }else{
     segim=image
   }
-
+  
   if(plot){
     if(verbose){message(paste(" - Plotting segments -", round(proc.time()[3]-timestart,3), "sec"))}
     profoundSegimPlot(image=image_orig, segim=segim, mask=mask, sky=sky, ...)
@@ -358,14 +358,14 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   
   image=image_sky/skyRMS
   image[!is.finite(image)]=0
-
+  
   if(smooth){
     if(verbose){message(paste(" - Smoothing the image -", round(proc.time()[3]-timestart,3), "sec"))}
     if(requireNamespace("imager", quietly = TRUE)){
       image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
     }else{
       if(!requireNamespace("EBImage", quietly = TRUE)){
-      stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+        stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
       }
       message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
       image=as.matrix(EBImage::gblur(image,sigma))
@@ -388,6 +388,13 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   segim_new=segim
   segvec=which(tabulate(segim)>0)
   segvec=segvec[segvec>0]
+  
+  if(is.null(expand) | length(expand)==0){
+    objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+    objects[]=as.logical(segim)
+    return(invisible(list(segim=segim, objects=objects, segstats=segstats, header=header, call=call)))
+  }
+  
   if(expand[1]=='all'){expand=segvec}
   if(verbose){message(paste(" - Expanding segments -", round(proc.time()[3]-timestart,3), "sec"))}
   for(i in expand){
@@ -458,11 +465,11 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   
   if(verbose){message(paste(" - profoundMakeSegimExpand is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  invisible(list(segim=segim_new, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call))
+  return(invisible(list(segim=segim_new, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)))
 }
 
 profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shape='disc', expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, skyRMS=0, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
-
+  
   if(verbose){message(' - Running MakeSegimDilate:')}
   timestart = proc.time()[3]
   
@@ -491,6 +498,12 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   kern = EBImage::makeBrush(size, shape=shape)
   
   if(verbose){message(paste(" - Dilating segments -", round(proc.time()[3]-timestart,3), "sec"))}
+  
+  if(is.null(expand) | length(expand)==0){
+    objects=matrix(0L,dim(segim)[1],dim(segim)[2])
+    objects[]=as.logical(segim)
+    return(invisible(list(segim=segim, objects=objects, segstats=segstats, header=header, call=call)))
+  }
   
   if(expand[1]=='all'){
     segim_new=segim
@@ -548,7 +561,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(verbose){message(paste(" - profoundMakeSegimDilate is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  invisible(list(segim=segim_new, objects=objects, segstats=segstats, header=header, call=call))
+  return(invisible(list(segim=segim_new, objects=objects, segstats=segstats, header=header, call=call)))
 }
 
 profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, sky=0, lambda=1e-4, plot=FALSE, ...){
@@ -663,7 +676,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   }
   if(hassky & hasskyRMS==FALSE){
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), sky=as.numeric(sky[segsel]))
-      rm(sky)
+    rm(sky)
   }
   if(hassky==FALSE & hasskyRMS){
     tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), skyRMS=as.numeric(skyRMS[segsel]))
@@ -787,7 +800,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   con=R50seg/R90seg
   con[R90seg==0]=NA
-
+  
   SB_N50=profoundFlux2SB(flux=fluxout$flux*0.5/fluxout$N50seg, magzero=magzero, pixscale=pixscale)
   SB_N90=profoundFlux2SB(flux=fluxout$flux*0.9/fluxout$N90seg, magzero=magzero, pixscale=pixscale)
   SB_N100=profoundFlux2SB(flux=fluxout$flux/fluxout$N100seg, magzero=magzero, pixscale=pixscale)
@@ -876,7 +889,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     #Nsky=Nsky-Nmask #Raw Nsky-Nmask-Nborder, to correct for masked pixels
     Nobject=Nedge-Nsky-Nborder # Nedge-Nsky
     edge_frac=Nsky/Nedge
-
+    
     #Using Ramanujan approximation from Wikipedia:
     
     A=R100seg/pixscale
@@ -981,7 +994,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
 }
 
 profoundSegimNear=function(segim=NULL, offset=1){
-
+  
   xlen=dim(segim)[1]
   ylen=dim(segim)[2]
   
