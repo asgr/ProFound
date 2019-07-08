@@ -13,7 +13,7 @@ detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6, iters
 sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box, boxadd=box/2,
 bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
 docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE,
-groupby_det = 'segim_orig', groupby_mul = 'segim_orig', keepsegims=FALSE, ...)
+groupby_det = 'segim_orig', groupby_mul = 'segim_orig', keepsegims = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

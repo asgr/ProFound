@@ -240,7 +240,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100)
         fluxgrowth = (segstats_new$flux - skystats * segstats_new$N100) / (segstats$flux - skystats * segstats$N100) #account for flux growth
         skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #account for sky growth
-        expand_segID=segstats[segstats_new$flux>0 & fluxgrowth > threshold & SBnew < (SBlast/threshold) & skyfrac < 0.5 & selseg==(i-1),'segID']
+        expand_segID=segstats[which(segstats_new$flux>0 & fluxgrowth > threshold & SBnew < (SBlast/threshold) & skyfrac < 0.5 & selseg==(i-1)),'segID']
+        expand_segID=expand_segID[is.finite(expand_segID)]
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
         selseg[updateID] = i

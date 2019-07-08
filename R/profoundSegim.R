@@ -392,6 +392,15 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   if(is.null(expand) | length(expand)==0){
     objects=matrix(0L,dim(segim)[1],dim(segim)[2])
     objects[]=as.logical(segim)
+    
+    if(stats){
+      if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
+      segstats=profoundSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    }else{
+      if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
+      segstats=NULL
+    }
+    
     return(invisible(list(segim=segim, objects=objects, segstats=segstats, header=header, call=call)))
   }
   
@@ -502,6 +511,15 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   if(is.null(expand) | length(expand)==0){
     objects=matrix(0L,dim(segim)[1],dim(segim)[2])
     objects[]=as.logical(segim)
+    
+    if(stats){
+      if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    }else{
+      if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
+      segstats=NULL
+    }
+    
     return(invisible(list(segim=segim, objects=objects, segstats=segstats, header=header, call=call)))
   }
   
