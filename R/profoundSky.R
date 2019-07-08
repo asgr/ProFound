@@ -211,6 +211,12 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
     clip=select
   }
   
+  if(length(clip)==1){
+    if(is.na(clip)){
+      return(invisible(list(val=c(NA, NA), clip=NA)))
+    }
+  }
+  
   if(skytype=='median'){
     if('Rfast' %in% .packages()){
       skyloc=try(Rfast::med(clip, na.rm=TRUE), silent=TRUE)
@@ -228,23 +234,23 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   if(skyRMStype=='quanlo'){
     temp=clip-skyloc
     temp=temp[temp<0]
-    skyRMSloc=abs(quantile(temp, pnorm(-sigmasel)*2))/sigmasel
+    skyRMSloc=abs(quantile(temp, pnorm(-sigmasel)*2,na.rm=TRUE))/sigmasel
   }else if(skyRMStype=='quanhi'){
     temp=clip-skyloc
     temp=temp[temp>0]
-    skyRMSloc=abs(quantile(temp, (pnorm(sigmasel)-0.5)*2))/sigmasel
+    skyRMSloc=abs(quantile(temp, (pnorm(sigmasel)-0.5)*2,na.rm=TRUE))/sigmasel
   }else if(skyRMStype=='quanboth'){
     temp=clip-skyloc
     templo=temp[temp<0]
     temphi=temp[temp>0]
-    skyRMSloclo=abs(quantile(templo, pnorm(-sigmasel)*2))/sigmasel
-    skyRMSlochi=abs(quantile(temphi, (pnorm(sigmasel)-0.5)*2))/sigmasel
+    skyRMSloclo=abs(quantile(templo, pnorm(-sigmasel)*2,na.rm=TRUE))/sigmasel
+    skyRMSlochi=abs(quantile(temphi, (pnorm(sigmasel)-0.5)*2,na.rm=TRUE))/sigmasel
     skyRMSloc=(skyRMSloclo+skyRMSlochi)/2
   }else if(skyRMStype=='sd'){
     skyRMSloc=sqrt(.varwt(clip, wt=1, xcen=skyloc))
   }
   
-  invisible(list(val=c(skyloc, skyRMSloc), clip=clip))
+  return(invisible(list(val=c(skyloc, skyRMSloc), clip=clip)))
 }
 
 profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
