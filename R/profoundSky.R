@@ -213,7 +213,7 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   
   if(skytype=='median'){
     if('Rfast' %in% .packages()){
-      skyloc=try(Rfast::med(clip, na.rm=TRUE))
+      skyloc=try(Rfast::med(clip, na.rm=TRUE), silent=TRUE)
       if(class(skyloc)=='try-error'){skyloc=NA}
     }else{
       skyloc=stats::median(clip, na.rm=TRUE)
