@@ -348,9 +348,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     if(dofull){
       modellist = list(
         pointsource = list(
-          xcen = xcen,
-          ycen = ycen,
-          mag = mag
+          xcen = xcen[is.finite(mag)],
+          ycen = ycen[is.finite(mag)],
+          mag = mag[is.finite(mag)]
         )
       )
       fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
@@ -368,42 +368,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     }
     
     for(i in 1:Nmodels){
-      image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
-      sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
-      
-      singlist = list(
-        pointsource = list(
-          xcen = image_cut$loc[1],
-          ycen = image_cut$loc[2],
-          mag = mag[i]
-        )
-      )
-      
-      singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
-      
-      if(modxy){
-        if(anyNA(image_cut$image)){
-          selNA=which(is.na(image_cut$image))
-          image_cut$image[selNA]=image_cut$image[length(image_cut$image)+1-selNA]
-          sigma_cut[selNA]=sigma_cut[length(image_cut$image)+1-selNA]
-        }
+      if(is.finite(mag[i])){
+        image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
+        sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
         
-        select=which(image_cut$image+singmodel > sigma_cut*sigthresh)
-        
-        if(length(select)>0){
-          weights=(singmodel*(image_cut$image+singmodel))[select]
-          newx=.meanwt(xygrid[select,1], weights)
-          newy=.meanwt(xygrid[select,2], weights)
-          if(newx-image_cut$loc[1] > 0.5){newx=image_cut$loc[1]+0.5}
-          if(newx-image_cut$loc[1] < -0.5){newx=image_cut$loc[1]-0.5}
-          if(newy-image_cut$loc[2] > 0.5){newy=image_cut$loc[2]+0.5}
-          if(newy-image_cut$loc[2] < -0.5){newy=image_cut$loc[2]-0.5}
-          
-          image_cut$loc=c(newx,newy)
-          xcen[i]=image_cut$loc[1]+image_cut$loc.diff[1]
-          ycen[i]=image_cut$loc[2]+image_cut$loc.diff[2]
-          
-          singlist = list(
+        singlist = list(
           pointsource = list(
             xcen = image_cut$loc[1],
             ycen = image_cut$loc[2],
@@ -411,41 +380,81 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
           )
         )
         
-        if(anyNA(image_cut)){
-          image_cut[selNA]=NA
-          sigma_cut[selNA]=NA
-        }
-        
         singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
         
+        if(modxy){
+          if(anyNA(image_cut$image)){
+            selNA=which(is.na(image_cut$image))
+            image_cut$image[selNA]=image_cut$image[length(image_cut$image)+1-selNA]
+            sigma_cut[selNA]=sigma_cut[length(image_cut$image)+1-selNA]
+          }
+          
+          select=which(image_cut$image+singmodel > sigma_cut*sigthresh)
+          
+          if(length(select)>0){
+            weights=(singmodel*(image_cut$image+singmodel))[select]
+            newx=.meanwt(xygrid[select,1], weights)
+            newy=.meanwt(xygrid[select,2], weights)
+            if(newx-image_cut$loc[1] > 0.5){newx=image_cut$loc[1]+0.5}
+            if(newx-image_cut$loc[1] < -0.5){newx=image_cut$loc[1]-0.5}
+            if(newy-image_cut$loc[2] > 0.5){newy=image_cut$loc[2]+0.5}
+            if(newy-image_cut$loc[2] < -0.5){newy=image_cut$loc[2]-0.5}
+            
+            image_cut$loc=c(newx,newy)
+            xcen[i]=image_cut$loc[1]+image_cut$loc.diff[1]
+            ycen[i]=image_cut$loc[2]+image_cut$loc.diff[2]
+            
+            singlist = list(
+            pointsource = list(
+              xcen = image_cut$loc[1],
+              ycen = image_cut$loc[2],
+              mag = mag[i]
+            )
+          )
+          
+          if(anyNA(image_cut)){
+            image_cut[selNA]=NA
+            sigma_cut[selNA]=NA
+          }
+          
+          singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+          
+          }
+        }
+        
+        if(j<fit_iters){
+          diffmag[i] = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
+        }else{
+          finaloptim=optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)
+          diffmag[i]=finaloptim$par
+          psfLL[i]=-finaloptim$value
+          flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
+          fluxhess=optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut)
+          flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
+          beam_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
+        }
+        if(itersub){
+          rescale=10^(-0.4*diffmag[i])-1
+          image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
+        }
+        mag=mag+diffmag
+      }else{
+        if(j==fit_iters){
+          psfLL[i]=NA
+          flux[i]=0
+          sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
+          flux_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
         }
       }
-      
-      if(j<fit_iters){
-        diffmag[i] = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
-      }else{
-        finaloptim=optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)
-        diffmag[i]=finaloptim$par
-        psfLL[i]=-finaloptim$value
-        flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
-        fluxhess=optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut)
-        flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
-        beam_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
-      }
-      if(itersub){
-        rescale=10^(-0.4*diffmag[i])-1
-        image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
-      }
     }
-    mag=mag+diffmag
   }
   
   if(modelout){
     modellist = list(
       pointsource = list(
-        xcen = xcen,
-         ycen = ycen,
-        mag = mag
+        xcen = xcen[is.finite(mag)],
+         ycen = ycen[is.finite(mag)],
+        mag = mag[is.finite(mag)]
       )
     )
     fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
@@ -455,6 +464,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     finalLL=NULL
   }
   flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
+  flux_err[!is.finite(flux_err)]=beam_err[!is.finite(flux_err)]
   flux_err[flux_err<beam_err]=beam_err[flux_err<beam_err]
   mag_err=(2.5/log(10))*flux_err/flux
   
