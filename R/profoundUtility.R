@@ -250,7 +250,7 @@ profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic',
     invisible(temp)
 }
 
-genPointSource = function(xcen=50, ycen=50, flux=1, psf, dim=c(100,100)){
+.genPointSource = function(xcen=50, ycen=50, flux=1, psf, dim=c(100,100)){
   dimpsf = dim(psf)
   psfcen=dim(psf)/2
   
@@ -280,22 +280,27 @@ genPointSource = function(xcen=50, ycen=50, flux=1, psf, dim=c(100,100)){
     ypix_top = ypix_bottom + 1L
     inim_ypix_top = ypix_top >= 1 & ypix_top <= dim[2]
     
-    if(any(inim_xpix_left) & any(inim_ypix_bottom)){
+    dobottom = any(inim_ypix_bottom)
+    doleft = any(inim_xpix_left)
+    dotop = any(inim_ypix_top)
+    doright = any(inim_xpix_right)
+    
+    if(dobottom & doleft & left_bottom>0){
       image[xpix_left[inim_xpix_left],ypix_bottom[inim_ypix_bottom]] = 
         image[xpix_left[inim_xpix_left],ypix_bottom[inim_ypix_bottom]] + psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_bottom]] * left_bottom * flux[i]
     }
     
-    if(any(inim_xpix_left) & any(inim_ypix_top)){
+    if(dotop & doleft & left_top>0){
       image[xpix_left[inim_xpix_left],ypix_top[inim_ypix_top]] =
         image[xpix_left[inim_xpix_left],ypix_top[inim_ypix_top]] + psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_top]] * left_top * flux[i]
     }
     
-    if(any(inim_xpix_right) & any(inim_ypix_bottom)){
+    if(dobottom & doright & right_bottom>0){
       image[xpix_right[inim_xpix_right],ypix_bottom[inim_ypix_bottom]] = 
         image[xpix_right[inim_xpix_right],ypix_bottom[inim_ypix_bottom]] + psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_bottom]] * right_bottom * flux[i]
     }
     
-    if(any(inim_xpix_right) & any(inim_ypix_top)){
+    if(dotop & doright & right_top>0){
       image[xpix_right[inim_xpix_right],ypix_top[inim_ypix_top]] =
         image[xpix_right[inim_xpix_right],ypix_top[inim_ypix_top]] + psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_top]] * right_top * flux[i]
     }

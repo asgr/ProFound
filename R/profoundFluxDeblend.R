@@ -360,7 +360,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       
       #fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
       
-      fullmodel=genPointSource(
+      fullmodel=.genPointSource(
         xcen = xcen[is.finite(mag)],
         ycen = ycen[is.finite(mag)],
         flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
@@ -396,7 +396,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         
         #singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
         
-        singmodel=genPointSource(
+        singmodel=.genPointSource(
           xcen = image_cut$loc[1],
           ycen = image_cut$loc[2],
           flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
@@ -441,7 +441,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
           
           #singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
           
-          singmodel=genPointSource(
+          singmodel=.genPointSource(
             xcen = image_cut$loc[1],
             ycen = image_cut$loc[2],
             flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
@@ -491,7 +491,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     # 
     # fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
     
-    fullmodel=genPointSource(
+    fullmodel=.genPointSource(
       xcen = xcen[is.finite(mag)],
       ycen = ycen[is.finite(mag)],
       flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
