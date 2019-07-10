@@ -96,6 +96,12 @@ List containing:
 \item{finalLL}{Numeric scalar; the final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{image}{Numeric matric; the image used for fitting. This might have an additional sky component removed (if \option{doProFound}=TRUE) and NAs for masked regions.}
 \item{psfstats_extra}{Data.frame; xtra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
+\item{call}{The original function call.}
+\item{date}{The date, more specifically the output of \code{\link{date}}.}
+\item{time}{The elapsed run time in seconds.}
+\item{ProFound.version}{The version of \code{ProFound} run, more specifically the output of \code{\link{packageVersion}}('ProFound').}
+\item{R.version}{The version of \code{R} run, more specifically the output of \code{\link{R.version}}.}
+  
 
 \option{psfstats} \option{psfstats_extra} data.frames have the following columns:
 

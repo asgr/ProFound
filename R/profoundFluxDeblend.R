@@ -231,6 +231,10 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
 
 profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
+  timestart=proc.time()[3]
+  
+  call=match.call()
+  
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
   }
@@ -528,7 +532,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
   
-  return(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, psfstats_extra=psfstats_extra))
+  return(invisible(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, psfstats_extra=psfstats_extra, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)))
 }
 
 .minlike_mag=function(par,singmodel,image,im_sigma){
