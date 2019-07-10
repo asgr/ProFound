@@ -437,7 +437,6 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
           rescale=10^(-0.4*diffmag[i])-1
           image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
         }
-        mag=mag+diffmag
       }else{
         if(j==fit_iters){
           psfLL[i]=NA
@@ -447,7 +446,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         }
       }
     }
+    mag=mag+diffmag
   }
+  
   
   if(modelout){
     modellist = list(

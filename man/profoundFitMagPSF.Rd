@@ -129,8 +129,8 @@ tolerance=0, sigma=0)
 pro_s250$segstats=pro_s250$segstats[!is.na(pro_s250$segstats$mag),]
 
 newmag=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS,
-psf=s250_psf_cut, header=pro_s250$header)
+image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS, psf=s250_psf_cut,
+header=pro_s250$header)
 
 magimage(s250_im$imDat-pro_s250$sky-newmag$origmodel, qdiff=TRUE)
 magimage(s250_im$imDat-pro_s250$sky-newmag$finalmodel, qdiff=TRUE)
@@ -144,8 +144,8 @@ abline(0,1, col='red')
 #We can also run slightly adjusting the xcen and ycen as we go:
 
 newmag2=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-mag=pro_s250$segstats$mag, image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS,
-psf=s250_psf_cut, modxy=TRUE, header=pro_s250$header)
+image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS, psf=s250_psf_cut, modxy=TRUE,
+header=pro_s250$header)
 
 magimage(s250_im$imDat-pro_s250$sky-newmag2$finalmodel, qdiff=TRUE)
 
