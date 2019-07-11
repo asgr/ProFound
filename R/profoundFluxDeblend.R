@@ -235,9 +235,12 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   call=match.call()
   
-  # if(!requireNamespace("ProFit", quietly = TRUE)){
-  #   stop('The ProFit package is needed for this function to work. Please install it from CRAN.', call. = FALSE)
-  # }
+  if(!requireNamespace("ProFit", quietly = TRUE)){
+    hasProFit=TRUE
+    message('ProFit package will run things faster! Please install it from CRAN.', call. = FALSE)
+  }else{
+    hasProFit=FALSE
+  }
   
   if((is.null(xcen) & !is.null(ycen))){stop('Need xcen/ycen pair!')}
   if((!is.null(xcen) & is.null(ycen))){stop('Need xcen/ycen pair!')}
@@ -304,7 +307,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }
   
   image_orig=image
-  
+
   Nmodels=length(mag)
   
   if(verbose){
@@ -359,23 +362,24 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     }
     
     if(dofull){
-      # modellist = list(
-      #   pointsource = list(
-      #     xcen = xcen[is.finite(mag)],
-      #     ycen = ycen[is.finite(mag)],
-      #     mag = mag[is.finite(mag)]
-      #   )
-      # )
-      
-      #fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
-      
-      fullmodel=.genPointSource(
-        xcen = xcen[is.finite(mag)],
-        ycen = ycen[is.finite(mag)],
-        flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
-        psf=psf,
-        dim=dim(image)
-      )
+      if(hasProFit){
+        modellist = list(
+            pointsource = list(
+            xcen = xcen[is.finite(mag)],
+            ycen = ycen[is.finite(mag)],
+            mag = mag[is.finite(mag)]
+          )
+        )
+        fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+      }else{
+        fullmodel=.genPointSource(
+          xcen = xcen[is.finite(mag)],
+          ycen = ycen[is.finite(mag)],
+          flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
+          psf=psf,
+          dim=dim(image)
+        )
+      }
       
       image=image_orig-fullmodel
     }
@@ -398,23 +402,24 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
         sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
         
-        # singlist = list(
-        #   pointsource = list(
-        #     xcen = image_cut$loc[1],
-        #     ycen = image_cut$loc[2],
-        #     mag = mag[i]
-        #   )
-        # )
-        
-        #singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
-        
-        singmodel=.genPointSource(
-          xcen = image_cut$loc[1],
-          ycen = image_cut$loc[2],
-          flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
-          psf=psf,
-          dim=dim(psf)
-        )
+        if(hasProFit){
+          singlist = list(
+            pointsource = list(
+              xcen = image_cut$loc[1],
+              ycen = image_cut$loc[2],
+              mag = mag[i]
+            )
+          )
+          singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+        }else{
+          singmodel=.genPointSource(
+            xcen = image_cut$loc[1],
+            ycen = image_cut$loc[2],
+            flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
+            psf=psf,
+            dim=dim(psf)
+          )
+        }
         
         if(modxy){
           if(anyNA(image_cut$image)){
@@ -438,29 +443,24 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
             xcen[i]=image_cut$loc[1]+image_cut$loc.diff[1]
             ycen[i]=image_cut$loc[2]+image_cut$loc.diff[2]
             
-            singlist = list(
-            pointsource = list(
-              xcen = image_cut$loc[1],
-              ycen = image_cut$loc[2],
-              mag = mag[i]
-            )
-          )
-          
-          if(anyNA(image_cut)){
-            image_cut[selNA]=NA
-            sigma_cut[selNA]=NA
-          }
-          
-          #singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
-          
-          singmodel=.genPointSource(
-            xcen = image_cut$loc[1],
-            ycen = image_cut$loc[2],
-            flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
-            psf=psf,
-            dim=dim(psf)
-          )
-          
+            if(hasProFit){
+              singlist = list(
+                pointsource = list(
+                  xcen = image_cut$loc[1],
+                  ycen = image_cut$loc[2],
+                  mag = mag[i]
+                )
+              )
+              singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+            }else{
+              singmodel=.genPointSource(
+                xcen = image_cut$loc[1],
+                ycen = image_cut$loc[2],
+                flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
+                psf=psf,
+                dim=dim(psf)
+              )
+            }
           }
         }
         
@@ -477,6 +477,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         }
         if(itersub){
           rescale=10^(-0.4*diffmag[i])-1
+          #Now this is a weird thing. Much more efficient memory wise to use this Rcpp function to allocate matrix subsets. Not clear why since it should not be copying on modification in this case...?
           image=.addmat_cpp(image, -singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale, range(image_cut$xsel), range(image_cut$ysel))
           #image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
         }
@@ -494,23 +495,24 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   
   if(modelout){
-    # modellist = list(
-    #   pointsource = list(
-    #     xcen = xcen[is.finite(mag)],
-    #      ycen = ycen[is.finite(mag)],
-    #     mag = mag[is.finite(mag)]
-    #   )
-    # )
-    # 
-    # fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
-    
-    fullmodel=.genPointSource(
-      xcen = xcen[is.finite(mag)],
-      ycen = ycen[is.finite(mag)],
-      flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
-      psf=psf,
-      dim=dim(image)
-    )
+    if(hasProFit){
+      modellist = list(
+        pointsource = list(
+          xcen = xcen[is.finite(mag)],
+           ycen = ycen[is.finite(mag)],
+          mag = mag[is.finite(mag)]
+        )
+      )
+      fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+    }else{
+      fullmodel=.genPointSource(
+        xcen = xcen[is.finite(mag)],
+        ycen = ycen[is.finite(mag)],
+        flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
+        psf=psf,
+        dim=dim(image)
+      )
+    }
     
     finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
   }else{

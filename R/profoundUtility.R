@@ -286,23 +286,47 @@ profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic',
     doright = any(inim_xpix_right)
     
     if(dobottom & doleft & left_bottom>0){
-      image[xpix_left[inim_xpix_left],ypix_bottom[inim_ypix_bottom]] = 
-        image[xpix_left[inim_xpix_left],ypix_bottom[inim_ypix_bottom]] + psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_bottom]] * left_bottom * flux[i]
+      image = .addmat_cpp(
+        image,
+        psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_bottom]] * left_bottom * flux[i],
+        range(xpix_left[inim_xpix_left]),
+        range(ypix_bottom[inim_ypix_bottom])
+      )
+      #image[xpix_left[inim_xpix_left],ypix_bottom[inim_ypix_bottom]] = 
+        #image[xpix_left[inim_xpix_left],ypix_bottom[inim_ypix_bottom]] + psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_bottom]] * left_bottom * flux[i]
     }
     
     if(dotop & doleft & left_top>0){
-      image[xpix_left[inim_xpix_left],ypix_top[inim_ypix_top]] =
-        image[xpix_left[inim_xpix_left],ypix_top[inim_ypix_top]] + psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_top]] * left_top * flux[i]
+      image = .addmat_cpp(
+        image,
+        psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_top]] * left_top * flux[i],
+        range(xpix_left[inim_xpix_left]),
+        range(ypix_top[inim_ypix_top])
+      )
+      #image[xpix_left[inim_xpix_left],ypix_top[inim_ypix_top]] =
+        #image[xpix_left[inim_xpix_left],ypix_top[inim_ypix_top]] + psf[(1:dimpsf[1])[inim_xpix_left], (1:dimpsf[2])[inim_ypix_top]] * left_top * flux[i]
     }
     
     if(dobottom & doright & right_bottom>0){
-      image[xpix_right[inim_xpix_right],ypix_bottom[inim_ypix_bottom]] = 
-        image[xpix_right[inim_xpix_right],ypix_bottom[inim_ypix_bottom]] + psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_bottom]] * right_bottom * flux[i]
+      image = .addmat_cpp(
+        image,
+        psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_bottom]] * right_bottom * flux[i],
+        range(xpix_right[inim_xpix_right]),
+        range(ypix_bottom[inim_ypix_bottom])
+      )
+      #image[xpix_right[inim_xpix_right],ypix_bottom[inim_ypix_bottom]] = 
+        #image[xpix_right[inim_xpix_right],ypix_bottom[inim_ypix_bottom]] + psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_bottom]] * right_bottom * flux[i]
     }
     
     if(dotop & doright & right_top>0){
-      image[xpix_right[inim_xpix_right],ypix_top[inim_ypix_top]] =
-        image[xpix_right[inim_xpix_right],ypix_top[inim_ypix_top]] + psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_top]] * right_top * flux[i]
+      image = .addmat_cpp(
+        image,
+        psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_top]] * right_top * flux[i],
+        range(xpix_right[inim_xpix_right]),
+        range(ypix_top[inim_ypix_top])
+      )
+      #image[xpix_right[inim_xpix_right],ypix_top[inim_ypix_top]] =
+        #image[xpix_right[inim_xpix_right],ypix_top[inim_ypix_top]] + psf[(1:dimpsf[1])[inim_xpix_right], (1:dimpsf[2])[inim_ypix_top]] * right_top * flux[i]
     }
   }
   return(invisible(image))
