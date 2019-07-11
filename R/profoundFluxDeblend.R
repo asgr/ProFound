@@ -477,7 +477,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         }
         if(itersub){
           rescale=10^(-0.4*diffmag[i])-1
-          image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
+          image=.addmat_cpp(image, -singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale, range(image_cut$xsel), range(image_cut$ysel))
+          #image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
         }
       }else{
         if(j==fit_iters){

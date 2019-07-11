@@ -5,6 +5,10 @@ water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, clip
     .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck)
 }
 
+.addmat_cpp <- function(base, add, xlim, ylim) {
+    .Call(`_ProFound_addmat`, base, add, xlim, ylim)
+}
+
 .order_cpp <- function(x) {
     .Call(`_ProFound_order_cpp`, x)
 }

@@ -4,6 +4,17 @@
 #include <unistd.h>
 using namespace Rcpp;
 
+// [[Rcpp::export(".addmat_cpp")]]
+NumericMatrix addmat(NumericMatrix base, NumericMatrix add, IntegerVector xlim, IntegerVector ylim){
+  for (int i = xlim(0)-1; i < xlim(1); i++) {
+    for (int j = ylim(0)-1; j < ylim(1); j++) {
+      base(i,j) += add(i-xlim(0)+1,j-ylim(0)+1);
+    }
+  }
+  return base;
+}
+
+
 // [[Rcpp::export(".order_cpp")]]
 IntegerVector order_cpp(NumericVector x) {
   // NumericVector sorted = clone(x).sort(true);
