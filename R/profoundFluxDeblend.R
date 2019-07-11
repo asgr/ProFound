@@ -306,6 +306,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   image_orig=image
   
   Nmodels=length(mag)
+  
+  if(verbose){
+    Nprint=signif(Nmodels/5,1)
+  }
+  
   if(Nmodels != length(xcen)){
     stop('xcen must be the same length as mag!')
   }
@@ -384,6 +389,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     }
     
     for(i in 1:Nmodels){
+      if(verbose & (i %% Nprint == 0)  & Nmodels>=1e3){
+        message(paste('- model',i,'of',Nmodels))
+      }
       if(is.finite(mag[i])){
         image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
         sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
