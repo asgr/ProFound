@@ -283,6 +283,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       if(verbose){message('- using ProFound skyRMS model for im_sigma')}
       im_sigma=protemp$skyRMS
     }
+  }else{
+    protemp=NULL
   }
   
   if(is.null(mag)){
@@ -514,11 +516,14 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   if(findextra){
     if(verbose){message('Finding extra sources with ProFound')}
-    protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+    protemp=profoundProFound(image_orig-fullmodel+protemp$sky, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+    image_orig=image_orig-protemp$sky
     if(!is.null(protemp$segstats)){
       xcen=c(xcen, protemp$segstats$xcen)
       ycen=c(ycen, protemp$segstats$ycen)
       mag=c(mag, protemp$segstats$mag)
+      
+      if(verbose){message(paste('- gained',length(protemp$Nseg),'additional sources'))}
       
       if(verbose){message('Rerunning source model with extra sources')}
       
@@ -568,7 +573,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
   
-  return(invisible(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, psfstats_extra=psfstats_extra, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)))
+  return(invisible(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, psfstats_extra=psfstats_extra, profound=protemp, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)))
 }
 
 .minlike_mag=function(par,singmodel,image,im_sigma){

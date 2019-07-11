@@ -96,6 +96,7 @@ List containing:
 \item{finalLL}{Numeric scalar; the final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{image}{Numeric matric; the image used for fitting. This might have an additional sky component removed (if \option{doProFound}=TRUE) and NAs for masked regions.}
 \item{psfstats_extra}{Data.frame; xtra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
+\item{profound}{List; an object of class profound as output by the \code{\link{profoundProFound}} function. This contains the output for the ProFound part of the analysis if \option{doProFound}=TRUE or \option{findextra}=TRUE.}
 \item{call}{The original function call.}
 \item{date}{The date, more specifically the output of \code{\link{date}}.}
 \item{time}{The elapsed run time in seconds.}
