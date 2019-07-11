@@ -309,6 +309,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   if(verbose){
     Nprint=signif(Nmodels/5,1)
+  }else{
+    Nprint=Inf
   }
   
   if(Nmodels != length(xcen)){
@@ -390,7 +392,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     
     for(i in 1:Nmodels){
       if(verbose & (i %% Nprint == 0)  & Nmodels>=1e3){
-        message(paste('- model',i,'of',Nmodels))
+        message(paste(' - model',i,'of',Nmodels))
       }
       if(is.finite(mag[i])){
         image_cut=magcutout(image, loc=c(xcen[i],ycen[i]), box=dim(psf))
@@ -531,7 +533,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       ycen=c(ycen, protemp$segstats$ycen)
       mag=c(mag, protemp$segstats$mag)
       
-      if(verbose){message(paste('- gained',length(protemp$Nseg),'additional sources'))}
+      if(verbose){message(paste('- gained',protemp$Nseg,'additional sources'))}
       
       if(verbose){message('Rerunning source model with extra sources')}
       
