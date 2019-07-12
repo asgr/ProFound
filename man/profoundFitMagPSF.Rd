@@ -8,7 +8,7 @@ Fit PSF Magnitudes to an Image
 Fits PSF mags to an image with known source positions. This is the best deblend option in the regime where the sources are not well resolved, but the source positions are reasonably well defined.
 }
 \usage{
-profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen=NULL, Deccen=NULL, mag = NULL,
+profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen = NULL, Deccen = NULL, mag = NULL,
 image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
 modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
 fluxtype = 'Raw', header = NULL, doProFound = FALSE, findextra = FALSE, verbose = FALSE,
@@ -32,7 +32,7 @@ Numeric vector; declination centres in degrees.  If provided, must be the same l
 Numeric vector; required, initial PSF mags. This is what will be fitted.
 }
   \item{image}{
-Numeric matrix; required, the image we want to analyse.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
 }
   \item{im_sigma}{
 Numeric matrix; required, the measurement errors per pixel (expressed in terms of sigma).
@@ -94,7 +94,8 @@ List containing:
 \item{finalmodel}{Numeric matric; the final model image after optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{origLL}{Numeric scalar; the original data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{finalLL}{Numeric scalar; the final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
-\item{image}{Numeric matric; the image used for fitting. This might have an additional sky component removed (if \option{doProFound}=TRUE) and NAs for masked regions.}
+\item{image}{Numeric matric; the image directly used for fitting. This might have an additional sky component removed (if \option{doProFound}=TRUE) and NAs for masked regions.}
+\item{header}{The header provided, if missing this is NULL.}
 \item{psfstats_extra}{Data.frame; xtra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
 \item{profound}{List; an object of class profound as output by the \code{\link{profoundProFound}} function. This contains the output for the ProFound part of the analysis if \option{doProFound}=TRUE or \option{findextra}=TRUE.}
 \item{call}{The original function call.}
