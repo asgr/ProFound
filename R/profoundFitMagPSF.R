@@ -1,14 +1,14 @@
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   timestart=proc.time()[3]
   
   call=match.call()
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
-    hasProFit=TRUE
+    hasProFit=FALSE
     message('ProFit package will run things faster! Please install it from CRAN.', call. = FALSE)
   }else{
-    hasProFit=FALSE
+    hasProFit=TRUE
   }
   
   #Split out image and header parts of input:
@@ -74,9 +74,13 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   if(doProFound){
     if(verbose){message('Running initial ProFound')}
-    protemp=profoundProFound(image, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
-    if(verbose){message('- subtracting ProFound sky model from input image')}
-    image=image-protemp$sky
+    if(psf_redosky){
+      protemp=profoundProFound(image, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+      if(verbose){message('- subtracting ProFound sky model from input image')}
+      image=image-protemp$sky
+    }else{
+      protemp=profoundProFound(image, mask=mask, sky=0, magzero=magzero, header=header, verbose=FALSE, ...)
+    }
     if(is.null(xcen) & is.null(ycen) & is.null(mag)){
       if(verbose){message('- using ProFound xcen / ycen / mag for source properties')}
       xcen=protemp$segstats$xcen
@@ -330,8 +334,13 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   
   if(findextra){
     if(verbose){message('Finding extra sources with ProFound')}
-    protemp=profoundProFound(image_orig-fullmodel+protemp$sky, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
-    image_orig=image_orig-protemp$sky
+    if(psf_redosky){
+      image_orig=image_orig+protemp$sky
+      protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+      image_orig=image_orig-protemp$sky
+    }else{
+      protemp=profoundProFound(image_orig-fullmodel, mask=mask, sky=0, magzero=magzero, header=header, verbose=FALSE, ...)
+    }
     if(!is.null(protemp$segstats)){
       xcen=c(xcen, protemp$segstats$xcen)
       ycen=c(ycen, protemp$segstats$ycen)

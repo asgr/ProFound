@@ -11,8 +11,8 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen = NULL, Deccen = NULL, mag = NULL,
 image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
 modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
-fluxtype = 'Raw', header = NULL, doProFound = FALSE, findextra = FALSE, verbose = FALSE,
-...)
+fluxtype = 'Raw', psf_redosky = FALSE, header = NULL, doProFound = FALSE,
+findextra = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -66,6 +66,9 @@ Logical; should the full model image be output?
 }
   \item{fluxtype}{
 Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+}
+  \item{psf_redosky}{
+Logical; should the sky calulcated by \code{\link{profoundProFound}} be subtracted from the target image? Since FIR frames are often confused, this should be turned on with care since possibly none of the pixels are a good sky reference. Put another way, you really need to trust your PSF wings.
 }
   \item{header}{
 Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
@@ -129,22 +132,23 @@ Aaron Robotham
 \examples{
 \dontrun{
 s250_im=readFITS(system.file("extdata", 'IRdata/s250_im.fits', package="ProFound"))
-s250_psf=readFITS(system.file("extdata", 'IRdata/s250_psf.fits', package="ProFound"))
-s250_psf_cut=magcutout(s250_psf$imDat, box=c(21,21))$image
+s250_psf=readFITS(system.file("extdata",'IRdata/s250_psf.fits', package="ProFound"))$imDat
+magzero_s250=11.68
 
 pro_s250=profoundProFound(s250_im, pixcut=1, skycut=2, ext=1, redosky=FALSE, iters=1,
-tolerance=0, sigma=0)
+tolerance=0, sigma=0, magzero=magzero_s250)
 pro_s250$segstats=pro_s250$segstats[!is.na(pro_s250$segstats$mag),]
 
 newmag=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS, psf=s250_psf_cut,
-header=pro_s250$header)
+image=s250_im, psf=s250_psf, doProFound=TRUE, findextra=TRUE, verbose=TRUE, redosky=FALSE,
+magzero=magzero_s250)
 
-magimage(s250_im$imDat-pro_s250$sky-newmag$origmodel, qdiff=TRUE)
-magimage(s250_im$imDat-pro_s250$sky-newmag$finalmodel, qdiff=TRUE)
+magimage(newmag$image, qdiff=TRUE)
+magimage(newmag$image - newmag$origmodel, qdiff=TRUE)
+magimage(newmag$image - newmag$finalmodel, qdiff=TRUE)
 
-magplot(pro_s250$segstats$mag, newmag$psfstats$mag, xlim=c(-1,6), ylim=c(-1,6),
-xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
+magplot(pro_s250$segstats$mag, newmag$psfstats$mag, xlim=c(11,18), ylim=c(11,18),
+xlab='ProFound Mag', ylab='FitPSF Mag', asp=1, grid=TRUE)
 magerr(pro_s250$segstats$mag, newmag$psfstats$mag, xlo=pro_s250$segstats$mag_err,
 ylo=newmag$psfstats$mag_err)
 abline(0,1, col='red')
@@ -152,21 +156,21 @@ abline(0,1, col='red')
 #We can also run slightly adjusting the xcen and ycen as we go:
 
 newmag2=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-image=s250_im$imDat-pro_s250$sky, im_sigma=pro_s250$skyRMS, psf=s250_psf_cut, modxy=TRUE,
-header=pro_s250$header)
+image=s250_im, psf=s250_psf, doProFound=TRUE, findextra=TRUE, verbose=TRUE, redosky=FALSE,
+modxy=TRUE, magzero=magzero_s250)
 
-magimage(s250_im$imDat-pro_s250$sky-newmag2$finalmodel, qdiff=TRUE)
+magimage(newmag2$image - newmag2$finalmodel, qdiff=TRUE)
 
-magplot(pro_s250$segstats$mag, newmag2$psfstats$mag,xlim=c(-1,6), ylim=c(-1,6),
-xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
+magplot(pro_s250$segstats$mag, newmag2$psfstats$mag,xlim=c(11,18), ylim=c(11,18),
+xlab='ProFound Mag', ylab='FitPSF Mag', asp=1, grid=TRUE)
 magerr(pro_s250$segstats$mag, newmag2$psfstats$mag, xlo=pro_s250$segstats$mag_err,
 ylo=newmag2$psfstats$mag_err)
 abline(0,1, col='red')
 
 # The two profoundFitMagPSF approaches agree well within the error:
 
-magplot(newmag$psfstats$mag, newmag2$psfstats$mag,xlim=c(-1,6), ylim=c(-1,6),
-xlab='Start Mag', ylab='End Mag', asp=1, grid=TRUE)
+magplot(newmag$psfstats$mag, newmag2$psfstats$mag,xlim=c(11,18), ylim=c(11,18),
+xlab='FitPSF Mag', ylab='FitPSF (mod xy) Mag', asp=1, grid=TRUE)
 magerr(newmag$psfstats$mag, newmag2$psfstats$mag, xlo=newmag$psfstats$mag_err,
 ylo=newmag2$psfstats$mag_err)
 abline(0,1, col='red')
