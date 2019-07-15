@@ -26,6 +26,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// addmat
+NumericMatrix addmat(NumericMatrix base, NumericMatrix add, IntegerVector xlim, IntegerVector ylim);
+RcppExport SEXP _ProFound_addmat(SEXP baseSEXP, SEXP addSEXP, SEXP xlimSEXP, SEXP ylimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type base(baseSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type add(addSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type xlim(xlimSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ylim(ylimSEXP);
+    rcpp_result_gen = Rcpp::wrap(addmat(base, add, xlim, ylim));
+    return rcpp_result_gen;
+END_RCPP
+}
 // order_cpp
 IntegerVector order_cpp(NumericVector x);
 RcppExport SEXP _ProFound_order_cpp(SEXP xSEXP) {
@@ -73,6 +87,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
+    {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},
     {"_ProFound_order_cpp", (DL_FUNC) &_ProFound_order_cpp, 1},
     {"_ProFound_tabulate_cpp", (DL_FUNC) &_ProFound_tabulate_cpp, 2},
     {"_ProFound_water_cpp_old", (DL_FUNC) &_ProFound_water_cpp_old, 11},
