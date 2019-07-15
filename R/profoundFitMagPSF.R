@@ -396,7 +396,28 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
   
-  return(invisible(list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, profound=protemp, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)))
+  output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, profound=protemp, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+  class(output)='fitmagpsf'
+  return(invisible(output))
+}
+
+plot.fitmagpsf=function(x, ...){
+  layout(rbind(1:3))
+  if(is.null(x$header)){
+    magimage(x$image, qdiff=TRUE, ...)
+    legend('topleft', legend='image', bty='n', cex=3, pch='')
+    magimage(x$finalmodel, qdiff=TRUE, ...)
+    legend('topleft', legend='model', bty='n', cex=3, pch='')
+    magimage(x$image - x$finalmodel, qdiff=TRUE, ...)
+    legend('topleft', legend='image - model', bty='n', cex=3, pch='')
+  }else{
+    magimageWCS(x$image, header=x$header, qdiff=TRUE, ...)
+    legend('topleft', legend='image', bty='n', cex=3, pch='')
+    magimageWCS(x$finalmodel, header=x$header, qdiff=TRUE, ...)
+    legend('topleft', legend='model', bty='n', cex=3, pch='')
+    magimageWCS(x$image - x$finalmodel, header=x$header, qdiff=TRUE, ...)
+    legend('topleft', legend='image - model', bty='n', cex=3, pch='')
+  }
 }
 
 .minlike_mag=function(par,singmodel,image,im_sigma){

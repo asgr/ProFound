@@ -446,7 +446,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
-  invisible(output)
+  return(invisible(output))
 }
 
 plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
