@@ -90,7 +90,7 @@ Arguments to be passed on to \code{\link{profoundProFound}}. Only relevant if \o
 This function uses \code{ProFit} to make a full model image. It then makes a model image for each indiviual PSF component and optimises just this alone. This means a maximum likelihood solution is converged on very efficiently, and is inspired by Expectation Maximisation which is often used for mixture model problems (which this basically is) for the reason of fast convergence. Here we use \code{\link{optim}} with \option{method} Brent to achieve the individual PSF optimisations.
 }
 \value{
-List containing:
+Object of class "fitmagpsf", a list containing:
 
 \item{psfstats}{Data.frame; main source photometric properties (see below).}
 \item{origmodel}{Numeric matric; the original model image before optimisation. This will have the same dimensions as the input \option{image}. Only relevant if \option{modelout}=TRUE, else NA.}
@@ -127,7 +127,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profoundFluxDeblend}}
+\code{\link{profoundFluxDeblend}}, \code{\link{plot.fitmagpsf}}
 }
 \examples{
 \dontrun{
