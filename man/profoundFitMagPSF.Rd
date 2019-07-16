@@ -101,6 +101,7 @@ Object of class "fitmagpsf", a list containing:
 \item{header}{The header provided, if missing this is NULL.}
 \item{psfstats_extra}{Data.frame; xtra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
 \item{profound}{List; an object of class profound as output by the \code{\link{profoundProFound}} function. This contains the output for the ProFound part of the analysis if \option{doProFound}=TRUE or \option{findextra}=TRUE.}
+\item{mask}{The input or computed \option{mask} matrix, else NULL.}
 \item{call}{The original function call.}
 \item{date}{The date, more specifically the output of \code{\link{date}}.}
 \item{time}{The elapsed run time in seconds.}

@@ -43,6 +43,29 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     stop('Missing image - this is a required input!')
   }
   
+  #Treat image NAs as masked regions:
+  badpix=NULL
+  if(!is.null(mask)){
+    mask=mask*1L #Looks silly, but this ensures a logical mask becomes integer.
+    if(length(mask)==1 & !is.na(mask[1])){
+      maskflag=mask
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      mask[image==maskflag]=1L
+    }
+    if(anyNA(image)){
+      badpix=which(is.na(image))
+      mask[badpix]=1L
+      image[badpix]=0
+    }
+  }else{
+    if(anyNA(image)){
+      mask=matrix(0L,dim(image)[1],dim(image)[2])
+      badpix=which(is.na(image))
+      mask[badpix]=1L
+      image[badpix]=0
+    }
+  }
+  
   if(is.null(psf)){stop('Missing psf - this is a required input!')}
   
   fluxtype=tolower(fluxtype)
@@ -396,26 +419,41 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
   
-  output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, profound=protemp, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+  output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, profound=protemp, mask=mask, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   class(output)='fitmagpsf'
   return(invisible(output))
 }
 
 plot.fitmagpsf=function(x, ...){
+  
+  if(!is.null(x$mask)){
+    x$image[x$mask!=0]=NA #means we will ignore the masked bits when doing the LL
+  }
+  
   layout(rbind(1:3))
   if(is.null(x$header)){
     magimage(x$image, qdiff=TRUE, ...)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image', bty='n', cex=3, pch='')
+    
     magimage(x$finalmodel, qdiff=TRUE, ...)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='model', bty='n', cex=3, pch='')
+    
     magimage(x$image - x$finalmodel, qdiff=TRUE, ...)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image - model', bty='n', cex=3, pch='')
   }else{
     magimageWCS(x$image, header=x$header, qdiff=TRUE, ...)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image', bty='n', cex=3, pch='')
+    
     magimageWCS(x$finalmodel, header=x$header, qdiff=TRUE, ...)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='model', bty='n', cex=3, pch='')
+    
     magimageWCS(x$image - x$finalmodel, header=x$header, qdiff=TRUE, ...)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image - model', bty='n', cex=3, pch='')
   }
 }
