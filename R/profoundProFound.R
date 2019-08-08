@@ -204,11 +204,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      segstats=.profoundFluxCalcMin(image=image, segim=segim, mask=mask)
-      skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask)
-      skystats=skystats$flux/skystats$N100
-      skymed=median(skystats, na.rm=TRUE)
-      origfrac=segstats$flux - (skystats*segstats$N100)
+      skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask) #run on sky
+      skystats=skystats$flux/skystats$N100 #get per pixel mean flux per segment
+      skymed=median(skystats, na.rm=TRUE) #median per pixel mean flux per segment for the whole image
+      segstats=.profoundFluxCalcMin(image=image, segim=segim, mask=mask) #run on initial image
+      segstats$flux = segstats$flux - (skystats*segstats$N100) #remove the local sky component
+      origfrac = segstats$flux #set to initial fluxes
       
       if(iterskyloc){
         localadd=1
@@ -235,17 +236,24 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         
       for(i in 1:(iters)){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask)
-        SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100)
-        fluxgrowth = (segstats_new$flux - skystats * segstats_new$N100) / (segstats$flux - skystats * segstats$N100) #account for flux growth
-        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #account for sky growth
-        expand_segID=segstats[which(segstats_new$flux>0 & fluxgrowth > threshold & SBnew < (SBlast/threshold) & skyfrac < 0.5 & selseg==(i-1)),'segID']
-        expand_segID=expand_segID[is.finite(expand_segID)]
+        segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
+        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask) #run on image with dilated segments
+        segstats_new$flux = segstats_new$flux - (skystats * segstats_new$N100) #subtract local sky levels
+        SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100) #calculate the surface brightness of the new grown anulus only
+        fluxgrowthratio = segstats_new$flux / segstats$flux #calculate flux growth ratio
+        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
+        #set various growth logic:
+        #fluxgrowthratio > threshold - main control of growth: require the flux to increase by a factor threshold with each iteration
+        #segstats_new$flux>0 - flux has to be positive
+        #SBnew < SBlast - surface brightness has to monotonically decrease as we grow for each segment
+        #skyfrac < 0.5 - Less than half the growth should come from an unusal local oscillation in the sky background estimate
+        #selseg==(i-1) - the current segment has been flagged for dilation
+        expand_segID=segstats[which(fluxgrowthratio > threshold & segstats_new$flux>0 & SBnew < SBlast & skyfrac < 0.5 & selseg==(i-1)),'segID']
+        expand_segID=expand_segID[is.finite(expand_segID)] #safety first
         if(length(expand_segID)==0){break}
         updateID=which(segstats$segID %in% expand_segID)
-        selseg[updateID] = i
-        segstats[updateID,] = segstats_new[updateID,]
+        selseg[updateID] = i #iteration number for segments flagged for growth
+        segstats[updateID,] = segstats_new[updateID,] #update only the segstats for things that are growing, the rest can be ignored
         SBlast = SBnew
         if('fastmatch' %in% .packages()){ #dilate segments that pass tests
           selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 

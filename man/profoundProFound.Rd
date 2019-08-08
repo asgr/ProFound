@@ -256,7 +256,7 @@ An object list of class 'profound' containing:
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{image}{The input \option{image} matrix if \option{keepim}=TRUE, else NULL.}
-  \item{mask}{The input \option{mask} matrix if \option{keepim}=TRUE, else NULL.}
+  \item{mask}{The input or computed \option{mask} matrix if \option{keepim}=TRUE, else NULL.}
   \item{segstats}{If \option{stats}=TRUE then contains the output of \code{\link{profoundSegimStats}} run using the final \option{segim} (see below), otherwise NULL.}
   \item{Nseg}{The total number of segments extracted (dim(segstats)[1]).}
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}

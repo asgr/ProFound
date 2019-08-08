@@ -43,7 +43,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profoundMakeSegim}}, ~~~
+\code{\link{profoundMakeSegim}}, \code{\link{profoundSegimKeep}}
 }
 \examples{
 \dontrun{
