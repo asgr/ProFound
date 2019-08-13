@@ -118,10 +118,10 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     protemp=NULL
   }
   
+  goodlocs=ceiling(xcen)>=1 & ceiling(xcen)<= dim(image)[1] & ceiling(ycen)>=1 & ceiling(ycen)<= dim(image)[2]
   if(is.null(mag)){
-    tempflux=ifelse(ceiling(xcen)>=1 & ceiling(xcen)<= dim(image)[1] & ceiling(ycen)>=1 & ceiling(ycen)<= dim(image)[2],
-    image[cbind(ceiling(xcen),ceiling(ycen))], #if source is in image
-    NA) #otherwise set tempflux to NA
+    tempflux=rep(NA,length(xcen))
+    tempflux[goodlocs]=image[cbind(ceiling(xcen[goodlocs]),ceiling(ycen[goodlocs]))] #only if source is in image
     tempflux=tempflux*sum(image, na.rm=TRUE)/sum(tempflux, na.rm=TRUE)
     mag=profoundFlux2Mag(flux=tempflux, magzero=magzero)
   }
@@ -162,6 +162,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   RAcen=RAcen[fluxorder]
   Deccen=Deccen[fluxorder]
   mag=mag[fluxorder]
+  goodlocs=goodlocs[fluxorder]
   
   if(modxy){
     xygrid=expand.grid(1:dim(psf)[1],1:dim(psf)[2])-0.5
@@ -170,11 +171,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   psf=psf/sum(psf,na.rm=TRUE)
   beamscale=sqrt(1/sum(psf^2,na.rm=TRUE))
   
-  diffmag=rep(0,Nmodels)
-  psfLL=rep(0,Nmodels)
-  flux=rep(0,Nmodels)
-  flux_err=rep(0,Nmodels)
-  beam_err=rep(0,Nmodels)
+  diffmag=rep(NA,Nmodels)
+  psfLL=rep(NA,Nmodels)
+  flux=rep(NA,Nmodels)
+  flux_err=rep(NA,Nmodels)
+  beam_err=rep(NA,Nmodels)
   
   if(verbose){message('Iterating over source model')}
   
@@ -314,15 +315,18 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       }else{
         if(j==fit_iters){
           psfLL[i]=NA
-          flux[i]=0
-          sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
-          flux_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
+          flux[i]=NA
+          if(goodlocs[i]){
+            sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
+            flux_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
+          }else{
+            flux_err[i]=NA
+          }
         }
       }
     }
     mag=mag+diffmag
   }
-  
   
   if(modelout){
     if(hasProFit){
@@ -351,7 +355,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }
   flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
   flux_err[!is.finite(flux_err)]=beam_err[!is.finite(flux_err)]
-  flux_err[flux_err<beam_err]=beam_err[flux_err<beam_err]
+  flux_err[which(flux_err<beam_err)]=beam_err[which(flux_err<beam_err)]
   mag_err=(2.5/log(10))*flux_err/flux
   
   pchi=pchisq(prod(dim(psf))*(flux/flux_err)^2,prod(dim(psf))-1,log.p=TRUE)
@@ -416,10 +420,12 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if(findextra & !is.null(psfstats_extra)){
     psfstats_extra$flux=psfstats_extra$flux*fluxscale
     psfstats_extra$flux_err=psfstats_extra$flux_err*fluxscale
+    row.names(psfstats_extra)=NULL
   }
   
   psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
+  row.names(psfstats)=NULL
   
   output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, profound=protemp, mask=mask, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
   class(output)='fitmagpsf'
