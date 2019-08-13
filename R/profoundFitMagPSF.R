@@ -119,7 +119,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }
   
   if(is.null(mag)){
-    tempflux=image[cbind(ceiling(xcen),ceiling(ycen))]
+    tempflux=ifelse(ceiling(xcen)>=1 & ceiling(xcen)<= dim(image)[1] & ceiling(ycen)>=1 & ceiling(ycen)<= dim(image)[2],
+    image[cbind(ceiling(xcen),ceiling(ycen))], #if source is in image
+    NA) #otherwise set tempflux to NA
     tempflux=tempflux*sum(image, na.rm=TRUE)/sum(tempflux, na.rm=TRUE)
     mag=profoundFlux2Mag(flux=tempflux, magzero=magzero)
   }
