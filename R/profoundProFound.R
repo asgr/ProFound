@@ -233,7 +233,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       selseg=rep(0,length(expand_segID))
       
       if(verbose){message('Doing dilations:')}
-        
+      
       for(i in 1:(iters)){
         if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
         segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
@@ -268,8 +268,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segstats_new=.profoundFluxCalcMin(image=image, segim=segim_skyloc, mask=mask)
         skyseg_mean=(segstats_new$flux-segstats$flux)/(segstats_new$N100-segstats$N100)
         skyseg_mean[!is.finite(skyseg_mean)]=0
-      }else{
-        skyseg_mean=NA
       }
       
       objects=matrix(0L,dim(segim)[1],dim(segim)[2])
@@ -281,6 +279,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       segim_orig=segim
       selseg=0
       origfrac=1
+      skyseg_mean=NA
     }
     
     if(redosky){
