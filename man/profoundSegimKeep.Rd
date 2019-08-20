@@ -31,6 +31,8 @@ Logical; should segments partially overlapping with chosen groups be aggressivel
 }
 \details{
 The merged segments inherit the lowest segment value, e.g. list(c(1,2,4),c(5,6)) would merge together segments 1,2,4 and to be a new segment 1, and then 5,6 to be a new segment 5.
+
+If the package \code{fastmatch} is loaded then matching should be faster when multiple groups are being merged together.
 }
 \value{
 Integer matrix; the merged segmentation map, where specified groups and segments have been merged.
