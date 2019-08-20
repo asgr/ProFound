@@ -220,6 +220,7 @@ profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic',
   return(invisible(output))
 }
 
+
 # Hidden utility functions
 
 .interp.2d=function(x, y, obj){
