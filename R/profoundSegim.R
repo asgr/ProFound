@@ -1088,8 +1088,11 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
       temploc=locator(type = 'p', col=col, pch=pch)
       if(is.null(temploc)){
         mergeIDs=list()
+        check=0
       }else{
         mergeIDs=cutsegim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+        check=tabulate(mergeIDs)
+        mergeIDs=list(which(check %% 2 == 1))
       }
     }else{
       par(mar=c(0.1,0.1,0.1,0.1))
@@ -1131,8 +1134,14 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
       if(any(check==3)){
         continue=FALSE
       }else{
-        par(mar=c(0.1,0.1,0.1,0.1))
-        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE)
+        if(!is.null(loc)){
+          cutsegim=magcutout(segim, loc=loc, ...)$image
+          par(mar=c(0.1,0.1,0.1,0.1))
+          profoundSegimPlot(image=cutimage, segim=cutsegim, mask=cutmask, sky=cutsky, axes=FALSE, labels=FALSE)
+        }else{
+          par(mar=c(0.1,0.1,0.1,0.1))
+          profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE) 
+        }
         
         cat('Do you want to fix any more segments? [y]/n')
         continue = readLines(n=1L)
