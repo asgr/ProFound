@@ -1106,8 +1106,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
-    legend('topleft', legend='Click on contiguous segments to merge, and hit Escape when done.', text.col='magenta', bty='n')
-    cat('Click on contiguous segments to merge, and hit Escape when done.\n')
+    legend('topleft', legend='Click on contiguous segments to merge, and hit ESC when done.', text.col='magenta', bty='n')
+    cat('Click on contiguous segments to merge, and hit ESC when done.\n')
     
     temploc=locator(type = 'p', col=col, pch=pch, cex=cex)
     
@@ -1171,12 +1171,12 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
         if(continue_default){
-          cat('Do you want to fix any more segments? [y]/n')
+          cat('Do you want to continue fixing segments? [y]/n')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
         }else{
-          cat('Do you want to fix any more segments? y/[n]')
+          cat('Do you want to continue fixing segments? y/[n]')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
