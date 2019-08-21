@@ -1095,9 +1095,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
   
   par(mar=c(0.1,0.1,0.1,0.1))
   if(is.list(image)){
-    magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE)
+    magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
   }else{
-    magimage(image, axes=FALSE, labels=FALSE)
+    magimage(image, axes=FALSE, labels=FALSE, ...)
   }
   profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE)
   
@@ -1164,9 +1164,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       }else{
         par(mar=c(0.1,0.1,0.1,0.1))
         if(is.list(image)){
-          magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE)
+          magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
         }else{
-          magimage(image, axes=FALSE, labels=FALSE)
+          magimage(image, axes=FALSE, labels=FALSE, ...)
         }
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
