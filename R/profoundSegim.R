@@ -1028,7 +1028,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, loc=NULL, col='green', pch=4, profound=NULL, crosshair=FALSE, crosscex=5, ...){
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, loc=NULL, segID_merge=list(), col='green', pch=4, profound=NULL, crosshair=FALSE, crosscex=5, ...){
   if(capabilities()['aqua']){
     quartz()
   }else{
@@ -1057,65 +1057,71 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
     if(is.null(header)){header=profound$header}
   }
   
+  segim_start=segim
+  segim_progress=segim_start
+  if(length(segID_merge)>0){
+    segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+    segim=profoundSegimKeep(segim, segID_merge=segID_merge)
+  }
+  
+  if(!is.null(loc)){
+    image=magcutout(image, loc=loc, ...)$image
+    segim=magcutout(segim, loc=loc, ...)$image
+    if(!is.null(mask)){
+      mask=magcutout(mask, loc=loc, ...)$image
+    }else{
+      mask=NULL
+    }
+    if(!is.null(sky)){
+      sky=magcutout(sky, loc=loc, ...)$image
+    }else{
+      sky=NULL
+    }
+    segim_start=magcutout(segim_start, loc=loc, ...)$image
+    segim_progress=magcutout(segim_progress, loc=loc, ...)$image
+  }
+  
   continue=TRUE
   
-  segID_merge=list()
+  par(mar=c(0.1,0.1,0.1,0.1))
+  profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE)
   
   while(continue){
-    if(!is.null(loc)){
-      cutimage=magcutout(image, loc=loc, ...)$image
-      cutsegim=magcutout(segim, loc=loc, ...)$image
-      if(!is.null(mask)){
-        cutmask=magcutout(mask, loc=loc, ...)$image
-      }else{
-        cutmask=NULL
-      }
-      if(!is.null(sky)){
-        cutsky=magcutout(sky, loc=loc, ...)$image
-      }else{
-        cutsky=NULL
-      }
-      
-      par(mar=c(0.1,0.1,0.1,0.1))
-      profoundSegimPlot(image=cutimage, segim=cutsegim, mask=cutmask, sky=cutsky, axes=FALSE, labels=FALSE)
-      if(crosshair){
-        points(dim(cutimage)[1]/2,dim(cutimage)[2]/2, col='magenta', pch=5, cex=crosscex)
-      }
-      
-      legend('topleft', legend='Click on contiguous segments to merge, and hit Escape when done.', text.col='magenta', bty='n')
-      cat('Click on contiguous segments to merge, and hit Escape when done.\n')
-      
-      temploc=locator(type = 'p', col=col, pch=pch)
-      if(is.null(temploc)){
-        mergeIDs=list()
-        check=0
-      }else{
-        mergeIDs=cutsegim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-        check=tabulate(mergeIDs)
-        mergeIDs=list(which(check %% 2 == 1))
-      }
-    }else{
-      par(mar=c(0.1,0.1,0.1,0.1))
-      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE)
-      if(crosshair){
-        points(dim(image)[1]/2,dim(image)[2]/2, col='magenta', pch=5, cex=crosscex)
-      }
-      
-      legend('topleft', legend='Click on contiguous segments to merge, and hit Escape when done.', text.col='magenta', bty='n')
-      cat('Click on contiguous segments to merge, and hit Escape when done.\n')
-      
-      temploc=locator(type = 'p', col=col, pch=pch)
-      if(is.null(temploc)){
-        mergeIDs=list()
-        check=0
-      }else{
-        mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-        check=tabulate(mergeIDs)
-        mergeIDs=list(which(check %% 2 == 1))
-      }
+    magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=0.3)), add=TRUE)
+    if(crosshair){
+      points(dim(image)[1]/2,dim(image)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
+    legend('topleft', legend='Click on contiguous segments to merge, and hit Escape when done.', text.col='magenta', bty='n')
+    cat('Click on contiguous segments to merge, and hit Escape when done.\n')
     
-    segID_merge=c(segID_merge,mergeIDs)
+    temploc=locator(type = 'p', col=col, pch=pch)
+    
+    if(is.null(temploc)){
+      mergeIDs=list()
+      check=0
+    }else{
+      mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+      check=tabulate(mergeIDs)
+      mergeIDs=list(which(check %% 2 == 1))
+      
+      if(length(which(check>0))==1){
+        mergeIDs=list()
+        zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+        if(length(which(zapIDs>0))>0){
+          zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+          segID_merge=profoundZapSegID(zapIDs, segID_merge)
+          if(length(segID_merge)>0){
+            segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
+          }else{
+            segim=segim_start
+          }
+        }
+      }
+      
+      segID_merge=c(segID_merge,mergeIDs)
+      segim_progress=segim_start
+      segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+    }
     
     if(any(check==3)){
       happy=TRUE
@@ -1127,21 +1133,15 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
     }
     
     if(happy & length(mergeIDs)>0){
-      segim=invisible(profoundSegimKeep(segim, segID_merge=mergeIDs))
+      segim=profoundSegimKeep(segim, segID_merge=mergeIDs)
     }
     
     if(happy){
       if(any(check==3)){
         continue=FALSE
       }else{
-        if(!is.null(loc)){
-          cutsegim=magcutout(segim, loc=loc, ...)$image
-          par(mar=c(0.1,0.1,0.1,0.1))
-          profoundSegimPlot(image=cutimage, segim=cutsegim, mask=cutmask, sky=cutsky, axes=FALSE, labels=FALSE)
-        }else{
-          par(mar=c(0.1,0.1,0.1,0.1))
-          profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE) 
-        }
+        par(mar=c(0.1,0.1,0.1,0.1))
+        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE) 
         
         cat('Do you want to fix any more segments? [y]/n')
         continue = readLines(n=1L)
@@ -1156,6 +1156,14 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
   dev.off()
   
   return(invisible(list(segim=segim, segID_merge=segID_merge)))
+}
+
+profoundZapSegID=function(segID, segID_merge){
+  times=unlist(lapply(segID_merge, length))
+  refs=rep(1:length(segID_merge), times=times)
+  logic=unlist(segID_merge) %in% segID
+  refs=unique(refs[logic])
+  return(invisible(segID_merge[-refs]))
 }
 
 profoundSegimNear=function(segim=NULL, offset=1){
