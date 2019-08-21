@@ -941,62 +941,65 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   invisible(as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),]))
 }
 
-profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, ...){
-  if(!is.null(image)){
-    if(class(image)=='profound'){
-      if(is.null(segim)){segim=image$segim}
-      if(is.null(mask)){mask=image$mask}
-      if(is.null(sky)){sky=image$sky}
-      if(is.null(header)){header=image$header}
-      image=image$image
+profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, add=FALSE, ...){
+  if(add==FALSE){
+    if(!is.null(image)){
+      if(class(image)=='profound'){
+        if(is.null(segim)){segim=image$segim}
+        if(is.null(mask)){mask=image$mask}
+        if(is.null(sky)){sky=image$sky}
+        if(is.null(header)){header=image$header}
+        image=image$image
+        if(is.null(image)){stop('Need image in profound object to be non-Null')}
+      }
+    }
+    if(!is.null(profound)){
+      if(class(profound) != 'profound'){
+        stop('Class of profound input must be of type \'profound\'')
+      }
+      if(is.null(image)){image=profound$image}
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
+      if(is.null(segim)){segim=profound$segim}
+      if(is.null(mask)){mask=profound$mask}
+      if(is.null(sky)){sky=profound$sky}
+      if(is.null(header)){header=profound$header}
     }
-  }
-  if(!is.null(profound)){
-    if(class(profound) != 'profound'){
-      stop('Class of profound input must be of type \'profound\'')
+    if(!is.null(image)){
+      if(any(names(image)=='imDat') & is.null(header)){
+        header=image$hdr
+        image=image$imDat
+      }else if(any(names(image)=='imDat') & !is.null(header)){
+        image=image$imDat
+      }
+      if(any(names(image)=='dat') & is.null(header)){
+        header=image$hdr[[1]]
+        header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
+        image=image$dat[[1]]
+      }else if(any(names(image)=='dat') & !is.null(header)){
+        image=image$dat[[1]]
+      }
+      if(any(names(image)=='image') & is.null(header)){
+        header=image$header
+        image=image$image
+      }else if(any(names(image)=='image') & !is.null(header)){
+        image=image$image
+      }
     }
-    if(is.null(image)){image=profound$image}
-    if(is.null(image)){stop('Need image in profound object to be non-Null')}
-    if(is.null(segim)){segim=profound$segim}
-    if(is.null(mask)){mask=profound$mask}
-    if(is.null(sky)){sky=profound$sky}
-    if(is.null(header)){header=profound$header}
-  }
-  if(!is.null(image)){
-    if(any(names(image)=='imDat') & is.null(header)){
-      header=image$hdr
-      image=image$imDat
-    }else if(any(names(image)=='imDat') & !is.null(header)){
-      image=image$imDat
+    
+    if(!is.null(sky)){
+      image=image-sky
     }
-    if(any(names(image)=='dat') & is.null(header)){
-      header=image$hdr[[1]]
-      header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-      image=image$dat[[1]]
-    }else if(any(names(image)=='dat') & !is.null(header)){
-      image=image$dat[[1]]
+    
+    if(is.null(header)){header=NULL}
+    if(is.null(header)){
+      magimage(image, ...)
+    }else{
+      magimageWCS(image, header=header, ...)
     }
-    if(any(names(image)=='image') & is.null(header)){
-      header=image$header
-      image=image$image
-    }else if(any(names(image)=='image') & !is.null(header)){
-      image=image$image
-    }
-  }
-  
-  if(!is.null(sky)){
-    image=image-sky
   }
   
   segim[is.na(segim)]=0L
-  
-  if(is.null(header)){header=NULL}
-  if(is.null(header)){
-    temp=magimage(image, ...)
-  }else{
-    temp=magimageWCS(image, header=header, ...)
-  }
+
   if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
   #segvec=which(tabulate(segim)>0)
   # for(i in segvec){
@@ -1028,7 +1031,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, loc=NULL, segID_merge=list(), col='green', pch=4, profound=NULL, crosshair=FALSE, crosscex=5, ...){
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, ...){
   if(capabilities()['aqua']){
     quartz()
   }else{
@@ -1040,7 +1043,6 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
       if(is.null(segim)){segim=image$segim}
       if(is.null(mask)){mask=image$mask}
       if(is.null(sky)){sky=image$sky}
-      if(is.null(header)){header=image$header}
       image=image$image
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
     }
@@ -1054,7 +1056,6 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
     if(is.null(segim)){segim=profound$segim}
     if(is.null(mask)){mask=profound$mask}
     if(is.null(sky)){sky=profound$sky}
-    if(is.null(header)){header=profound$header}
   }
   
   segim_start=segim
@@ -1062,39 +1063,53 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
   if(length(segID_merge)>0){
     segim_progress[!segim_progress %in% unlist(segID_merge)]=0
     segim=profoundSegimKeep(segim, segID_merge=segID_merge)
+  }else{
+    segim_progress[]=0
   }
   
   if(!is.null(loc)){
-    image=magcutout(image, loc=loc, ...)$image
-    segim=magcutout(segim, loc=loc, ...)$image
+    if(is.list(image)){
+      imageR=magcutout(image$R, loc=loc, box=box)$image
+      imageG=magcutout(image$G, loc=loc, box=box)$image
+      imageB=magcutout(image$B, loc=loc, box=box)$image
+      image=list(R=imageR, G=imageG, B=imageB)
+    }else{
+      image=magcutout(image, loc=loc, box=box)$image
+    }
+    segim=magcutout(segim, loc=loc, box=box)$image
     if(!is.null(mask)){
-      mask=magcutout(mask, loc=loc, ...)$image
+      mask=magcutout(mask, loc=loc, box=box)$image
     }else{
       mask=NULL
     }
     if(!is.null(sky)){
-      sky=magcutout(sky, loc=loc, ...)$image
+      sky=magcutout(sky, loc=loc, box=box)$image
     }else{
       sky=NULL
     }
-    segim_start=magcutout(segim_start, loc=loc, ...)$image
-    segim_progress=magcutout(segim_progress, loc=loc, ...)$image
+    segim_start=magcutout(segim_start, loc=loc, box=box)$image
+    segim_progress=magcutout(segim_progress, loc=loc, box=box)$image
   }
   
   continue=TRUE
   
   par(mar=c(0.1,0.1,0.1,0.1))
-  profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE)
+  if(is.list(image)){
+    magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE)
+  }else{
+    magimage(image, axes=FALSE, labels=FALSE)
+  }
+  profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE)
   
   while(continue){
     magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=0.3)), add=TRUE)
     if(crosshair){
-      points(dim(image)[1]/2,dim(image)[2]/2, col='magenta', pch=5, cex=crosscex)
+      points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
     legend('topleft', legend='Click on contiguous segments to merge, and hit Escape when done.', text.col='magenta', bty='n')
     cat('Click on contiguous segments to merge, and hit Escape when done.\n')
     
-    temploc=locator(type = 'p', col=col, pch=pch)
+    temploc=locator(type = 'p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){
       mergeIDs=list()
@@ -1126,10 +1141,17 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
     if(any(check==3)){
       happy=TRUE
     }else{
-      cat('Are you happy with your solution? [y]/n')
-      happy = readLines(n=1L)
-      happy = tolower(happy)
-      happy = happy == "" | happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
+      if(happy_default){
+        cat('Are you happy with your solution? [y]/n')
+        happy = readLines(n=1L)
+        happy = tolower(happy)
+        happy = happy == "" | happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
+      }else{
+        cat('Are you happy with your solution? y/[n]')
+        happy = readLines(n=1L)
+        happy = tolower(happy)
+        happy = happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
+      }
     }
     
     if(happy & length(mergeIDs)>0){
@@ -1141,12 +1163,24 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NU
         continue=FALSE
       }else{
         par(mar=c(0.1,0.1,0.1,0.1))
-        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE) 
+        if(is.list(image)){
+          magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE)
+        }else{
+          magimage(image, axes=FALSE, labels=FALSE)
+        }
+        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
-        cat('Do you want to fix any more segments? [y]/n')
-        continue = readLines(n=1L)
-        continue = tolower(continue)
-        continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        if(continue_default){
+          cat('Do you want to fix any more segments? [y]/n')
+          continue = readLines(n=1L)
+          continue = tolower(continue)
+          continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        }else{
+          cat('Do you want to fix any more segments? y/[n]')
+          continue = readLines(n=1L)
+          continue = tolower(continue)
+          continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        }
       }
     }else{
       continue=TRUE
