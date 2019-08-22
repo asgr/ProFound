@@ -1031,11 +1031,13 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, ...){
-  if(capabilities()['aqua']){
-    quartz()
-  }else{
-    X11()
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, openwindow=TRUE, ...){
+  if(openwindow){
+    if(capabilities()['aqua']){
+      quartz()
+    }else{
+      X11()
+    }
   }
   
   if(!is.null(image)){
@@ -1058,15 +1060,6 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     if(is.null(sky)){sky=profound$sky}
   }
   
-  segim_start=segim
-  segim_progress=segim_start
-  if(length(segID_merge)>0){
-    segim_progress[!segim_progress %in% unlist(segID_merge)]=0
-    segim=profoundSegimKeep(segim, segID_merge=segID_merge)
-  }else{
-    segim_progress[]=0
-  }
-  
   if(!is.null(loc)){
     if(is.list(image)){
       imageR=magcutout(image$R, loc=loc, box=box)$image
@@ -1087,8 +1080,15 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }else{
       sky=NULL
     }
-    segim_start=magcutout(segim_start, loc=loc, box=box)$image
-    segim_progress=magcutout(segim_progress, loc=loc, box=box)$image
+  }
+  
+  segim_start=segim
+  segim_progress=segim_start
+  if(length(segID_merge)>0){
+    segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+    segim=profoundSegimKeep(segim, segID_merge=segID_merge)
+  }else{
+    segim_progress[]=0
   }
   
   continue=TRUE
@@ -1112,8 +1112,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     temploc=locator(type = 'p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){
-      mergeIDs=list()
-      check=0
+      break
+      #mergeIDs=list()
+      #check=0
     }else{
       mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
       check=tabulate(mergeIDs)
@@ -1142,12 +1143,12 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       happy=TRUE
     }else{
       if(happy_default){
-        cat('Are you happy with your solution? [y]/n')
+        cat('HAPPY with your solution? [y]/n')
         happy = readLines(n=1L)
         happy = tolower(happy)
         happy = happy == "" | happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
       }else{
-        cat('Are you happy with your solution? y/[n]')
+        cat('HAPPY with your solution? y/[n]')
         happy = readLines(n=1L)
         happy = tolower(happy)
         happy = happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
@@ -1171,12 +1172,12 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
         if(continue_default){
-          cat('Do you want to continue fixing segments? [y]/n')
+          cat('CONTINUE fixing segments? [y]/n')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
         }else{
-          cat('Do you want to continue fixing segments? y/[n]')
+          cat('CONTINUE fixing segments? y/[n]')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
@@ -1187,7 +1188,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }
   }
   
-  dev.off()
+  if(openwindow){
+    dev.off()
+  }
   
   return(invisible(list(segim=segim, segID_merge=segID_merge)))
 }
