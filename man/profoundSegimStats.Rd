@@ -14,7 +14,7 @@ magzero = 0, gain = NULL, pixscale = 1, header = NULL, sortcol = "segID",
 decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1, cor_err_func = NULL,
 app_diam = 1)
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, header = NULL,
-col = rainbow(max(segim), end=2/3), profound = NULL, ...)
+col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -71,6 +71,9 @@ Function; the error function between \option{N100} (the number of pixels in the 
 }
   \item{app_diam}{
 Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
+}
+  \item{add}{
+Logical; should just the segment contours be added to the current image? This allows for complex colouring of different segments to be achieved by adding various overlays.  
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.

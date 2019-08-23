@@ -1033,11 +1033,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
 
 profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, openwindow=TRUE, ...){
   if(openwindow){
-    if(capabilities()['aqua']){
-      quartz()
-    }else{
-      X11()
-    }
+      dev.new(noRStudioGD = TRUE)
   }
   
   if(!is.null(image)){
@@ -1106,8 +1102,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
-    legend('topleft', legend='Click on contiguous segments to merge, and hit ESC when done.', text.col='magenta', bty='n')
-    cat('Click on contiguous segments to merge, and hit ESC when done.\n')
+    legend('topleft', legend='ESC in this plot window when done.', text.col='magenta', bg='black')
+    cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
     temploc=locator(type = 'p', col=col, pch=pch, cex=cex)
     
@@ -1200,7 +1196,10 @@ profoundZapSegID=function(segID, segID_merge){
   refs=rep(1:length(segID_merge), times=times)
   logic=unlist(segID_merge) %in% segID
   refs=unique(refs[logic])
-  return(invisible(segID_merge[-refs]))
+  if(length(refs)>0){
+    segID_merge=segID_merge[-refs]
+  }
+  return(invisible(segID_merge))
 }
 
 profoundSegimNear=function(segim=NULL, offset=1){
