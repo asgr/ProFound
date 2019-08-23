@@ -89,18 +89,22 @@ If you see one of these coloured polygon complexes and do not like the solution 
 If you click on any segment twice this will ignore the segment when merging- this allows you to fix silly click errors by clicking again.
 
 If you click on any segment three times and hit ESC in the plot window it will tell the code that you are both definitely happy *and* that you want to stop fixing segments, ending the session instantly. This allows you to make rapid progress when doing lots of easy fixes since you do not need to then type anything at all into the command prompt (which slows down progress).
+
+If you click on the sky once and hit ESC you will enter the segment creation mode. Now all clicks made will form a convex polygon, with the contained pixels becoming a new segment with a new segID (maximum in \option{segim} + 1). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency.
 }
 \value{
 List containing:
-\item{segim}{Fixed version of the segmentation map. If a cutout has been requested this will be for just the cutout section.}
-\item{segIF_merge}{Fixed version of the list of segIDs to be merged.}
+\item{segim}{Numeric matrix; fixed version of the segmentation map. If a cutout has been requested this will be for just the cutout section.}
+\item{segim_start}{Numeric matrix; reference starting segmentation map.}
+\item{segID_merge}{Fixed version of the list of segIDs to be merged.}
 
+It is always the case that \option{segim_start} combined with \option{segID_merge} will produce \option{segim} via \code{\link{profoundSegimKeep}}. We provide \option{segim_start} for reference since the segment creation mode (see Details above) will also modify the base segmentation map in order to guarantee the internal consistency. This means the output \option{segim_start} and differ from the input \option{segim_start}, but only if new segments have been manually drawn.
 }
 \author{
 Aaron Robotham
 }
 \seealso{
-\code{\link{profoundProFound}}
+\code{\link{profoundProFound}}; \code{\link{profoundSegimKeep}}
 }
 \examples{
 \dontrun{

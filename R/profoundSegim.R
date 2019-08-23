@@ -1102,12 +1102,13 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
-    legend('topleft', legend='ESC in this plot window when done.', text.col='magenta', bg='black')
+    legend('topleft', legend=c('ESC to stop','Multi: merge','1: de-merge/new','2: cancel','3: happy/stop'), text.col='magenta', bg='black')
     cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
-    temploc=locator(type = 'p', col=col, pch=pch, cex=cex)
+    temploc=locator(type='p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){
+      legend('bottomleft', legend='Done!', text.col='magenta', bg='black')
       break
       #mergeIDs=list()
       #check=0
@@ -1115,9 +1116,23 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
       check=tabulate(mergeIDs)
       mergeIDs=list(which(check %% 2 == 1))
+      seggrid=NULL
       
-      if(length(which(check>0))==1){
+      if(length(check)==1 & check[1]==0){ #entering segment polygon mode
         mergeIDs=list()
+        legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
+        temploc=locator(type='o', col=col, pch=pch, cex=cex)
+        
+        if(is.null(temploc)){
+          break
+        }else{
+          lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
+          seggrid=.inpoly_pix(temploc$x, temploc$y)
+        }
+        
+      }else if(length(which(check>0))==1){#group de-merge
+        mergeIDs=list()
+        legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
         zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
         if(length(which(zapIDs>0))>0){
           zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
@@ -1126,24 +1141,25 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
             segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
           }else{
             segim=segim_start
+            segim_progress[]=0
           }
         }
+      }else{
+        legend('bottomleft', legend='Merge segments', text.col='magenta', bg='black')
       }
-      
-      segID_merge=c(segID_merge,mergeIDs)
-      segim_progress=segim_start
-      segim_progress[!segim_progress %in% unlist(segID_merge)]=0
     }
     
     if(any(check==3)){
       happy=TRUE
     }else{
       if(happy_default){
+        legend('topright', legend='Happy? [y]/n', text.col='magenta', bg='black')
         cat('HAPPY with your solution? [y]/n')
         happy = readLines(n=1L)
         happy = tolower(happy)
         happy = happy == "" | happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
       }else{
+        legend('topright', legend='Happy? y/[n]', text.col='magenta', bg='black')
         cat('HAPPY with your solution? y/[n]')
         happy = readLines(n=1L)
         happy = tolower(happy)
@@ -1151,8 +1167,18 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       }
     }
     
-    if(happy & length(mergeIDs)>0){
-      segim=profoundSegimKeep(segim, segID_merge=mergeIDs)
+    if(happy){
+      if(!is.null(seggrid)){
+        newsegID=max(segim, na.rm = TRUE) + 1L
+        segim[seggrid]=newsegID
+        segim_start[seggrid]=newsegID
+      }
+      if(length(mergeIDs)>0){
+        segID_merge=c(segID_merge,mergeIDs)
+        segim_progress=segim_start
+        segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+        segim=profoundSegimKeep(segim, segID_merge=mergeIDs)
+      }
     }
     
     if(happy){
@@ -1168,11 +1194,13 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
         if(continue_default){
+          legend('topleft', legend='Continue? [y]/n', text.col='magenta', bg='black')
           cat('CONTINUE fixing segments? [y]/n')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
         }else{
+          legend('topleft', legend='Continue? y/[n]', text.col='magenta', bg='black')
           cat('CONTINUE fixing segments? y/[n]')
           continue = readLines(n=1L)
           continue = tolower(continue)
@@ -1181,6 +1209,13 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       }
     }else{
       continue=TRUE
+      par(mar=c(0.1,0.1,0.1,0.1))
+      if(is.list(image)){
+        magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+      }else{
+        magimage(image, axes=FALSE, labels=FALSE, ...)
+      }
+      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
     }
   }
   
@@ -1188,7 +1223,32 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     dev.off()
   }
   
-  return(invisible(list(segim=segim, segID_merge=segID_merge)))
+  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge)))
+}
+
+.inpoly=function(polyx,polyy,x0,y0){
+  polyx = c(polyx, polyx[1])
+  polyy = c(polyy, polyy[1])
+  polyx = polyx - x0
+  polyy = polyy - y0
+  norm=sqrt(polyx^2 + polyy^2)
+  polyx = polyx/norm
+  polyy = polyy/norm
+  dotprod = polyx[1:(length(polyx)-1)]*polyx[2:length(polyx)] + polyy[1:(length(polyy)-1)]*polyy[2:length(polyy)]
+  return(sum(acos(dotprod)) > 2*pi-1e-10)
+}
+
+.inpoly_pix=function(polyx,polyy){
+  xseq=floor(min(polyx)):ceiling(max(polyx)) - 0.5
+  yseq=floor(min(polyy)):ceiling(max(polyy)) - 0.5
+  tempgrid=as.matrix(expand.grid(xseq, yseq))
+  tempgrid=cbind(tempgrid,0)
+  
+  for(i in 1:length(tempgrid[,1])){
+    tempgrid[i,3] = .inpoly(polyx, polyy, x0=tempgrid[i,1], y0=tempgrid[i,2])
+  }
+  
+  return(invisible(ceiling(tempgrid[tempgrid[,3]>0,1:2])))
 }
 
 profoundZapSegID=function(segID, segID_merge){
