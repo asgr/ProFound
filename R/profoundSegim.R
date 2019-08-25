@@ -1122,26 +1122,28 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         mergeIDs=list()
         legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
         temploc=locator(type='o', col=col, pch=pch, cex=cex)
-        
         if(is.null(temploc)){
           break
         }else{
           lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
           seggrid=.inpoly_pix(temploc$x, temploc$y)
         }
-        
-      }else if(length(which(check>0))==1){#group de-merge
+      }else if(length(which(check>0))==1){
         mergeIDs=list()
-        legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
-        zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-        if(length(which(zapIDs>0))>0){
-          zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-          segID_merge=profoundZapSegID(zapIDs, segID_merge)
-          if(length(segID_merge)>0){
-            segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
-          }else{
-            segim=segim_start
-            segim_progress[]=0
+        if(max(check)==2){ #select segment
+          seggrid=which(segim==which(check==2), arr.ind=TRUE)
+        }else{ #group de-merge
+          legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
+          zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+          if(length(which(zapIDs>0))>0){
+            zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+            segID_merge=profoundZapSegID(zapIDs, segID_merge)
+            if(length(segID_merge)>0){
+              segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
+            }else{
+              segim=segim_start
+              segim_progress[]=0
+            }
           }
         }
       }else{
@@ -1169,8 +1171,17 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     
     if(happy){
       if(!is.null(seggrid)){
-        newsegID=max(segim, na.rm = TRUE) + 1L
+        legend('topright', legend='segID: [auto]/#', text.col='magenta', bg='black')
+        cat('segID: [auto]/#')
+        newsegID = readLines(n=1L)
+        newsegID =tolower(newsegID)
+        if(newsegID=='auto' | newsegID==''){
+          newsegID=max(segim, na.rm = TRUE) + 1L
+        }else{
+          newsegID = as.integer(newsegID)
+        }
         segim[seggrid]=newsegID
+        segim_progress[seggrid]=newsegID
         segim_start[seggrid]=newsegID
       }
       if(length(mergeIDs)>0){
@@ -1226,29 +1237,41 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
   return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge)))
 }
 
-.inpoly=function(polyx,polyy,x0,y0){
-  polyx = c(polyx, polyx[1])
-  polyy = c(polyy, polyy[1])
-  polyx = polyx - x0
-  polyy = polyy - y0
-  norm=sqrt(polyx^2 + polyy^2)
-  polyx = polyx/norm
-  polyy = polyy/norm
-  dotprod = polyx[1:(length(polyx)-1)]*polyx[2:length(polyx)] + polyy[1:(length(polyy)-1)]*polyy[2:length(polyy)]
-  return(sum(acos(dotprod)) > 2*pi-1e-10)
-}
+# .inpoly=function(polyx,polyy,x0,y0){ #defunct code
+#   #polyx = c(polyx, polyx[1])
+#   #polyy = c(polyy, polyy[1])
+#   polyx = polyx - x0
+#   polyy = polyy - y0
+#   #norm=sqrt(polyx^2 + polyy^2)
+#   #polyx = polyx/norm
+#   #polyy = polyy/norm
+#   #dotprod = polyx[1:(length(polyx)-1)]*polyx[2:length(polyx)] + polyy[1:(length(polyy)-1)]*polyy[2:length(polyy)]
+#   #crossprod=crossprod(rbind(polyx[1:(length(polyx)-1)],polyy[1:(length(polyy)-1)]), rbind(polyx[2:length(polyx)], polyy[2:length(polyy)]))
+#   allangs = atan2(polyy, polyx) %% 2*pi
+#   shift = which.min(allangs)
+#   if(shift>1){
+#     allangs = c(0, allangs[shift:length(allangs)], allangs[1:(shift-1)], 2*pi)
+#   }
+#   #tempsum = abs(sum(acos(dotprod)*sign(dotprod))) #fix for non convex cases!
+#   tempsum = abs(sum(diff(c(allangs,allangs[1]))))
+#   print(tempsum)
+#   return(tempsum < 1e-10)
+# }
 
-.inpoly_pix=function(polyx,polyy){
-  xseq=floor(min(polyx)):ceiling(max(polyx)) - 0.5
-  yseq=floor(min(polyy)):ceiling(max(polyy)) - 0.5
+.inpoly_pix=function(poly_x,poly_y){
+  xseq=floor(min(poly_x)):ceiling(max(poly_x)) - 0.5
+  yseq=floor(min(poly_y)):ceiling(max(poly_y)) - 0.5
   tempgrid=as.matrix(expand.grid(xseq, yseq))
-  tempgrid=cbind(tempgrid,0)
+  #tempgrid=cbind(tempgrid,0)
   
-  for(i in 1:length(tempgrid[,1])){
-    tempgrid[i,3] = .inpoly(polyx, polyy, x0=tempgrid[i,1], y0=tempgrid[i,2])
-  }
+  #for(i in 1:length(tempgrid[,1])){
+  #  tempgrid[i,3] = point_in_polygon_cpp(x=tempgrid[i,1], y=tempgrid[i,2], poly_x = poly_x, poly_y = poly_y)
+    #tempgrid[i,3] = .inpoly(poly_y, poly_y, x0=tempgrid[i,1], y0=tempgrid[i,2])
+  #}
   
-  return(invisible(ceiling(tempgrid[tempgrid[,3]>0,1:2])))
+  select=.point_in_polygon_cpp(tempgrid[,1], tempgrid[,2], poly_x, poly_y)
+  
+  return(invisible(ceiling(tempgrid[select,])))
 }
 
 profoundZapSegID=function(segID, segID_merge){
@@ -1411,11 +1434,12 @@ profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_m
     whichpix=which(segim_out %in% unlist(segID_merge))
     pixsel=segim_out[whichpix]
     for(i in 1:length(segID_merge)){
-      tempID=segID_merge[[i]]
-      if('fastmatch' %in% .packages()){
-        pixsel[fastmatch::fmatch(pixsel, tempID, nomatch = 0L) > 0L]=min(tempID)
-      }else{
-        pixsel[pixsel %in% tempID]=min(tempID)
+      if(length(segID_merge[[i]])>0){
+        if('fastmatch' %in% .packages()){
+          pixsel[fastmatch::fmatch(pixsel, segID_merge[[i]], nomatch = 0L) > 0L]=min(segID_merge[[i]], na.rm=TRUE)
+        }else{
+          pixsel[pixsel %in% segID_merge[[i]]]=min(segID_merge[[i]], na.rm=TRUE)
+        }
       }
     }
     segim_out[whichpix]=pixsel
