@@ -89,11 +89,11 @@ Currently fixed segment complexes (as per the internal version of \option{segID_
 
 If you see one of these coloured polygon complexes and do not like the solution you can click once in it and hit ESC in the plot window. This will tell the code to unpick the complex and return all filled segments back to their original solution. You can then try to fix it again, if needed.
 
-If you click on any segment twice this will ignore the segment when merging- this allows you to fix silly click errors by clicking again.
+If you make a number of clicks and then change your mind, click on the unwanted segment twice and make some other this will ignore the segment when merging- this allows you to fix silly click errors by clicking again. If you just click on a segment twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky).
 
 If you click on any segment three times and hit ESC in the plot window it will tell the code that you are both definitely happy *and* that you want to stop fixing segments, ending the session instantly. This allows you to make rapid progress when doing lots of easy fixes since you do not need to then type anything at all into the command prompt (which slows down progress).
 
-If you click on the sky once and hit ESC you will enter the segment creation mode. Now all clicks made will form a convex polygon, with the contained pixels becoming a new segment with a new segID (maximum in \option{segim} + 1). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency.
+If you click on the sky once and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. Double clicking a single segment (see above) also enters this mode, and the segment is changed in the same manner as if it were drawn manually.
 }
 \value{
 List containing:
