@@ -11,7 +11,7 @@ This function will launch an interactive session to let users reassemble segment
 profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, loc = NULL,
 box = 400, segID_merge = list(), col = "magenta", pch = 4, cex = 2, profound = NULL,
 crosshair = FALSE, crosscex = 5, happy_default = TRUE, continue_default = TRUE,
-openwindow = TRUE, segID_max = NULL ...)
+openwindow = TRUE, segID_max = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -64,7 +64,7 @@ Logical; what should the default answer be to whether you what to fix more segme
 Logical; should a new Quartz or X11 window be opened. When looping through different image regions this should probably be FALSE. It is here because it is a very bad idea to try to do this using the R-Studio plot window- it does not properly support interactive plotting and will not show the click positions.
 }
   \item{segID_max}{
-Integer; the maximum segment ID to assume for the input \option{segim}. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k).
+Integer; the maximum segment ID to assume for the input \option{segim}. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k). If set to 'auto' then it will check the input \option{segim}, if left at the default NULL it will check the available segim when it is creating a new segment. Since this will be on a segmentation image subset when specifying a box, this might mean the segID is not unique on the larger input \option{segim}, but it will be unique on the cut down one being processed internally, and the ones returned (\option{segim} and \option{segim_start}).
 }
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.
