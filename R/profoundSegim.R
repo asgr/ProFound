@@ -1081,8 +1081,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
   segim_start=segim
   segim_progress=segim_start
   if(length(segID_merge)>0){
-    segim_progress[!segim_progress %in% unlist(segID_merge)]=0
     segim=profoundSegimKeep(segim, segID_merge=segID_merge)
+    segim_progress[!segim_progress %in% unlist(segID_merge)]=0
   }else{
     segim_progress[]=0
   }
@@ -1107,12 +1107,10 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     
     temploc=locator(type='p', col=col, pch=pch, cex=cex)
     
-    if(is.null(temploc)){
+    if(is.null(temploc)){ #if nothing is selected move on
       legend('bottomleft', legend='Done!', text.col='magenta', bg='black')
       break
-      #mergeIDs=list()
-      #check=0
-    }else{
+    }else{ #otherwise prepare for trouble...
       mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
       check=tabulate(mergeIDs)
       mergeIDs=list(which(check %% 2 == 1))
@@ -1138,12 +1136,14 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
           if(length(which(zapIDs>0))>0){
             zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
             segID_merge=profoundZapSegID(zapIDs, segID_merge)
-            if(length(segID_merge)>0){
-              segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
-            }else{
-              segim=segim_start
-              segim_progress[]=0
-            }
+            # if(length(segID_merge)>0){
+            #   segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
+            #   segim_progress=segim_start
+            #   segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+            # }else{
+            #   segim=segim_start
+            #   segim_progress[]=0
+            # }
           }
         }
       }else{
@@ -1186,9 +1186,11 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       }
       if(length(mergeIDs)>0){
         segID_merge=c(segID_merge,mergeIDs)
+      }
+      if(length(segID_merge)>0){
+        segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
         segim_progress=segim_start
         segim_progress[!segim_progress %in% unlist(segID_merge)]=0
-        segim=profoundSegimKeep(segim, segID_merge=mergeIDs)
       }
     }
     
