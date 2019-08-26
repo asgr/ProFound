@@ -1078,6 +1078,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }
   }
   
+  segID_max=max(segim, na.rm = TRUE)
   segim_start=segim
   segim_progress=segim_start
   if(length(segID_merge)>0){
@@ -1124,7 +1125,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
           break
         }else{
           lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
-          seggrid=.inpoly_pix(temploc$x, temploc$y)
+          seggrid=.inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
         }
       }else if(length(which(check>0))==1){
         mergeIDs=list()
@@ -1174,9 +1175,10 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         legend('topright', legend='segID: [auto]/#: ', text.col='magenta', bg='black')
         cat('segID: [auto]/#')
         newsegID = readLines(n=1L)
-        newsegID =tolower(newsegID)
+        newsegID = tolower(newsegID)
         if(newsegID=='auto' | newsegID==''){
-          newsegID=max(segim, na.rm = TRUE) + 1L
+          newsegID = segID_max + 1L
+          segID_max = segID_max + 1L
         }else{
           newsegID = as.integer(newsegID)
         }
@@ -1239,7 +1241,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
   return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge)))
 }
 
-# .inpoly=function(polyx,polyy,x0,y0){ #defunct code
+# .inpoly=function(polyx,polyy,x0,y0){ #defunct code, not working properly anyway...
 #   #polyx = c(polyx, polyx[1])
 #   #polyy = c(polyy, polyy[1])
 #   polyx = polyx - x0
