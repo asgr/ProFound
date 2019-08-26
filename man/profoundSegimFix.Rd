@@ -11,7 +11,7 @@ This function will launch an interactive session to let users reassemble segment
 profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, loc = NULL,
 box = 400, segID_merge = list(), col = "magenta", pch = 4, cex = 2, profound = NULL,
 crosshair = FALSE, crosscex = 5, happy_default = TRUE, continue_default = TRUE,
-openwindow = TRUE, ...)
+openwindow = TRUE, segID_max = NULL ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -63,6 +63,9 @@ Logical; what should the default answer be to whether you what to fix more segme
   \item{openwindow}{
 Logical; should a new Quartz or X11 window be opened. When looping through different image regions this should probably be FALSE. It is here because it is a very bad idea to try to do this using the R-Studio plot window- it does not properly support interactive plotting and will not show the click positions.
 }
+  \item{segID_max}{
+Integer; the maximum segment ID to assume for the input \option{segim}. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k).
+}
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.
 }
@@ -96,7 +99,8 @@ If you click on the sky once and hit ESC you will enter the segment creation mod
 List containing:
 \item{segim}{Numeric matrix; fixed version of the segmentation map. If a cutout has been requested this will be for just the cutout section.}
 \item{segim_start}{Numeric matrix; reference starting segmentation map.}
-\item{segID_merge}{Fixed version of the list of segIDs to be merged.}
+\item{segID_merge}{List; fixed version of the list of segIDs to be merged.}
+\item{segID_max}{Integer; the current maximum segment ID in the output \option{segim}. This should only be modified compared to the input \option{segim} if new segments have be drawn on the image.}
 
 It is always the case that \option{segim_start} combined with \option{segID_merge} will produce \option{segim} via \code{\link{profoundSegimKeep}}. We provide \option{segim_start} for reference since the segment creation mode (see Details above) will also modify the base segmentation map in order to guarantee the internal consistency. This means the output \option{segim_start} and differ from the input \option{segim_start}, but only if new segments have been manually drawn.
 }

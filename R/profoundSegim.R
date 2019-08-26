@@ -1031,7 +1031,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, openwindow=TRUE, ...){
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, openwindow=TRUE, segID_max=NULL, ...){
   if(openwindow){
       dev.new(noRStudioGD = TRUE)
   }
@@ -1056,6 +1056,12 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     if(is.null(sky)){sky=profound$sky}
   }
   
+  if(!is.null(segID_max)){
+    if(segID_max=='auto'){
+      segID_max = max(segim, na.rm=TRUE)
+    }
+  }
+  
   if(!is.null(loc)){
     if(is.list(image)){
       imageR=magcutout(image$R, loc=loc, box=box)$image
@@ -1078,7 +1084,6 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }
   }
   
-  segID_max=max(segim, na.rm = TRUE)
   segim_start=segim
   segim_progress=segim_start
   if(length(segID_merge)>0){
@@ -1106,49 +1111,55 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     legend('topleft', legend=c('ESC to stop','Multi: merge','1: ungroup','2: undo seg','3: skip check'), text.col='magenta', bg='black')
     cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
+    check=NULL
+    seggrid=NULL
+    mergeIDs=list()
     temploc=locator(type='p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){ #if nothing is selected move on
       legend('bottomleft', legend='Done!', text.col='magenta', bg='black')
       break
     }else{ #otherwise prepare for trouble...
-      mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-      check=tabulate(mergeIDs)
-      mergeIDs=list(which(check %% 2 == 1))
-      seggrid=NULL
-      
-      if(length(check)==1 & check[1]==0){ #entering segment polygon mode
-        mergeIDs=list()
-        legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
-        temploc=locator(type='o', col=col, pch=pch, cex=cex)
-        if(is.null(temploc)){
-          break
-        }else{
-          lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
-          seggrid=.inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
-        }
-      }else if(length(which(check>0))==1){
-        mergeIDs=list()
-        if(max(check)==2){ #select segment
-          seggrid=which(segim==which(check==2), arr.ind=TRUE)
-        }else{ #group de-merge
-          legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
-          zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-          if(length(which(zapIDs>0))>0){
-            zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-            segID_merge=profoundZapSegID(zapIDs, segID_merge)
-            # if(length(segID_merge)>0){
-            #   segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
-            #   segim_progress=segim_start
-            #   segim_progress[!segim_progress %in% unlist(segID_merge)]=0
-            # }else{
-            #   segim=segim_start
-            #   segim_progress[]=0
-            # }
-          }
-        }
+      if(any(ceiling(temploc$x)<0) | any(ceiling(temploc$y)<0) | any(ceiling(temploc$x)>dim(segim)[1]) | any(ceiling(temploc$y)>dim(segim)[2])){
+        legend('bottomleft', legend='Selected outside of image!', text.col='magenta', bg='black')
       }else{
-        legend('bottomleft', legend='Merge segments', text.col='magenta', bg='black')
+        mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+        check=tabulate(mergeIDs)
+        mergeIDs=list(which(check %% 2 == 1))
+      }
+      
+      if(!is.null(check)){
+        if(length(check)==1 & check[1]==0){ #entering segment polygon mode
+          mergeIDs=list()
+          legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
+          temploc=locator(type='o', col=col, pch=pch, cex=cex)
+          if(!is.null(temploc)){
+            lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
+            seggrid=.inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
+          }
+        }else if(length(which(check>0))==1){
+          mergeIDs=list()
+          if(max(check)==2){ #select segment
+            seggrid=which(segim==which(check==2), arr.ind=TRUE)
+          }else{ #group de-merge
+            legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
+            zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+            if(length(which(zapIDs>0))>0){
+              zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+              segID_merge=profoundZapSegID(zapIDs, segID_merge)
+              # if(length(segID_merge)>0){
+              #   segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
+              #   segim_progress=segim_start
+              #   segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+              # }else{
+              #   segim=segim_start
+              #   segim_progress[]=0
+              # }
+            }
+          }
+        }else{
+          legend('bottomleft', legend='Merge segments', text.col='magenta', bg='black')
+        }
       }
     }
     
@@ -1177,6 +1188,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         newsegID = readLines(n=1L)
         newsegID = tolower(newsegID)
         if(newsegID=='auto' | newsegID==''){
+          if(is.null(segID_max)){
+            segID_max = max(segim, na.rm=TRUE)
+          }
           newsegID = segID_max + 1L
           segID_max = segID_max + 1L
         }else{
@@ -1193,6 +1207,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
         segim_progress=segim_start
         segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+      }else{
+        segim=segim_start
+        segim_progress[]=0
       }
     }
     
@@ -1238,7 +1255,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     dev.off()
   }
   
-  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge)))
+  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max)))
 }
 
 # .inpoly=function(polyx,polyy,x0,y0){ #defunct code, not working properly anyway...
