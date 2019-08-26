@@ -1102,7 +1102,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
-    legend('topleft', legend=c('ESC to stop','Multi: merge','1: de-merge/new','2: cancel','3: happy/stop'), text.col='magenta', bg='black')
+    legend('topleft', legend=c('ESC to stop','Multi: merge','1: ungroup','2: undo seg','3: skip check'), text.col='magenta', bg='black')
     cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
     temploc=locator(type='p', col=col, pch=pch, cex=cex)
@@ -1156,13 +1156,13 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }else{
       if(happy_default){
         legend('topright', legend='Happy? [y]/n', text.col='magenta', bg='black')
-        cat('HAPPY with your solution? [y]/n')
+        cat('HAPPY with your solution? [y]/n: ')
         happy = readLines(n=1L)
         happy = tolower(happy)
         happy = happy == "" | happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
       }else{
         legend('topright', legend='Happy? y/[n]', text.col='magenta', bg='black')
-        cat('HAPPY with your solution? y/[n]')
+        cat('HAPPY with your solution? y/[n]: ')
         happy = readLines(n=1L)
         happy = tolower(happy)
         happy = happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
@@ -1171,7 +1171,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     
     if(happy){
       if(!is.null(seggrid)){
-        legend('topright', legend='segID: [auto]/#', text.col='magenta', bg='black')
+        legend('topright', legend='segID: [auto]/#: ', text.col='magenta', bg='black')
         cat('segID: [auto]/#')
         newsegID = readLines(n=1L)
         newsegID =tolower(newsegID)
@@ -1207,14 +1207,14 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
         if(continue_default){
-          legend('topleft', legend='Continue? [y]/n', text.col='magenta', bg='black')
-          cat('CONTINUE fixing segments? [y]/n')
+          legend('topleft', legend='Cont? [y]/n', text.col='magenta', bg='black')
+          cat('CONTINUE fixing segments on current image? [y]/n: ')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
         }else{
-          legend('topleft', legend='Continue? y/[n]', text.col='magenta', bg='black')
-          cat('CONTINUE fixing segments? y/[n]')
+          legend('topleft', legend='Cont? y/[n]', text.col='magenta', bg='black')
+          cat('CONTINUE fixing segments on current image? y/[n]: ')
           continue = readLines(n=1L)
           continue = tolower(continue)
           continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
