@@ -1289,11 +1289,13 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
 
 profoundZapSegID=function(segID, segID_merge){
   times=unlist(lapply(segID_merge, length))
-  refs=rep(1:length(segID_merge), times=times)
-  logic=unlist(segID_merge) %in% segID
-  refs=unique(refs[logic])
-  if(length(refs)>0){
-    segID_merge=segID_merge[-refs]
+    if(!is.null(times)){
+    refs=rep(1:length(segID_merge), times=times)
+    logic=unlist(segID_merge) %in% segID
+    refs=unique(refs[logic])
+    if(length(refs)>0){
+      segID_merge=segID_merge[-refs]
+    }
   }
   return(invisible(segID_merge))
 }
