@@ -1031,8 +1031,8 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, openwindow=TRUE, segID_max=NULL, ...){
-  if(openwindow){
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, segID_max=NULL, ...){
+  if(open_window){
       dev.new(noRStudioGD = TRUE)
   }
   
@@ -1087,7 +1087,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
   segim_start=segim
   segim_progress=segim_start
   if(length(segID_merge)>0){
-    segim=profoundSegimKeep(segim, segID_merge=segID_merge)
+    segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
     segim_progress[!segim_progress %in% unlist(segID_merge)]=0
   }else{
     segim_progress[]=0
@@ -1129,7 +1129,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
       }
       
       if(!is.null(check)){
-        if(length(check)==1 & check[1]==0){ #entering segment polygon mode
+        if(length(check)==1 & check[1]==0  & allow_seg_modify){ #entering segment polygon mode
           mergeIDs=list()
           legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
           temploc=locator(type='o', col=col, pch=pch, cex=cex)
@@ -1139,7 +1139,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
           }
         }else if(length(which(check>0))==1){
           mergeIDs=list()
-          if(max(check)==2){ #select segment
+          if(max(check)==2 & allow_seg_modify){ #select segment
             seggrid=which(segim==which(check==2), arr.ind=TRUE)
           }else{ #group de-merge
             legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
@@ -1147,14 +1147,6 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
             if(length(which(zapIDs>0))>0){
               zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
               segID_merge=profoundZapSegID(zapIDs, segID_merge)
-              # if(length(segID_merge)>0){
-              #   segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
-              #   segim_progress=segim_start
-              #   segim_progress[!segim_progress %in% unlist(segID_merge)]=0
-              # }else{
-              #   segim=segim_start
-              #   segim_progress[]=0
-              # }
             }
           }
         }else{
@@ -1182,7 +1174,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }
     
     if(happy){
-      if(!is.null(seggrid)){
+      if(!is.null(seggrid) & allow_seg_modify){
         legend('topright', legend='segID: [auto]/#: ', text.col='magenta', bg='black')
         cat('segID: [auto]/#')
         newsegID = readLines(n=1L)
@@ -1251,7 +1243,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
     }
   }
   
-  if(openwindow){
+  if(open_window){
     dev.off()
   }
   
