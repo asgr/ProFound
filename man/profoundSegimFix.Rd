@@ -8,10 +8,11 @@ Interactive Segment Fixing Tool
 This function will launch an interactive session to let users reassemble segments of groups etc. The idea is that you might have very large galaxies that are hard to keep together with \code{\link{profoundProFound}} settings that also work well at separating close sources. Using this tool allows users to quickly put things back together in an easy fashion.
 }
 \usage{
-profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, loc = NULL,
-box = 400, segID_merge = list(), col = "magenta", pch = 4, cex = 2, profound = NULL,
-crosshair = FALSE, crosscex = 5, happy_default = TRUE, continue_default = TRUE,
-open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL, ...)
+profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound = NULL,
+loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
+crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
+continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL,
+...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +27,9 @@ Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 
 }
   \item{sky}{
 User provided estimate of the absolute sky level. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted!
+}
+  \item{profound}{
+List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure. As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
   \item{loc}{
 Numeric vector; the [x,y] location where we want to cutout the image.
@@ -45,14 +49,14 @@ Point type of the overlaid click positions.
   \item{cex}{
 Size of the overlaid click positions.
 }
-  \item{profound}{
-List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure. As an added convenience, you can assign the profound object directly to the \option{image} input.
-}
   \item{crosshair}{
 Logical; should a crosshair be placed in the centre of the image to guide the eye?
 }
   \item{crosscex}{
-Size of the overlaid crosshair.
+Numeric scalar; size of the overlaid crosshair.
+}
+  \item{alpha_seg}{
+Numeric scalar; the alpha transparency of the overlaid segment polygons.
 }
   \item{happy_default}{
 Logical; what should the default answer be to whether you are happy with the current fix (default is TRUE, i.e. yes).

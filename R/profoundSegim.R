@@ -1027,11 +1027,11 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   magimage(segim, col=c(NA,col), add=TRUE, magmap=FALSE)
   
   if(!is.null(mask)){
-    magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
+    magimage(mask!=0, col=c(NA,hsv(alpha=0.3)), add=TRUE, magmap=FALSE, zlim=c(0,1))
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, profound=NULL, crosshair=FALSE, crosscex=5, happy_default=TRUE, continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, segID_max=NULL, ...){
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, segID_max=NULL, ...){
   if(open_window){
       dev.new(noRStudioGD = TRUE)
   }
@@ -1104,7 +1104,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, loc=NULL,
   profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE)
   
   while(continue){
-    magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=0.3)), add=TRUE)
+    magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=alpha_seg)), add=TRUE)
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
