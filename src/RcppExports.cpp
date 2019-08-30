@@ -5,6 +5,20 @@
 
 using namespace Rcpp;
 
+// point_in_polygon
+LogicalVector point_in_polygon(NumericVector x, NumericVector y, NumericVector poly_x, NumericVector poly_y);
+RcppExport SEXP _ProFound_point_in_polygon(SEXP xSEXP, SEXP ySEXP, SEXP poly_xSEXP, SEXP poly_ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type poly_x(poly_xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type poly_y(poly_ySEXP);
+    rcpp_result_gen = Rcpp::wrap(point_in_polygon(x, y, poly_x, poly_y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // water_cpp
 Rcpp::IntegerMatrix water_cpp(Rcpp::NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck);
 RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP) {
@@ -86,6 +100,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ProFound_point_in_polygon", (DL_FUNC) &_ProFound_point_in_polygon, 4},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
     {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},
     {"_ProFound_order_cpp", (DL_FUNC) &_ProFound_order_cpp, 1},

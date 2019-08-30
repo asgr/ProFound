@@ -291,19 +291,19 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     segstats=NULL
   }
   
-  if(!is.null(SBlim) & !missing(magzero)){
-    SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
-  }else if(is.null(SBlim) & !missing(magzero) & skycut>0){
-    SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-  }else{
-    SBlim=NULL
-  }
+  # if(!is.null(SBlim) & !missing(magzero)){
+  #   SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
+  # }else if(is.null(SBlim) & !missing(magzero) & skycut>0){
+  #   SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
+  # }else{
+  #   SBlim=NULL
+  # }
   
   if(is.null(header)){header=NULL}
   
   if(verbose){message(paste(" - MakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  invisible(list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call))
+  invisible(list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, call=call))
 }
 
 profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL, skycut=1, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
@@ -941,13 +941,106 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   invisible(as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),]))
 }
 
-profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, ...){
+profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, add=FALSE, ...){
+  if(add==FALSE){
+    if(!is.null(image)){
+      if(class(image)=='profound'){
+        if(is.null(segim)){segim=image$segim}
+        if(is.null(mask)){mask=image$mask}
+        if(is.null(sky)){sky=image$sky}
+        if(is.null(header)){header=image$header}
+        image=image$image
+        if(is.null(image)){stop('Need image in profound object to be non-Null')}
+      }
+    }
+    if(!is.null(profound)){
+      if(class(profound) != 'profound'){
+        stop('Class of profound input must be of type \'profound\'')
+      }
+      if(is.null(image)){image=profound$image}
+      if(is.null(image)){stop('Need image in profound object to be non-Null')}
+      if(is.null(segim)){segim=profound$segim}
+      if(is.null(mask)){mask=profound$mask}
+      if(is.null(sky)){sky=profound$sky}
+      if(is.null(header)){header=profound$header}
+    }
+    if(!is.null(image)){
+      if(any(names(image)=='imDat') & is.null(header)){
+        header=image$hdr
+        image=image$imDat
+      }else if(any(names(image)=='imDat') & !is.null(header)){
+        image=image$imDat
+      }
+      if(any(names(image)=='dat') & is.null(header)){
+        header=image$hdr[[1]]
+        header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
+        image=image$dat[[1]]
+      }else if(any(names(image)=='dat') & !is.null(header)){
+        image=image$dat[[1]]
+      }
+      if(any(names(image)=='image') & is.null(header)){
+        header=image$header
+        image=image$image
+      }else if(any(names(image)=='image') & !is.null(header)){
+        image=image$image
+      }
+    }
+    
+    if(!is.null(sky)){
+      image=image-sky
+    }
+    
+    if(is.null(header)){header=NULL}
+    if(is.null(header)){
+      magimage(image, ...)
+    }else{
+      magimageWCS(image, header=header, ...)
+    }
+  }
+  
+  segim[is.na(segim)]=0L
+
+  if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
+  #segvec=which(tabulate(segim)>0)
+  # for(i in segvec){
+  #   z=segim==i
+  #   z=z[ceiling(temp$x), ceiling(temp$y)]
+  #   contour(temp$x,temp$y,z,add=T,col=col[i],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
+  # }
+  xrun=1:(dim(segim)[1]-1)
+  yrun=1:(dim(segim)[2]-1)
+  
+  segim_lb=segim[xrun,yrun]
+  segim_lt=segim[xrun+1,yrun]
+  segim_rt=segim[xrun+1,yrun+1]
+  segim_rb=segim[xrun,yrun+1]
+  
+  segim_temp = (segim_lb == segim_lt) & (segim_rt == segim_rb) & (segim_lb == segim_rb) & (segim_lt == segim_rt) 
+  
+  segim_edge=matrix(0,dim(segim)[1],dim(segim)[2])
+  segim_edge[xrun,yrun]=segim_edge[xrun,yrun]+segim_temp
+  segim_edge[xrun+1,yrun]=segim_edge[xrun+1,yrun]+segim_temp
+  segim_edge[xrun+1,yrun+1]=segim_edge[xrun+1,yrun+1]+segim_temp
+  segim_edge[xrun,yrun+1]=segim_edge[xrun,yrun+1]+segim_temp
+  segim[segim_edge==4]=0
+  
+  magimage(segim, col=c(NA,col), add=TRUE, magmap=FALSE)
+  
+  if(!is.null(mask)){
+    magimage(mask!=0, col=c(NA,hsv(alpha=0.3)), add=TRUE, magmap=FALSE, zlim=c(0,1))
+  }
+}
+
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, segID_max=NULL, ...){
+  if(open_window){
+      dev.new(noRStudioGD = TRUE)
+  }
+  
   if(!is.null(image)){
     if(class(image)=='profound'){
       if(is.null(segim)){segim=image$segim}
       if(is.null(mask)){mask=image$mask}
       if(is.null(sky)){sky=image$sky}
-      if(is.null(header)){header=image$header}
       image=image$image
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
     }
@@ -961,54 +1054,250 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
     if(is.null(segim)){segim=profound$segim}
     if(is.null(mask)){mask=profound$mask}
     if(is.null(sky)){sky=profound$sky}
-    if(is.null(header)){header=profound$header}
   }
-  if(!is.null(image)){
-    if(any(names(image)=='imDat') & is.null(header)){
-      header=image$hdr
-      image=image$imDat
-    }else if(any(names(image)=='imDat') & !is.null(header)){
-      image=image$imDat
-    }
-    if(any(names(image)=='dat') & is.null(header)){
-      header=image$hdr[[1]]
-      header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-      image=image$dat[[1]]
-    }else if(any(names(image)=='dat') & !is.null(header)){
-      image=image$dat[[1]]
-    }
-    if(any(names(image)=='image') & is.null(header)){
-      header=image$header
-      image=image$image
-    }else if(any(names(image)=='image') & !is.null(header)){
-      image=image$image
+  
+  if(!is.null(segID_max)){
+    if(segID_max=='auto'){
+      segID_max = max(segim, na.rm=TRUE)
     }
   }
   
-  if(!is.null(sky)){
-    image=image-sky
-  }
-  
-  segim[is.na(segim)]=0L
-  
-  if(is.null(header)){header=NULL}
-  if(is.null(header)){
-    temp=magimage(image, ...)
-  }else{
-    temp=magimageWCS(image, header=header, ...)
-  }
-  if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
-  segvec=which(tabulate(segim)>0)
-  for(i in segvec){
-    z=segim==i
-    z=z[ceiling(temp$x), ceiling(temp$y)]
-    contour(temp$x,temp$y,z,add=T,col=col[i],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
-  }
-  if(!is.null(mask)){
+  if(!is.null(loc)){
+    if(is.list(image)){
+      imageR=magcutout(image$R, loc=loc, box=box)$image
+      imageG=magcutout(image$G, loc=loc, box=box)$image
+      imageB=magcutout(image$B, loc=loc, box=box)$image
+      image=list(R=imageR, G=imageG, B=imageB)
+    }else{
+      image=magcutout(image, loc=loc, box=box)$image
+    }
+    segim=magcutout(segim, loc=loc, box=box)$image
     if(!is.null(mask)){
-      magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
+      mask=magcutout(mask, loc=loc, box=box)$image
+    }else{
+      mask=NULL
+    }
+    if(!is.null(sky)){
+      sky=magcutout(sky, loc=loc, box=box)$image
+    }else{
+      sky=NULL
     }
   }
+  
+  segim_start=segim
+  segim_progress=segim_start
+  if(length(segID_merge)>0){
+    segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
+    segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+  }else{
+    segim_progress[]=0
+  }
+  
+  continue=TRUE
+  
+  par(mar=c(0.1,0.1,0.1,0.1))
+  if(is.list(image)){
+    magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+  }else{
+    magimage(image, axes=FALSE, labels=FALSE, ...)
+  }
+  profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE)
+  
+  while(continue){
+    magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=alpha_seg)), add=TRUE)
+    if(crosshair){
+      points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
+    }
+    legend('topleft', legend=c('ESC to stop','Multi: merge','1: ungroup','2: undo seg','3: skip check'), text.col='magenta', bg='black')
+    cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
+    
+    check=NULL
+    seggrid=NULL
+    mergeIDs=list()
+    temploc=locator(type='p', col=col, pch=pch, cex=cex)
+    
+    if(is.null(temploc)){ #if nothing is selected move on
+      legend('bottomleft', legend='Done!', text.col='magenta', bg='black')
+      break
+    }else{ #otherwise prepare for trouble...
+      if(any(ceiling(temploc$x)<0) | any(ceiling(temploc$y)<0) | any(ceiling(temploc$x)>dim(segim)[1]) | any(ceiling(temploc$y)>dim(segim)[2])){
+        legend('bottomleft', legend='Selected outside of image!', text.col='magenta', bg='black')
+      }else{
+        mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+        check=tabulate(mergeIDs)
+        mergeIDs=list(which(check %% 2 == 1))
+      }
+      
+      if(!is.null(check)){
+        if(length(check)==1 & check[1]==0  & allow_seg_modify){ #entering segment polygon mode
+          mergeIDs=list()
+          legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
+          temploc=locator(type='o', col=col, pch=pch, cex=cex)
+          if(!is.null(temploc)){
+            lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
+            seggrid=.inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
+          }
+        }else if(length(which(check>0))==1){
+          mergeIDs=list()
+          if(max(check)==2 & allow_seg_modify){ #select segment
+            seggrid=which(segim==which(check==2), arr.ind=TRUE)
+          }else{ #group de-merge
+            legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
+            zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+            if(length(which(zapIDs>0))>0){
+              zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+              segID_merge=profoundZapSegID(zapIDs, segID_merge)
+            }
+          }
+        }else{
+          legend('bottomleft', legend='Merge segments', text.col='magenta', bg='black')
+        }
+      }
+    }
+    
+    if(any(check==3)){
+      happy=TRUE
+    }else{
+      if(happy_default){
+        legend('topright', legend='Happy? [y]/n', text.col='magenta', bg='black')
+        cat('HAPPY with your solution? [y]/n: ')
+        happy = readLines(n=1L)
+        happy = tolower(happy)
+        happy = happy == "" | happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
+      }else{
+        legend('topright', legend='Happy? y/[n]', text.col='magenta', bg='black')
+        cat('HAPPY with your solution? y/[n]: ')
+        happy = readLines(n=1L)
+        happy = tolower(happy)
+        happy = happy == 'yes' | happy == 'y' | happy == 't' | happy == 'true'
+      }
+    }
+    
+    if(happy){
+      if(!is.null(seggrid) & allow_seg_modify){
+        legend('topright', legend='segID: [auto]/#: ', text.col='magenta', bg='black')
+        cat('segID: [auto]/#')
+        newsegID = readLines(n=1L)
+        newsegID = tolower(newsegID)
+        if(newsegID=='auto' | newsegID==''){
+          if(is.null(segID_max)){
+            segID_max = max(segim, na.rm=TRUE)
+          }
+          newsegID = segID_max + 1L
+          segID_max = segID_max + 1L
+        }else{
+          newsegID = as.integer(newsegID)
+        }
+        segim[seggrid]=newsegID
+        segim_progress[seggrid]=newsegID
+        segim_start[seggrid]=newsegID
+      }
+      if(length(mergeIDs)>0){
+        segID_merge=c(segID_merge,mergeIDs)
+      }
+      if(length(segID_merge)>0){
+        segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
+        segim_progress=segim_start
+        segim_progress[!segim_progress %in% unlist(segID_merge)]=0
+      }else{
+        segim=segim_start
+        segim_progress[]=0
+      }
+    }
+    
+    if(happy){
+      if(any(check==3)){
+        continue=FALSE
+      }else{
+        par(mar=c(0.1,0.1,0.1,0.1))
+        if(is.list(image)){
+          magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+        }else{
+          magimage(image, axes=FALSE, labels=FALSE, ...)
+        }
+        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
+        
+        if(continue_default){
+          legend('topleft', legend='Cont? [y]/n', text.col='magenta', bg='black')
+          cat('CONTINUE fixing segments on current image? [y]/n: ')
+          continue = readLines(n=1L)
+          continue = tolower(continue)
+          continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        }else{
+          legend('topleft', legend='Cont? y/[n]', text.col='magenta', bg='black')
+          cat('CONTINUE fixing segments on current image? y/[n]: ')
+          continue = readLines(n=1L)
+          continue = tolower(continue)
+          continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        }
+      }
+    }else{
+      continue=TRUE
+      par(mar=c(0.1,0.1,0.1,0.1))
+      if(is.list(image)){
+        magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+      }else{
+        magimage(image, axes=FALSE, labels=FALSE, ...)
+      }
+      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
+    }
+  }
+  
+  if(open_window){
+    dev.off()
+  }
+  
+  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max)))
+}
+
+# .inpoly=function(polyx,polyy,x0,y0){ #defunct code, not working properly anyway...
+#   #polyx = c(polyx, polyx[1])
+#   #polyy = c(polyy, polyy[1])
+#   polyx = polyx - x0
+#   polyy = polyy - y0
+#   #norm=sqrt(polyx^2 + polyy^2)
+#   #polyx = polyx/norm
+#   #polyy = polyy/norm
+#   #dotprod = polyx[1:(length(polyx)-1)]*polyx[2:length(polyx)] + polyy[1:(length(polyy)-1)]*polyy[2:length(polyy)]
+#   #crossprod=crossprod(rbind(polyx[1:(length(polyx)-1)],polyy[1:(length(polyy)-1)]), rbind(polyx[2:length(polyx)], polyy[2:length(polyy)]))
+#   allangs = atan2(polyy, polyx) %% 2*pi
+#   shift = which.min(allangs)
+#   if(shift>1){
+#     allangs = c(0, allangs[shift:length(allangs)], allangs[1:(shift-1)], 2*pi)
+#   }
+#   #tempsum = abs(sum(acos(dotprod)*sign(dotprod))) #fix for non convex cases!
+#   tempsum = abs(sum(diff(c(allangs,allangs[1]))))
+#   print(tempsum)
+#   return(tempsum < 1e-10)
+# }
+
+.inpoly_pix=function(poly_x,poly_y){
+  xseq=floor(min(poly_x)):ceiling(max(poly_x)) - 0.5
+  yseq=floor(min(poly_y)):ceiling(max(poly_y)) - 0.5
+  tempgrid=as.matrix(expand.grid(xseq, yseq))
+  #tempgrid=cbind(tempgrid,0)
+  
+  #for(i in 1:length(tempgrid[,1])){
+  #  tempgrid[i,3] = point_in_polygon_cpp(x=tempgrid[i,1], y=tempgrid[i,2], poly_x = poly_x, poly_y = poly_y)
+    #tempgrid[i,3] = .inpoly(poly_y, poly_y, x0=tempgrid[i,1], y0=tempgrid[i,2])
+  #}
+  
+  select=.point_in_polygon_cpp(tempgrid[,1], tempgrid[,2], poly_x, poly_y)
+  
+  return(invisible(ceiling(tempgrid[select,])))
+}
+
+profoundZapSegID=function(segID, segID_merge){
+  times=unlist(lapply(segID_merge, length))
+    if(!is.null(times)){
+    refs=rep(1:length(segID_merge), times=times)
+    logic=unlist(segID_merge) %in% segID
+    refs=unique(refs[logic])
+    if(length(refs)>0){
+      segID_merge=segID_merge[-refs]
+    }
+  }
+  return(invisible(segID_merge))
 }
 
 profoundSegimNear=function(segim=NULL, offset=1){
@@ -1160,11 +1449,12 @@ profoundSegimKeep=function(segim=NULL, groupim=NULL, groupID_merge=NULL, segID_m
     whichpix=which(segim_out %in% unlist(segID_merge))
     pixsel=segim_out[whichpix]
     for(i in 1:length(segID_merge)){
-      tempID=segID_merge[[i]]
-      if('fastmatch' %in% .packages()){
-        pixsel[fastmatch::fmatch(pixsel, tempID, nomatch = 0L) > 0L]=min(tempID)
-      }else{
-        pixsel[pixsel %in% tempID]=min(tempID)
+      if(length(segID_merge[[i]])>0){
+        if('fastmatch' %in% .packages()){
+          pixsel[fastmatch::fmatch(pixsel, segID_merge[[i]], nomatch = 0L) > 0L]=min(segID_merge[[i]], na.rm=TRUE)
+        }else{
+          pixsel[pixsel %in% segID_merge[[i]]]=min(segID_merge[[i]], na.rm=TRUE)
+        }
       }
     }
     segim_out[whichpix]=pixsel

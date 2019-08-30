@@ -14,7 +14,7 @@ magzero = 0, gain = NULL, pixscale = 1, header = NULL, sortcol = "segID",
 decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1, cor_err_func = NULL,
 app_diam = 1)
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, header = NULL,
-col = rainbow(max(segim), end=2/3), profound = NULL, ...)
+col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,7 +55,7 @@ Logical; if FALSE (default) the segmentation statistics data.frame will be sorte
 Logical; if TRUE then the \option{asymm}, \option{flux_reflect} and \option{mag_reflect} are computed, else they are set to NA. This is because they are very expensive to compute compared to other photometric properties.
 }
   \item{boundstats}{
-Logical; if TRUE then various pixel boundary statistics are computed (\option{Nedge}, \option{Nsky}, \option{Nobject}, \option{Nborder}, \option{edge_frac}, \option{edge_excess} and \option{FlagBorder}). If FALSE these return NA instead (saving computation time).
+Logical; if TRUE then various pixel boundary statistics are computed (\option{Nedge}, \option{Nsky}, \option{Nobject}, \option{Nborder} \option{Nmask}, \option{edge_frac}, \option{edge_excess} and \option{FlagBorder}). If FALSE these return NA instead (saving computation time). Note by construction \option{Nedge} = \option{Nobject} + \option{Nsky} + \option{Nborder}. If you want to adjust specifically for \option{Nmask} then \option{Nsky} = \option{Nsky} - \option{Nmask}.
 }
   \item{offset}{
 Integer scalar; the distance to offset when searching for nearby segments.  
@@ -71,6 +71,9 @@ Function; the error function between \option{N100} (the number of pixels in the 
 }
   \item{app_diam}{
 Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
+}
+  \item{add}{
+Logical; should just the segment contours be added to the current image? This allows for complex colouring of different segments to be achieved by adding various overlays.  
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.
@@ -139,7 +142,7 @@ A data.frame with columns:
   \item{Nobject}{Number of edge segment pixels that are touching another object segment}
   \item{Nborder}{Number of edge segment pixels that are touching the \option{image} border}
   \item{Nmask}{Number of edge segment pixels that are touching a masked pixel (note NAs in \option{image} are also treated as masked pixels)}
-  \item{edge_frac}{Fraction of edge segment pixels that are touching the sky i.e. \option{Nsky}\option{Nedge}, higher generally meaning more robust segmentation statistics}
+  \item{edge_frac}{Fraction of edge segment pixels that are touching the sky i.e. \option{Nsky}/\option{Nedge}, higher generally meaning more robust segmentation statistics}
   \item{edge_excess}{Ratio of the number of edge pixels to the expected number given the elliptical geometry measurements of the segment. If this is larger than 1 then it is a sign that the segment geometry is irregular, and is likely a flag for compromised photometry}
   \item{flag_border}{A binary flag telling the user which \option{image} borders the segment touches. The bottom of the \option{image} is flagged 1, left=2, top=4 and right=8. A summed combination of these flags indicate the segment is in a corner touching two borders: bottom-left=3, top-left=6, top-right=12, bottom-right=9.}
   

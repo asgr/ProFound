@@ -369,7 +369,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         }else{
           #pro_multi_col=profoundProFound(image=multi, segim=pro_detect$segim_orig, mask=mask, magzero=magzero[i], gain=gain[i], objects=pro_detect$objects, boundstats=boundstats, groupstats=FALSE, iters=0, verbose=verbose, ...)$segstats
           
-          pro_multi_col=do.call("profoundProFound", c(list(image=quote(mult), segim=quote(pro_detect$segim_orig), mask=quote(mask), magzero=magzero[i], gain=gain[i], box=box[i], grid=grid[i], boxadd=boxadd[i], objects=quote(pro_detect$objects), groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
+          pro_multi_col=do.call("profoundProFound", c(list(image=quote(multi), segim=quote(pro_detect$segim_orig), mask=quote(mask), magzero=magzero[i], gain=gain[i], box=box[i], grid=grid[i], boxadd=boxadd[i], objects=quote(pro_detect$objects), groupstats=FALSE, iters=0, deblend=FALSE, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))$segstats
         }
         
         # Append column names and concatenate cat_col together
@@ -405,7 +405,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   
   # Return all of the things!
   
-  if(keepsegims){
+  if(dotot & keepsegims){
     names(segimlist)=multibands
   }
   
