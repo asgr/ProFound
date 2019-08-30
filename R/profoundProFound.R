@@ -208,24 +208,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       skystats=skystats$flux/skystats$N100 #get per pixel mean flux per segment
       skymed=median(skystats, na.rm=TRUE) #median per pixel mean flux per segment for the whole image
       segstats=.profoundFluxCalcMin(image=image, segim=segim, mask=mask) #run on initial image
-      segstats$flux = segstats$flux - (skystats*segstats$N100) #remove the local sky component
+      segstats$flux = segstats$flux - (skystats * segstats$N100) #remove the local sky component
       origfrac = segstats$flux #set to initial fluxes
-      
-      if(iterskyloc){
-        localadd=1
-      }else{
-        localadd=0
-      }
-      
-      #compmat=matrix(0,nrow = dim(segstats)[1], ncol = iters+1+localadd)
-      #Nmat=compmat
-      #compmat[,1]=segstats[,'flux']
-      #Nmat[,1]=segstats[,'N100']
-      #flux_old=segstats[,'flux']
-      #N100_old=segstats[,'N100']
-      
-      #segim_array=array(0L, dim=c(dim(segim),iters+1+localadd))
-      #segim_array[,,1]=segim
       
       segim_orig=segim
       expand_segID=segstats[,'segID']
@@ -234,38 +218,35 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       
       if(verbose){message('Doing dilations:')}
       
-      for(i in 1:(iters)){
-        if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-        segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
-        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask) #run on image with dilated segments
-        segstats_new$flux = segstats_new$flux - (skystats * segstats_new$N100) #subtract local sky levels
-        SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100) #calculate the surface brightness of the new grown anulus only
-        fluxgrowthratio = segstats_new$flux / segstats$flux #calculate flux growth ratio
-        skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
-        #set various growth logic:
-        #fluxgrowthratio > threshold - main control of growth: require the flux to increase by a factor threshold with each iteration
-        #segstats_new$flux>0 - flux has to be positive
-        #SBnew < SBlast - surface brightness has to monotonically decrease as we grow for each segment
-        #skyfrac < 0.5 - Less than half the growth should come from an unusal local oscillation in the sky background estimate
-        #selseg==(i-1) - the current segment has been flagged for dilation
-        expand_segID=segstats[which(fluxgrowthratio > threshold & segstats_new$flux>0 & SBnew < SBlast & skyfrac < 0.5 & selseg==(i-1)),'segID']
-        expand_segID=expand_segID[is.finite(expand_segID)] #safety first
-        if(length(expand_segID)==0){break}
-        updateID=which(segstats$segID %in% expand_segID)
-        selseg[updateID] = i #iteration number for segments flagged for growth
-        segstats[updateID,] = segstats_new[updateID,] #update only the segstats for things that are growing, the rest can be ignored
-        SBlast = SBnew
-        if('fastmatch' %in% .packages()){ #dilate segments that pass tests
-          selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
-        }else{
-          selpix = which(segim_new %in% expand_segID)
+      if(iters>0){
+        for(i in 1:(iters)){
+          if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
+          segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
+          segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask) #run on image with dilated segments
+          segstats_new$flux = segstats_new$flux - (skystats * segstats_new$N100) #subtract local sky levels
+          SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100) #calculate the surface brightness of the new grown anulus only
+          fluxgrowthratio = segstats_new$flux / segstats$flux #calculate flux growth ratio
+          skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
+          expand_segID=segstats[which(fluxgrowthratio > threshold & segstats_new$flux>0 & SBnew < SBlast & skyfrac < 0.5 & selseg==(i-1)),'segID']
+          expand_segID=expand_segID[is.finite(expand_segID)] #safety first
+          if(length(expand_segID)==0){break}
+          updateID=which(segstats$segID %in% expand_segID)
+          selseg[updateID] = i #iteration number for segments flagged for growth
+          segstats[updateID,] = segstats_new[updateID,] #update only the segstats for things that are growing, the rest can be ignored
+          SBlast = SBnew
+          if('fastmatch' %in% .packages()){ #dilate segments that pass tests
+            selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
+          }else{
+            selpix = which(segim_new %in% expand_segID)
+          }
+          segim[selpix]=segim_new[selpix]
         }
-        segim[selpix]=segim_new[selpix]
       }
       
       if(iterskyloc){
-        segim_skyloc=profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats_new=.profoundFluxCalcMin(image=image, segim=segim_skyloc, mask=mask)
+        segim_skyloc = profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segstats_new = .profoundFluxCalcMin(image=image, segim=segim_skyloc, mask=mask)
+        segstats$flux = segstats$flux + (skystats * segstats$N100) #add back the local sky component
         skyseg_mean=(segstats_new$flux-segstats$flux)/(segstats_new$N100-segstats$N100)
         skyseg_mean[!is.finite(skyseg_mean)]=0
       }

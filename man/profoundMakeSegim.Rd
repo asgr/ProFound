@@ -121,7 +121,6 @@ A list containing:
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
   \item{header}{The header provided, if missing this is NULL.}
-  \item{SBlim}{The surface brightness limit of detected objects (requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL).}
   \item{call}{The original function call.}
   
 If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame else NULL (see \code{\link{profoundSegimStats}}).

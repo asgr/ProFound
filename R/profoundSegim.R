@@ -291,19 +291,19 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     segstats=NULL
   }
   
-  if(!is.null(SBlim) & !missing(magzero)){
-    SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
-  }else if(is.null(SBlim) & !missing(magzero) & skycut>0){
-    SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
-  }else{
-    SBlim=NULL
-  }
+  # if(!is.null(SBlim) & !missing(magzero)){
+  #   SBlim=min(SBlim, profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale), na.rm=TRUE)
+  # }else if(is.null(SBlim) & !missing(magzero) & skycut>0){
+  #   SBlim=profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
+  # }else{
+  #   SBlim=NULL
+  # }
   
   if(is.null(header)){header=NULL}
   
   if(verbose){message(paste(" - MakeSegim is finished! -", round(proc.time()[3]-timestart,3), "sec"))}
   
-  invisible(list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call))
+  invisible(list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, call=call))
 }
 
 profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL, skycut=1, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
