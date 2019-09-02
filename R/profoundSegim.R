@@ -1192,7 +1192,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         segim_progress[seggrid]=newsegID
         segim_start[seggrid]=newsegID
       }
-      if(length(mergeIDs)>0){
+      if(length(unlist(mergeIDs))>0){
         segID_merge=c(segID_merge,mergeIDs)
       }
       if(length(segID_merge)>0){
