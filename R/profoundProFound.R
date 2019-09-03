@@ -219,9 +219,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(is.null(SBdilate)){
         SBdilate=Inf
       }else{
-        skyRMSstats=.profoundFluxCalcMin(image=skyRMS, segim=segim, mask=mask) #run on sky
-        skyRMSstats=skyRMSstats$flux/skyRMSstats$N100 #get per pixel mean flux per segment
-        SBdilate=profoundSB2Flux(profoundFlux2SB(skyRMSstats, magzero=magzero, pixscale=pixscale) + SBdilate, magzero=magzero, pixscale=pixscale)
+        skyRMSstats = .profoundFluxCalcMin(image=skyRMS, segim=segim, mask=mask) #run on sky
+        skyRMSstats = skyRMSstats$flux/skyRMSstats$N100 #get per pixel mean flux per segment
+        SBdilate = skyRMSstats * 10^(-0.4*SBdilate)
         SBdilate[!is.finite(SBdilate)]=Inf
       }
       
