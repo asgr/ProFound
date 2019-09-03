@@ -11,17 +11,17 @@ This is the highest level source detection function provided in \code{ProFit}, c
 \usage{
 profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut=1,
 pixcut=3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
-SBlim, size = 5, shape = "disc", iters = 6, threshold = 1.05, magzero = 0, gain = NULL,
-pixscale = 1, sky = NULL, skyRMS = NULL, redosegim = FALSE, redosky = TRUE,
-redoskysize = 21, box = c(100,100), grid = box, type = "bicubic", skytype = "median",
-skyRMStype = "quanlo", roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2,
-boxadd = box/2, boxiters = 0, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
-iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
-verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
-offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
-lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE,
-deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
+SBlim, SBdilate = NULL, SBN100 = 100, size = 5, shape = "disc", iters = 6,
+threshold = 1.05, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
+redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
+type = "bicubic", skytype = "median", skyRMStype = "quanlo", roughpedestal = FALSE,
+sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, iterskyloc = TRUE,
+deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE,
+paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+boundstats = FALSE, nearstats = boundstats, groupstats = boundstats, group = NULL,
+groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
+decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound',
+pixelcov = FALSE, deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
 convmode = 'extended', fluxtype = 'Raw', app_diam = 1, Ndeblendlim = Inf, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -64,6 +64,12 @@ Logical; should smoothing be done on the target \option{image}? Passed to \code{
 }
   \item{SBlim}{
 Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. If a matrix is provided, this matrix *must* be the same dimensions as \option{image}. Passed to \code{\link{profoundMakeSegim}}. If set to 'get' then the output \option{SBlim} is calculated from the \option{skyRMS} and \option{magzero} automatically.
+}
+  \item{SBdilate}{
+Numeric scalar; how many surface brightness mags beyond the sky RMS to push the dilation process. The extra dilation logic is that if the new mean surface brightness in the dilated annulus is above the sky surface brightness + \option{SBdilate} and we are adding more than \option{SBN100} pixels then we will continue to dilate. This works well to capture extra flux in very large extended structures, where the fractional flux might not be changing much, but where we can safely keep dilating. Sensible values are between 0-2 (i.e. with 100 pixels we might be able to reliably push 2 mags fainter than the nominal sky surface brightness).
+}
+  \item{SBN100}{
+Integer scalar; the number of new annulus pixels in our dilated segment required to trigger the \option{SBdilate} criteria.
 }
   \item{size}{
 Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}. Passed to \code{\link{profoundMakeSegimDilate}}.

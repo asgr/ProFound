@@ -1,4 +1,4 @@
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound', pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype = 'brute', convmode = 'extended', fluxtype='Raw', app_diam=1, Ndeblendlim=Inf, ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, SBdilate=NULL, SBN100=100, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound', pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype = 'brute', convmode = 'extended', fluxtype='Raw', app_diam=1, Ndeblendlim=Inf, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -216,6 +216,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       SBlast=rep(Inf,length(expand_segID))
       selseg=rep(0,length(expand_segID))
       
+      if(is.null(SBdilate)){
+        SBdilate=Inf
+      }else{
+        skyRMSstats=.profoundFluxCalcMin(image=skyRMS, segim=segim, mask=mask) #run on sky
+        skyRMSstats=skyRMSstats$flux/skyRMSstats$N100 #get per pixel mean flux per segment
+        SBdilate=profoundSB2Flux(profoundFlux2SB(skyRMSstats, magzero=magzero, pixscale=pixscale) + SBdilate, magzero=magzero, pixscale=pixscale)
+        SBdilate[!is.finite(SBdilate)]=Inf
+      }
+      
       if(verbose){message('Doing dilations:')}
       
       if(iters>0){
@@ -224,10 +233,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
           segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
           segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask) #run on image with dilated segments
           segstats_new$flux = segstats_new$flux - (skystats * segstats_new$N100) #subtract local sky levels
-          SBnew=(segstats_new$flux - segstats$flux) / (segstats_new$N100 - segstats$N100) #calculate the surface brightness of the new grown anulus only
+          N100diff = (segstats_new$N100-segstats$N100)
+          SBnew=(segstats_new$flux - segstats$flux) / N100diff #calculate the surface brightness of the new grown anulus only
           fluxgrowthratio = segstats_new$flux / segstats$flux #calculate flux growth ratio
-          skyfrac = abs(((skystats-skymed) * (segstats_new$N100-segstats$N100)) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
-          expand_segID=segstats[which(fluxgrowthratio > threshold & segstats_new$flux>0 & SBnew < SBlast & skyfrac < 0.5 & selseg==(i-1)),'segID']
+          skyfrac = abs(((skystats-skymed) * N100diff) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
+          expand_segID=segstats[which((fluxgrowthratio > threshold | (SBnew > SBdilate & N100diff>SBN100)) & segstats_new$flux>0 & SBnew < SBlast & skyfrac < 0.5 & selseg==(i-1)),'segID']
           expand_segID=expand_segID[is.finite(expand_segID)] #safety first
           if(length(expand_segID)==0){break}
           updateID=which(segstats$segID %in% expand_segID)
