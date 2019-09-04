@@ -134,7 +134,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(' - Sky-RMS statistics :')}
       if(verbose){print(summary(as.numeric(skyRMS)))}
     }
-      rm(roughsky)
+    rm(roughsky)
   }else{
     if(verbose){message("Skipping making initial sky map - User provided sky and sky RMS, or user provided segim")}
   }
@@ -172,6 +172,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         objects_redo=objects
       }
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
+      rm(sky)
+      rm(skyRMS)
       bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       if(hassky==FALSE){
         sky=bettersky$sky
@@ -183,6 +185,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         if(verbose){message(' - Sky-RMS statistics :')}
         if(verbose){print(summary(as.numeric(skyRMS)))}
       }
+      rm(bettersky)
       if(redosegim){
         if(verbose){message(paste('Making better segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
         imagescale=(image-sky)/skyRMS
@@ -278,6 +281,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Doing final aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
       objects_redo=profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
+      rm(sky)
+      rm(skyRMS)
       sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       skyRMS=sky$skyRMS
       sky=sky$sky
