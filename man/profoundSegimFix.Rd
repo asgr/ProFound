@@ -106,7 +106,7 @@ If you click on the sky once and hit ESC you will enter the segment creation mod
 List containing:
 \item{segim}{Numeric matrix; fixed version of the segmentation map. If a cutout has been requested this will be for just the cutout section.}
 \item{segim_start}{Numeric matrix; reference starting segmentation map.}
-\item{segID_merge}{List; fixed version of the list of segIDs to be merged.}
+\item{segID_merge}{List; fixed version of the list of segIDs to be merged. Usefully, this can be directly passed into \code{\link{profoundSegimKeep}} (see Examples).}
 \item{segID_max}{Integer; the current maximum segment ID in the output \option{segim}. This should only be modified compared to the input \option{segim} if new segments have be drawn on the image.}
 
 It is always the case that \option{segim_start} combined with \option{segID_merge} will produce \option{segim} via \code{\link{profoundSegimKeep}}. We provide \option{segim_start} for reference since the segment creation mode (see Details above) will also modify the base segmentation map in order to guarantee the internal consistency. This means the output \option{segim_start} and differ from the input \option{segim_start}, but only if new segments have been manually drawn.
@@ -124,18 +124,32 @@ VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
 VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 
 # Warp to common WCS:
+
 GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)$image
 VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)$image
 
 #Good but not perfect:
+
 profound=profoundProFound(VST_r, roughpedestal=TRUE, plot=TRUE)
 
 #Let's fix it:
+
 fixed=profoundSegimFix(profound)
 
 #Colour might help:
+
 fixedRGB=profoundSegimFix(list(R=VISTA_K_VST, G=VST_r$imDat, B=GALEX_NUV_VST),
 segim=profound$segim)
+
+#Assuming you made some fixes you can also recreate the fixed segim using the output
+# \option{segID_merge})(i.e. you only really need to save \option{segID_merge}):
+
+fixedRGB2=profoundSegimKeep(segim=profound$segim, segID_merge=fixedRGB$segID_merge)
+
+#Check things look the same:
+
+profoundSegimPlot(image=VST_r$imDat, segim=fixedRGB$segim)
+profoundSegimPlot(image=VST_r$imDat, segim=fixedRGB2)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
