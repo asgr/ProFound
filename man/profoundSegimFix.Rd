@@ -150,6 +150,13 @@ fixedRGB2=profoundSegimKeep(segim=profound$segim, segID_merge=fixedRGB$segID_mer
 
 profoundSegimPlot(image=VST_r$imDat, segim=fixedRGB$segim)
 profoundSegimPlot(image=VST_r$imDat, segim=fixedRGB2)
+
+#We can now feed this back into ProFound for our best final effort:
+
+profound2=profoundProFound(VST_r, segim=fixedRGB$segim, plot=TRUE, SBdilate=1)
+
+#The object at 300, 300 is the new merged object (if you have merged the main galaxy).
+#On a local run this had segID=6, old mag=15.5, new mag=15.2 (i.e. flux increase of 30\%).
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
