@@ -172,8 +172,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         objects_redo=objects
       }
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-      rm(sky)
-      rm(skyRMS)
+      if(hassky==FALSE){rm(sky)}
+      if(hasskyRMS==FALSE){rm(skyRMS)}
       bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       if(hassky==FALSE){
         sky=bettersky$sky
@@ -207,9 +207,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask) #run on sky
-      skystats=skystats$flux/skystats$N100 #get per pixel mean flux per segment
-      skymed=median(skystats, na.rm=TRUE) #median per pixel mean flux per segment for the whole image
+      if(length(sky)>1){
+        skystats=.profoundFluxCalcMin(image=sky, segim=segim, mask=mask) #run on sky
+        skystats=skystats$flux/skystats$N100 #get per pixel mean flux per segment
+        skymed=median(skystats, na.rm=TRUE) #median per pixel mean flux per segment for the whole image
+      }else{
+        skystats=sky #specified
+        skymed=sky #specified
+      }
+      
       segstats=.profoundFluxCalcMin(image=image, segim=segim, mask=mask) #run on initial image
       segstats$flux = segstats$flux - (skystats * segstats$N100) #remove the local sky component
       origfrac = segstats$flux #set to initial fluxes
