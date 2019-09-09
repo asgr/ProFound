@@ -250,7 +250,7 @@ This high level function is both a source detection and a segmented aperture gro
 
 The defaults should work reasonably well on modern survey data (see Examples), but should the solution not be ideal try modifying these parameters (in order of impact priority): \option{skycut}, \option{pixcut}, \option{tolerance}, \option{sigma}, \option{ext}.
 
-\code{\link{profoundMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?objmasks}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profoundProFound} is not trivially replicated by other astronomy tools.
+\code{\link{profoundMakeSegimDilate}} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://iraf.noao.edu/projects/ccdmosaic/objmasks/objmasks.html}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{profoundProFound} is not trivially replicated by other astronomy tools.
 }
 \value{
 An object list of class 'profound' containing:
