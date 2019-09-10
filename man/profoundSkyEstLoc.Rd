@@ -76,10 +76,7 @@ There are many questions to think about when choosing the best combination of sk
 If the package \code{Rfast} is loaded, then this function will use the faster Rfast::med median function over the base median. This is about a factor 2-3 faster.
 }
 \value{
-A 2 component list containing:
-  \item{val }{A length two vector where the first element is the sky and the second is the skyRMS.}
-  \item{clip }{The full vector of pixels selected as being sky pixels (can then be plotted with \code{\link{maghist}} etc.)}
-
+A length two vector where the first element is the sky and the second is the skyRMS.
 }
 \author{
 Aaron Robotham

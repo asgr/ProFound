@@ -535,7 +535,6 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     segim_new[replace]=segim[replace] #put back non-dilated segments
   }else{
     segim_new=segim
-    #segim_new[!(segim_new %in% expand)]=0L #remove things that will not be dilated
     if('fastmatch' %in% .packages()){ #remove things that will not be dilated
       segim_new[fastmatch::fmatch(segim_new, expand, nomatch = 0L) == 0L] = 0L
     }else{
