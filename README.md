@@ -84,14 +84,33 @@ A replacement for much of the functionality of SExtractor. This was originally d
 
 ## Contributors
 
-A.S.G. Robotham
+Code:
 
-## Reference
+Aaron Robotham
+Rodrigo Tobar
+
+Testing and feedback:
+
+Sarah Casura
+Luke Davies
+Simon Driver
+Catherine Hale
+
+## References
+
+Main introduction:
 
 Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
 
+Direct usage:
+
+Davies L.J.M, et al., 2018, MNRAS, 480, 768
+Bassett R., et al., 2019, MNRAS, 487, 2354
+Hale C.L., et al., 2019, MNRAS, 487, 3971
+
 ## Resources
 
+<https://ui.adsabs.harvard.edu/abs/2018MNRAS.476.3137R/abstract>
 <https://www.dropbox.com/s/xxh0c9xlaqjyjhu/Profound-Sparks.pdf?dl=0>
 
 ## Forums
