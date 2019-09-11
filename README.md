@@ -92,7 +92,7 @@ A.S.G. Robotham
 
 Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
 
-Although also check recent talks:
+## Resources
 
 <https://www.dropbox.com/s/xxh0c9xlaqjyjhu/Profound-Sparks.pdf?dl=0>
 
@@ -102,4 +102,4 @@ Please sign up to <http://profit.freeforums.net/> if you want to ask a question 
 
 ## License
 
-GPL-3+
+LGPL-3+
