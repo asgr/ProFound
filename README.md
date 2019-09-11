@@ -50,8 +50,8 @@ install_github("asgr/ProFound")
 To use the **profoundMakeSegim** and **profoundProFound** function for image segmentation you will need to have **EBImage** installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
 
 ```R
-source("http://bioconductor.org/biocLite.R")
-biocLite("EBImage")
+install.packages("BiocManager")
+BiocManager::install("EBImage")
 ```
 
 Be warned, it will probably ask you to update a whole bunch of stuff. Just say **no** and only install **EBImage** for now. If something else needs updating or is missing you will get a warning when trying to use it, and you can update those packages as neccessary. If you say yes you will probably sit there for an hour whilst it builds dozens of packages from source that you do not need to really update (or need at all).
@@ -91,6 +91,10 @@ A.S.G. Robotham
 ## Reference
 
 Robotham A.S.G., et al., 2018, MNRAS, 476, 3137
+
+Although also check recent talks:
+
+<https://www.dropbox.com/s/xxh0c9xlaqjyjhu/Profound-Sparks.pdf?dl=0>
 
 ## Forums
 
