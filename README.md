@@ -29,9 +29,8 @@ Now you have the development version of R installed (hopefully) I would also sug
 Source installation from GitHub should be easy:
 
 ```R
-install.packages('devtools')
-library(devtools)
-install_github("asgr/ProFound")
+install.packages('remotes')
+remotes::install_github("asgr/ProFound")
 library(ProFound)
 ```
 
@@ -42,9 +41,8 @@ The above should also install the required packages. If you have trouble with th
 ```R
 install.packages(c('magicaxis', 'FITSio', 'data.table')) # Required packages
 install.packages(c('knitr', 'rmarkdown', 'EBImage', 'akima', 'imager', 'LaplacesDemon')) # Suggested packages
-install.packages('devtools')
-library(devtools)
-install_github("asgr/ProFound")
+install.packages('remotes')
+remotes::install_github("asgr/ProFound")
 ```
 
 To use the **profoundMakeSegim** and **profoundProFound** function for image segmentation you will need to have **EBImage** installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
