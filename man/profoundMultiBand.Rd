@@ -13,7 +13,8 @@ detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6, iters
 sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box, boxadd=box/2,
 bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
 docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE,
-groupby_det = 'segim_orig', groupby_mul = 'segim_orig', keepsegims = FALSE, ...)
+groupby_det = 'segim_orig', groupby_mul = 'segim_orig', keepsegims = FALSE,
+masking = 'and', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -94,6 +95,9 @@ Character scalar; How should the grouped segmentation map be formed that will be
 }
   \item{keepsegims}{
 Logical; if TRUE then \code{profoundMultiBand} will return a list of per band segmentation maps in \option{segimlist}. This is useful since they can be slightly different per band.
+}
+  \item{masking}{
+Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
   \item{\dots}{
 Further arguments to be passed to all instances of \code{\link{profoundProFound}}. E.g. if the sky \option{box} is set to a non-default value (default is \option{box}=c(100,100)), this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}.

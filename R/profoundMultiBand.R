@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', keepsegims=FALSE, ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', keepsegims=FALSE, masking='and', ...){
   
   # The most important thing is that all of the input images must be pixel matched via SWarp or magwarp etc
   # detectbands and multibands are the names of the target bands, which should be the names of the images ignoring the .fits ending
@@ -267,7 +267,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     # Stack!!!
     # We first stack the image then the sky.
     
-    detect_image_stack=profoundMakeStack(image_list=detect_image, sky_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1])
+    detect_image_stack=profoundMakeStack(image_list=detect_image, sky_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1], masking=masking)
     detect_sky_stack=profoundMakeStack(image_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1])
     
     # Delete and clean up
