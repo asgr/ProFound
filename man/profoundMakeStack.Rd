@@ -9,7 +9,7 @@ Stacks multiple images based on their signal-to-noise.
 }
 \usage{
 profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL, magzero_in = 0,
-magzero_out = 0)
+magzero_out = 0, masking = 'and')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,6 +28,9 @@ Numeric vector; the input mag-zero points. If length 1 then it is assumed all in
   \item{magzero_out}{
 Numeric scalar; the output mag-zero point desired.
 }
+  \item{masking}{
+Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
+}
 }
 \details{
 The stack is actually done based on variance weighting. In pseudo code:
@@ -44,7 +47,7 @@ The output is explictly sky subtracted (so the sky is now 0 everywhere by defini
 }
 \value{
 A list containing:
-  \item{image}{Numeric matrix; the variance-weighted sky-subtracted stacked image.}
+  \item{image}{Numeric matrix; the variance-weighted sky-subtracted stacked image. Masked pixels are NA.}
   \item{skyRMS}{Numeric matrix/scalar; the sky RMS image/value of the final stacked image}
   \item{magzero}{The mag-zero point of the stacked image.}
 }
@@ -55,14 +58,27 @@ Aaron Robotham
 \code{\link{profoundProFound}}
 }
 \examples{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+im1 = im2 = im3 =readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 
-stack=profoundMakeStack(list(image$imDat, image$imDat, image$imDat),
+stack=profoundMakeStack(list(im1, im2, im3),
 skyRMS_list = list(8,8,3))
 
 #The new signal-to-noise weighted sky should equal sqrt(1/(1/8^2+1/8^2+1/3^2)) = 2.65
 
 stack$skyRMS
+
+# masking logic, here we have a wedding cake of masked regions:
+
+im1[100:200,100:200]=NA; im2[120:180,120:180]=NA; im3[140:160,140:160]=NA
+
+# masking='or' will conservatively mask any pixel that is masked in the stack:
+
+magimage(profoundMakeStack(list(im1, im2, im3), masking='or')$image)
+
+# masking='and' will optimistically only mask pixels masked in all stacked images:
+
+magimage(profoundMakeStack(list(im1, im2, im3), masking='and')$image)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
