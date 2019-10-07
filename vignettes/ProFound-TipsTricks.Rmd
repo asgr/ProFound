@@ -1,0 +1,92 @@
+---
+title: "Lost and ProFound: Tips and Tricks"
+author: "Aaron Robotham"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ProFound: Testing on Simulated Images}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Load boring things
+
+```{r}
+library(ProFound)
+library(FITSio)
+```
+
+## General advice
+
+Pass in an image with a WCS attached (as per Rfits_read_image [Rfits], read.fits [astro], readFITS [FITSio]).
+
+You can always plot the output of **profoundProFound** to get a handy 3x3 diagnostic plot.
+
+## Parameters to focus on
+
+There are a lot of parameters in **ProFound**. Most do not need to be touched, some need to be touched a lot. Here are the ones to focus on in early experimentation (i.e. usually need to be adjusted away from defaults for a given data set):
+
+* *magzero* - this needs to be set correctly. It is not read from the header (to many different ways this is written unfortunately).
+* *skycut* - the most important of all, controlling the depth of extraction.
+* *tolerance* - controls how groups are segmented (so does *reltol*, these two play together in a slightly complex manner)
+* *box* - controls the sky background box size (also see *grid*). This needs to be set sensibly for the data.
+
+Useful things and suggested settings:
+
+* *verbose* - nice to hear what is happening
+* *plot* - nice to see what has happened
+* *sigma* - controls how much the image is smoothed before it is analysed. This should not need much fiddling, but it should appropriate for the data (roughly the PSF)
+* *SBdilate* - a relatively recent addition, but it allows natural additional dilation for more extended objects (should be set in the range 1--2 usually)
+* *fluxtype* = 'Jansky' is usually more useful than 'Raw'
+* *roughpedestal* = TRUE for extended sources that dominate the pixels of an image (stops over subtraction)
+
+## Some examples:
+
+```{r}
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+```
+
+```{r, fig.width=8, fig.height=8}
+profound=profoundProFound(image, magzero=30, plot=TRUE)
+profound=profoundProFound(image, magzero=30, plot=TRUE, skycut = 2)
+profound=profoundProFound(image, magzero=30, plot=TRUE, tolerance = 10)
+profound=profoundProFound(image, magzero=30, plot=TRUE, box = 50)
+profound=profoundProFound(image, magzero=30, plot=TRUE, SBdilate = 1)
+profound=profoundProFound(image, magzero=30, plot=TRUE, roughpedestal = TRUE)
+```
+
+## Multi-band
+
+Some different data:
+
+```{r}
+GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
+VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
+
+# Warp to common WCS:
+GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)$image
+VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)$image
+```
+
+Good but not perfect:
+
+```{r, fig.width=8, fig.height=8}
+profound=profoundProFound(VST_r, roughpedestal=TRUE, SBdilate=1, plot=TRUE)
+```
+
+Try to find the best parameters for the above galaxy (e.g. particularly play with the *tolerance* and *reltol*. Once you have a decent effort, we can fix the remainder:
+
+```{r, eval=FALSE}
+fixedRGB=profoundSegimFix(list(R=VISTA_K_VST, G=VST_r$imDat, B=GALEX_NUV_VST), segim=profound$segim)
+```
+
+```{r, eval=FALSE, fig.width=8, fig.height=8}
+profoundSegimPlot(image=VST_r$imDat, segim=fixedRGB$segim)
+```
+
+We can now feed this back into ProFound for our best final effort:
+
+```{r, eval=FALSE, fig.width=8, fig.height=8}
+profound2=profoundProFound(VST_r, segim=fixedRGB$segim, plot=TRUE)
+```

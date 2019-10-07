@@ -213,7 +213,7 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
     skyRMSlochi=abs(quantile(temphi, (pnorm(sigmasel)-0.5)*2,na.rm=TRUE))/sigmasel
     skyRMSloc=(skyRMSloclo+skyRMSlochi)/2
   }else if(skyRMStype=='sd'){
-    skyRMSloc=sqrt(.varwt(clip, wt=1, xcen=skyloc))
+    skyRMSloc=sqrt(.varwt(clip, xcen=skyloc))
   }
   
   return(invisible(c(skyloc, skyRMSloc)))

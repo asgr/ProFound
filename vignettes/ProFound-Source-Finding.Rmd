@@ -226,6 +226,8 @@ magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_p
 legend('topleft',legend='Segment Borders Left')
 magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==4,"segID"]), col=c(0,rainbow(100)))
 legend('topleft',legend='Segment Borders Top')
+magimage(out_profound$segim*(out_profound$segim %in% out_profound$segstats[out_profound$segstats$flag_border==8,"segID"]), col=c(0,rainbow(100)))
+legend('topleft',legend='Segment Borders Right')
 ```
 
 Depending on your science requirements, users might want to make use of some or all of these useful flags. Practically the most useful flag is probably edge_frac, where values above 0.8 are usually a good cut off for fairly reliable photometry (i.e. the confused or missing flux is the sub-dominant form of error), but this cannot be treated as a guarantee!

@@ -1,22 +1,34 @@
 .meanwt=function(x=NULL, wt=NULL){
+  if(is.null(wt) | length(wt)==1){
+    return(invisible(sum(x, na.rm=TRUE)/length(x)))
+  }else if(all(wt==wt[1], na.rm=TRUE)){
+    wt[]=1L
+  }
   wt[wt<0]=0
-  if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
-  sum(x*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)
+  return(invisible(sum(x*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
 }
 
 .varwt=function(x=NULL, wt=NULL, xcen=NULL){
-  wt[wt<0]=0
-  if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   if(is.null(xcen)){xcen=.meanwt(x, wt)}
-  invisible((sum((x-xcen)^2*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
+  if(is.null(wt) | length(wt)==1){
+    return(invisible(sum((x-xcen)^2, na.rm=TRUE)/length(x)))
+  }else if(all(wt==wt[1], na.rm=TRUE)){
+    wt[]=1
+  }
+  wt[wt<0]=0
+  return(invisible(sum((x-xcen)^2*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
 }
 
 .covarwt=function(x=NULL, y=NULL, wt=NULL, xcen=NULL, ycen=NULL){
-  wt[wt<0]=0
-  if(all(wt==wt[1], na.rm=TRUE)){wt[]=1}
   if(is.null(xcen)){xcen=.meanwt(x, wt)}
   if(is.null(ycen)){ycen=.meanwt(y, wt)}
-  invisible((sum((x-xcen)*(y-ycen)*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
+  if(is.null(wt) | length(wt)==1){
+    return(invisible((sum((x-xcen)*(y-ycen), na.rm=TRUE)/length(x))))
+  }else if(all(wt==wt[1], na.rm=TRUE)){
+    wt[]=1
+  }
+  wt[wt<0]=0
+  return(invisible(sum((x-xcen)*(y-ycen)*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
 }
 
 .cov2eigval=function(sx=NULL, sy=NULL, sxy=NULL){
