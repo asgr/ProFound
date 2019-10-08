@@ -67,6 +67,9 @@ VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 # Warp to common WCS:
 GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)$image
 VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)$image
+
+multi=profoundMultiBand(inputlist=list(GALEX_NUV_VST, VST_r, VISTA_K_VST),
+magzero=c(20.08,0,30), detectbands=c('r','K'), multibands=c('NUV','r','K'))
 ```
 
 Good but not perfect:
