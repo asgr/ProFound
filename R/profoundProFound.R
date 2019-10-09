@@ -109,7 +109,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects[]=as.logical(segim)
     }
   }else{
-    objects=objects*1 #Looks silly, but this ensures a logical mask becomes integer.
+    objects=objects*1L #Looks silly, but this ensures a logical mask becomes integer.
   }
   
   #Check for user provided sky, and compute if missing:
