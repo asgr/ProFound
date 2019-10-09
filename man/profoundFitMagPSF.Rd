@@ -65,7 +65,7 @@ Numeric scalar; the magnitude zero point. What this implies depends on the magni
 Logical; should the full model image be output?
 }
   \item{fluxtype}{
-Character scaler; specifies whether fluxes will be output in Jansky ('Jansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+Character scaler; specifies whether fluxes will be output in Jansky / MicroJansky ('Jansky' / 'microjansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use 'Jansky' if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
 }
   \item{psf_redosky}{
 Logical; should the sky calulcated by \code{\link{profoundProFound}} be subtracted from the target image? Since FIR frames are often confused, this should be turned on with care since possibly none of the pixels are a good sky reference. Put another way, you really need to trust your PSF wings.

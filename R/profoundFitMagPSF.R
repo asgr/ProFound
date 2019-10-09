@@ -74,6 +74,8 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     fluxscale=1
   }else if (fluxtype=='jansky'){
     fluxscale=10^(-0.4*(magzero-8.9))
+  }else if (fluxtype=='microjansky'){
+    fluxscale=10^(-0.4*(magzero-23.9))
   }else{
     stop('fluxtype must be Jansky / Raw!')
   }
