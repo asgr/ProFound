@@ -1,4 +1,4 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', keepsegims=FALSE, masking='and', ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, app_diam=1, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', keepsegims=FALSE, masking='and', ...){
   
   # The most important thing is that all of the input images must be pixel matched via SWarp or magwarp etc
   # detectbands and multibands are the names of the target bands, which should be the names of the images ignoring the .fits ending
@@ -108,6 +108,14 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   
   if(length(boxadd)!=length(multibands)){
     stop('Length of boxadd must equal length of multibands!')
+  }
+  
+  if(length(app_diam)==1){
+    app_diam=rep(app_diam, length(multibands))
+  }
+  
+  if(length(app_diam)!=length(app_diam)){
+    stop('Length of app_diam must equal length of multibands!')
   }
   
   #if(dogrp & boundstats==FALSE){
@@ -342,7 +350,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         
         # pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], groupstats=FALSE, iters=iters_tot[i], size=sizes_tot[i], deblend=deblend, redosegim=FALSE, roughpedestal=FALSE, ...)
         
-        pro_multi_tot=do.call("profoundProFound", c(list(image=quote(multi), segim=quote(pro_detect$segim), mask=quote(mask), magzero=magzero[i], gain=gain[i], box=box[i], grid=grid[i], boxadd=boxadd[i], groupstats=FALSE, iters=iters_tot[i], size=sizes_tot[i], deblend=deblend, groupby=groupby_mul, redosegim=FALSE, roughpedestal=FALSE), dotsmulti))
+        pro_multi_tot=do.call("profoundProFound", c(list(image=quote(multi), segim=quote(pro_detect$segim), mask=quote(mask), magzero=magzero[i], gain=gain[i], box=box[i], grid=grid[i], boxadd=boxadd[i], groupstats=FALSE, iters=iters_tot[i], size=sizes_tot[i], deblend=deblend, groupby=groupby_mul, redosegim=FALSE, roughpedestal=FALSE, app_diam=app_diam[i]), dotsmulti))
         
         # Append column names and concatenate cat_tot together
         
