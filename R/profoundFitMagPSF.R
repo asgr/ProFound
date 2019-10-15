@@ -1,4 +1,4 @@
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext =FALSE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   timestart=proc.time()[3]
   
@@ -330,7 +330,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     mag=mag+diffmag
   }
   
-  if(modelout){
+  if(modelout | findextra | fluxext){
     if(hasProFit){
       modellist = list(
         pointsource = list(
@@ -355,6 +355,48 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     fullmodel=NULL
     finalLL=NULL
   }
+  
+  if(fluxext){
+    
+    for(i in 1:Nmodels){
+      if(verbose & (i %% Nprint == 0)  & Nmodels>=1e3){
+        message(paste(' - model',i,'of',Nmodels))
+      }
+      if(is.finite(mag[i])){
+        image_cut = magcutout(image_orig, loc=c(xcen[i],ycen[i]), box=dim(psf))
+        model_cut = magcutout(fullmodel, loc=c(xcen[i],ycen[i]), box=dim(psf))
+
+        if(hasProFit){
+          singlist = list(
+            pointsource = list(
+              xcen = image_cut$loc[1],
+              ycen = image_cut$loc[2],
+              mag = mag[i]
+            )
+          )
+          singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+        }else{
+          singmodel=.genPointSource(
+            xcen = image_cut$loc[1],
+            ycen = image_cut$loc[2],
+            flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
+            psf=psf,
+            dim=dim(psf)
+          )
+        }
+        
+        sing_rel = singmodel / model_cut$image
+        sing_rel[is.na(sing_rel)] = 0
+        sing_rel[is.nan(sing_rel)] = 0
+        sing_rel[sing_rel<0] = 0
+        sing_rel[sing_rel>1] = 1
+        
+        flux[i] = sum(image_cut$image*sing_rel, na.rm=TRUE)
+        mag[i] = profoundFlux2Mag(flux[i], magzero=magzero)
+      }
+    }
+  }
+  
   flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
   flux_err[!is.finite(flux_err)]=beam_err[!is.finite(flux_err)]
   flux_err[which(flux_err<beam_err)]=beam_err[which(flux_err<beam_err)]
