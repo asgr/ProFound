@@ -357,7 +357,6 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }
   
   if(fluxext){
-    
     for(i in 1:Nmodels){
       if(verbose & (i %% Nprint == 0)  & Nmodels>=1e3){
         message(paste(' - model',i,'of',Nmodels))
@@ -395,6 +394,32 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         mag[i] = profoundFlux2Mag(flux[i], magzero=magzero)
       }
     }
+    
+    if(modelout){
+      if(hasProFit){
+        modellist = list(
+          pointsource = list(
+            xcen = xcen[is.finite(mag)],
+            ycen = ycen[is.finite(mag)],
+            mag = mag[is.finite(mag)]
+          )
+        )
+        fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+      }else{
+        fullmodel=.genPointSource(
+          xcen = xcen[is.finite(mag)],
+          ycen = ycen[is.finite(mag)],
+          flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
+          psf=psf,
+          dim=dim(image)
+        )
+      }
+      
+      finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
+    }else{
+      fullmodel=NULL
+      finalLL=NULL
+    }
   }
   
   flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
@@ -423,7 +448,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       
       if(verbose){message('Rerunning source model with extra sources')}
       
-      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
+      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, fluxext=fluxext, verbose=verbose)
       
       seltarget=1:Nmodels
       xcen=rerun$psfstats$xcen[seltarget]
