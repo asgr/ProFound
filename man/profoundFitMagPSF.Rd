@@ -11,7 +11,7 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen = NULL, Deccen = NULL, mag = NULL,
 image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
 modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
-fluxtype = 'Raw', psf_redosky = FALSE, header = NULL, doProFound = FALSE,
+fluxtype = 'Raw', psf_redosky = FALSE, fluxext = FALSE, header = NULL, doProFound = FALSE,
 findextra = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -69,6 +69,9 @@ Character scaler; specifies whether fluxes will be output in Jansky / MicroJansk
 }
   \item{psf_redosky}{
 Logical; should the sky calulcated by \code{\link{profoundProFound}} be subtracted from the target image? Since FIR frames are often confused, this should be turned on with care since possibly none of the pixels are a good sky reference. Put another way, you really need to trust your PSF wings.
+}
+  \item{fluxext}{
+Logical; should the full model be used to compute an image deblending function? This means fluxes are guaranteed to add up to those available in the \option{image}. The fit PSF can differ, especially if the \option{psf} supplied is not in detail identical to the true \option{image} PSF. In practice we find that using \option{fluxext}=FALSE works better when the sources are not well resolved (assuming the true \option{psf} ~ true PSF), but when sources are marginally extended then \option{fluxext}=TRUE is probably the safer mode to use (hence the name).
 }
   \item{header}{
 Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
