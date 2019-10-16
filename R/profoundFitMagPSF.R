@@ -441,42 +441,50 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       protemp=profoundProFound(image_orig-fullmodel, mask=mask, sky=0, magzero=magzero, header=header, verbose=FALSE, ...)
     }
     if(!is.null(protemp$segstats)){
-      xcen=c(xcen, protemp$segstats$xcen)
-      ycen=c(ycen, protemp$segstats$ycen)
-      mag=c(mag, protemp$segstats$mag)
+      addxcen = protemp$segstats$xcen
+      addycen = protemp$segstats$ycen
+      addmag = protemp$segstats$mag
+      goodadd = which(is.finite(addxcen) & is.finite(addycen) & is.finite(addmag))
+      if(length(goodadd)>0){
+        xcen=c(xcen, protemp$segstats$xcen)
+        ycen=c(ycen, protemp$segstats$ycen)
+        mag=c(mag, protemp$segstats$mag)
       
-      if(verbose){message(paste('- gained',protemp$Nseg,'additional sources'))}
+        if(verbose){message(paste('- gained',protemp$Nseg,'additional sources'))}
       
-      if(verbose){message('Rerunning source model with extra sources')}
+        if(verbose){message('Rerunning source model with extra sources')}
       
-      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, fluxext=fluxext, verbose=verbose)
+        rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, fluxext=fluxext, verbose=verbose)
       
-      seltarget=1:Nmodels
-      xcen=rerun$psfstats$xcen[seltarget]
-      ycen=rerun$psfstats$ycen[seltarget]
-      RAcen=rerun$psfstats$RAcen[seltarget]
-      Deccen=rerun$psfstats$Deccen[seltarget]
-      flux=rerun$psfstats$flux[seltarget]
-      flux_err=rerun$psfstats$flux_err[seltarget]
-      mag=rerun$psfstats$mag[seltarget]
-      mag_err=rerun$psfstats$mag_err[seltarget]
-      psfLL=rerun$psfstats$psfLL[seltarget]
-      signif=rerun$psfstats$signif[seltarget]
-      
-      selextra=(Nmodels+1):(dim(rerun$psfstats)[1])
-      xcen_extra=rerun$psfstats$xcen[selextra]
-      ycen_extra=rerun$psfstats$ycen[selextra]
-      RAcen_extra=rerun$psfstats$RAcen[selextra]
-      Deccen_extra=rerun$psfstats$Deccen[selextra]
-      flux_extra=rerun$psfstats$flux[selextra]
-      flux_err_extra=rerun$psfstats$flux_err[selextra]
-      mag_extra=rerun$psfstats$mag[selextra]
-      mag_err_extra=rerun$psfstats$mag_err[selextra]
-      psfLL_extra=rerun$psfstats$psfLL[selextra]
-      signif_extra=rerun$psfstats$signif[selextra]
-      psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, signif=signif_extra)
-      
-      fullmodel=rerun$finalmodel
+        seltarget=1:Nmodels
+        xcen=rerun$psfstats$xcen[seltarget]
+        ycen=rerun$psfstats$ycen[seltarget]
+        RAcen=rerun$psfstats$RAcen[seltarget]
+        Deccen=rerun$psfstats$Deccen[seltarget]
+        flux=rerun$psfstats$flux[seltarget]
+        flux_err=rerun$psfstats$flux_err[seltarget]
+        mag=rerun$psfstats$mag[seltarget]
+        mag_err=rerun$psfstats$mag_err[seltarget]
+        psfLL=rerun$psfstats$psfLL[seltarget]
+        signif=rerun$psfstats$signif[seltarget]
+        
+        selextra=(Nmodels+1):(dim(rerun$psfstats)[1])
+        xcen_extra=rerun$psfstats$xcen[selextra]
+        ycen_extra=rerun$psfstats$ycen[selextra]
+        RAcen_extra=rerun$psfstats$RAcen[selextra]
+        Deccen_extra=rerun$psfstats$Deccen[selextra]
+        flux_extra=rerun$psfstats$flux[selextra]
+        flux_err_extra=rerun$psfstats$flux_err[selextra]
+        mag_extra=rerun$psfstats$mag[selextra]
+        mag_err_extra=rerun$psfstats$mag_err[selextra]
+        psfLL_extra=rerun$psfstats$psfLL[selextra]
+        signif_extra=rerun$psfstats$signif[selextra]
+        psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, signif=signif_extra)
+        
+        fullmodel=rerun$finalmodel
+      }else{
+        psfstats_extra=NULL
+      }
     }else{
       psfstats_extra=NULL
     }
