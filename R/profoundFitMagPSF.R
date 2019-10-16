@@ -446,9 +446,9 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       addmag = protemp$segstats$mag
       goodadd = which(is.finite(addxcen) & is.finite(addycen) & is.finite(addmag))
       if(length(goodadd)>0){
-        xcen=c(xcen, protemp$segstats$xcen)
-        ycen=c(ycen, protemp$segstats$ycen)
-        mag=c(mag, protemp$segstats$mag)
+        xcen=c(xcen, addxcen[goodadd])
+        ycen=c(ycen, addycen[goodadd])
+        mag=c(mag, addmag[goodadd])
       
         if(verbose){message(paste('- gained',protemp$Nseg,'additional sources'))}
       
