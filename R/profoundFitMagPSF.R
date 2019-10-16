@@ -120,7 +120,12 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     protemp=NULL
   }
   
+  if(!is.null(mask)){
+    image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
+  }
+  
   goodlocs=ceiling(xcen)>=1 & ceiling(xcen)<= dim(image)[1] & ceiling(ycen)>=1 & ceiling(ycen)<= dim(image)[2]
+  
   if(is.null(mag)){
     tempflux=rep(NA,length(xcen))
     tempflux[goodlocs]=image[cbind(ceiling(xcen[goodlocs]),ceiling(ycen[goodlocs]))] #only if source is in image
@@ -133,10 +138,6 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if(is.null(Deccen)){Deccen=rep(NA,length(mag))}
   
   mag[is.na(mag)]=Inf
-  
-  if(!is.null(mask)){
-    image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
-  }
   
   image_orig=image
   
