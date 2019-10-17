@@ -221,7 +221,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     if(j==1){
       if(modelout){
         origmodel=fullmodel
-        origLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
+        origLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2), na.rm = TRUE)
       }else{
         origmodel=NULL
         origLL=NULL
@@ -351,7 +351,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       )
     }
     
-    finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
+    finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2), na.rm = TRUE)
   }else{
     fullmodel=NULL
     finalLL=NULL
@@ -416,7 +416,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         )
       }
       
-      finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
+      finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2), na.rm = TRUE)
     }else{
       fullmodel=NULL
       finalLL=NULL
