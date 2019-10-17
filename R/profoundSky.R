@@ -286,11 +286,11 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   
   tempmat_sky=matrix(0,length(xseq),length(yseq))
   tempmat_sky[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,1]
-  tempmat_sky[is.na(tempmat_sky)]= stats::median(tempmat_sky, na.rm = TRUE)
+  tempmat_sky[is.na(tempmat_sky)]= stats::median(tempsky[,1], na.rm = TRUE)
   
   tempmat_skyRMS=matrix(0,length(xseq),length(yseq))
   tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
-  tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempmat_skyRMS, na.rm = TRUE)
+  tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempsky[,2], na.rm = TRUE)
   
   xstart=min(3,dim(tempmat_sky)[1]-1)
   ystart=min(3,dim(tempmat_sky)[2]-1)

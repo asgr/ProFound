@@ -1,4 +1,4 @@
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext =FALSE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   timestart=proc.time()[3]
   
@@ -120,7 +120,12 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     protemp=NULL
   }
   
+  if(!is.null(mask)){
+    image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
+  }
+  
   goodlocs=ceiling(xcen)>=1 & ceiling(xcen)<= dim(image)[1] & ceiling(ycen)>=1 & ceiling(ycen)<= dim(image)[2]
+  
   if(is.null(mag)){
     tempflux=rep(NA,length(xcen))
     tempflux[goodlocs]=image[cbind(ceiling(xcen[goodlocs]),ceiling(ycen[goodlocs]))] #only if source is in image
@@ -133,10 +138,6 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if(is.null(Deccen)){Deccen=rep(NA,length(mag))}
   
   mag[is.na(mag)]=Inf
-  
-  if(!is.null(mask)){
-    image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
-  }
   
   image_orig=image
   
@@ -220,7 +221,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     if(j==1){
       if(modelout){
         origmodel=fullmodel
-        origLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
+        origLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2), na.rm = TRUE)
       }else{
         origmodel=NULL
         origLL=NULL
@@ -330,7 +331,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     mag=mag+diffmag
   }
   
-  if(modelout){
+  if(modelout | findextra | fluxext){
     if(hasProFit){
       modellist = list(
         pointsource = list(
@@ -350,11 +351,78 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       )
     }
     
-    finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2))
+    finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2), na.rm = TRUE)
   }else{
     fullmodel=NULL
     finalLL=NULL
   }
+  
+  if(fluxext){
+    for(i in 1:Nmodels){
+      if(verbose & (i %% Nprint == 0)  & Nmodels>=1e3){
+        message(paste(' - model',i,'of',Nmodels))
+      }
+      if(is.finite(mag[i])){
+        image_cut = magcutout(image_orig, loc=c(xcen[i],ycen[i]), box=dim(psf))
+        model_cut = magcutout(fullmodel, loc=c(xcen[i],ycen[i]), box=dim(psf))
+
+        if(hasProFit){
+          singlist = list(
+            pointsource = list(
+              xcen = image_cut$loc[1],
+              ycen = image_cut$loc[2],
+              mag = mag[i]
+            )
+          )
+          singmodel=ProFit::profitMakeModel(modellist=singlist, dim=dim(psf), psf=psf, magzero=magzero)$z
+        }else{
+          singmodel=.genPointSource(
+            xcen = image_cut$loc[1],
+            ycen = image_cut$loc[2],
+            flux=profoundMag2Flux(mag=mag[i], magzero=magzero),
+            psf=psf,
+            dim=dim(psf)
+          )
+        }
+        
+        sing_rel = singmodel / model_cut$image
+        sing_rel[is.na(sing_rel)] = 0
+        sing_rel[is.nan(sing_rel)] = 0
+        sing_rel[sing_rel<0] = 0
+        sing_rel[sing_rel>1] = 1
+        
+        flux[i] = sum(image_cut$image*sing_rel, na.rm=TRUE)
+        mag[i] = profoundFlux2Mag(flux[i], magzero=magzero)
+      }
+    }
+    
+    if(modelout){
+      if(hasProFit){
+        modellist = list(
+          pointsource = list(
+            xcen = xcen[is.finite(mag)],
+            ycen = ycen[is.finite(mag)],
+            mag = mag[is.finite(mag)]
+          )
+        )
+        fullmodel=ProFit::profitMakeModel(modellist=modellist, dim=dim(image), psf=psf, magzero=magzero)$z
+      }else{
+        fullmodel=.genPointSource(
+          xcen = xcen[is.finite(mag)],
+          ycen = ycen[is.finite(mag)],
+          flux=profoundMag2Flux(mag=mag[is.finite(mag)], magzero=magzero),
+          psf=psf,
+          dim=dim(image)
+        )
+      }
+      
+      finalLL= -0.5*sum((image_orig-fullmodel)^2/(im_sigma^2), na.rm = TRUE)
+    }else{
+      fullmodel=NULL
+      finalLL=NULL
+    }
+  }
+  
   flux_err=sqrt(flux_err^2 + (diffmag*flux/(2.5/log(10)))^2)
   flux_err[!is.finite(flux_err)]=beam_err[!is.finite(flux_err)]
   flux_err[which(flux_err<beam_err)]=beam_err[which(flux_err<beam_err)]
@@ -373,42 +441,50 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       protemp=profoundProFound(image_orig-fullmodel, mask=mask, sky=0, magzero=magzero, header=header, verbose=FALSE, ...)
     }
     if(!is.null(protemp$segstats)){
-      xcen=c(xcen, protemp$segstats$xcen)
-      ycen=c(ycen, protemp$segstats$ycen)
-      mag=c(mag, protemp$segstats$mag)
+      addxcen = protemp$segstats$xcen
+      addycen = protemp$segstats$ycen
+      addmag = protemp$segstats$mag
+      goodadd = which(is.finite(addxcen) & is.finite(addycen) & is.finite(addmag))
+      if(length(goodadd)>0){
+        xcen=c(xcen, addxcen[goodadd])
+        ycen=c(ycen, addycen[goodadd])
+        mag=c(mag, addmag[goodadd])
       
-      if(verbose){message(paste('- gained',protemp$Nseg,'additional sources'))}
+        if(verbose){message(paste('- gained',protemp$Nseg,'additional sources'))}
       
-      if(verbose){message('Rerunning source model with extra sources')}
+        if(verbose){message('Rerunning source model with extra sources')}
       
-      rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, verbose=verbose)
+        rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, fluxext=fluxext, verbose=verbose)
       
-      seltarget=1:Nmodels
-      xcen=rerun$psfstats$xcen[seltarget]
-      ycen=rerun$psfstats$ycen[seltarget]
-      RAcen=rerun$psfstats$RAcen[seltarget]
-      Deccen=rerun$psfstats$Deccen[seltarget]
-      flux=rerun$psfstats$flux[seltarget]
-      flux_err=rerun$psfstats$flux_err[seltarget]
-      mag=rerun$psfstats$mag[seltarget]
-      mag_err=rerun$psfstats$mag_err[seltarget]
-      psfLL=rerun$psfstats$psfLL[seltarget]
-      signif=rerun$psfstats$signif[seltarget]
-      
-      selextra=(Nmodels+1):(dim(rerun$psfstats)[1])
-      xcen_extra=rerun$psfstats$xcen[selextra]
-      ycen_extra=rerun$psfstats$ycen[selextra]
-      RAcen_extra=rerun$psfstats$RAcen[selextra]
-      Deccen_extra=rerun$psfstats$Deccen[selextra]
-      flux_extra=rerun$psfstats$flux[selextra]
-      flux_err_extra=rerun$psfstats$flux_err[selextra]
-      mag_extra=rerun$psfstats$mag[selextra]
-      mag_err_extra=rerun$psfstats$mag_err[selextra]
-      psfLL_extra=rerun$psfstats$psfLL[selextra]
-      signif_extra=rerun$psfstats$signif[selextra]
-      psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, signif=signif_extra)
-      
-      fullmodel=rerun$finalmodel
+        seltarget=1:Nmodels
+        xcen=rerun$psfstats$xcen[seltarget]
+        ycen=rerun$psfstats$ycen[seltarget]
+        RAcen=rerun$psfstats$RAcen[seltarget]
+        Deccen=rerun$psfstats$Deccen[seltarget]
+        flux=rerun$psfstats$flux[seltarget]
+        flux_err=rerun$psfstats$flux_err[seltarget]
+        mag=rerun$psfstats$mag[seltarget]
+        mag_err=rerun$psfstats$mag_err[seltarget]
+        psfLL=rerun$psfstats$psfLL[seltarget]
+        signif=rerun$psfstats$signif[seltarget]
+        
+        selextra=(Nmodels+1):(dim(rerun$psfstats)[1])
+        xcen_extra=rerun$psfstats$xcen[selextra]
+        ycen_extra=rerun$psfstats$ycen[selextra]
+        RAcen_extra=rerun$psfstats$RAcen[selextra]
+        Deccen_extra=rerun$psfstats$Deccen[selextra]
+        flux_extra=rerun$psfstats$flux[selextra]
+        flux_err_extra=rerun$psfstats$flux_err[selextra]
+        mag_extra=rerun$psfstats$mag[selextra]
+        mag_err_extra=rerun$psfstats$mag_err[selextra]
+        psfLL_extra=rerun$psfstats$psfLL[selextra]
+        signif_extra=rerun$psfstats$signif[selextra]
+        psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, signif=signif_extra)
+        
+        fullmodel=rerun$finalmodel
+      }else{
+        psfstats_extra=NULL
+      }
     }else{
       psfstats_extra=NULL
     }
