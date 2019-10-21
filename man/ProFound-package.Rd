@@ -13,7 +13,7 @@
 Package: \tab ProFound\cr
 Type: \tab Package\cr
 Version: \tab 1.10.8\cr
-Date: \tab 2019-10-17\cr
+Date: \tab 2019-10-21\cr
 License: \tab LGPL-3\cr
 Depends: \tab R (>= 3.0), FITSio, magicaxis (>= 2.0.8)\cr
 Imports: \tab RColorBrewer, data.table, celestial (>= 1.4.1), foreach, doParallel, Rcpp\cr
