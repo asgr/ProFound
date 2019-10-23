@@ -536,15 +536,16 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   }
   
   if(expand[1]=='all'){
-    segim_new=segim
-    maxorig=max(segim_new, na.rm=TRUE)+1L
-    replace=which(segim_new!=0)
-    segim_new[replace]=maxorig-segim_new[replace]
-    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    replace=which(segim_new!=0)
-    segim_new[replace]=maxorig-segim_new[replace]
-    replace=which(segim!=0) #put back non-dilated segments
-    segim_new[replace]=segim[replace] #put back non-dilated segments
+    segim_new = .dilate_cpp(segim, kern)
+    # segim_new=segim
+    # maxorig=max(segim_new, na.rm=TRUE)+1L
+    # replace=which(segim_new!=0)
+    # segim_new[replace]=maxorig-segim_new[replace]
+    # segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
+    # replace=which(segim_new!=0)
+    # segim_new[replace]=maxorig-segim_new[replace]
+    # replace=which(segim!=0) #put back non-dilated segments
+    # segim_new[replace]=segim[replace] #put back non-dilated segments
   }else{
     segim_new=segim
     if('fastmatch' %in% .packages()){ #remove things that will not be dilated
@@ -552,12 +553,13 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     }else{
       segim_new[!(segim_new %in% expand)] = 0L
     }
-    maxorig=max(segim_new, na.rm=TRUE)+1L
-    replace=which(segim_new!=0)
-    segim_new[replace]=maxorig-segim_new[replace]
-    segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    replace=which(segim_new!=0)
-    segim_new[replace]=maxorig-segim_new[replace]
+    # maxorig=max(segim_new, na.rm=TRUE)+1L
+    # replace=which(segim_new!=0)
+    # segim_new[replace]=maxorig-segim_new[replace]
+    # segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
+    # replace=which(segim_new!=0)
+    # segim_new[replace]=maxorig-segim_new[replace]
+    segim_new = .dilate_cpp(segim_new, kern)
     replace=which(segim!=0) #put back non-dilated segments
     segim_new[replace]=segim[replace] #put back non-dilated segments
     rm(replace)
