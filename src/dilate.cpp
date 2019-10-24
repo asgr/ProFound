@@ -20,8 +20,10 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern){
             if(kern(m,n) > 0){
               if(m != krow_off | n != kcol_off){
                 if(segim(i + m - krow_off,j + n - kcol_off) == 0){
-                  if(segim(i,j) < segim_new(i + m - krow_off,j + n - kcol_off) | segim_new(i + m - krow_off,j + n - kcol_off) == 0) {
-                    segim_new(i + m - krow_off,j + n - kcol_off) = segim(i,j);
+                  int xloc = i + m - krow_off;
+                  int yloc = j + n - kcol_off;
+                  if(segim(i,j) < segim_new(xloc,yloc) | segim_new(xloc,yloc) == 0) {
+                    segim_new(xloc,yloc) = segim(i,j);
                   }
                 }
               }else{
