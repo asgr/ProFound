@@ -230,7 +230,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
       image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
     }else{
       if(!requireNamespace("EBImage", quietly = TRUE)){
-        stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+        stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN/Bioconductor.', call. = FALSE)
       }
       message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
       image=as.matrix(EBImage::gblur(image,sigma))
@@ -249,7 +249,11 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   }
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
-    if(watershed=='EBImage'){
+    if(watershed=='ProFound'){
+      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
+    }else if(watershed=='ProFound-old'){
+      segim=water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
+    }else if(watershed=='EBImage'){
       if(!requireNamespace("EBImage", quietly = TRUE)){
         stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
       }
@@ -258,12 +262,8 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
       segtab=tabulate(segim)
       segim[segim %in% which(segtab<pixcut)]=0L
       mode(segim)='integer'
-    }else if(watershed=='ProFound'){
-      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
-    }else if(watershed=='ProFound-old'){
-      segim=water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else{
-      stop('watershed option must either be EBImage/ProFound/ProFound-old!')
+      stop('watershed option must either be ProFound/ProFound-old/EBImage!')
     }
   }else{
     segim=image
@@ -377,7 +377,7 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
       image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
     }else{
       if(!requireNamespace("EBImage", quietly = TRUE)){
-        stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+        stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN/Bioconductor', call. = FALSE)
       }
       message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
       image=as.matrix(EBImage::gblur(image,sigma))
@@ -1345,13 +1345,14 @@ profoundSegimNear=function(segim=NULL, offset=1){
 }
 
 profoundSegimGroup=function(segim=NULL){
-  if(!requireNamespace("EBImage", quietly = TRUE)){
-    stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
+  if(!requireNamespace("imager", quietly = TRUE)){
+    stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
   }
   
   Ngroup=NULL; segID=NULL; Npix=NULL
   
-  groupim=EBImage::bwlabel(segim)
+  ##groupim=EBImage::bwlabel(segim)
+  groupim = as.matrix(imager::label(as.cimg(segim>0)))
   segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
   segimDT[groupID>0,groupID:=which.max(tabulate(groupID)),by=segID]
   groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
