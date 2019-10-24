@@ -1352,7 +1352,7 @@ profoundSegimGroup=function(segim=NULL){
   Ngroup=NULL; segID=NULL; Npix=NULL
   
   ##groupim=EBImage::bwlabel(segim)
-  groupim = as.matrix(imager::label(as.cimg(segim>0)))
+  groupim = as.matrix(imager::label(imager::as.cimg(segim>0)))
   segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
   segimDT[groupID>0,groupID:=which.max(tabulate(groupID)),by=segID]
   groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
