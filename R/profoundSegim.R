@@ -496,9 +496,9 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   call=match.call()
   
-  if(!requireNamespace("EBImage", quietly = TRUE)){
-    stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
-  }
+  # if(!requireNamespace("EBImage", quietly = TRUE)){
+  #   stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
+  # }
   
   #Treat image NAs as masked regions:
   
@@ -516,7 +516,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     if(verbose){message(paste(' - Extracted pixel scale from header provided:',round(pixscale,3),'asec/pixel.'))}
   }
   
-  kern = EBImage::makeBrush(size, shape=shape)
+  kern = .makeBrush(size, shape=shape)
   
   if(verbose){message(paste(" - Dilating segments -", round(proc.time()[3]-timestart,3), "sec"))}
   

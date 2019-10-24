@@ -35,7 +35,6 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern){
       }
     }
   }
-  
   return segim_new;
 }
 
