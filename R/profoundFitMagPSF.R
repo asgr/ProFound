@@ -514,6 +514,7 @@ plot.fitmagpsf=function(x, ...){
   
   if(!is.null(x$mask)){
     x$image[x$mask!=0]=NA #means we will ignore the masked bits when doing the LL
+    x$finalmodel[x$mask!=0]=NA #means we will ignore the masked bits when doing the LL
   }
   
   layout(rbind(1:3))
