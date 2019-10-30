@@ -540,14 +540,13 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
-    #stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
-    #maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
-    #magimageWCS(x$sky, x$header, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), stretchscale=stretchscale, col=cmap)
     magimageWCS(x$sky, x$header, qdiff=TRUE)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimageWCS(x$skyRMS, x$header)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='skyRMS',bg='white')
     
     if(hist=='iters'){
@@ -603,14 +602,13 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    #stretchscale = 1/median(abs(x$sky), na.rm=TRUE)
-    #maxsky = quantile(abs(x$sky[is.finite(x$sky)]), 0.995, na.rm=TRUE)
-    #magimage(x$sky, locut=-maxsky, hicut=maxsky, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     magimage(x$sky, qdiff=TRUE)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$skyRMS)
+    if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='skyRMS',bg='white')
     
     if(hist=='iters'){
