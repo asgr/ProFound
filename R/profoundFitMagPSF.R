@@ -85,14 +85,22 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if((is.null(xcen) & is.null(ycen)) & (is.null(RAcen) | is.null(Deccen))){stop('Need RAcen/Decen pair!')}
   
   if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(header)){
-    RAdeccoords=magWCSxy2radec(x = xcen, y = ycen, header=header)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      RAdeccoords=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', header=header)
+    }else{
+      RAdeccoords=magWCSxy2radec(x = xcen, y = ycen, header=header)
+    }
     RAcen=RAdeccoords[,'RA']
     Deccen=RAdeccoords[,'Dec']
   }
   
   if((is.null(xcen) & is.null(ycen)) & (!is.null(RAcen) & !is.null(Deccen))){
     if(is.null(header)){stop('Need header if using RAcen and Deccec input')}
-    xycoords=magWCSradec2xy(RA = RAcen, Dec = Deccen, header=header)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      xycoords=Rwcs::Rwcs_s2p(RA = RAcen, Dec = Deccen, pixcen = 'R', header=header)
+    }else{
+      xycoords=magWCSradec2xy(RA = RAcen, Dec = Deccen, header=header)
+    }
     xcen=xycoords[,'x']
     ycen=xycoords[,'y']
   }

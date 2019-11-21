@@ -511,17 +511,29 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   if(!is.null(x$header)){
   
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      Rwcs::Rwcs_image(image=image, header=x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+    }else{
+      magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+    }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(x$segim, x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      Rwcs::Rwcs_image(image=x$segim, header=x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
+    }else{
+      magimageWCS(x$segim, x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
+    }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     abline(v=c(0,dim(x$image)[1]))
     abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(image, x$header)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      Rwcs::Rwcs_image(image=image, header=x$header)
+    }else{
+      magimageWCS(image, x$header)
+    }
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     
@@ -540,12 +552,20 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
       
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(x$sky, x$header, qdiff=TRUE)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      Rwcs::Rwcs_image(image=x$sky, header=x$header, qdiff=TRUE)
+    }else{
+      magimageWCS(x$sky, x$header, qdiff=TRUE)
+    }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='sky',bg='white')
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimageWCS(x$skyRMS, x$header)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      Rwcs::Rwcs_image(image=x$skyRMS, header=x$header)
+    }else{
+      magimageWCS(x$skyRMS, x$header)
+    }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='skyRMS',bg='white')
     

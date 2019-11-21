@@ -837,10 +837,18 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   SB_N100=profoundFlux2SB(flux=fluxout$flux/fluxout$N100seg, magzero=magzero, pixscale=pixscale)
   
   if(!is.null(header)){
-    coord=magWCSxy2radec(xcen, ycen, header=header)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      coord=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', header=header)
+    }else{
+      coord=magWCSxy2radec(x = xcen, y = ycen, header=header)
+    }
     RAcen=coord[,1]
     Deccen=coord[,2]
-    coord=magWCSxy2radec(xmax, ymax, header=header)
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      coord=Rwcs::Rwcs_p2s(x = xmax, y = ymax, pixcen = 'R', header=header)
+    }else{
+      coord=magWCSxy2radec(x = xmax, y = ymax, header=header)
+    }
     RAmax=coord[,1]
     Decmax=coord[,2]
   }else{
@@ -1007,7 +1015,11 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
     if(is.null(header)){
       magimage(image, ...)
     }else{
-      magimageWCS(image, header=header, ...)
+      if(requireNamespace("Rwcs", quietly = TRUE)){
+        Rwcs::Rwcs_image(image, header=header, ...)
+      }else{
+        magimageWCS(image, header=header, ...)
+      }
     }
   }
   
