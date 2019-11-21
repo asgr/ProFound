@@ -89,5 +89,4 @@ function (image, pixscale_old = 1, pixscale_new = 1, type = "bicubic",
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\concept{ resample }% use one of  RShowDoc("KEYWORDS")
