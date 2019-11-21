@@ -1,16 +1,17 @@
 Package: ProFound
 Type: Package
 Title: Photometry Tools
-Version: 1.10.8
-Date: 2019-10-21
+Version: 1.11.1
+Date: 2019-11-19
 Author: Aaron Robotham
 Maintainer: Aaron Robotham <aaron.robotham@uwa.edu.au>
 Description: Core package containing all the tools for simple and advanced source extraction. This is used to create inputs for 'ProFit', or for source detection, extraction and photometry in its own right.
 License: LGPL-3
-Depends: R (>= 3.1), FITSio, magicaxis (>= 2.0.8)
-Imports: RColorBrewer, data.table, celestial (>= 1.4.1), foreach, doParallel, Rcpp
-Suggests: ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon, Rfast, fastmatch
+Depends: R (>= 3.1), FITSio, magicaxis (>= 2.0.8), Rcpp (>= 1.0.2)
+Imports: RColorBrewer, data.table, celestial (>= 1.4.1), foreach, doParallel
+Suggests: ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon, Rfast, fastmatch, Rfits, Rwcs
 VignetteBuilder: knitr
 SystemRequirements: C++11
 LinkingTo: Rcpp
 NeedsCompilation: yes
+Additional_repositories: https://github.com/asgr

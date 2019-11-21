@@ -5,6 +5,18 @@
 
 using namespace Rcpp;
 
+// dilate_cpp
+IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern);
+RcppExport SEXP _ProFound_dilate_cpp(SEXP segimSEXP, SEXP kernSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type segim(segimSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type kern(kernSEXP);
+    rcpp_result_gen = Rcpp::wrap(dilate_cpp(segim, kern));
+    return rcpp_result_gen;
+END_RCPP
+}
 // point_in_polygon
 LogicalVector point_in_polygon(NumericVector x, NumericVector y, NumericVector poly_x, NumericVector poly_y);
 RcppExport SEXP _ProFound_point_in_polygon(SEXP xSEXP, SEXP ySEXP, SEXP poly_xSEXP, SEXP poly_ySEXP) {
@@ -100,6 +112,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 2},
     {"_ProFound_point_in_polygon", (DL_FUNC) &_ProFound_point_in_polygon, 4},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
     {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},
