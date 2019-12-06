@@ -17,6 +17,10 @@
     .Call(`_ProFound_point_in_polygon`, x, y, poly_x, poly_y)
 }
 
+profoundMakeSkyGrid_new <- function(image, sky, skyRMS, Fquantile, objects = NULL, mask = NULL, box1 = 100L, box2 = 100L, grid1 = 100L, grid2 = 100L, boxadd1 = 50L, boxadd2 = 50L, type = 2L, skypixmin = 5000L, boxiters = 0L, doclip = 1L, skytype = 1L, skyRMStype = 2L, sigmasel = 1) {
+    invisible(.Call(`_ProFound_Cadacs_MakeSkyGrid`, image, sky, skyRMS, Fquantile, objects, mask, box1, box2, grid1, grid2, boxadd1, boxadd2, type, skypixmin, boxiters, doclip, skytype, skyRMStype, sigmasel))
+}
+
 water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1000000, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L) {
     .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck)
 }

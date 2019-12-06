@@ -57,6 +57,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Cadacs_MakeSkyGrid
+void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image, Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS, Rcpp::Function Fquantile, Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask, const int box1, const int box2, const int grid1, const int grid2, const int boxadd1, const int boxadd2, const int type, const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel);
+RcppExport SEXP _ProFound_Cadacs_MakeSkyGrid(SEXP imageSEXP, SEXP skySEXP, SEXP skyRMSSEXP, SEXP FquantileSEXP, SEXP objectsSEXP, SEXP maskSEXP, SEXP box1SEXP, SEXP box2SEXP, SEXP grid1SEXP, SEXP grid2SEXP, SEXP boxadd1SEXP, SEXP boxadd2SEXP, SEXP typeSEXP, SEXP skypixminSEXP, SEXP boxitersSEXP, SEXP doclipSEXP, SEXP skytypeSEXP, SEXP skyRMStypeSEXP, SEXP sigmaselSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type image(imageSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type sky(skySEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type skyRMS(skyRMSSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Function >::type Fquantile(FquantileSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerMatrix> >::type objects(objectsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerMatrix> >::type mask(maskSEXP);
+    Rcpp::traits::input_parameter< const int >::type box1(box1SEXP);
+    Rcpp::traits::input_parameter< const int >::type box2(box2SEXP);
+    Rcpp::traits::input_parameter< const int >::type grid1(grid1SEXP);
+    Rcpp::traits::input_parameter< const int >::type grid2(grid2SEXP);
+    Rcpp::traits::input_parameter< const int >::type boxadd1(boxadd1SEXP);
+    Rcpp::traits::input_parameter< const int >::type boxadd2(boxadd2SEXP);
+    Rcpp::traits::input_parameter< const int >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< const int >::type skypixmin(skypixminSEXP);
+    Rcpp::traits::input_parameter< const int >::type boxiters(boxitersSEXP);
+    Rcpp::traits::input_parameter< const int >::type doclip(doclipSEXP);
+    Rcpp::traits::input_parameter< const int >::type skytype(skytypeSEXP);
+    Rcpp::traits::input_parameter< const int >::type skyRMStype(skyRMStypeSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigmasel(sigmaselSEXP);
+    Cadacs_MakeSkyGrid(image, sky, skyRMS, Fquantile, objects, mask, box1, box2, grid1, grid2, boxadd1, boxadd2, type, skypixmin, boxiters, doclip, skytype, skyRMStype, sigmasel);
+    return R_NilValue;
+END_RCPP
+}
 // water_cpp
 Rcpp::IntegerMatrix water_cpp(Rcpp::NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck);
 RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP) {
@@ -142,6 +170,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_interpolateLinearGrid", (DL_FUNC) &_ProFound_interpolateLinearGrid, 4},
     {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 2},
     {"_ProFound_point_in_polygon", (DL_FUNC) &_ProFound_point_in_polygon, 4},
+    {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 19},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
     {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},
     {"_ProFound_order_cpp", (DL_FUNC) &_ProFound_order_cpp, 1},
