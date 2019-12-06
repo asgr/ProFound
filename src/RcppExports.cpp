@@ -5,6 +5,32 @@
 
 using namespace Rcpp;
 
+// interpolateAkimaGrid
+void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq, NumericMatrix tempmat_sky, NumericMatrix output);
+RcppExport SEXP _ProFound_interpolateAkimaGrid(SEXP xseqSEXP, SEXP yseqSEXP, SEXP tempmat_skySEXP, SEXP outputSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type xseq(xseqSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type yseq(yseqSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type tempmat_sky(tempmat_skySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type output(outputSEXP);
+    interpolateAkimaGrid(xseq, yseq, tempmat_sky, output);
+    return R_NilValue;
+END_RCPP
+}
+// interpolateLinearGrid
+void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix tempmat_sky, NumericMatrix output);
+RcppExport SEXP _ProFound_interpolateLinearGrid(SEXP xseqSEXP, SEXP yseqSEXP, SEXP tempmat_skySEXP, SEXP outputSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type xseq(xseqSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type yseq(yseqSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type tempmat_sky(tempmat_skySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type output(outputSEXP);
+    interpolateLinearGrid(xseq, yseq, tempmat_sky, output);
+    return R_NilValue;
+END_RCPP
+}
 // dilate_cpp
 IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern);
 RcppExport SEXP _ProFound_dilate_cpp(SEXP segimSEXP, SEXP kernSEXP) {
@@ -112,6 +138,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ProFound_interpolateAkimaGrid", (DL_FUNC) &_ProFound_interpolateAkimaGrid, 4},
+    {"_ProFound_interpolateLinearGrid", (DL_FUNC) &_ProFound_interpolateLinearGrid, 4},
     {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 2},
     {"_ProFound_point_in_polygon", (DL_FUNC) &_ProFound_point_in_polygon, 4},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},

@@ -311,10 +311,9 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     
     #expand out map here!! and then use akima::bilinear function
     
-    bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
-    bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
-    
     if(type=='bilinear'){
+      bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
+      bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
       if(useakima){
         tempgrid=expand.grid(xseq, yseq)
         temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
@@ -324,14 +323,18 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
         temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
       }
     }else if(type=='bicubic'){
+      bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
+      bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
       temp_bi_sky=akima::bicubic(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
       temp_bi_skyRMS=akima::bicubic(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
+    }else if(type=='bicubic_new'){
+      temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
+      .interpolateAkimaGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
+      temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
+      .interpolateAkimaGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
     }else{
       stop('type must be one of bilinear / bicubic !')
     }
-    
-    rm(bigridx)
-    rm(bigridy)
   
     temp_bi_sky=matrix(temp_bi_sky, dim(image)[1], dim(image)[2])
     temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1], dim(image)[2])
