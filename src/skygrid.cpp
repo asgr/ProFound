@@ -47,7 +47,7 @@ private:
  * Histograming methods
  */
 AdacsHistogram::AdacsHistogram() {
-  
+
 }
 void AdacsHistogram::accumulate(Rcpp::NumericVector x,int nbins, double minv, double maxv) {
   _nbins = nbins;
@@ -67,10 +67,10 @@ void AdacsHistogram::accumulate(Rcpp::NumericVector x,int nbins, double minv, do
     }
   }
   _null_sample_count = size-_non_null_sample_count;
-  
+
   if (_non_null_sample_count<1)
     return;
-  
+
   if (!std::isnan(minv) && !std::isnan(maxv)) {
     _min = minv;
     _max = maxv;
@@ -78,7 +78,7 @@ void AdacsHistogram::accumulate(Rcpp::NumericVector x,int nbins, double minv, do
   if (_min==_max) {
     return;
   }
-  
+
   // histogram
   _toolow = 0;
   _toohigh = 0;
@@ -121,10 +121,10 @@ void AdacsHistogram::accumulateLO(Rcpp::NumericVector x,double offset, int nbins
     }
   }
   _null_sample_count = size-_non_null_sample_count;
-  
+
   if (_non_null_sample_count<1)
     return;
-  
+
   if (!std::isnan(minv) && !std::isnan(maxv)) {
     _min = minv;
     _max = maxv;
@@ -132,7 +132,7 @@ void AdacsHistogram::accumulateLO(Rcpp::NumericVector x,double offset, int nbins
   if (_min==_max) {
     return;
   }
-  
+
   // histogram
   _toolow = 0;
   _toohigh = 0;
@@ -175,10 +175,10 @@ void AdacsHistogram::accumulateHI(Rcpp::NumericVector x,double offset, int nbins
     }
   }
   _null_sample_count = size-_non_null_sample_count;
-  
+
   if (_non_null_sample_count<1)
     return;
-  
+
   if (!std::isnan(minv) && !std::isnan(maxv)) {
     _min = minv;
     _max = maxv;
@@ -186,7 +186,7 @@ void AdacsHistogram::accumulateHI(Rcpp::NumericVector x,double offset, int nbins
   if (_min==_max) {
     return;
   }
-  
+
   // histogram
   _toolow = 0;
   _toohigh = 0;
@@ -230,8 +230,8 @@ double AdacsHistogram::quantile(double quantile, double offset) const {
 * Expand the box by boxadd until enough found.
 */
 Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
-                                                    Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask, 
-                                                    const double loc1, const double loc2, const double box1, const double box2, const double boxadd1, const double boxadd2, 
+                                                    Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
+                                                    const double loc1, const double loc2, const double box1, const double box2, const double boxadd1, const double boxadd2,
                                                     const int skypixmin, const int boxiters)
 {
   // R is 1 relative
@@ -241,9 +241,9 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
   int ibox2 = (int)(box2/2);
   int nrow = image.nrow();
   int ncol = image.ncol();
-  
+
   //Rcpp::Rcout << "\nCbox "<<ssrow<<" "<<eerow<<" "<<sscol<<" "<<eecol<<"\n";
-  
+
   const double_t* iiimage=REAL(image);
   Rcpp::IntegerMatrix iobjects;
   const int32_t* iiobjects=NULL;
@@ -257,7 +257,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
     imask = Rcpp::as<Rcpp::IntegerMatrix>(mask);
     iimask=INTEGER(mask.get());
   }
-  
+
   int iboxadd1=0;
   int iboxadd2=0;
   int skyN=0;
@@ -266,7 +266,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
   int eerow = 0;
   int sscol = 1;
   int eecol = 0;
-  
+
   while(skyN<skypixmin & iterN<=boxiters){
     skyN = 0;
     ibox1 += iboxadd1;
@@ -275,7 +275,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
     eerow = std::min(nrow,iloc1+ibox1);
     sscol = std::max(1,iloc2-ibox2);
     eecol = std::min(ncol,iloc2+ibox2);
-    
+
     for (int j = sscol; j <= eecol; j++) {
       int ii=(j-1)*ncol+(ssrow-1);
       for (int i = ssrow; i <= eerow; i++,ii++) {
@@ -296,7 +296,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
     iterN++;
     iboxadd1 = (int)(boxadd1/2);
     iboxadd2 = (int)(boxadd2/2);
-    
+
   }
   // copy sky cell values to vec and return
   Rcpp::NumericVector vec(skyN);
@@ -427,7 +427,7 @@ double_t Cadacs_mode(Rcpp::NumericVector x) {
       max = std::max(max,myx[i]);
     }
   }
-  
+
   // histogram
   int levels = 16384*2;
   std::vector<int> histogram;
@@ -445,10 +445,10 @@ double_t Cadacs_mode(Rcpp::NumericVector x) {
       histogram[index]++;
     }
   }
-  
+
   double current_bin_lower=min;
   double mode=current_bin_lower;
-  
+
   double binwidth = (max - min)/levels;
   int max_count = 0;
   for (int i=0;i<levels;i++) {
@@ -477,11 +477,11 @@ Rcpp::NumericVector Cadacs_magclip(Rcpp::NumericVector x, const int sigma, const
     }
   }
   std::sort (myx.begin(), myx.begin()+length, std::less<double_t>()); // ascending
-  
+
   int newlen = length;
   if(clipiters>0 & length>0){
     double sigcut=R::pnorm(sigmasel, 0.0, 1.0, 1, 0);
-    
+
     for(int iteration=0; iteration<clipiters; iteration++){
       if(newlen<=1)
         break;
@@ -493,7 +493,7 @@ Rcpp::NumericVector Cadacs_magclip(Rcpp::NumericVector x, const int sigma, const
         double_t y=1.0-2.0/l1;
         clipsigma = R::qnorm(y, 0.0, 1.0, 1, 0);
       }
-      
+
       double_t vallims = 0;
       switch(estimate) {
       case 1:
@@ -529,8 +529,8 @@ Rcpp::NumericVector Cadacs_magclip(Rcpp::NumericVector x, const int sigma, const
 
 Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
                                             Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
-                                            const double loc1, const double loc2, const double box1, const double box2, 
-                                            const double boxadd1, const double boxadd2, 
+                                            const double loc1, const double loc2, const double box1, const double box2,
+                                            const double boxadd1, const double boxadd2,
                                             const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel
 ) {
   Rcpp::NumericVector select = Cadacs_FindSkyCellValues(image, objects, mask, loc1, loc2, box1, box2, boxadd1, boxadd2, skypixmin, boxiters);
@@ -566,7 +566,7 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
   }
     break;
   }
-  
+
   double skyRMSloc=0.0;
   switch (skyRMStype) {
   case adacs_LO:
@@ -608,7 +608,7 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
     break;
   case adacs_RBOTH:
   {
-    
+
     // Its ok to modify clip since its a fresh object and will not be used later
     for (int i=0; i<clip.size();i++) {
     clip[i] -= skyloc;
@@ -627,7 +627,7 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
         temphi[i] = R_NaN;
       }
     }
-    
+
     double lo = fabs(REAL(Fquantile(templo, R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, true))[0])/sigmasel;
     double hi = fabs(REAL(Fquantile(temphi, (R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, true))[0])/sigmasel;
     skyRMSloc = (lo+hi)/2;
@@ -672,13 +672,13 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     box[0]=image.nrow();
   if(box[1]>image.ncol())
     box[1]=image.ncol();
-  
+
   double grid[2] = {(double)grid1, (double)grid2};
   if(grid[0]>image.nrow())
     grid[0]=image.nrow();
   if(grid[1]>image.ncol())
     grid[1]=image.ncol();
-  
+
   // tile over input image with tile size (grid) and no overlap
   // xseq,yseq give the centres of each tile
   int tile_nrows=0;
@@ -693,11 +693,11 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     tile_ncols++;
     y_tile_centre += grid[1];
   }
-  
+
   // add room for linearly extrapolated padding
   tile_nrows += 2;
   tile_ncols += 2;
-  
+
   // Construct the vector of tile centroids
   Rcpp::NumericVector xseq(tile_nrows);
   Rcpp::NumericVector yseq(tile_ncols);
@@ -711,10 +711,10 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     yseq[i] = y_tile_centre;
     y_tile_centre += grid[1];
   }
-  
+
   Rcpp::NumericMatrix z_sky_centre(tile_nrows, tile_ncols);
   Rcpp::NumericMatrix z_skyRMS_centre(tile_nrows, tile_ncols);
-  
+
   bool hasNaNs=false;
   x_tile_centre=grid[0]/2;
   for (int i=1; i<tile_nrows-1; i++) {
@@ -730,11 +730,11 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
       if (std::isnan(z_tile_centre[0]) || std::isnan(z_tile_centre[1])) {
         hasNaNs = true;
       }
-      
+
       z_sky_centre(i, j) = z_tile_centre[0];
       z_skyRMS_centre(i, j) = z_tile_centre[1];
     }
-  } 
+  }
   if (hasNaNs) {
     // Replace any NaN's with reasonable substitute
     // initialise the pad area before getting the medians
@@ -766,7 +766,7 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
       }
     }
   }
-  
+
   // Padding
   //work out the second point for linear extrapolation (the first one is at 1+1 and length(seq)-1)
   int xstart=std::min(2,tile_nrows-2);
@@ -789,9 +789,9 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     z_skyRMS_centre(0, i) = z_skyRMS_centre(1, i)*2 - z_skyRMS_centre(xstart, i);
     z_skyRMS_centre(tile_nrows-1, i) = z_skyRMS_centre(tile_nrows-2, i)*2 - z_skyRMS_centre(xend, i);
   }
-  
+
   // Now interpolate for each image cell
-  
+
   switch (type) {
   case adacs_CLASSIC_BILINEAR:
     interpolateLinearGrid(xseq, yseq, z_sky_centre, sky);
@@ -802,7 +802,7 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     interpolateAkimaGrid(xseq, yseq, z_skyRMS_centre, skyRMS);
     break;
   }
-  
+
   // Apply mask
   if (mask.isNotNull()) {
     Rcpp::IntegerMatrix imask = Rcpp::as<Rcpp::IntegerMatrix>(mask);
@@ -817,5 +817,5 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
       }
     }
   }
-} 
+}
 

@@ -26,7 +26,7 @@ public:
   }
   static double_t calcSlopeAtMiddle(const double_t *x, const double_t *z);
   double_t interpValue(double_t x) const;
-  
+
   // valid interpolation range
   double_t x3;
   double_t x4;
@@ -53,7 +53,7 @@ public:
   adacsakima();
   adacsakima(int npts, const double_t *xorig, const double_t *yorig);
   bool Initialise(int npts,const double_t *xorig, const double_t *yorig);
-  
+
   bool isValid() const;
   double_t InterpValue(double_t x) const;
 private:
@@ -80,7 +80,7 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
   const double_t* myy=REAL(yseq);
   int ncol=tempmat_sky.ncol();
   int nrow=tempmat_sky.nrow();
-  
+
   std::vector<double_t> xin,zin;
   std::vector<adacsakima> akimaCOL;
   xin.reserve(ncol);
@@ -101,8 +101,8 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
     thisspline.Initialise(nrow,xin.data(),zin.data());
     akimaCOL.push_back(thisspline);
   }
-  
-  // For each vertical row 
+
+  // For each vertical row
   for (int i = 1; i <= myxnpts; i++) {
     // For a spline to interpolate vertically along the elements of the row
     double_t x = -0.5+i;
@@ -112,7 +112,7 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
     }
     adacsakima thisspline;
     thisspline.Initialise(ncol,xin.data(),zin.data());
-    
+
     // Interpolate vertically for each element (j) in the current (i) output row
     for (int j = 1; j <= myynpts; j++) {
       double_t y = -0.5+j;
@@ -137,8 +137,8 @@ void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix
   const double_t* myy=REAL(yseq);
   int ncol=tempmat_sky.ncol();
   int nrow=tempmat_sky.nrow();
-  
-  // For each vertical row 
+
+  // For each vertical row
   for (int i = 1; i <= myxnpts; i++) {
     // For a spline to interpolate vertically along the elements of the row
     double_t x = -0.5+i;
@@ -152,7 +152,7 @@ void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix
         break;
       }
     }
-    
+
     //Rcpp::Rcout << "x="<<x<<" xindex="<<left_index<<" "<<right_index<<"\n";
     //Rcpp::Rcout << "x="<<x<<" xleft="<<myx[left_index]<<" "<<myx[right_index]<<"\n";
     int top_index = -1;
@@ -171,7 +171,7 @@ void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix
           double p2 = tempmat_sky(right_index,top_index);
           double p3 = tempmat_sky(left_index,bottom_index);
           double p4 = tempmat_sky(right_index,bottom_index);
-          
+
           double xlambda = (x-myx[left_index])/(myx[right_index]-myx[left_index]);
           double ylambda = (y-myy[top_index])/(myy[bottom_index]-myy[top_index]);
           double ztop = p1 * (1.0-xlambda) + p2 * xlambda;
@@ -229,26 +229,26 @@ bool adacsakima::Initialise(int npts, const double_t *xorig, const double_t *yor
   double_t r2 = 2, r3 = 3;
   double_t s3 = 0, s4 = 0, dx = 0., dy = 0., p2, p3, x3, x4, y3, y4;
   int i;
-  
+
   if (npts < 5)	// Error status if validity test fails
   {
     return false;
   }
-  
+
   // One spline for each interval (xorig[i], xorig[i+1])
   ncoeffs = npts-1;
   coeffs.reserve(ncoeffs);
-  
+
   for (i = 0; i < ncoeffs; i++)
   {
     x3 = xorig[i];
     y3 = yorig[i];
-    
+
     x4 = xorig[i + 1];
     y4 = yorig[i + 1];
     dx = x4 - x3;
     dy = y4 - y3;
-    
+
     // check for boundary conditions
     if (i == 0)
     {
@@ -291,7 +291,7 @@ bool adacsakima::Initialise(int npts, const double_t *xorig, const double_t *yor
       s3 = Coeff::calcSlopeAtMiddle(&xorig[i - 2], &yorig[i - 2]);
       s4 = Coeff::calcSlopeAtMiddle(&xorig[i - 1], &yorig[i - 1]);
     }
-    
+
     //
     // Compute coefficients of cubic equation for this akima
     //
@@ -344,14 +344,14 @@ double_t Coeff::calcSlopeAtMiddle(const double_t *x, const double_t *z)
   int i;
   double_t S13, S34, S12, S24, W2, W3, Z, DEN;
   double_t A[4], B[4];
-  
+
   // Calculate differences between input points
   for (i = 0; i < 4; i++)
   {
     A[i] = x[i + 1] - x[i];
     B[i] = z[i + 1] - z[i];
   }
-  
+
   //
   S13 = A[0] * B[2] - A[2] * B[0];
   S34 = A[2] * B[3] - A[3] * B[2];
@@ -362,7 +362,7 @@ double_t Coeff::calcSlopeAtMiddle(const double_t *x, const double_t *z)
   //
   Z   = W2 * B[1] + W3 * B[2];
   DEN = W2 * A[1] + W3 * A[2];
-  
+
   if (DEN == 0.0)
   {
     return 0.0;
