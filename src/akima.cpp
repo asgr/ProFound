@@ -14,29 +14,21 @@ using namespace Rcpp;
 class Coeff
 {
 public:
-  Coeff ()
-  {
-    w0 = 0.;
-    w1 = 0.;
-    w2 = 0.;
-    w3 = 0.;
-    x3 = 0.;
-    x4 = 0.;
-    y3 = 0.;
-  }
   static double_t calcSlopeAtMiddle(const double_t *x, const double_t *z);
   double_t interpValue(double_t x) const;
 
   // valid interpolation range
-  double_t x3;
-  double_t x4;
+  double_t x3 = 0;
+  double_t x4 = 0;
+
   // extra coeffs for akima
-  double_t w0;
-  double_t w1;
-  double_t w2;
-  double_t w3;
-  double_t y3;
+  double_t w0 = 0;
+  double_t w1 = 0;
+  double_t w2 = 0;
+  double_t w3 = 0;
+  double_t y3 = 0;
 };
+
 /**
  *  Represents an array of Akima splines covering a set of (at least 5) input (X,Z) pairs.
  *  Given six input (X,Z) pairs this akima spline fits a smooth curve between points 3 and 4.
