@@ -214,9 +214,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       detect=inputlist[[which(multibands==detectbands)]]
     }
     temp_magzero=magzero[multibands==detectbands]
-    temp_box=box[multibands==detectbands[i]]
-    temp_grid=grid[multibands==detectbands[i]]
-    temp_boxadd=boxadd[multibands==detectbands[i]]
+    temp_box=box[multibands==detectbands]
+    temp_grid=grid[multibands==detectbands]
+    temp_boxadd=boxadd[multibands==detectbands]
     
     # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
