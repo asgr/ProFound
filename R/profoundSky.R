@@ -246,106 +246,174 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
   return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))))
 }
 
-profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
-  if(!requireNamespace("akima", quietly = TRUE)){
-    if(type=='bicubic'){
-      stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
-    }
-    if(type=='bilinear'){
-      useakima=FALSE
-    }
-  }else{
-    useakima=TRUE
-  }
+profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), grid=box, skygrid_type='new',
+                             type='bicubic', skytype='median', skyRMStype='quanlo', sigmasel=1,
+                             skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE,
+                             shiftloc = FALSE, paddim = TRUE, cores=1){
   
-  if(box[1]>dim(image)[1]){box[1]=dim(image)[1]}
-  if(box[2]>dim(image)[2]){box[2]=dim(image)[2]}
-  if(grid[1]>dim(image)[1]){grid[1]=dim(image)[1]}
-  if(grid[2]>dim(image)[2]){grid[2]=dim(image)[2]}
-  
-  xseq=seq(grid[1]/2, ceiling(dim(image)[1]/grid[1])*grid[1], by=grid[1])
-  yseq=seq(grid[2]/2, ceiling(dim(image)[2]/grid[2])*grid[2], by=grid[2])
-  tempgrid=expand.grid(xseq, yseq)
-  
-  if(cores>1){
-    registerDoParallel(cores=cores)
-    i=NULL
-    tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
-      profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
-    }
-    tempsky=rbind(tempsky)
-  }else{
-    tempsky=matrix(0,dim(tempgrid)[1],2)
-    for(i in 1:dim(tempgrid)[1]){
-      tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
-    }
-  }
-  
-  xseq=c(-grid[1]/2,xseq,max(xseq)+grid[1]/2)
-  yseq=c(-grid[2]/2,yseq,max(yseq)+grid[2]/2)
-  
-  tempmat_sky=matrix(0,length(xseq),length(yseq))
-  tempmat_sky[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,1]
-  tempmat_sky[is.na(tempmat_sky)]= stats::median(tempsky[,1], na.rm = TRUE)
-  
-  tempmat_skyRMS=matrix(0,length(xseq),length(yseq))
-  tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
-  tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempsky[,2], na.rm = TRUE)
-  
-  xstart=min(3,dim(tempmat_sky)[1]-1)
-  ystart=min(3,dim(tempmat_sky)[2]-1)
-  xend=max(length(xseq)-2,2)
-  yend=max(length(yseq)-2,2)
-  
-  tempmat_sky[1,]=tempmat_sky[2,]*2-tempmat_sky[xstart,]
-  tempmat_sky[length(xseq),]=tempmat_sky[length(xseq)-1,]*2-tempmat_sky[xend,]
-  tempmat_sky[,1]=tempmat_sky[,2]*2-tempmat_sky[,ystart]
-  tempmat_sky[,length(yseq)]=tempmat_sky[,length(yseq)-1]*2-tempmat_sky[,yend]
-  
-  tempmat_skyRMS[1,]=tempmat_skyRMS[2,]*2-tempmat_skyRMS[xstart,]
-  tempmat_skyRMS[length(xseq),]=tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[xend,]
-  tempmat_skyRMS[,1]=tempmat_skyRMS[,2]*2-tempmat_skyRMS[,ystart]
-  tempmat_skyRMS[,length(yseq)]=tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,yend]
-  
-  if(dim(tempmat_sky)[1]>1){
+  if(skygrid_type=='new'){
+    # void .Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
+    #                         Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS,
+    #                         Rcpp::Function Fquantile,
+    #                         Rcpp::Nullable<Rcpp::IntegerMatrix> objects = R_NilValue,
+    #                         Rcpp::Nullable<Rcpp::IntegerMatrix> mask = R_NilValue,
+    #                         const int box1 = 100, const int box2 = 100,
+    #                         const int grid1 =100, const int grid2 = 100,
+    #                         const int boxadd1 = 50, const int boxadd2 = 50,
+    #                         const int type = 2, const int skypixmin = 5000,
+    #                         const int boxiters = 0, const int doclip = 1,
+    #                         const int skytype = 1, const int skyRMStype = 2,
+    #                         const double sigmasel = 1
+    # )
+    #define adacs_BOTH 1
+    #define adacs_LO 2
+    #define adacs_HI 3
+    #define adacs_SD 4
+    #define adacs_RBOTH 5
+    #define adacs_RLO 6
+    #define adacs_RHI 7
+    #define adacs_RSD 8
     
-    #expand out map here!! and then use akima::bilinear function
+    #define adacs_AUTO 1
+    #define adacs_SET 2
     
-    if(type=='bilinear'){
-      bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
-      bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
-      if(useakima){
-        tempgrid=expand.grid(xseq, yseq)
-        temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
-        temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
-      }else{
-        temp_bi_sky=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_sky))
-        temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
+    #define adacs_MEDIAN 1
+    #define adacs_MEAN 2
+    #define adacs_MODE 3
+    #define adacs_RMEDIAN 4
+    #define adacs_RMEAN 5
+    #define adacs_RMODE 6
+    
+    type = switch(type, bilinear=1L, bilinear_new=1L, bicubic=2L, bicubic_new=2L)
+    skytype = switch(skytype, median=1L, mean=2L, mode=3L)
+    skyRMStype = switch(skyRMStype, quanboth=1L, quanlo=2L, quanhi=3L, sd=4L)
+    
+    temp_bi_sky = matrix(0, nrow=dim(image)[1], ncol=dim(image)[2])
+    temp_bi_skyRMS = matrix(0, nrow=dim(image)[1], ncol=dim(image)[2])
+    .Cadacs_MakeSkyGrid(image = image,
+                        sky = temp_bi_sky,
+                        skyRMS = temp_bi_skyRMS,
+                        objects = objects,
+                        mask = mask,
+                        box1 = box[1], box2 = box[2],
+                        grid1 = grid[1], grid2 = grid[2],
+                        boxadd1 = boxadd[1], boxadd2 = boxadd[2],
+                        type = type,
+                        skypixmin = skypixmin,
+                        boxiters = boxiters,
+                        doclip = doclip,
+                        skytype = skytype,
+                        skyRMStype = skyRMStype,
+                        sigmasel = sigmasel
+                        )
+  }else if(skygrid_type=='old'){
+  
+    if(!requireNamespace("akima", quietly = TRUE)){
+      if(type=='bicubic'){
+        stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
       }
-    }else if(type=='bicubic'){
-      bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
-      bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
-      temp_bi_sky=akima::bicubic(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
-      temp_bi_skyRMS=akima::bicubic(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
-    }else if(type=='bicubic_new'){
-      temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
-      .interpolateAkimaGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
-      temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
-      .interpolateAkimaGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+      if(type=='bilinear'){
+        useakima=FALSE
+      }
     }else{
-      stop('type must be one of bilinear / bicubic !')
+      useakima=TRUE
     }
-  
-    temp_bi_sky=matrix(temp_bi_sky, dim(image)[1], dim(image)[2])
-    temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1], dim(image)[2])
+    
+    if(box[1]>dim(image)[1]){box[1]=dim(image)[1]}
+    if(box[2]>dim(image)[2]){box[2]=dim(image)[2]}
+    if(grid[1]>dim(image)[1]){grid[1]=dim(image)[1]}
+    if(grid[2]>dim(image)[2]){grid[2]=dim(image)[2]}
+    
+    xseq=seq(grid[1]/2, ceiling(dim(image)[1]/grid[1])*grid[1], by=grid[1])
+    yseq=seq(grid[2]/2, ceiling(dim(image)[2]/grid[2])*grid[2], by=grid[2])
+    tempgrid=expand.grid(xseq, yseq)
+    
+    if(cores>1){
+      registerDoParallel(cores=cores)
+      i=NULL
+      tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
+        profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      }
+      tempsky=rbind(tempsky)
+    }else{
+      tempsky=matrix(0,dim(tempgrid)[1],2)
+      for(i in 1:dim(tempgrid)[1]){
+        tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      }
+    }
+    
+    xseq=c(-grid[1]/2,xseq,max(xseq)+grid[1]/2)
+    yseq=c(-grid[2]/2,yseq,max(yseq)+grid[2]/2)
+    
+    tempmat_sky=matrix(0,length(xseq),length(yseq))
+    tempmat_sky[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,1]
+    tempmat_sky[is.na(tempmat_sky)]= stats::median(tempsky[,1], na.rm = TRUE)
+    
+    tempmat_skyRMS=matrix(0,length(xseq),length(yseq))
+    tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
+    tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempsky[,2], na.rm = TRUE)
+    
+    xstart=min(3,dim(tempmat_sky)[1]-1)
+    ystart=min(3,dim(tempmat_sky)[2]-1)
+    xend=max(length(xseq)-2,2)
+    yend=max(length(yseq)-2,2)
+    
+    tempmat_sky[1,]=tempmat_sky[2,]*2-tempmat_sky[xstart,]
+    tempmat_sky[length(xseq),]=tempmat_sky[length(xseq)-1,]*2-tempmat_sky[xend,]
+    tempmat_sky[,1]=tempmat_sky[,2]*2-tempmat_sky[,ystart]
+    tempmat_sky[,length(yseq)]=tempmat_sky[,length(yseq)-1]*2-tempmat_sky[,yend]
+    
+    tempmat_skyRMS[1,]=tempmat_skyRMS[2,]*2-tempmat_skyRMS[xstart,]
+    tempmat_skyRMS[length(xseq),]=tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[xend,]
+    tempmat_skyRMS[,1]=tempmat_skyRMS[,2]*2-tempmat_skyRMS[,ystart]
+    tempmat_skyRMS[,length(yseq)]=tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,yend]
+    
+    if(dim(tempmat_sky)[1]>1){
+      
+      #expand out map here!! and then use akima::bilinear function
+      
+      if(type=='bilinear'){
+        bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
+        bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
+        if(useakima){
+          tempgrid=expand.grid(xseq, yseq)
+          temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
+          temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
+        }else{
+          temp_bi_sky=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_sky))
+          temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
+        }
+      }else if(type=='bilinear_new'){
+        temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
+        .interpolateLinearGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
+        temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
+        .interpolateLinearGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+      }else if(type=='bicubic'){
+        bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
+        bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
+        temp_bi_sky=akima::bicubic(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
+        temp_bi_skyRMS=akima::bicubic(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
+      }else if(type=='bicubic_new'){
+        temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
+        .interpolateAkimaGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
+        temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
+        .interpolateAkimaGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+      }else{
+        stop('type must be one of bilinear / bicubic !')
+      }
+    
+      temp_bi_sky=matrix(temp_bi_sky, dim(image)[1], dim(image)[2])
+      temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1], dim(image)[2])
+    }else{
+      temp_bi_sky=matrix(tempmat_sky[1,1], dim(image)[1], dim(image)[2])
+      temp_bi_skyRMS=matrix(tempmat_skyRMS[1,1], dim(image)[1], dim(image)[2])
+    }
+    if(!is.null(mask)){
+      temp_bi_sky[mask>0]=NA
+      temp_bi_skyRMS[mask>0]=NA
+    }
   }else{
-    temp_bi_sky=matrix(tempmat_sky[1,1], dim(image)[1], dim(image)[2])
-    temp_bi_skyRMS=matrix(tempmat_skyRMS[1,1], dim(image)[1], dim(image)[2])
-  }
-  
-  if(!is.null(mask)){
-    temp_bi_sky[mask>0]=NA
-    temp_bi_skyRMS[mask>0]=NA
+    stop('skygrid_type must be new/old!')
   }
   
   return(invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS)))

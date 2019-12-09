@@ -1,4 +1,19 @@
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, SBdilate=NULL, SBN100=100, size=5, shape='disc', iters=6, threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box, type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE, sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE, deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, nearstats=boundstats, groupstats=boundstats, group=NULL, groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID", decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound', pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype = 'brute', convmode = 'extended', fluxtype='Raw', app_diam=1, Ndeblendlim=Inf, ...){
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3,
+                          tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE,
+                          SBlim=NULL, SBdilate=NULL, SBN100=100, size=5, shape='disc', iters=6,
+                          threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL,
+                          redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box,
+                          skygrid_type = 'new', type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE,
+                          sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, iterskyloc=TRUE,
+                          deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE,
+                          shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE,
+                          plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE,
+                          nearstats=boundstats, groupstats=boundstats, group=NULL,
+                          groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID",
+                          decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound',
+                          pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum',
+                          convtype = 'brute', convmode = 'extended', fluxtype='Raw',
+                          app_diam=1, Ndeblendlim=Inf, ...){
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -122,7 +137,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if((hassky==FALSE | hasskyRMS==FALSE) & is.null(segim)){
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=0, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, skygrid_type=skygrid_type, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=0, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     if(roughpedestal){
       roughsky$sky=median(roughsky$sky,na.rm=TRUE)
       roughsky$skyRMS=median(roughsky$skyRMS,na.rm=TRUE)
@@ -177,7 +192,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       if(hassky==FALSE){rm(sky)}
       if(hasskyRMS==FALSE){rm(skyRMS)}
-      bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       if(hassky==FALSE){
         sky=bettersky$sky
         if(verbose){message(' - Sky statistics :')}
@@ -292,7 +307,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       rm(sky)
       rm(skyRMS)
-      sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       skyRMS=sky$skyRMS
       sky=sky$sky
       if(verbose){message(' - Sky statistics :')}

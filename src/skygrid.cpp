@@ -531,11 +531,11 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
                                             Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
                                             const double loc1, const double loc2, const double box1, const double box2, 
                                             const double boxadd1, const double boxadd2, 
-                                            const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel,
-                                            Rcpp::Function Fquantile
+                                            const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel
 ) {
   Rcpp::NumericVector select = Cadacs_FindSkyCellValues(image, objects, mask, loc1, loc2, box1, box2, boxadd1, boxadd2, skypixmin, boxiters);
   Rcpp::NumericVector clip;
+  Function Fquantile("quantile");
   if(doclip) {
     clip = Cadacs_magclip(select,adacs_AUTO,5,sigmasel,adacs_LO);
   } else {
@@ -653,17 +653,18 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
 }
 
 
-// [[Rcpp::export("profoundMakeSkyGrid_new")]]
+// [[Rcpp::export(".Cadacs_MakeSkyGrid")]]
 void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
                                Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS,
-                               Rcpp::Function Fquantile,
                                Rcpp::Nullable<Rcpp::IntegerMatrix> objects = R_NilValue,
                                Rcpp::Nullable<Rcpp::IntegerMatrix> mask = R_NilValue,
                                const int box1 = 100, const int box2 = 100,
                                const int grid1 =100, const int grid2 = 100,
                                const int boxadd1 = 50, const int boxadd2 = 50,
-                               const int type = 2, const int skypixmin = 5000, const int boxiters = 0,
-                               const int doclip = 1, const int skytype = 1, const int skyRMStype = 2, const double sigmasel = 1
+                               const int type = 2, const int skypixmin = 5000,
+                               const int boxiters = 0, const int doclip = 1,
+                               const int skytype = 1, const int skyRMStype = 2,
+                               const double sigmasel = 1
 ) {
   // box MUST NOT be larger than the input image
   double box[2] = {(double)box1, (double)box2};
@@ -725,7 +726,7 @@ void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
                                                            box1, box2,
                                                            boxadd1, boxadd2,
                                                            skypixmin, boxiters,
-                                                           doclip, skytype, skyRMStype, sigmasel, Fquantile);
+                                                           doclip, skytype, skyRMStype, sigmasel);
       if (std::isnan(z_tile_centre[0]) || std::isnan(z_tile_centre[1])) {
         hasNaNs = true;
       }

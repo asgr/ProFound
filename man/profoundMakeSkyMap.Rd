@@ -15,9 +15,9 @@ grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
 skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
 paddim = TRUE, cores = 1)
 profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
-grid = box, type = 'bicubic', skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
-skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
-paddim = TRUE, cores = 1)
+grid = box, skygrid_type = 'new', type = 'bicubic', skytype = "median",
+skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
+boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, cores = 1)
 profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100, sigma = box*(4/pi)/sqrt(12))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -36,6 +36,9 @@ Integer vector; the dimensions of the box car filter to estimate the sky with.
 }
   \item{grid}{
 Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}.
+}
+  \item{skygrid_type}{
+Character scalar; either 'new' (the new ADACS C++ sky grid code) or 'old' (the older R based code as used for ProFound <= v1.10).  
 }
   \item{type}{
 Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default, requires \code{akima} package). The former creates sharper edges.
