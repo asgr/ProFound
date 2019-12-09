@@ -14,19 +14,57 @@ using namespace Rcpp;
 class Coeff
 {
 public:
-  static double_t calcSlopeAtMiddle(const double_t *x, const double_t *z);
-  double_t interpValue(double_t x) const;
+
+  /**
+   * Evaluate this akima spline interpolating polynomial at x
+   */
+  double interpValue(double x) const
+  {
+    double xx = x - x3;
+    return y3 + xx * (w0 + xx * (w2 + xx * w3));
+  }
+
+  /**
+   *   Finds the slope of the middle point in a sequence of five (x,z) pairs.
+   */
+  static double calcSlopeAtMiddle(const double *x, const double *z)
+  {
+    int i;
+    double S13, S34, S12, S24, W2, W3, Z, DEN;
+    double A[4], B[4];
+
+    // Calculate differences between input points
+    for (i = 0; i < 4; i++) {
+      A[i] = x[i + 1] - x[i];
+      B[i] = z[i + 1] - z[i];
+    }
+
+    S13 = A[0] * B[2] - A[2] * B[0];
+    S34 = A[2] * B[3] - A[3] * B[2];
+    S12 = A[0] * B[1] - A[1] * B[0];
+    S24 = A[1] * B[3] - A[3] * B[1];
+    W2  = sqrt(std::abs(S13 * S34));
+    W3  = sqrt(std::abs(S12 * S24));
+    Z   = W2 * B[1] + W3 * B[2];
+    DEN = W2 * A[1] + W3 * A[2];
+
+    if (DEN == 0.0) {
+      return 0.0;
+    }
+    return Z / DEN;
+  }
 
   // valid interpolation range
-  double_t x3 = 0;
-  double_t x4 = 0;
+  double x3 = 0;
+  double x4 = 0;
 
   // extra coeffs for akima
-  double_t w0 = 0;
-  double_t w1 = 0;
-  double_t w2 = 0;
-  double_t w3 = 0;
-  double_t y3 = 0;
+  double w0 = 0;
+  double w1 = 0;
+  double w2 = 0;
+  double w3 = 0;
+  double y3 = 0;
+
 };
 
 /**
@@ -316,58 +354,3 @@ double_t adacsakima::InterpValue(double_t x) const
   }
   return 0.0;
 }
-
-// Akima spline used to interpolate regular 2D grid
-/**
- *  Represents an Akima spline
- *  Given six input (X,Z) pairs this akima spline fits a smooth curve between points 3 and 4.
- *  This akima spline that is valid for interpolations between the third and fourth points (inclusive) of the six (X,Z) pairs
- *  used in its construction
- *  Reference :  A new method of interpolation and smooth curve fitting based on local procedures, Hiroshi Akima,
- *               Journal Of The Association Of Computing Machinery, Volume 17, number 4, October, 1970, pp. 589 - 602.
- *               https://dl.acm.org/citation.cfm?id=321609
- *
- */
-/*
- *   Finds the slope of the middle point in a sequence of five (x,z) pairs.
- */
-double_t Coeff::calcSlopeAtMiddle(const double_t *x, const double_t *z)
-{
-  int i;
-  double_t S13, S34, S12, S24, W2, W3, Z, DEN;
-  double_t A[4], B[4];
-
-  // Calculate differences between input points
-  for (i = 0; i < 4; i++)
-  {
-    A[i] = x[i + 1] - x[i];
-    B[i] = z[i + 1] - z[i];
-  }
-
-  //
-  S13 = A[0] * B[2] - A[2] * B[0];
-  S34 = A[2] * B[3] - A[3] * B[2];
-  S12 = A[0] * B[1] - A[1] * B[0];
-  S24 = A[1] * B[3] - A[3] * B[1];
-  W2  = sqrt(std::abs(S13 * S34));
-  W3  = sqrt(std::abs(S12 * S24));
-  //
-  Z   = W2 * B[1] + W3 * B[2];
-  DEN = W2 * A[1] + W3 * A[2];
-
-  if (DEN == 0.0)
-  {
-    return 0.0;
-  }
-  return Z / DEN;
-}
-/*
- * Evaluate this akima spline interpolating polynomial at x
- */
-double_t Coeff::interpValue(double_t x) const{
-  double_t xx = x - x3;
-  return y3 + xx * (w0 + xx * (w2 + xx * w3));
-}
-
-
-
