@@ -267,7 +267,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
   int sscol = 1;
   int eecol = 0;
 
-  while(skyN<skypixmin & iterN<=boxiters){
+  while(skyN<skypixmin && iterN<=boxiters){
     skyN = 0;
     ibox1 += iboxadd1;
     ibox2 += iboxadd2;
@@ -479,7 +479,7 @@ Rcpp::NumericVector Cadacs_magclip(Rcpp::NumericVector x, const int sigma, const
   std::sort (myx.begin(), myx.begin()+length, std::less<double_t>()); // ascending
 
   int newlen = length;
-  if(clipiters>0 & length>0){
+  if(clipiters>0 && length>0){
     double sigcut=R::pnorm(sigmasel, 0.0, 1.0, 1, 0);
 
     for(int iteration=0; iteration<clipiters; iteration++){
