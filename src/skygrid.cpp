@@ -233,8 +233,9 @@ double Cadacs_quantile(Rcpp::NumericVector x, double quantile, int nbins=16384, 
   histogram.accumulate(x, nbins, minv, maxv);
   return histogram.quantile(quantile);
 }
+
 /**
- * C++ version of R quantile low variant
+ * C++ version of R quantile, low variant
  */
 double Cadacs_quantileLO(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=R_NaN, double maxv=R_NaN) {
   // The population we want the quantile for is x-offset where x<offset
@@ -242,8 +243,9 @@ double Cadacs_quantileLO(Rcpp::NumericVector x, double quantile, const double of
   histogram.accumulateLO(x, offset, nbins, minv, maxv);
   return histogram.quantile(quantile, offset);
 }
+
 /**
- * C++ version of R quantile high variant
+ * C++ version of R quantile, high variant
  */
 double Cadacs_quantileHI(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=R_NaN, double maxv=R_NaN) {
   // The population we want the quantile for is x-offset where x>offset
@@ -251,6 +253,7 @@ double Cadacs_quantileHI(Rcpp::NumericVector x, double quantile, const double of
   histogram.accumulateHI(x, offset, nbins, minv, maxv);
   return histogram.quantile(quantile, offset);
 }
+
 /**
  * C++ version of R stats::mean
  */
@@ -270,6 +273,7 @@ double Cadacs_mean(Rcpp::NumericVector x) {
     return R_NaN;
   return mean/non_null_sample_count;
 }
+
 double Cadacs_population_variance(Rcpp::NumericVector x, const double offset) {
   const double* myx=REAL(x);
   int size = x.size();
@@ -290,6 +294,7 @@ double Cadacs_population_variance(Rcpp::NumericVector x, const double offset) {
   double N=non_null_sample_count;
   return sum_sq/N;
 }
+
 double Cadacs_sample_variance(Rcpp::NumericVector x, const double offset) {
   const double* myx=REAL(x);
   int size = x.size();
@@ -313,9 +318,11 @@ double Cadacs_sample_variance(Rcpp::NumericVector x, const double offset) {
   return (N*sum_sq - sum*sum)/(N * (N - 1));
   //return sqrt(sum_sq);
 }
+
 double Cadacs_median(Rcpp::NumericVector x) {
   return Cadacs_quantile(x, 0.5);
 }
+
 double Cadacs_mode(Rcpp::NumericVector x) {
   const double* iiix=REAL(x);
   int size = x.size();
