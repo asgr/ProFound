@@ -18,11 +18,11 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern){
         for (int n = std::max(0,kcol_off - j); n < std::min(kcol, kcol_off - (j - scol)); n++) {
           for (int m = std::max(0,krow_off - i); m < std::min(krow, krow_off - (i - srow)); m++) {
             if(kern(m,n) > 0){
-              if(m != krow_off | n != kcol_off){
+              if(m != krow_off || n != kcol_off){
                 if(segim(i + m - krow_off,j + n - kcol_off) == 0){
                   int xloc = i + m - krow_off;
                   int yloc = j + n - kcol_off;
-                  if(segim(i,j) < segim_new(xloc,yloc) | segim_new(xloc,yloc) == 0) {
+                  if(segim(i,j) < segim_new(xloc,yloc) || segim_new(xloc,yloc) == 0) {
                     segim_new(xloc,yloc) = segim(i,j);
                   }
                 }
