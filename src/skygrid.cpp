@@ -28,11 +28,79 @@ using namespace Rcpp;
 class AdacsHistogram {
 public:
   AdacsHistogram();
-  void accumulate(Rcpp::NumericVector x,int nbins=16384, double minv=R_NaN, double maxv=R_NaN);
-  void accumulateLO(Rcpp::NumericVector x,double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN);
-  void accumulateHI(Rcpp::NumericVector x,double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN);
+
+  void accumulate(Rcpp::NumericVector x,int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  {
+    accumulate(x, nbins, minv, maxv,
+               [](double) { return true; });
+  }
+
+  void accumulateLO(Rcpp::NumericVector x,double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  {
+    accumulate(x, nbins, minv, maxv,
+               [offset](double x) { return x < offset; });
+  }
+
+  void accumulateHI(Rcpp::NumericVector x,double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  {
+    accumulate(x, nbins, minv, maxv,
+               [offset](double x) { return x > offset; });
+  }
+
   double quantile(double quantile, double offset=0) const;
+
 private:
+
+  template <typename Predicate>
+  void accumulate(Rcpp::NumericVector x, int nbins, double minv, double maxv,
+                  Predicate condition)
+  {
+    _nbins = nbins;
+    _min = std::numeric_limits<double>::max();
+    _max = -_min;
+    _non_null_sample_count = 0;
+    _null_sample_count = 0;
+
+    for (auto _x: x) {
+      if (!std::isnan(_x) && condition(_x)) {
+        _non_null_sample_count++;
+        _min = std::min(_min, _x);
+        _max = std::max(_max, _x);
+      }
+    }
+    _null_sample_count = x.size() - _non_null_sample_count;
+
+    if (_non_null_sample_count < 1)
+      return;
+
+    if (!std::isnan(minv) && !std::isnan(maxv)) {
+      _min = minv;
+      _max = maxv;
+    }
+    if (_min == _max) {
+      return;
+    }
+
+    // histogram
+    _toolow = 0;
+    _toohigh = 0;
+    _histogram.resize(_nbins);
+    double value_to_bin_index = _nbins - 1;
+    value_to_bin_index /= _max - _min;
+    for (auto _x: x) {
+      if (!std::isnan(_x) && condition(_x)) {
+        int index = (_x - _min) * value_to_bin_index;
+        if (index < 0) {
+          _toolow++;
+        } else if (index >= nbins) {
+          _toohigh++;
+        } else {
+          _histogram[index]++;
+        }
+      }
+    }
+  }
+
   int _nbins;
   double _min;
   double _max;
@@ -48,168 +116,6 @@ private:
  */
 AdacsHistogram::AdacsHistogram() {
 
-}
-void AdacsHistogram::accumulate(Rcpp::NumericVector x,int nbins, double minv, double maxv) {
-  _nbins = nbins;
-  const double* iiix=REAL(x);
-  int size = x.size();
-  std::vector<double> myx (iiix, iiix+size);
-  _min=std::numeric_limits<double>::max();
-  _max=-_min;
-  _non_null_sample_count=0;
-  _null_sample_count=0;
-  for (int i=0;i<size;i++)
-  {
-    if (!std::isnan(myx[i])) {
-      _non_null_sample_count++;
-      _min = std::min(_min,myx[i]);
-      _max = std::max(_max,myx[i]);
-    }
-  }
-  _null_sample_count = size-_non_null_sample_count;
-
-  if (_non_null_sample_count<1)
-    return;
-
-  if (!std::isnan(minv) && !std::isnan(maxv)) {
-    _min = minv;
-    _max = maxv;
-  }
-  if (_min==_max) {
-    return;
-  }
-
-  // histogram
-  _toolow = 0;
-  _toohigh = 0;
-  _histogram.resize(_nbins);
-  for (int i=0;i<nbins;i++)
-  {
-    _histogram[i] = 0;
-  }
-  double value_to_bin_index = (_nbins-1);
-  value_to_bin_index /= (_max - _min);
-  for (int i=0;i<size;i++)
-  {
-    if (!std::isnan(myx[i])) {
-      int index = (myx[i] - _min)*value_to_bin_index;
-      if (index<0) {
-        _toolow++;
-      } else if (index>=nbins) {
-        _toohigh++;
-      } else {
-        _histogram[index]++;
-      }
-    }
-  }
-}
-void AdacsHistogram::accumulateLO(Rcpp::NumericVector x,double offset, int nbins, double minv, double maxv) {
-  _nbins = nbins;
-  const double* iiix=REAL(x);
-  int size = x.size();
-  std::vector<double> myx (iiix, iiix+size);
-  _min=std::numeric_limits<double>::max();
-  _max=-_min;
-  _non_null_sample_count=0;
-  _null_sample_count=0;
-  for (int i=0;i<size;i++)
-  {
-    if (!std::isnan(myx[i]) && myx[i]<offset) {
-      _non_null_sample_count++;
-      _min = std::min(_min,myx[i]);
-      _max = std::max(_max,myx[i]);
-    }
-  }
-  _null_sample_count = size-_non_null_sample_count;
-
-  if (_non_null_sample_count<1)
-    return;
-
-  if (!std::isnan(minv) && !std::isnan(maxv)) {
-    _min = minv;
-    _max = maxv;
-  }
-  if (_min==_max) {
-    return;
-  }
-
-  // histogram
-  _toolow = 0;
-  _toohigh = 0;
-  _histogram.resize(_nbins);
-  for (int i=0;i<nbins;i++)
-  {
-    _histogram[i] = 0;
-  }
-  double value_to_bin_index = (_nbins-1);
-  value_to_bin_index /= (_max - _min);
-  for (int i=0;i<size;i++)
-  {
-    if (!std::isnan(myx[i]) && myx[i]<offset) {
-      int index = (myx[i] - _min)*value_to_bin_index;
-      if (index<0) {
-        _toolow++;
-      } else if (index>=nbins) {
-        _toohigh++;
-      } else {
-        _histogram[index]++;
-      }
-    }
-  }
-}
-void AdacsHistogram::accumulateHI(Rcpp::NumericVector x,double offset, int nbins, double minv, double maxv) {
-  _nbins = nbins;
-  const double* iiix=REAL(x);
-  int size = x.size();
-  std::vector<double> myx (iiix, iiix+size);
-  _min=std::numeric_limits<double>::max();
-  _max=-_min;
-  _non_null_sample_count=0;
-  _null_sample_count=0;
-  for (int i=0;i<size;i++)
-  {
-    if (!std::isnan(myx[i]) && myx[i]>offset) {
-      _non_null_sample_count++;
-      _min = std::min(_min,myx[i]);
-      _max = std::max(_max,myx[i]);
-    }
-  }
-  _null_sample_count = size-_non_null_sample_count;
-
-  if (_non_null_sample_count<1)
-    return;
-
-  if (!std::isnan(minv) && !std::isnan(maxv)) {
-    _min = minv;
-    _max = maxv;
-  }
-  if (_min==_max) {
-    return;
-  }
-
-  // histogram
-  _toolow = 0;
-  _toohigh = 0;
-  _histogram.resize(_nbins);
-  for (int i=0;i<nbins;i++)
-  {
-    _histogram[i] = 0;
-  }
-  double value_to_bin_index = (_nbins-1);
-  value_to_bin_index /= (_max - _min);
-  for (int i=0;i<size;i++)
-  {
-    if (!std::isnan(myx[i]) && myx[i]>offset) {
-      int index = (myx[i] - _min)*value_to_bin_index;
-      if (index<0) {
-        _toolow++;
-      } else if (index>=nbins) {
-        _toohigh++;
-      } else {
-        _histogram[index]++;
-      }
-    }
-  }
 }
 double AdacsHistogram::quantile(double quantile, double offset) const {
   int count=0;
