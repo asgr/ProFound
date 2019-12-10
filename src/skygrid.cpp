@@ -25,29 +25,46 @@ using namespace Rcpp;
 #define adacs_CLASSIC_BILINEAR 1
 #define adacs_AKIMA_BICUBIC 2
 
+/**
+ * A simple histogram that first accumulates values from a vector following
+ * certain conditions, and then allows quick calculation of quantiles
+ */
 class AdacsHistogram {
-public:
-  AdacsHistogram();
 
-  void accumulate(Rcpp::NumericVector x,int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+public:
+  void accumulate(Rcpp::NumericVector x, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
   {
     accumulate(x, nbins, minv, maxv,
                [](double) { return true; });
   }
 
-  void accumulateLO(Rcpp::NumericVector x,double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  void accumulateLO(Rcpp::NumericVector x, double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
   {
     accumulate(x, nbins, minv, maxv,
                [offset](double x) { return x < offset; });
   }
 
-  void accumulateHI(Rcpp::NumericVector x,double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  void accumulateHI(Rcpp::NumericVector x, double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
   {
     accumulate(x, nbins, minv, maxv,
                [offset](double x) { return x > offset; });
   }
 
-  double quantile(double quantile, double offset=0) const;
+  double quantile(double quantile, double offset=0) const
+  {
+    int count = 0;
+    double quantileValue = _min - offset;
+    double binwidth = (_max - _min) / _nbins;
+    int target_count = _non_null_sample_count * quantile;
+    for (auto bin_count: _histogram) {
+      if (count >= target_count) {
+        return quantileValue;
+      }
+      quantileValue += binwidth;
+      count += bin_count;
+    }
+    return quantileValue;
+  }
 
 private:
 
@@ -111,26 +128,7 @@ private:
   int _toohigh;
 };
 
-/**
- * Histograming methods
- */
-AdacsHistogram::AdacsHistogram() {
-
-}
-double AdacsHistogram::quantile(double quantile, double offset) const {
-  int count=0;
-  double quantileValue = _min-offset;
-  double binwidth = (_max - _min)/_nbins;
-  int target_count = _non_null_sample_count*quantile;
-  for (int i=0;i<_nbins;i++) {
-    if (count>=target_count)
-      return quantileValue;
-    quantileValue += binwidth;
-    count += _histogram[i];
-  }
-  return quantileValue;
-}
-
+//==================================================================================
 /*
 * Search neighbourhood of (loc1, loc2) for at least skypixmin viable "sky" values.
 * Expand the box by boxadd until enough found.
