@@ -131,10 +131,12 @@ private:
 * Search neighbourhood of (loc1, loc2) for at least skypixmin viable "sky" values.
 * Expand the box by boxadd until enough found.
 */
-Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
-                                                    Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
-                                                    const double loc1, const double loc2, const double box1, const double box2, const double boxadd1, const double boxadd2,
-                                                    const int skypixmin, const int boxiters)
+Rcpp::NumericVector Cadacs_FindSkyCellValues(
+    Rcpp::NumericMatrix image, Rcpp::Nullable<Rcpp::IntegerMatrix> objects,
+    Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
+    const double loc1, const double loc2, const double box1, const double box2,
+    const double boxadd1, const double boxadd2, const int skypixmin,
+	const int boxiters)
 {
   // R is 1 relative
   int iloc1 = (int)(loc1+0.5);
@@ -430,11 +432,12 @@ Rcpp::NumericVector Cadacs_magclip(Rcpp::NumericVector x, const int sigma, const
 }
 
 Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
-                                            Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
-                                            const double loc1, const double loc2, const double box1, const double box2,
-                                            const double boxadd1, const double boxadd2,
-                                            const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel
-) {
+    Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask,
+    const double loc1, const double loc2, const double box1, const double box2,
+    const double boxadd1, const double boxadd2,
+    const int skypixmin, const int boxiters, const int doclip, const int skytype,
+    const int skyRMStype, const double sigmasel)
+{
   Rcpp::NumericVector select = Cadacs_FindSkyCellValues(image, objects, mask, loc1, loc2, box1, box2, boxadd1, boxadd2, skypixmin, boxiters);
   Rcpp::NumericVector clip;
   Function Fquantile("quantile");
@@ -556,18 +559,18 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
 
 
 // [[Rcpp::export(".Cadacs_MakeSkyGrid")]]
-void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
-                               Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS,
-                               Rcpp::Nullable<Rcpp::IntegerMatrix> objects = R_NilValue,
-                               Rcpp::Nullable<Rcpp::IntegerMatrix> mask = R_NilValue,
-                               const int box1 = 100, const int box2 = 100,
-                               const int grid1 =100, const int grid2 = 100,
-                               const int boxadd1 = 50, const int boxadd2 = 50,
-                               const int type = 2, const int skypixmin = 5000,
-                               const int boxiters = 0, const int doclip = 1,
-                               const int skytype = 1, const int skyRMStype = 2,
-                               const double sigmasel = 1
-) {
+void Cadacs_MakeSkyGrid(
+    Rcpp::NumericMatrix image, Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS,
+    Rcpp::Nullable<Rcpp::IntegerMatrix> objects = R_NilValue,
+    Rcpp::Nullable<Rcpp::IntegerMatrix> mask = R_NilValue,
+    const int box1 = 100, const int box2 = 100,
+    const int grid1 =100, const int grid2 = 100,
+    const int boxadd1 = 50, const int boxadd2 = 50,
+    const int type = 2, const int skypixmin = 5000,
+    const int boxiters = 0, const int doclip = 1,
+    const int skytype = 1, const int skyRMStype = 2,
+    const double sigmasel = 1)
+{
   // box MUST NOT be larger than the input image
   double box[2] = {(double)box1, (double)box2};
   if(box[0]>image.nrow())
