@@ -492,11 +492,11 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
       clip[i] = R_NaN;
     }
   }
-    skyRMSloc = fabs(REAL(Fquantile(clip, R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, true))[0])/sigmasel;
+    skyRMSloc = std::abs(REAL(Fquantile(clip, R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, true))[0])/sigmasel;
   }
     break;
   case adacs_HI:
-    skyRMSloc = fabs(Cadacs_quantileHI(clip,(R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, skyloc))/sigmasel;
+    skyRMSloc = std::abs(Cadacs_quantileHI(clip,(R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, skyloc))/sigmasel;
     break;
   case adacs_RHI:
   {
