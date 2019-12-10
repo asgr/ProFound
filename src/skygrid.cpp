@@ -224,15 +224,6 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(Rcpp::NumericMatrix image,
 
 //==================================================================================
 /**
- * C++ version of R quantile
- */
-double Cadacs_quantile(Rcpp::NumericVector x, double quantile, int nbins=16384, double minv=R_NaN, double maxv=R_NaN) {
-  AdacsHistogram histogram;
-  histogram.accumulate(x, nbins, minv, maxv);
-  return histogram.quantile(quantile);
-}
-
-/**
  * C++ version of R quantile, low variant
  */
 double Cadacs_quantileLO(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=R_NaN, double maxv=R_NaN) {
@@ -318,7 +309,9 @@ double Cadacs_sample_variance(Rcpp::NumericVector x, const double offset) {
 }
 
 double Cadacs_median(Rcpp::NumericVector x) {
-  return Cadacs_quantile(x, 0.5);
+  AdacsHistogram histogram;
+  histogram.accumulate(x);
+  return histogram.quantile(0.5);
 }
 
 double Cadacs_mode(Rcpp::NumericVector x) {
