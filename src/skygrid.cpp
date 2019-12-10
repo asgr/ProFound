@@ -1,8 +1,6 @@
 #include <Rcpp.h>
 #include "akima.h"
 
-using namespace Rcpp;
-
 #define adacs_BOTH 1
 #define adacs_LO 2
 #define adacs_HI 3
