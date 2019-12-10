@@ -24,6 +24,28 @@
 #define adacs_AKIMA_BICUBIC 2
 
 /**
+ * Simple functors for testing postiveness/negativeness, and setting NaNs on
+ * a vector for a given condition
+ */
+struct positive_or_zero {
+  bool operator()(double n) { return n >= 0; }
+};
+
+struct negative_or_zero {
+  bool operator()(double n) { return n <= 0; }
+};
+
+template <typename Predicate>
+void set_nan_if(Rcpp::NumericVector numbers, Predicate condition)
+{
+  for (auto &n: numbers) {
+    if (condition(n)) {
+      n = R_NaN;
+    }
+  }
+}
+
+/**
  * A simple histogram that first accumulates values from a vector following
  * certain conditions, and then allows quick calculation of quantiles
  */
@@ -472,85 +494,91 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
     break;
   }
 
-  double skyRMSloc=0.0;
+  // This is done by a couple of "case" blocks below, so let's not duplicate
+  auto subtract_skyloc_from_clip = [&]() {
+    for (auto &n: clip) {
+      n -= skyloc;
+    }
+  };
+
+  // As above, centralising calculation of pnorm
+  auto get_pnorm = [&](bool is_low) {
+    if (is_low) {
+      return R::pnorm(-sigmasel, 0.0, 1.0, 1, 0) * 2;
+    }
+    return (R::pnorm(sigmasel, 0.0, 1.0, 1, 0) - 0.5)  * 2;
+  };
+
+  // As above, let's bring together what's done equally in a "case" bloocks
+  auto get_rms = [&](Rcpp::NumericVector values, bool is_low, bool use_r) {
+    auto pnorm = get_pnorm(is_low);
+    double quantile;
+    if (use_r) {
+      quantile = REAL(Fquantile(values, pnorm, true))[0];
+    }
+    else if (is_low) {
+      quantile = Cadacs_quantileLO(clip, pnorm, skyloc);
+    }
+    else {
+      quantile = Cadacs_quantileHI(clip, pnorm, skyloc);
+    }
+    return std::abs(quantile) / sigmasel;
+  };
+
+  // Calculate skyRMSloc depending on the type
+  double skyRMSloc = 0.0;
+  double lo, hi;
+  Rcpp::DoubleVector templo, temphi;
   switch (skyRMStype) {
+
   case adacs_LO:
-    skyRMSloc = fabs(Cadacs_quantileLO(clip,R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, skyloc))/sigmasel;
+    skyRMSloc = get_rms(clip, true, false);
     break;
+
   case adacs_RLO:
-  {
-    // Its ok to modify clip since its a fresh object and will not be used later
-    for (int i=0; i<clip.size();i++) {
-    clip[i] -= skyloc;
-    if (clip[i]>=0) {
-      clip[i] = R_NaN;
-    }
-  }
-    skyRMSloc = std::abs(REAL(Fquantile(clip, R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, true))[0])/sigmasel;
-  }
+    subtract_skyloc_from_clip();
+    set_nan_if(clip, positive_or_zero{});
+    skyRMSloc = get_rms(clip, true, true);
     break;
+
   case adacs_HI:
-    skyRMSloc = std::abs(Cadacs_quantileHI(clip,(R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, skyloc))/sigmasel;
+    skyRMSloc = get_rms(clip, false, false);
     break;
+
   case adacs_RHI:
-  {
-    // Its ok to modify clip since its a fresh object and will not be used later
-    for (int i=0; i<clip.size();i++) {
-    clip[i] -= skyloc;
-    if (clip[i]<=0) {
-      clip[i] = R_NaN;
-    }
-  }
-    skyRMSloc = fabs(REAL(Fquantile(clip, (R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, true))[0])/sigmasel;
-  }
+    subtract_skyloc_from_clip();
+    set_nan_if(clip, negative_or_zero{});
+    skyRMSloc = get_rms(clip, false, true);
     break;
+
   case adacs_BOTH:
-  {
-    double lo=fabs(Cadacs_quantileLO(clip,R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, skyloc))/sigmasel;
-    double hi=fabs(Cadacs_quantileHI(clip,(R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, skyloc))/sigmasel;
-    skyRMSloc = (lo+hi)/2;
-  }
+    lo = get_rms(clip, true, false);
+    hi = get_rms(clip, false, false);
+    skyRMSloc = (lo + hi) / 2;
     break;
+
   case adacs_RBOTH:
-  {
-
-    // Its ok to modify clip since its a fresh object and will not be used later
-    for (int i=0; i<clip.size();i++) {
-    clip[i] -= skyloc;
-  }
-    Rcpp::DoubleVector templo(clip.size());
-    for (int i=0; i<clip.size();i++) {
-      templo[i] = clip[i];
-      if (templo[i]>=0) {
-        templo[i] = R_NaN;
-      }
-    }
-    Rcpp::DoubleVector temphi(clip.size());
-    for (int i=0; i<clip.size();i++) {
-      temphi[i] = clip[i];
-      if (temphi[i]<=0) {
-        temphi[i] = R_NaN;
-      }
-    }
-
-    double lo = fabs(REAL(Fquantile(templo, R::pnorm(-sigmasel, 0.0, 1.0, 1, 0)*2, true))[0])/sigmasel;
-    double hi = fabs(REAL(Fquantile(temphi, (R::pnorm(sigmasel, 0.0, 1.0, 1, 0)-0.5)*2, true))[0])/sigmasel;
-    skyRMSloc = (lo+hi)/2;
-  }
+    subtract_skyloc_from_clip();
+    templo = Rcpp::clone(clip);
+    temphi = Rcpp::clone(clip);
+    set_nan_if(templo, positive_or_zero{});
+    set_nan_if(temphi, negative_or_zero{});
+    lo = get_rms(templo, true, true);
+    hi = get_rms(temphi, false, true);
+    skyRMSloc = (lo + hi) / 2;
     break;
+
   case adacs_SD:
     skyRMSloc = sqrt(Cadacs_population_variance(clip, skyloc));
     break;
+
   case adacs_RSD:
-  {
     // Its ok to modify clip since its a fresh object and will not be used later
-    for (int i=0; i<clip.size();i++) {
-    clip[i] -= skyloc;
-  }
+    subtract_skyloc_from_clip();
     skyRMSloc = sqrt(Rcpp::var(clip));
-  }
     break;
   }
+
   Rcpp::NumericVector result(2);
   result[0] = skyloc;
   result[1] = skyRMSloc;
