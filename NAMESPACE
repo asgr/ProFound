@@ -10,7 +10,6 @@ import("stats")
 import("graphics")
 import("grDevices")
 import("foreach")
-import("doParallel")
 
 importFrom("Rcpp", "evalCpp")
 importFrom("utils", "relist", "packageVersion")

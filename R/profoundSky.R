@@ -223,16 +223,25 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
-  registerDoParallel(cores=cores)
-  
-  if(cores>1){
-    registerDoParallel(cores=cores)
+
+  if(cores>1 & 'foreach' %in% .packages() & 'snow' %in% .packages() & 'doSNOW' %in% .packages() & 'bigmemory'  %in% .packages()){
+    cl = snow::makeCluster(cores)
+    doSNOW::registerDoSNOW(cl)
+    
+    image_big = bigmemory::as.big.matrix(image)
+    image_desc = bigmemory::describe(image_big)
     i=NULL
+    
     tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
-      profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      image_loop = bigmemory::attach.big.matrix(image_desc)
+      profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     }
+    closeAllConnections()
     tempsky=rbind(tempsky)
   }else{
+    if(cores>1){
+      message('Missing parallel backend packages (need foreach, snow, doSNOW and bigmemory)')
+    }
     tempsky=matrix(0,dim(tempgrid)[1],2)
     for(i in 1:dim(tempgrid)[1]){
       tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
@@ -328,14 +337,24 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     yseq=seq(grid[2]/2, ceiling(dim(image)[2]/grid[2])*grid[2], by=grid[2])
     tempgrid=expand.grid(xseq, yseq)
     
-    if(cores>1){
-      registerDoParallel(cores=cores)
+    if(cores>1 & 'foreach' %in% .packages() & 'snow' %in% .packages() & 'doSNOW' %in% .packages() & 'bigmemory'  %in% .packages()){
+      cl = snow::makeCluster(cores)
+      doSNOW::registerDoSNOW(cl)
+      
+      image_big = bigmemory::as.big.matrix(image)
+      image_desc = bigmemory::describe(image_big)
       i=NULL
+      
       tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
-        profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+        image_loop = bigmemory::attach.big.matrix(image_desc)
+        profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       }
+      closeAllConnections()
       tempsky=rbind(tempsky)
     }else{
+      if(cores>1){
+        message('Missing parallel backend packages (need foreach, snow, doSNOW and bigmemory)')
+      }
       tempsky=matrix(0,dim(tempgrid)[1],2)
       for(i in 1:dim(tempgrid)[1]){
         tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
