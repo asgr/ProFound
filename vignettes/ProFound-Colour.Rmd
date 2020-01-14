@@ -1,5 +1,5 @@
 ---
-title: "ProFound: Colour me happy"
+title: "ProFound: Colour Me Happy"
 author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
