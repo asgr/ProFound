@@ -1,5 +1,5 @@
 ---
-title: "ProFound: Segmentation Mapss"
+title: "ProFound: Segmentation Maps"
 author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

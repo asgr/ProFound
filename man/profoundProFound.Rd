@@ -14,15 +14,16 @@ pixcut=3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth =
 SBlim, SBdilate = NULL, SBN100 = 100, size = 5, shape = "disc", iters = 6,
 threshold = 1.05, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
 redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
-type = "bicubic", skytype = "median", skyRMStype = "quanlo", roughpedestal = FALSE,
-sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, iterskyloc = TRUE,
-deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE, doclip = TRUE, shiftloc = FALSE,
-paddim = TRUE, header, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-boundstats = FALSE, nearstats = boundstats, groupstats = boundstats, group = NULL,
-groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
-decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound',
-pixelcov = FALSE, deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
-convmode = 'extended', fluxtype = 'Raw', app_diam = 1, Ndeblendlim = Inf, ...)
+skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
+roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
+boxiters = 0, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE,
+doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE,
+stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
+groupstats = boundstats, group = NULL, groupby = 'segim_orig', offset = 1,
+haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
+keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
+fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
+app_diam = 1, Ndeblendlim = Inf, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -112,6 +113,9 @@ Integer vector; the dimensions of the box car filter to estimate the sky with. F
 }
   \item{grid}{
 Integer vector; the resolution of the background grid to estimate the sky with. By default this is set to be the same as the \option{box}.
+}
+  \item{skygrid_type}{
+Character scalar; either 'new' (the new ADACS C++ sky grid code) or 'old' (the older R based code as used for ProFound <= v1.10).  
 }
   \item{type}{
 Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default). The former creates sharper edges. 

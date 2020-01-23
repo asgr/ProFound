@@ -214,10 +214,13 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       detect=inputlist[[which(multibands==detectbands)]]
     }
     temp_magzero=magzero[multibands==detectbands]
+    temp_box=box[multibands==detectbands]
+    temp_grid=grid[multibands==detectbands]
+    temp_boxadd=boxadd[multibands==detectbands]
     
     # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=quote(detect), segim=quote(segim), mask=quote(mask), iters=iters_det, magzero=temp_magzero, deblend=FALSE, groupstats=(groupstats | dogrp), pixelcov=FALSE, group_by=groupby_det), dotsdetect))
+    pro_detect=do.call("profoundProFound", c(list(image=quote(detect), segim=quote(segim), mask=quote(mask), iters=iters_det, magzero=temp_magzero, box=temp_box, grid=temp_grid, boxadd=temp_boxadd, deblend=FALSE, groupstats=(groupstats | dogrp), pixelcov=FALSE, group_by=groupby_det), dotsdetect))
     
   }else{
   
