@@ -8,7 +8,21 @@ Core package containing all the tools for simple and advanced source extraction.
 
 ### Getting R
 
-Firs things first, you will probably want to install a recent version of R that lets you build packages from source. The advantage of choosing this route is you can then update bleeding edge versions directly from GitHub. If you rely on the pre-build binaries on CRAN you might be waiting much longer.
+First things first, you will probably want to install a recent version of R that lets you build packages from source. The advantage of choosing this route is you can then update bleeding edge versions directly from GitHub. If you rely on the pre-built binaries on CRAN you might be waiting much longer.
+
+#### Mac
+
+For Mac just get the latest binaries from the **R** project pages:
+
+<https://cloud.r-project.org/bin/macosx/>
+
+#### Windows
+
+For Windows just get the latest binaries from the **R** project pages:
+
+<https://cloud.r-project.org/bin/windows/>
+
+#### Linux
 
 Debian:	`sudo apt-get install r-base r-base-dev`
 
@@ -33,6 +47,33 @@ install.packages('remotes')
 remotes::install_github("asgr/ProFound")
 library(ProFound)
 ```
+
+A few Mac people seem to have issues with the above due to the backend used to download files. A work around seems to be to either use devtools (which I do not use as the default since it has a low more dependencies, and is tricky to install on HPCs):
+
+```R
+install.packages('devtools')
+devtools::install_github("asgr/ProFound")
+library(ProFound)
+```
+
+Or try the following:
+
+```R
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true”)
+remotes::install_github("asgr/ProFound")
+```
+
+If all of these do not work than the nuclear option is to download (or clone) the GitHub repo, cd to where the tar.gz file is and run in the **console** (or **Terminal** on Mac):
+
+```console
+R CMD install ProFound_X.Y.Z.tar.gz
+```
+
+where X, Y and Z should be set as appropriate for the version downloaded (check the name of the file basically).
+
+If none of the above works then you should consider burning your computer in sacrifice to the IO Gods. Then buy a newer better computer, and try all the above steps again.
+
+Failing all of the above, please email me for help.
 
 #### Package Dependencies
 
