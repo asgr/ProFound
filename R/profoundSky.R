@@ -260,6 +260,14 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
                              skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE,
                              shiftloc = FALSE, paddim = TRUE, cores=1){
   
+  if(dim(image)[1]/box[1] < 3){
+    box[1] = ceiling(dim(image)[1]/3)
+    message('dim(image)[1]/box[1] must be >=3, box[1] modified to ',box[1])
+  }
+  if(dim(image)[2]/box[2] < 3){
+    box[2] = ceiling(dim(image)[2]/3)
+    message('dim(image)[2]/box[2] must be >=3, box[2] modified to ',box[2])
+  }
   if(skygrid_type=='new'){
     # void .Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     #                         Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS,
