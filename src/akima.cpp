@@ -207,36 +207,43 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
   int ncol=tempmat_sky.ncol();
   int nrow=tempmat_sky.nrow();
 
-  std::vector<double> xin,zin;
+  std::vector<double> xin,yin,zinx,ziny;
   std::vector<adacsakima> akimaCOL;
-  xin.reserve(ncol);
-  zin.reserve(nrow);
+  xin.reserve(nrow);
+  yin.reserve(ncol);
+  zinx.reserve(nrow);
+  ziny.reserve(ncol);
   akimaCOL.reserve(ncol);
   for (int i = 1; i <= nrow; i++)
   {
     xin.push_back(0);
-    zin.push_back(0);
+    zinx.push_back(0);
   }
   for (int j = 1; j <= ncol; j++) {
-    int ii=(j-1)*ncol+(1-1);
-    for (int i = 1; i <= nrow; i++,ii++) {
+    //int ii=(j-1)*nrow+(1-1);
+    for (int i = 1; i <= nrow; i++) {
       xin[i-1] = myx[i-1];
-      zin[i-1] = tempmat_sky(i-1,j-1);
+      zinx[i-1] = tempmat_sky(i-1,j-1);
     }
-    adacsakima thisspline(nrow,xin.data(),zin.data());
+    // Rcpp::Rcout << xin[nrow-1] << "\n";
+    adacsakima thisspline(nrow,xin.data(),zinx.data());
     akimaCOL.push_back(thisspline);
   }
 
+  // Rcpp::Rcout << "WE GOT HERE\n";
+  
   // For each vertical row
   for (int i = 1; i <= myxnpts; i++) {
     // For a spline to interpolate vertically along the elements of the row
     double x = -0.5+i;
+    // Rcpp::Rcout << "AND HERE\n";
     for (int j = 1; j <= ncol; j++) {
-      xin[j-1] = myy[j-1];
-      zin[j-1] = akimaCOL[j-1].InterpValue(x);
+      yin[j-1] = myy[j-1];
+      ziny[j-1] = akimaCOL[j-1].InterpValue(x);
     }
-    adacsakima thisspline(ncol,xin.data(),zin.data());
 
+    adacsakima thisspline(ncol,yin.data(),ziny.data());
+    
     // Interpolate vertically for each element (j) in the current (i) output row
     for (int j = 1; j <= myynpts; j++) {
       double y = -0.5+j;
