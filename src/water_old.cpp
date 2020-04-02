@@ -1,7 +1,7 @@
 #include <Rcpp.h>
 #include <cmath>
 #include <vector>
-#include <unistd.h>
+// #include <unistd.h>
 using namespace Rcpp;
 
 // [[Rcpp::export(".addmat_cpp")]]
