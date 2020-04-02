@@ -168,8 +168,6 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
   int nrow = image.nrow();
   int ncol = image.ncol();
 
-  //Rcpp::Rcout << "\nCbox "<<ssrow<<" "<<eerow<<" "<<sscol<<" "<<eecol<<"\n";
-
   const double* iiimage=REAL(image);
   Rcpp::IntegerMatrix iobjects;
   const int32_t* iiobjects=NULL;
@@ -203,7 +201,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
     eecol = std::min(ncol,iloc2+ibox2);
 
     for (int j = sscol; j <= eecol; j++) {
-      int ii=(j-1)*ncol+(ssrow-1);
+      int ii=(j-1)*nrow+(ssrow-1);
       for (int i = ssrow; i <= eerow; i++,ii++) {
         // Count sky cells (sky cells are those NOT masked out and NOT objects)
         if ((iiobjects!=NULL)) {
@@ -225,11 +223,18 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
 
   }
   // copy sky cell values to vec and return
+  // Rcpp::Rcout << "\nCbox "<<ssrow<<" "<<eerow<<" "<<sscol<<" "<<eecol<<"\n";
+  
+  // Rcpp::Rcout << skyN << "\n";
+  
   Rcpp::NumericVector vec(skyN);
   int k=0;
   for (int j = sscol; j <= eecol; j++) {
-    int ii=(j-1)*ncol+(ssrow-1);
+    int ii=(j-1)*nrow+(ssrow-1);
     for (int i = ssrow; i <= eerow; i++,ii++) {
+      //Rcpp::Rcout << i << "\n";
+      //Rcpp::Rcout << ii << "\n";
+      //Rcpp::Rcout << k << "\n";
       if ((iiobjects!=NULL)) {
         if (iiobjects[ii]==0 && (iimask==NULL || iimask[ii]==0)) {
           vec[k++] = iiimage[ii];
@@ -243,6 +248,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
       }
     }
   }
+  // Rcpp::Rcout << vec[k-1] << k << " FINE!\n";
   return vec;
 }
 
@@ -724,7 +730,8 @@ void Cadacs_MakeSkyGrid(
   }
 
   // Now interpolate for each image cell
-
+  // Rcpp::Rcout << " AKIMA!\n";
+  
   switch (type) {
   case adacs_CLASSIC_BILINEAR:
     interpolateLinearGrid(xseq, yseq, z_sky_centre, sky);
@@ -736,6 +743,8 @@ void Cadacs_MakeSkyGrid(
     break;
   }
 
+  // Rcpp::Rcout << "POST AKIMA!\n";
+  
   // Apply mask
   if (mask.isNotNull()) {
     Rcpp::IntegerMatrix imask = Rcpp::as<Rcpp::IntegerMatrix>(mask);

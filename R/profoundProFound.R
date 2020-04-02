@@ -25,6 +25,14 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(missing(boxadd)){boxadd=box/2}
     if(missing(skypixmin)){skypixmin=prod(box)/2}
   }
+  if(dim(image)[1]/box[1] < 3){
+    box[1] = ceiling(dim(image)[1]/3)
+    message('dim(image)[1]/box[1] must be >=3, box[1] modified to ',box[1])
+  }
+  if(dim(image)[2]/box[2] < 3){
+    box[2] = ceiling(dim(image)[2]/3)
+    message('dim(image)[2]/box[2] must be >=3, box[2] modified to ',box[2])
+  }
   if(length(grid)==1){
     grid=rep(grid,2)
   }
