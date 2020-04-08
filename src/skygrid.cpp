@@ -40,7 +40,7 @@ void set_nan_if(Rcpp::NumericVector numbers, Predicate condition)
 {
   for (auto &n: numbers) {
     if (condition(n)) {
-      n = R_NaN;
+      n = NA_REAL;
     }
   }
 }
@@ -52,19 +52,19 @@ void set_nan_if(Rcpp::NumericVector numbers, Predicate condition)
 class AdacsHistogram {
 
 public:
-  void accumulate(Rcpp::NumericVector x, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  void accumulate(Rcpp::NumericVector x, int nbins=16384, double minv=NA_REAL, double maxv=NA_REAL)
   {
     accumulate(x, nbins, minv, maxv,
                [](double) { return true; });
   }
 
-  void accumulateLO(Rcpp::NumericVector x, double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  void accumulateLO(Rcpp::NumericVector x, double offset=0, int nbins=16384, double minv=NA_REAL, double maxv=NA_REAL)
   {
     accumulate(x, nbins, minv, maxv,
                [offset](double x) { return x < offset; });
   }
 
-  void accumulateHI(Rcpp::NumericVector x, double offset=0, int nbins=16384, double minv=R_NaN, double maxv=R_NaN)
+  void accumulateHI(Rcpp::NumericVector x, double offset=0, int nbins=16384, double minv=NA_REAL, double maxv=NA_REAL)
   {
     accumulate(x, nbins, minv, maxv,
                [offset](double x) { return x > offset; });
@@ -72,6 +72,9 @@ public:
 
   double quantile(double quantile, double offset=0) const
   {
+    if (_non_null_sample_count == 0) {
+      return NA_REAL;
+    }
     int count = 0;
     double quantileValue = _min - offset;
     double binwidth = (_max - _min) / _nbins;
@@ -256,7 +259,7 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
 /**
  * C++ version of R quantile, low variant
  */
-double Cadacs_quantileLO(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=R_NaN, double maxv=R_NaN) {
+double Cadacs_quantileLO(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=NA_REAL, double maxv=NA_REAL) {
   // The population we want the quantile for is x-offset where x<offset
   AdacsHistogram histogram;
   histogram.accumulateLO(x, offset, nbins, minv, maxv);
@@ -266,7 +269,7 @@ double Cadacs_quantileLO(Rcpp::NumericVector x, double quantile, const double of
 /**
  * C++ version of R quantile, high variant
  */
-double Cadacs_quantileHI(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=R_NaN, double maxv=R_NaN) {
+double Cadacs_quantileHI(Rcpp::NumericVector x, double quantile, const double offset, int nbins=16384, double minv=NA_REAL, double maxv=NA_REAL) {
   // The population we want the quantile for is x-offset where x>offset
   AdacsHistogram histogram;
   histogram.accumulateHI(x, offset, nbins, minv, maxv);
@@ -289,7 +292,7 @@ double Cadacs_mean(Rcpp::NumericVector x) {
     }
   }
   if (non_null_sample_count==0)
-    return R_NaN;
+    return NA_REAL;
   return mean/non_null_sample_count;
 }
 
@@ -309,7 +312,7 @@ double Cadacs_population_variance(Rcpp::NumericVector x, const double offset) {
     }
   }
   if (non_null_sample_count==0)
-    return R_NaN;
+    return NA_REAL;
   double N=non_null_sample_count;
   return sum_sq/N;
 }
@@ -332,7 +335,7 @@ double Cadacs_sample_variance(Rcpp::NumericVector x, const double offset) {
     }
   }
   if (non_null_sample_count<=1)
-    return R_NaN;
+    return NA_REAL;
   double N=non_null_sample_count;
   return (N*sum_sq - sum*sum)/(N * (N - 1));
   //return sqrt(sum_sq);
@@ -478,6 +481,7 @@ Rcpp::NumericVector Cadacs_SkyEstLoc(Rcpp::NumericMatrix image,
   switch (skytype) {
   case adacs_MEDIAN:
     skyloc = Cadacs_median(clip);
+    // Rcpp::Rcout << skyloc << "\n";
     break;
   case adacs_RMEDIAN:
     skyloc = Rcpp::median(clip);
@@ -675,23 +679,24 @@ void Cadacs_MakeSkyGrid(
     }
   }
   if (hasNaNs) {
+    // Rcpp::Rcout << "HERE!\n";
     // Replace any NaN's with reasonable substitute
     // initialise the pad area before getting the medians
     for (int i=0; i<tile_nrows; i++) {
       // sky
-      z_sky_centre(i,0) = R_NaN;
-      z_sky_centre(i,tile_ncols-1) = R_NaN;
+      z_sky_centre(i,0) = NA_REAL;
+      z_sky_centre(i,tile_ncols-1) = NA_REAL;
       // skyRMS
-      z_skyRMS_centre(i,0) = R_NaN;
-      z_skyRMS_centre(i,tile_ncols-1) = R_NaN;
+      z_skyRMS_centre(i,0) = NA_REAL;
+      z_skyRMS_centre(i,tile_ncols-1) = NA_REAL;
     }
     for (int i=0; i<tile_ncols; i++) {
       // sky
-      z_sky_centre(0, i) = R_NaN;
-      z_sky_centre(tile_nrows-1, i) = R_NaN;
+      z_sky_centre(0, i) = NA_REAL;
+      z_sky_centre(tile_nrows-1, i) = NA_REAL;
       // skyRMS
-      z_skyRMS_centre(0, i) = R_NaN;
-      z_skyRMS_centre(tile_nrows-1, i) = R_NaN;
+      z_skyRMS_centre(0, i) = NA_REAL;
+      z_skyRMS_centre(tile_nrows-1, i) = NA_REAL;
     }
     double medianSkyCentre=Cadacs_median(z_sky_centre);
     double medianSkyRMSCentre=Cadacs_median(z_skyRMS_centre);
@@ -753,8 +758,8 @@ void Cadacs_MakeSkyGrid(
     for (int i=0; i<ncols; i++) {
       for (int j=0; j<nrows; j++) {
         if (imask(j, i)==1) {
-          sky(j, i) = R_NaN;
-          skyRMS(j, i) = R_NaN;
+          sky(j, i) = NA_REAL;
+          skyRMS(j, i) = NA_REAL;
         }
       }
     }

@@ -105,6 +105,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       mask[badpix]=1L
       image[badpix]=0
     }
+    if(is.numeric(mask)){
+      mask=as.integer(mask)
+      attributes(mask)$dim = dim(image)
+    }
   }else{
     if(anyNA(image)){
       mask=matrix(0L,dim(image)[1],dim(image)[2])

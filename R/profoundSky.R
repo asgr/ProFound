@@ -66,7 +66,9 @@
     temp[c("x", "y", "z")]
 }
 
-profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2, cuthi=sqrt(sum((dim(image)/2)^2)), skycut='auto', clipiters=5, radweight=0, plot=FALSE, ...){
+profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2, 
+                        cuthi=sqrt(sum((dim(image)/2)^2)), skycut='auto', 
+                        clipiters=5, radweight=0, plot=FALSE, ...){
   radweight=-radweight
   xlen=dim(image)[1]
   ylen=dim(image)[2]
@@ -127,7 +129,10 @@ profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2, cuth
   return(invisible(list(sky=sky,skyerr=skyerr,skyRMS=skyRMS,Nnearsky=Nnearsky,radrun=tempmedian)))
 }
 
-profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2, box=c(100,100), skytype='median', skyRMStype='quanlo', sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, plot=FALSE, ...){
+profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2, 
+                           box=c(100,100), skytype='median', skyRMStype='quanlo', 
+                           sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, 
+                           doclip=TRUE, shiftloc = FALSE, paddim = TRUE, plot=FALSE, ...){
   if(!is.null(objects) | !is.null(mask)){
     skyN=0
     iterN=0
@@ -219,7 +224,10 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   return(invisible(c(skyloc, skyRMSloc)))
 }
 
-profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
+profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), 
+                            grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, 
+                            skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, 
+                            shiftloc = FALSE, paddim = TRUE, cores=1){
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
@@ -255,8 +263,9 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
   return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))))
 }
 
-profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), grid=box, skygrid_type='new',
-                             type='bicubic', skytype='median', skyRMStype='quanlo', sigmasel=1,
+profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
+                             grid=box, skygrid_type='new', type='bicubic', 
+                             skytype='median', skyRMStype='quanlo', sigmasel=1,
                              skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE,
                              shiftloc = FALSE, paddim = TRUE, cores=1){
   
