@@ -217,7 +217,7 @@ Logical; if TRUE then the input \option{image} and \option{mask} matrices are pa
 Character scalar; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
 }
   \item{pixelcov}{
-Logical, should pixel covariance be considered when computing errors? TRUE uses \code{\link{profoundPixelCorrelation}} and the \option{cor_err_func} output which is then passed into \code{\link{profoundSegimStats}}.
+Logical, should pixel covariance be considered when computing errors? TRUE uses \code{\link{profoundPixelCorrelation}} and the \option{cor_err_func} output which is then passed into \code{\link{profoundSegimStats}}. You can also directly pass it the \option{cor_err_func} function that you have already computed for the type of data being used. This means you do not need to recompute the correlation function for every \option{image} (which would be quite slow).
 }
   \item{deblendtype}{
 Character scalar, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.

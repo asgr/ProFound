@@ -334,11 +334,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     Norig=tabulate(segim_orig)
     
-    if(pixelcov){
-      if(verbose){message(paste('Calculating pixel covariance -',round(proc.time()[3]-timestart,3),'sec'))}
-      cor_err_func=profoundPixelCorrelation(image=image, objects=objects, mask=mask, sky=sky, skyRMS=skyRMS, fft=FALSE, lag=apply(expand.grid(c(1,2,4),c(1,10,100,1000,1e4)),MARGIN=1,FUN=prod))$cor_err_func
+    if(is.function(pixelcov)){
+      cor_err_func=pixelcov
     }else{
-      cor_err_func=NULL
+      if(pixelcov){
+        if(verbose){message(paste('Calculating pixel covariance -',round(proc.time()[3]-timestart,3),'sec'))}
+        cor_err_func=profoundPixelCorrelation(image=image, objects=objects, mask=mask, sky=sky, skyRMS=skyRMS, fft=FALSE, lag=apply(expand.grid(c(1,2,4),c(1,10,100,1000,1e4)),MARGIN=1,FUN=prod))$cor_err_func
+      }else{
+        cor_err_func=NULL
+      }
     }
     
     if(lowmemory){
