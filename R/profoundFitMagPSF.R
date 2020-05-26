@@ -186,7 +186,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   psfLL=rep(NA,Nmodels)
   flux=rep(NA,Nmodels)
   flux_err=rep(NA,Nmodels)
-  beam_err=rep(NA,Nmodels)
+  beam_err=rep(mean(im_sigma, na.rm=TRUE)*beamscale,Nmodels)
   
   if(verbose){message('Iterating over source model')}
   
@@ -329,7 +329,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
           flux[i]=NA
           if(goodlocs[i]){
             sigma_cut=magcutout(im_sigma, loc=c(xcen[i],ycen[i]), box=dim(psf))$image
-            flux_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
+            flux_err[i]=mean(sigma_cut, na.rm=TRUE)*beamscale
           }else{
             flux_err[i]=NA
           }
