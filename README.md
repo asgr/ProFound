@@ -2,13 +2,13 @@
 
 ## Synopsis
 
-Core package containing all the tools for simple and advanced source extraction. This is used to create inputs for **ProFit**, or for source detection, extraction and photometry in its own right.
+Core package containing all the tools for simple and advanced source extraction. This is used for source detection, extraction and photometry, and also to create inputs for **ProFit**.
 
 ## Installation
 
 ### Getting R
 
-First things first, you will probably want to install a recent version of R that lets you build packages from source. The advantage of choosing this route is you can then update bleeding edge versions directly from GitHub. If you rely on the pre-built binaries on CRAN you might be waiting much longer.
+First things first, you will probably want to install a recent version of **R** that lets you build packages from source. The advantage of choosing this route is you can then update bleeding edge versions directly from GitHub. If you rely on the pre-built binaries on CRAN you might be waiting much longer.
 
 #### Mac
 
@@ -34,9 +34,11 @@ Ubuntu:	`sudo apt-get install r-base-dev`
 
 All the info on binaries is here: <https://cloud.r-project.org/bin/linux/>
 
-If you have a poorly supported version of Linux (e.g. CentOS) you will need to install R from source with the development flags (this bit is important). You can read more here: <https://cloud.r-project.org/sources.html>
+If you have a poorly supported version of Linux (e.g. CentOS) you will need to install **R** from source with the development flags (this bit is important). You can read more here: <https://cloud.r-project.org/sources.html>
 
-Now you have the development version of R installed (hopefully) I would also suggest you get yourself R-Studio. It is a very popular and well maintained R IDE that gives you a lot of helpful shortcuts to scripting and analysing with R. The latest version can be grabbed from <https://www.rstudio.com/products/rstudio/> where you almost certainly want the free Desktop version.
+Now you have the development version of **R** installed (hopefully) I would also suggest you get yourself **R-Studio**. It is a very popular and well maintained **R** IDE that gives you a lot of helpful shortcuts to scripting and analysing with **R**. The latest version can be grabbed from <https://www.rstudio.com/products/rstudio/> where you almost certainly want the free Desktop version.
+
+If you wish to use the command line version of **R** on Mac (why?!) then you might need to separately install **XQuartz** and set the DISPLAY system variable via something like export DISPLAY=:0 (this is not an issue for most people however).
 
 ### Getting ProFound
 
@@ -105,7 +107,7 @@ Be warned, it will probably ask you to update a whole bunch of stuff. Just say *
 
 Linux users might also need to install some non-standard graphics libraries (depending on your install). If you do not have them already, you should look to install **Cairo**, **jpeg** and **tiff** libraries (these are apparently technically not entirely free, hence not coming by default on some strictly open source Linux variants). For **Cairo** you might need to install the development version, so check this if you are having issues.
 
-Assuming this has all installed successfully, you should now be able to load **ProFound** within R with the usual:
+Assuming this has all installed successfully, you should now be able to load **ProFound** within **R** with the usual:
 
 ```R
 library(ProFound)
