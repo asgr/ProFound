@@ -63,6 +63,14 @@ Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true”)
 remotes::install_github("asgr/ProFound")
 ```
 
+I also have these options set by default in my .Rprofile, which seems to help with some of the remote install issues some people face:
+
+```R
+options(download.file.method = "libcurl")
+options(repos="http://cran.rstudio.com/")
+options(rpubs.upload.method = "internal")
+```
+
 If all of these do not work than the nuclear option is to download (or clone) the GitHub repo, cd to where the tar.gz file is and run in the **console** (or **Terminal** on Mac):
 
 ```console

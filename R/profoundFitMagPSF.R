@@ -1,4 +1,8 @@
-profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext =FALSE, header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
+profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, 
+                           image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, 
+                           magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, 
+                           modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext =FALSE, 
+                           header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   timestart=proc.time()[3]
   
@@ -475,6 +479,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         mag_err=rerun$psfstats$mag_err[seltarget]
         psfLL=rerun$psfstats$psfLL[seltarget]
         signif=rerun$psfstats$signif[seltarget]
+        beam_err=rerun$psfstats$beam_err[seltarget]
         
         selextra=(Nmodels+1):(dim(rerun$psfstats)[1])
         xcen_extra=rerun$psfstats$xcen[selextra]
@@ -487,7 +492,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         mag_err_extra=rerun$psfstats$mag_err[selextra]
         psfLL_extra=rerun$psfstats$psfLL[selextra]
         signif_extra=rerun$psfstats$signif[selextra]
-        psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, signif=signif_extra)
+        beam_err_extra=rerun$psfstats$beam_err[selextra]
+        psfstats_extra=data.frame(xcen=xcen_extra, ycen=ycen_extra, RAcen=RAcen_extra, 
+                                  Deccen=Deccen_extra, flux=flux_extra, flux_err=flux_err_extra, 
+                                  mag=mag_extra, mag_err=mag_err_extra, psfLL=psfLL_extra, 
+                                  signif=signif_extra, beam_err=beam_err_extra)
         
         fullmodel=rerun$finalmodel
       }else{
@@ -509,11 +518,16 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     row.names(psfstats_extra)=NULL
   }
   
-  psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux, flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, signif=signif)
+  psfstats=data.frame(xcen=xcen, ycen=ycen, RAcen=RAcen, Deccen=Deccen, flux=flux,
+                      flux_err=flux_err, mag=mag, mag_err=mag_err, psfLL=psfLL, 
+                      signif=signif, beam_err=beam_err)
   psfstats=psfstats[match(1:Nmodels,fluxorder),] # Reorder back to the input
   row.names(psfstats)=NULL
   
-  output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, profound=protemp, mask=mask, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+  output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, 
+              finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, 
+              profound=protemp, mask=mask, call=call, date=date(), time=proc.time()[3]-timestart, 
+              ProFound.version=packageVersion('ProFound'), R.version=R.version)
   class(output)='fitmagpsf'
   return(invisible(output))
 }

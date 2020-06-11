@@ -9,8 +9,8 @@ ProFound Source Detection
 This is the highest level source detection function provided in \code{ProFit}, calculating both the initial segmentation map and reasonable estimates for the total flux apertures for each source in an automatic manner.
 }
 \usage{
-profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut=1,
-pixcut=3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
+profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut = 1,
+pixcut = 3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
 SBlim, SBdilate = NULL, SBN100 = 100, size = 5, shape = "disc", iters = 6,
 threshold = 1.05, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
 redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
