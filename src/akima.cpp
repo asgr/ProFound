@@ -197,55 +197,37 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
    * The elements of a row stack vertically
    * Any row I is to the right of row I-1
    */
-  int myxnpts = output.nrow();
-  int myynpts = output.ncol();
-  const double* myx=REAL(xseq);
-  const double* myy=REAL(yseq);
-  int ncol=tempmat_sky.ncol();
-  int nrow=tempmat_sky.nrow();
+  int ncol = tempmat_sky.ncol();
+  int nrow = tempmat_sky.nrow();
 
-  std::vector<double> xin,yin,zinx,ziny;
+  std::vector<double> zinx,ziny;
   std::vector<adacsakima> akimaCOL;
-  xin.reserve(nrow);
-  yin.reserve(ncol);
   zinx.reserve(nrow);
   ziny.reserve(ncol);
   akimaCOL.reserve(ncol);
-  for (int i = 1; i <= nrow; i++)
-  {
-    xin.push_back(0);
-    zinx.push_back(0);
-  }
-  for (int j = 1; j <= ncol; j++) {
-    //Rcpp::Rcout << 'y' << j-1 << ' ' << yin[j-1] << " " << ziny[j-1] << "\n";
-    for (int i = 1; i <= nrow; i++) {
-      xin[i-1] = myx[i-1];
-      zinx[i-1] = tempmat_sky(i-1,j-1);
-      //Rcpp::Rcout << "x" << i-1 << " " << myx[i-1] << " y" << j-1 << " " << myy[j-1] << " z " << tempmat_sky(i-1,j-1) << "\n";
+
+  // Create horizontal splines
+  for (int j = 0; j < ncol; j++) {
+    for (int i = 0; i < nrow; i++) {
+      zinx[i] = tempmat_sky(i, j);
     }
-    // Rcpp::Rcout << xin[nrow-1] << "\n";
-    adacsakima thisspline(nrow,xin.data(),zinx.data());
+    adacsakima thisspline(nrow, REAL(xseq), zinx.data());
     akimaCOL.push_back(thisspline);
   }
 
-  // Rcpp::Rcout << "WE GOT HERE\n";
-  
   // For each vertical row
-  for (int i = 1; i <= myxnpts; i++) {
+  for (int i = 0; i < output.nrow(); i++) {
     // For a spline to interpolate vertically along the elements of the row
-    double x = -0.5+i;
-    // Rcpp::Rcout << "AND HERE\n";
-    for (int j = 1; j <= ncol; j++) {
-      yin[j-1] = myy[j-1];
-      ziny[j-1] = akimaCOL[j-1].InterpValue(x);
+    double x = i + 0.5;
+    for (int j = 0; j < ncol; j++) {
+      ziny[j] = akimaCOL[j].InterpValue(x);
     }
 
-    adacsakima thisspline(ncol,yin.data(),ziny.data());
-    
     // Interpolate vertically for each element (j) in the current (i) output row
-    for (int j = 1; j <= myynpts; j++) {
-      double y = -0.5+j;
-      output(i-1,j-1) = thisspline.InterpValue(y);
+    adacsakima thisspline(ncol, REAL(yseq), ziny.data());
+    for (int j = 0; j < output.ncol(); j++) {
+      double y = 0.5 + j;
+      output(i, j) = thisspline.InterpValue(y);
     }
   }
 }
