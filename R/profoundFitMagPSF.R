@@ -1,7 +1,7 @@
 profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NULL, 
                            image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, 
                            magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, 
-                           modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext =FALSE, 
+                           modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext=FALSE, 
                            header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   timestart=proc.time()[3]
@@ -81,7 +81,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }else if (fluxtype=='microjansky'){
     fluxscale=10^(-0.4*(magzero-23.9))
   }else{
-    stop('fluxtype must be Jansky / Raw!')
+    stop('fluxtype must be Jansky / Microjansky / Raw!')
   }
   
   if((is.null(xcen) & !is.null(ycen))){stop('Need xcen/ycen pair!')}
@@ -141,7 +141,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if(is.null(mag)){
     tempflux=rep(NA,length(xcen))
     tempflux[goodlocs]=image[cbind(ceiling(xcen[goodlocs]),ceiling(ycen[goodlocs]))] #only if source is in image
-    tempflux=tempflux*sum(image, na.rm=TRUE)/sum(tempflux, na.rm=TRUE)
+    tempflux=tempflux*sum(magclip(image)$x, na.rm=TRUE)/sum(tempflux, na.rm=TRUE) # clipping to be safe from bad pixels!
     mag=profoundFlux2Mag(flux=tempflux, magzero=magzero)
   }
   if(is.null(im_sigma)){stop('Need im_sigma!')}
@@ -466,7 +466,12 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
       
         if(verbose){message('Rerunning source model with extra sources')}
       
-        rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig, im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters, magdiff=magdiff, modxy=modxy, sigthresh=sigthresh, itersub=itersub, magzero=magzero, modelout=modelout, fluxtype='Raw', header=header, doProFound=FALSE, findextra=FALSE, fluxext=fluxext, verbose=verbose)
+        rerun=profoundFitMagPSF(xcen=xcen, ycen=ycen, mag=mag, image=image_orig,
+                                im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters,
+                                magdiff=magdiff, modxy=modxy, sigthresh=sigthresh,
+                                itersub=itersub, magzero=magzero, modelout=modelout,
+                                fluxtype='Raw', header=header, doProFound=FALSE,
+                                findextra=FALSE, fluxext=fluxext, verbose=verbose)
       
         seltarget=1:Nmodels
         xcen=rerun$psfstats$xcen[seltarget]

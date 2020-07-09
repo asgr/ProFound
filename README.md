@@ -96,7 +96,9 @@ install.packages('remotes')
 remotes::install_github("asgr/ProFound")
 ```
 
-To use the **profoundMakeSegim** and **profoundProFound** function for image segmentation you will need to have **EBImage** installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
+**ProFound** now comes with its own watershed method, and can use the **imager** package to smooth the image, this means it does not strictly require the **EBImage** package any more. This is good, because it has always been a bit of a pain to install!
+
+To use the *old* **profoundMakeSegim** and **profoundProFound** function for image segmentation you will need to have **EBImage** installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
 
 ```R
 install.packages("BiocManager")
@@ -107,7 +109,7 @@ Be warned, it will probably ask you to update a whole bunch of stuff. Just say *
 
 Linux users might also need to install some non-standard graphics libraries (depending on your install). If you do not have them already, you should look to install **Cairo**, **jpeg** and **tiff** libraries (these are apparently technically not entirely free, hence not coming by default on some strictly open source Linux variants). For **Cairo** you might need to install the development version, so check this if you are having issues.
 
-Assuming this has all installed successfully, you should now be able to load **ProFound** within **R** with the usual:
+Assuming you have installed all of the packages that you need/want, you should now be able to load **ProFound** within **R** with the usual:
 
 ```R
 library(ProFound)

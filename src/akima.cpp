@@ -157,6 +157,9 @@ public:
       p3 = (s3 + s4 - r2 * dy / dx) / (dx * dx);
       //
       // store slopes and interploting coefficients
+      
+      // Rcpp::Rcout << s3<< ' ' << s4 << ' ' << p2 << ' ' << "\n";
+      
       Coeff coeff;
       coeff.w0 = s3;
       coeff.w1 = s4;
@@ -220,10 +223,11 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
     zinx.push_back(0);
   }
   for (int j = 1; j <= ncol; j++) {
-    //int ii=(j-1)*nrow+(1-1);
+    //Rcpp::Rcout << 'y' << j-1 << ' ' << yin[j-1] << " " << ziny[j-1] << "\n";
     for (int i = 1; i <= nrow; i++) {
       xin[i-1] = myx[i-1];
       zinx[i-1] = tempmat_sky(i-1,j-1);
+      //Rcpp::Rcout << "x" << i-1 << " " << myx[i-1] << " y" << j-1 << " " << myy[j-1] << " z " << tempmat_sky(i-1,j-1) << "\n";
     }
     // Rcpp::Rcout << xin[nrow-1] << "\n";
     adacsakima thisspline(nrow,xin.data(),zinx.data());

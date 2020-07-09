@@ -269,14 +269,37 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
                              skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE,
                              shiftloc = FALSE, paddim = TRUE, cores=1){
   
-  if(dim(image)[1]/box[1] < 3){
+  if(length(box)==1){
+    box=rep(box,2)
+    if(missing(grid)){grid=box}
+    if(missing(boxadd)){boxadd=box/2}
+    if(missing(skypixmin)){skypixmin=prod(box)/2}
+  }
+  if(length(grid)==1){
+    grid=rep(grid,2)
+  }
+  if(length(boxadd)==1){
+    boxadd=rep(boxadd,2)
+  }
+  
+  if(box[1] > ceiling(dim(image)[1]/3)){
     box[1] = ceiling(dim(image)[1]/3)
     message('dim(image)[1]/box[1] must be >=3, box[1] modified to ',box[1])
   }
-  if(dim(image)[2]/box[2] < 3){
+  if(box[2] > ceiling(dim(image)[1]/3)){
     box[2] = ceiling(dim(image)[2]/3)
     message('dim(image)[2]/box[2] must be >=3, box[2] modified to ',box[2])
   }
+  
+  if(grid[1] > ceiling(dim(image)[1]/3)){
+    grid[1] = ceiling(dim(image)[1]/3)
+    message('dim(image)[1]/grid[1] must be >=3, grid[1] modified to ',grid[1])
+  }
+  if(grid[2] > ceiling(dim(image)[1]/3)){
+    grid[2] = ceiling(dim(image)[2]/3)
+    message('dim(image)[2]/grid[2] must be >=3, grid[2] modified to ',grid[2])
+  }
+  
   if(skygrid_type=='new'){
     # void .Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
     #                         Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS,
