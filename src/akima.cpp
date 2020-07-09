@@ -86,19 +86,18 @@ public:
   /**
    * Computes the array of akima splines - notes the special treatment of intervals within 2 of the start and end.
    */
-  adacsakima(int npts,const double *xorig, const double *yorig)
+  adacsakima(int npts, const double *xorig, const double *yorig)
   {
     assert(npts >= 5);
 
     double r2 = 2, r3 = 3;
     double s3 = 0, s4 = 0, dx = 0., dy = 0., p2, p3, x3, x4, y3, y4;
-    int i;
 
     // One spline for each interval (xorig[i], xorig[i+1])
-    ncoeffs = npts-1;
+    std::size_t ncoeffs = npts - 1;
     coeffs.reserve(ncoeffs);
 
-    for (i = 0; i < ncoeffs; i++) {
+    for (std::size_t i = 0; i < ncoeffs; i++) {
       x3 = xorig[i];
       y3 = yorig[i];
 
@@ -112,27 +111,27 @@ public:
       {
         // do first interval
         s3 = dy / dx;
-        s4 = Coeff::calcSlopeAtMiddle(&(xorig[0]), &(yorig[0]));
+        s4 = Coeff::calcSlopeAtMiddle(xorig, yorig);
         s4 = (s4 + s3) / 2;
       }
       else if (i == 1)
       {
         // do second interval
         s3 = dy / dx;
-        s4 = Coeff::calcSlopeAtMiddle(&(xorig[0]), &(yorig[0]));
+        s4 = Coeff::calcSlopeAtMiddle(xorig, yorig);
         s3 = (s4 + s3) / 2;
       }
       else if (i == ncoeffs - 2)
       {
         // to second last interval
-        s3 = Coeff::calcSlopeAtMiddle(&xorig[i - 2], &yorig[i - 2]);
+        s3 = Coeff::calcSlopeAtMiddle(xorig + i - 2, yorig + i - 2);
         s4 = dy / dx;
         s4 = (s4 + s3) / 2;
       }
       else if (i == ncoeffs - 1)
       {
         // do last interval
-        s3 = Coeff::calcSlopeAtMiddle(&xorig[ncoeffs - 4], &yorig[ncoeffs - 4]);
+        s3 = Coeff::calcSlopeAtMiddle(xorig + ncoeffs - 4, yorig + ncoeffs - 4);
         x3 = xorig[npts - 2];
         y3 = yorig[npts - 2];
         x4 = xorig[npts - 1];
@@ -146,8 +145,8 @@ public:
       {
         // do the "pure" akima intervals
         // Determine slope at beginning and end of current interval.
-        s3 = Coeff::calcSlopeAtMiddle(&xorig[i - 2], &yorig[i - 2]);
-        s4 = Coeff::calcSlopeAtMiddle(&xorig[i - 1], &yorig[i - 1]);
+        s3 = Coeff::calcSlopeAtMiddle(xorig + i - 2, yorig + i - 2);
+        s4 = Coeff::calcSlopeAtMiddle(xorig + i - 1, yorig + i - 1);
       }
 
       //
@@ -174,20 +173,15 @@ public:
 
   double InterpValue(double x) const
   {
-    for (int spline = 0; spline < ncoeffs; spline++)
-    {
-      // Determine if this spline's interval covers x
-      if (x >= coeffs[spline].x3 && x <= coeffs[spline].x4)
-      {
-        // Evaluate this akima spline interpolating polynomial at x
-        return coeffs[spline].interpValue(x);
+    for (auto &coeff: coeffs) {
+      if (x >= coeff.x3 && x <= coeff.x4) {
+        return coeff.interpValue(x);
       }
     }
     return 0.0;
   }
 
 private:
-  int ncoeffs = 0;
   std::vector<Coeff> coeffs;
 };
 
