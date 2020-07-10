@@ -210,8 +210,7 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
     for (int i = 0; i < nrow; i++) {
       z[i] = tempmat_sky(i, j);
     }
-    adacsakima thisspline(nrow, REAL(xseq), z.data());
-    akimaCOL.push_back(thisspline);
+    akimaCOL.emplace_back(nrow, REAL(xseq), z.data());
   }
 
   // For each vertical row
