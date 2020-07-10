@@ -207,9 +207,8 @@ void interpolateAkimaGrid(NumericVector x, NumericVector y,
   // Create horizontal splines
   z.resize(nrow);
   for (int j = 0; j < ncol; j++) {
-    for (int i = 0; i < nrow; i++) {
-      z[i] = grid(i, j);
-    }
+    auto col = grid.column(j);
+    std::copy(col.begin(), col.end(), z.begin());
     col_splines.emplace_back(nrow, REAL(x), z.data());
   }
 
