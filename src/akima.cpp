@@ -204,7 +204,7 @@ void interpolateAkimaGrid(NumericVector x, NumericVector y,
   std::vector<adacsakima> col_splines;
   col_splines.reserve(ncol);
 
-  // Create horizontal splines
+  // Create column-wise splines
   z.resize(nrow);
   for (int j = 0; j < ncol; j++) {
     auto col = grid.column(j);
