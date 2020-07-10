@@ -6,15 +6,15 @@
 using namespace Rcpp;
 
 // interpolateAkimaGrid
-void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq, NumericMatrix tempmat_sky, NumericMatrix output);
-RcppExport SEXP _ProFound_interpolateAkimaGrid(SEXP xseqSEXP, SEXP yseqSEXP, SEXP tempmat_skySEXP, SEXP outputSEXP) {
+void interpolateAkimaGrid(NumericVector x, NumericVector y, NumericMatrix grid, NumericMatrix output);
+RcppExport SEXP _ProFound_interpolateAkimaGrid(SEXP xSEXP, SEXP ySEXP, SEXP gridSEXP, SEXP outputSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type xseq(xseqSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type yseq(yseqSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type tempmat_sky(tempmat_skySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type grid(gridSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type output(outputSEXP);
-    interpolateAkimaGrid(xseq, yseq, tempmat_sky, output);
+    interpolateAkimaGrid(x, y, grid, output);
     return R_NilValue;
 END_RCPP
 }

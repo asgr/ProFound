@@ -86,19 +86,18 @@ public:
   /**
    * Computes the array of akima splines - notes the special treatment of intervals within 2 of the start and end.
    */
-  adacsakima(int npts,const double *xorig, const double *yorig)
+  adacsakima(int npts, const double *xorig, const double *yorig)
   {
     assert(npts >= 5);
 
     double r2 = 2, r3 = 3;
     double s3 = 0, s4 = 0, dx = 0., dy = 0., p2, p3, x3, x4, y3, y4;
-    int i;
 
     // One spline for each interval (xorig[i], xorig[i+1])
-    ncoeffs = npts-1;
+    std::size_t ncoeffs = npts - 1;
     coeffs.reserve(ncoeffs);
 
-    for (i = 0; i < ncoeffs; i++) {
+    for (std::size_t i = 0; i < ncoeffs; i++) {
       x3 = xorig[i];
       y3 = yorig[i];
 
@@ -112,27 +111,27 @@ public:
       {
         // do first interval
         s3 = dy / dx;
-        s4 = Coeff::calcSlopeAtMiddle(&(xorig[0]), &(yorig[0]));
+        s4 = Coeff::calcSlopeAtMiddle(xorig, yorig);
         s4 = (s4 + s3) / 2;
       }
       else if (i == 1)
       {
         // do second interval
         s3 = dy / dx;
-        s4 = Coeff::calcSlopeAtMiddle(&(xorig[0]), &(yorig[0]));
+        s4 = Coeff::calcSlopeAtMiddle(xorig, yorig);
         s3 = (s4 + s3) / 2;
       }
       else if (i == ncoeffs - 2)
       {
         // to second last interval
-        s3 = Coeff::calcSlopeAtMiddle(&xorig[i - 2], &yorig[i - 2]);
+        s3 = Coeff::calcSlopeAtMiddle(xorig + i - 2, yorig + i - 2);
         s4 = dy / dx;
         s4 = (s4 + s3) / 2;
       }
       else if (i == ncoeffs - 1)
       {
         // do last interval
-        s3 = Coeff::calcSlopeAtMiddle(&xorig[ncoeffs - 4], &yorig[ncoeffs - 4]);
+        s3 = Coeff::calcSlopeAtMiddle(xorig + ncoeffs - 4, yorig + ncoeffs - 4);
         x3 = xorig[npts - 2];
         y3 = yorig[npts - 2];
         x4 = xorig[npts - 1];
@@ -146,8 +145,8 @@ public:
       {
         // do the "pure" akima intervals
         // Determine slope at beginning and end of current interval.
-        s3 = Coeff::calcSlopeAtMiddle(&xorig[i - 2], &yorig[i - 2]);
-        s4 = Coeff::calcSlopeAtMiddle(&xorig[i - 1], &yorig[i - 1]);
+        s3 = Coeff::calcSlopeAtMiddle(xorig + i - 2, yorig + i - 2);
+        s4 = Coeff::calcSlopeAtMiddle(xorig + i - 1, yorig + i - 1);
       }
 
       //
@@ -174,20 +173,15 @@ public:
 
   double InterpValue(double x) const
   {
-    for (int spline = 0; spline < ncoeffs; spline++)
-    {
-      // Determine if this spline's interval covers x
-      if (x >= coeffs[spline].x3 && x <= coeffs[spline].x4)
-      {
-        // Evaluate this akima spline interpolating polynomial at x
-        return coeffs[spline].interpValue(x);
+    for (auto &coeff: coeffs) {
+      if (x >= coeff.x3 && x <= coeff.x4) {
+        return coeff.interpValue(x);
       }
     }
     return 0.0;
   }
 
 private:
-  int ncoeffs = 0;
   std::vector<Coeff> coeffs;
 };
 
@@ -196,62 +190,42 @@ private:
  * Interpolate a 2D regular grid using akima spline interpolation
  */
 // [[Rcpp::export(".interpolateAkimaGrid")]]
-void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
-                          NumericMatrix tempmat_sky, NumericMatrix output) {
+void interpolateAkimaGrid(NumericVector x, NumericVector y,
+                          NumericMatrix grid, NumericMatrix output) {
   /*
    * An Matrix element is at (row,col)
    * The elements of a row stack vertically
    * Any row I is to the right of row I-1
    */
-  int myxnpts = output.nrow();
-  int myynpts = output.ncol();
-  const double* myx=REAL(xseq);
-  const double* myy=REAL(yseq);
-  int ncol=tempmat_sky.ncol();
-  int nrow=tempmat_sky.nrow();
+  int ncol = grid.ncol();
+  int nrow = grid.nrow();
 
-  std::vector<double> xin,yin,zinx,ziny;
-  std::vector<adacsakima> akimaCOL;
-  xin.reserve(nrow);
-  yin.reserve(ncol);
-  zinx.reserve(nrow);
-  ziny.reserve(ncol);
-  akimaCOL.reserve(ncol);
-  for (int i = 1; i <= nrow; i++)
-  {
-    xin.push_back(0);
-    zinx.push_back(0);
-  }
-  for (int j = 1; j <= ncol; j++) {
-    //Rcpp::Rcout << 'y' << j-1 << ' ' << yin[j-1] << " " << ziny[j-1] << "\n";
-    for (int i = 1; i <= nrow; i++) {
-      xin[i-1] = myx[i-1];
-      zinx[i-1] = tempmat_sky(i-1,j-1);
-      //Rcpp::Rcout << "x" << i-1 << " " << myx[i-1] << " y" << j-1 << " " << myy[j-1] << " z " << tempmat_sky(i-1,j-1) << "\n";
-    }
-    // Rcpp::Rcout << xin[nrow-1] << "\n";
-    adacsakima thisspline(nrow,xin.data(),zinx.data());
-    akimaCOL.push_back(thisspline);
+  std::vector<double> z;
+  std::vector<adacsakima> col_splines;
+  col_splines.reserve(ncol);
+
+  // Create column-wise splines
+  z.resize(nrow);
+  for (int j = 0; j < ncol; j++) {
+    auto col = grid.column(j);
+    std::copy(col.begin(), col.end(), z.begin());
+    col_splines.emplace_back(nrow, REAL(x), z.data());
   }
 
-  // Rcpp::Rcout << "WE GOT HERE\n";
-  
   // For each vertical row
-  for (int i = 1; i <= myxnpts; i++) {
+  z.resize(ncol);
+  for (int i = 0; i < output.nrow(); i++) {
     // For a spline to interpolate vertically along the elements of the row
-    double x = -0.5+i;
-    // Rcpp::Rcout << "AND HERE\n";
-    for (int j = 1; j <= ncol; j++) {
-      yin[j-1] = myy[j-1];
-      ziny[j-1] = akimaCOL[j-1].InterpValue(x);
+    double output_x = i + 0.5;
+    for (int j = 0; j < ncol; j++) {
+      z[j] = col_splines[j].InterpValue(output_x);
     }
 
-    adacsakima thisspline(ncol,yin.data(),ziny.data());
-    
     // Interpolate vertically for each element (j) in the current (i) output row
-    for (int j = 1; j <= myynpts; j++) {
-      double y = -0.5+j;
-      output(i-1,j-1) = thisspline.InterpValue(y);
+    adacsakima row_spline(ncol, REAL(y), z.data());
+    for (int j = 0; j < output.ncol(); j++) {
+      double output_y = j + 0.5;
+      output(i, j) = row_spline.InterpValue(output_y);
     }
   }
 }
