@@ -200,31 +200,31 @@ void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
   int ncol = tempmat_sky.ncol();
   int nrow = tempmat_sky.nrow();
 
-  std::vector<double> zinx,ziny;
+  std::vector<double> z;
   std::vector<adacsakima> akimaCOL;
-  zinx.reserve(nrow);
-  ziny.reserve(ncol);
   akimaCOL.reserve(ncol);
 
   // Create horizontal splines
+  z.resize(nrow);
   for (int j = 0; j < ncol; j++) {
     for (int i = 0; i < nrow; i++) {
-      zinx[i] = tempmat_sky(i, j);
+      z[i] = tempmat_sky(i, j);
     }
-    adacsakima thisspline(nrow, REAL(xseq), zinx.data());
+    adacsakima thisspline(nrow, REAL(xseq), z.data());
     akimaCOL.push_back(thisspline);
   }
 
   // For each vertical row
+  z.resize(ncol);
   for (int i = 0; i < output.nrow(); i++) {
     // For a spline to interpolate vertically along the elements of the row
     double x = i + 0.5;
     for (int j = 0; j < ncol; j++) {
-      ziny[j] = akimaCOL[j].InterpValue(x);
+      z[j] = akimaCOL[j].InterpValue(x);
     }
 
     // Interpolate vertically for each element (j) in the current (i) output row
-    adacsakima thisspline(ncol, REAL(yseq), ziny.data());
+    adacsakima thisspline(ncol, REAL(yseq), z.data());
     for (int j = 0; j < output.ncol(); j++) {
       double y = 0.5 + j;
       output(i, j) = thisspline.InterpValue(y);
