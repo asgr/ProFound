@@ -190,43 +190,43 @@ private:
  * Interpolate a 2D regular grid using akima spline interpolation
  */
 // [[Rcpp::export(".interpolateAkimaGrid")]]
-void interpolateAkimaGrid(NumericVector xseq, NumericVector yseq,
-                          NumericMatrix tempmat_sky, NumericMatrix output) {
+void interpolateAkimaGrid(NumericVector x, NumericVector y,
+                          NumericMatrix grid, NumericMatrix output) {
   /*
    * An Matrix element is at (row,col)
    * The elements of a row stack vertically
    * Any row I is to the right of row I-1
    */
-  int ncol = tempmat_sky.ncol();
-  int nrow = tempmat_sky.nrow();
+  int ncol = grid.ncol();
+  int nrow = grid.nrow();
 
   std::vector<double> z;
-  std::vector<adacsakima> akimaCOL;
-  akimaCOL.reserve(ncol);
+  std::vector<adacsakima> col_splines;
+  col_splines.reserve(ncol);
 
   // Create horizontal splines
   z.resize(nrow);
   for (int j = 0; j < ncol; j++) {
     for (int i = 0; i < nrow; i++) {
-      z[i] = tempmat_sky(i, j);
+      z[i] = grid(i, j);
     }
-    akimaCOL.emplace_back(nrow, REAL(xseq), z.data());
+    col_splines.emplace_back(nrow, REAL(x), z.data());
   }
 
   // For each vertical row
   z.resize(ncol);
   for (int i = 0; i < output.nrow(); i++) {
     // For a spline to interpolate vertically along the elements of the row
-    double x = i + 0.5;
+    double output_x = i + 0.5;
     for (int j = 0; j < ncol; j++) {
-      z[j] = akimaCOL[j].InterpValue(x);
+      z[j] = col_splines[j].InterpValue(output_x);
     }
 
     // Interpolate vertically for each element (j) in the current (i) output row
-    adacsakima thisspline(ncol, REAL(yseq), z.data());
+    adacsakima row_spline(ncol, REAL(y), z.data());
     for (int j = 0; j < output.ncol(); j++) {
-      double y = 0.5 + j;
-      output(i, j) = thisspline.InterpValue(y);
+      double output_y = j + 0.5;
+      output(i, j) = row_spline.InterpValue(output_y);
     }
   }
 }
