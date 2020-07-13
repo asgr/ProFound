@@ -3,6 +3,8 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+#include "IntpAkimaUniform2.h"
+
 /**
  *  Represents an Akima spline
  *  Given six input (X,Z) pairs this akima spline fits a smooth curve between points 3 and 4.
@@ -184,6 +186,34 @@ public:
 private:
   std::vector<Coeff> coeffs;
 };
+
+
+/**
+ * Performs 2D akima interpolation using the Geometric Tool Engine's
+ * implementation of the algorithm.
+ *
+ * @param x The X coordinates of the input grid
+ * @param y The Y coordinates of the input grid
+ * @param grid The input values, which are positioned on the regular grid
+ * defined by \p x and \p y
+ * @param output The output image. Interpolation values are generated for the
+ * middle coordinate of the pixel.
+ */
+static void interpolate_akima_gte(NumericVector x, NumericVector y,
+                                  NumericMatrix grid, NumericMatrix output)
+{
+    gte::IntpAkimaUniform2<double> spline2D {
+        grid.nrow(), grid.ncol(), x[0], x[1] - x[0],
+        y[0], y[1] - y[0], &grid[0]};
+    for (int j = 0; j != output.ncol(); j++) {
+        auto y = 0.5 + j;
+        for (int i = 0; i != output.nrow(); i++) {
+            auto x = 0.5 + i;
+            output(i, j) = spline2D(x, y);
+        }
+    }
+}
+
 
 /**
  * Performs 2D akima interpolation using 1D akima splines on a 2-step algorithm,
