@@ -185,13 +185,21 @@ private:
   std::vector<Coeff> coeffs;
 };
 
-//==================================================================================
 /**
- * Interpolate a 2D regular grid using akima spline interpolation
+ * Performs 2D akima interpolation using 1D akima splines on a 2-step algorithm,
+ * where splines are used to interpolate values on one dimension first, which
+ * are then the input for the second dimension's interpolation.
+ *
+ * @param x The X coordinates of the input grid
+ * @param y The Y coordinates of the input grid
+ * @param grid The input values, which are positioned on the regular grid
+ * defined by \p x and \p y
+ * @param output The output image. Interpolation values are generated for the
+ * middle coordinate of the pixel.
  */
-// [[Rcpp::export(".interpolateAkimaGrid")]]
-void interpolateAkimaGrid(NumericVector x, NumericVector y,
-                          NumericMatrix grid, NumericMatrix output) {
+static void interpolate_akima_adacs(NumericVector x, NumericVector y,
+                                    NumericMatrix grid, NumericMatrix output)
+{
   /*
    * An Matrix element is at (row,col)
    * The elements of a row stack vertically
@@ -229,6 +237,21 @@ void interpolateAkimaGrid(NumericVector x, NumericVector y,
     }
   }
 }
+
+//' Interpolates a grid of equally spaced values
+//'
+//' @param x X coordiantes of pixels in grid
+//' @param y Y coordinates of pixels in grid
+//' @param grid Input matrix with values to be interpolated
+//' @param output Output matrix. It starts at the origin on both dimensions, and
+//'   its interpolated values are calculated on the center of each cell
+// [[Rcpp::export(".interpolateAkimaGrid")]]
+void interpolateAkimaGrid(NumericVector x, NumericVector y,
+                          NumericMatrix grid, NumericMatrix output)
+{
+	interpolate_akima_adacs(x, y, grid, output);
+}
+
 /**
  * Interpolate a 2D regular grid using bilinear interpolation
  */
