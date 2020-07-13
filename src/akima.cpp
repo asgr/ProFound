@@ -280,11 +280,11 @@ void interpolateAkimaGrid(NumericVector x, NumericVector y,
                           NumericMatrix grid, NumericMatrix output)
 {
 	auto akima = std::getenv("PROFOUND_AKIMA");
-	if (akima == nullptr || std::string(akima) == "adacs") {
-		interpolate_akima_adacs(x, y, grid, output);
+	if (akima == nullptr || std::string(akima) == "gte") {
+	  interpolate_akima_gte(x, y, grid, output);
 	}
 	else {
-		interpolate_akima_gte(x, y, grid, output);
+	  interpolate_akima_adacs(x, y, grid, output);
 	}
 }
 
