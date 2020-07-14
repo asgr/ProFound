@@ -5,7 +5,7 @@
 Watershed Image Segmentation
 }
 \description{
-A high level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be passed to the \option{segim} input of \code{profitSetupData}).
+A mid level utility to achieve decent quality image segmentation. It uses a mixture of image smoothing and watershed segmentation propagation to identify distinct objects for use in, e.g., \code{profitSetupData} (where the \option{segim} list item output of \code{profoundMakeSegim} would be passed to the \option{segim} input of \code{profitSetupData}). For most user cases, people should use the higher level \code{\link{profoundProFound}} function.
 }
 \usage{
 profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut = 3,
