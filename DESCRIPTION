@@ -9,7 +9,7 @@ Description: Core package containing all the tools for simple and advanced sourc
 License: LGPL-3
 Depends: R (>= 3.1), FITSio, magicaxis (>= 2.0.8), Rcpp (>= 1.0.2)
 Imports: RColorBrewer, data.table, celestial (>= 1.4.1), foreach
-Suggests: ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon, Rfast, fastmatch, Rfits, Rwcs, astro, snow, doSNOW, bigmemory
+Suggests: ProFit, knitr, rmarkdown, EBImage, akima, imager, LaplacesDemon, Rfast, fastmatch, Rfits, Rwcs, snow, doSNOW, bigmemory
 VignetteBuilder: knitr
 SystemRequirements: C++11
 LinkingTo: Rcpp

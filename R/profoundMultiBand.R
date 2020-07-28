@@ -205,10 +205,8 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         detect=Rfits::Rfits_read_image(paste0(dir,detectbands,'.fits'))
       }else if(requireNamespace("FITSio", quietly = TRUE)){
         detect=FITSio::readFITS(paste0(dir,detectbands,'.fits'))
-      }else if(requireNamespace("astro", quietly = TRUE)){
-        detect=astro::read.fits(paste0(dir,detectbands,'.fits'))
       }else{
-        stop('One of Rfits / FITSio / astro is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN / CRAN.')
+        stop('One of Rfits / FITSio is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN.')
       }
     }else{
       detect=inputlist[[which(multibands==detectbands)]]

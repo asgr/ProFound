@@ -19,7 +19,7 @@ masking = 'and', ...)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{inputlist}{
-A list of already loaded images. Typically of the type loaded in from FITS files by the \code{astro} package's \code{read.fits} function, or the \code{FITSio} package's \code{readFITS} function. If using the \option{inputlist} parameter the length of the list must be the same length as \option{multibands} (and the related parameters).
+A list of already loaded images. Typically of the type loaded in from FITS files by the \code{FITSio} package's \code{readFITS} function. If using the \option{inputlist} parameter the length of the list must be the same length as \option{multibands} (and the related parameters).
 }
   \item{dir}{
 If \option{inputlist} is left as NULL then \code{profoundMultiBand} will instead try to load in FITS images from the directory specified by \option{dir}. The images in the directory must have names like \option{multibands}[i].fits etc (so with the defaults names like u.fits and g.fits would be okay). Since \option{multibands} effectively specifies the file names much more complicated naming can be used and passed in, but it is also used by default for naming the catalogue column outputs, so shorter names/references are likely to be preferable there (i.e. mag_ut is simpler than mag_KiDS_VST_ut etc). This can be over-ridden by using \option{bandappend}.
