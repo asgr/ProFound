@@ -1,4 +1,10 @@
-profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r', multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0, sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2, app_diam=1, bandappend=multibands, totappend='t', colappend='c', grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE, groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig', keepsegims=FALSE, masking='and', ...){
+profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detectbands='r',
+                           multibands=c('u','g','r','i','z'), iters_det=6, iters_tot=0,
+                           sizes_tot=5, magzero=0, gain=NULL, box=100, grid=box, boxadd=box/2,
+                           app_diam=1, bandappend=multibands, totappend='t', colappend='c',
+                           grpappend='g', dotot=TRUE, docol=TRUE, dogrp=TRUE, deblend=FALSE,
+                           groupstats=FALSE, groupby_det='segim_orig', groupby_mul='segim_orig',
+                           keepsegims=FALSE, masking='and', ...){
   
   # The most important thing is that all of the input images must be pixel matched via SWarp or magwarp etc
   # detectbands and multibands are the names of the target bands, which should be the names of the images ignoring the .fits ending
@@ -205,10 +211,8 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         detect=Rfits::Rfits_read_image(paste0(dir,detectbands,'.fits'))
       }else if(requireNamespace("FITSio", quietly = TRUE)){
         detect=FITSio::readFITS(paste0(dir,detectbands,'.fits'))
-      }else if(requireNamespace("astro", quietly = TRUE)){
-        detect=astro::read.fits(paste0(dir,detectbands,'.fits'))
       }else{
-        stop('One of Rfits / FITSio / astro is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN / CRAN.')
+        stop('One of Rfits / FITSio is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN / CRAN.')
       }
     }else{
       detect=inputlist[[which(multibands==detectbands)]]
