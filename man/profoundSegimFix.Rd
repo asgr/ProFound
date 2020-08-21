@@ -68,10 +68,10 @@ Logical; what should the default answer be to whether you what to fix more segme
 Logical; should a new Quartz or X11 window be opened. When looping through different image regions this should probably be FALSE. It is here because it is a very bad idea to try to do this using the R-Studio plot window- it does not properly support interactive plotting and will not show the click positions.
 }
   \item{allow_seg_modify}{
-Logical; should users be allowed to add and delete segments. Since this behaviour will modify the input \option{segim} it is not always desirable. To be safe, it is off (FALSE) by default.  
+Logical; should users be allowed to add and delete segments. Since this behaviour will modify the input \option{segim} it is not always desirable. To be safe, it is off (FALSE) by default. See Details.
 }
   \item{segID_max}{
-Integer; the maximum segment ID to assume for the input \option{segim}. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k). If set to 'auto' then it will check the input \option{segim}, if left at the default NULL it will check the available segim when it is creating a new segment. Since this will be on a segmentation image subset when specifying a box, this might mean the segID is not unique on the larger input \option{segim}, but it will be unique on the cut down one being processed internally, and the ones returned (\option{segim} and \option{segim_start}).
+Integer; the maximum segment ID to assume for the input \option{segim} when adding or replacing segments (so only relevant if \option{allow_seg_modify}=TRUE), where the default segID for a new segment becomes \option{segID_max} + 1. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k). If set to 'auto' then it will check the input \option{segim}, if left at the default NULL it will check the available segim when it is creating a new segment. Since this will be on a segmentation image subset when specifying a box, this might mean the segID is not unique on the larger input \option{segim}, but it will be unique on the cut down one being processed internally, and the ones returned (\option{segim} and \option{segim_start}).
 }
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.
@@ -96,11 +96,13 @@ Currently fixed segment complexes (as per the internal version of \option{segID_
 
 If you see one of these coloured polygon complexes and do not like the solution you can click once in it and hit ESC in the plot window. This will tell the code to unpick the complex and return all filled segments back to their original solution. You can then try to fix it again, if needed.
 
-If you make a number of clicks and then change your mind, click on the unwanted segment twice and make some other this will ignore the segment when merging- this allows you to fix silly click errors by clicking again. If you just click on a segment twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky).
+If you make a number of clicks and then change your mind, click on the unwanted segment twice and make some other this will ignore the segment when merging- this allows you to fix silly click errors by clicking again.
 
 If you click on any segment three times and hit ESC in the plot window it will tell the code that you are both definitely happy *and* that you want to stop fixing segments, ending the session instantly. This allows you to make rapid progress when doing lots of easy fixes since you do not need to then type anything at all into the command prompt (which slows down progress).
 
-If you click on the sky once and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. Double clicking a single segment (see above) also enters this mode, and the segment is changed in the same manner as if it were drawn manually.
+If \option{allow_seg_modify}=TRUE and you just click on a segment twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky). It will ask what segID you want for the segment, where the default of "auto" will make a new segID one larger than the current maximum. You can specify your own choice manually, where if you use a current segID it will merge the sources. Tt is possible to delete the segment by setting the segID when asked to "0", which means it will become sky.
+
+If \option{allow_seg_modify}=TRUE and you click on the sky once and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. Double clicking a single segment (see above) also enters this mode, and the segment is changed in the same manner as if it were drawn manually. In both cases it is possible to delete segments contained within the polygon simply by setting the segID when asked to "0", which means it will become sky. In this manner you can delete potentially many at once by drawing round large groups of unwanted segments.
 }
 \value{
 List containing:
