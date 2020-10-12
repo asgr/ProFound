@@ -34,7 +34,7 @@ Numeric matrix; required, the image we want to analyse. If \option{image} is a l
 Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
 }
   \item{objects}{
-Boolean matrix (1,0); optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
+Boolean matrix (1,0); optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}. If provided then this is used to initially mask pixels for determining the correct \option{sky} when \option{sky}=NULL.
 }
   \item{mask}{
 Boolean matrix or integer scalar (1,0); optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis. if a scalar is provided it indicates the exact \option{image} values that should be treated as masked (e.g. by setting masked pixels to 0 or -999). The latter achieves the same effect as setting masked \option{image} pixels to NA, but allows for the fact not all programs can produce \code{R} legal NA values.

@@ -18,7 +18,8 @@ profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
 grid = box, skygrid_type = 'new', type = 'bicubic', skytype = "median",
 skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
 boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, cores = 1)
-profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100, sigma = box*(4/pi)/sqrt(12))
+profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100,
+sigma = mean(box)*(4/pi)/sqrt(12))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

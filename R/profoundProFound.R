@@ -159,7 +159,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if((hassky==FALSE | hasskyRMS==FALSE) & is.null(segim)){
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, grid=grid, skygrid_type=skygrid_type, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=0, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+    roughsky=profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, 
+                                 grid=grid, skygrid_type=skygrid_type, type=type, 
+                                 skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, 
+                                 skypixmin=skypixmin, boxadd=boxadd, boxiters=0, 
+                                 doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     if(roughpedestal){
       roughsky$sky=median(roughsky$sky,na.rm=TRUE)
       roughsky$skyRMS=median(roughsky$skyRMS,na.rm=TRUE)
@@ -183,7 +187,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(is.null(segim)){
     if(verbose){message(paste('Making initial segmentation image -',round(proc.time()[3]-timestart,3),'sec'))}
-    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, magzero=magzero, pixscale=pixscale, verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
+    segim=profoundMakeSegim(image=image, objects=objects, mask=mask, tolerance=tolerance, 
+                            ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, 
+                            smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  
+                            sky=sky, skyRMS=skyRMS, magzero=magzero, pixscale=pixscale, 
+                            verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
     objects=segim$objects
     segim=segim$segim
   }else{
@@ -214,7 +222,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Making better sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       if(hassky==FALSE){rm(sky)}
       if(hasskyRMS==FALSE){rm(skyRMS)}
-      bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      bettersky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, 
+                                    box=box, skygrid_type=skygrid_type, grid=grid, 
+                                    type=type, skytype=skytype, skyRMStype=skyRMStype, 
+                                    sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, 
+                                    boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, 
+                                    paddim=paddim)
       if(hassky==FALSE){
         sky=bettersky$sky
         if(verbose){message(' - Sky statistics :')}
@@ -329,7 +342,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       rm(sky)
       rm(skyRMS)
-      sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, 
+                              skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, 
+                              skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
+                              boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, 
+                              paddim=paddim)
       skyRMS=sky$skyRMS
       sky=sky$sky
       if(verbose){message(' - Sky statistics :')}
@@ -348,7 +365,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     }else{
       if(pixelcov){
         if(verbose){message(paste('Calculating pixel covariance -',round(proc.time()[3]-timestart,3),'sec'))}
-        cor_err_func=profoundPixelCorrelation(image=image, objects=objects, mask=mask, sky=sky, skyRMS=skyRMS, fft=FALSE, lag=apply(expand.grid(c(1,2,4),c(1,10,100,1000,1e4)),MARGIN=1,FUN=prod))$cor_err_func
+        cor_err_func=profoundPixelCorrelation(image=image, objects=objects, mask=mask, sky=sky, skyRMS=skyRMS, 
+                                              fft=FALSE, lag=apply(expand.grid(c(1,2,4),c(1,10,100,1000,1e4)),MARGIN=1,FUN=prod))$cor_err_func
       }else{
         cor_err_func=NULL
       }
@@ -376,7 +394,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste(' - pixscale =', round(pixscale,3)))}
       if(verbose){message(paste(' - rotstats =', rotstats))}
       if(verbose){message(paste(' - boundstats =', boundstats))}
-      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, app_diam=app_diam)
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, 
+                                  magzero=magzero, gain=gain, pixscale=pixscale, header=header, 
+                                  sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, 
+                                  boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, 
+                                  app_diam=app_diam)
       segstats=cbind(segstats, iter=selseg, origfrac=origfrac, Norig=Norig[segstats$segID], skyseg_mean=skyseg_mean)
       segstats=cbind(segstats, flag_keep=segstats$origfrac>= median(segstats$origfrac[segstats$iter==iters]) | segstats$iter<iters)
     }else{
@@ -416,7 +438,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       }
 
       if(stats & !is.null(image) & !is.null(group)){
-        groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, app_diam=app_diam)
+        groupstats=profoundSegimStats(image=image, segim=group$groupim, mask=mask, 
+                                      sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, 
+                                      pixscale=pixscale, header=header, sortcol=sortcol, 
+                                      decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, 
+                                      offset=offset, cor_err_func=cor_err_func, app_diam=app_diam)
         colnames(groupstats)[1]='groupID'
       }else{
         groupstats=NULL
@@ -429,7 +455,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(deblend & stats & !is.null(image) & any(group$groupsegID$Ngroup>1)){
       if(verbose){message(paste(' - deblend = TRUE - ',round(proc.time()[3]-timestart,3),'sec'))}
-      tempblend=profoundFluxDeblend(image=image-sky, segim=segim, segstats=segstats, groupim=group$groupim, groupsegID=group$groupsegID, magzero=magzero, df=df, radtrunc=radtrunc, iterative=iterative, doallstats=TRUE, deblendtype=deblendtype, psf=psf, fluxweight=fluxweight, convtype=convtype, convmode=convmode, Ndeblendlim = Ndeblendlim)
+      tempblend=profoundFluxDeblend(image=image-sky, segim=segim, segstats=segstats, 
+                                    groupim=group$groupim, groupsegID=group$groupsegID, 
+                                    magzero=magzero, df=df, radtrunc=radtrunc, iterative=iterative, 
+                                    doallstats=TRUE, deblendtype=deblendtype, psf=psf, 
+                                    fluxweight=fluxweight, convtype=convtype, convmode=convmode, 
+                                    Ndeblendlim = Ndeblendlim)
       if(!is.null(tempblend)){
         segstats=cbind(segstats,tempblend[,-2])
       }
@@ -488,7 +519,13 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     segstats[,grep('flux',colnames(segstats))]=fluxscale*segstats[,grep('flux',colnames(segstats))]
     
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, 
+                sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, 
+                Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, 
+                haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), 
+                pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), 
+                time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), 
+                R.version=R.version)
   }else{
     if(is.null(header)){header=NULL}
     if(keepim==FALSE){image=NULL; mask=NULL}
@@ -496,7 +533,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(!is.null(badpix)){image[badpix]=NA}
     if(verbose){message('No objects in segmentation map - skipping dilations and CoG')}
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
-    output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), R.version=R.version)
+    output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, 
+                skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, 
+                group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  
+                magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, 
+                gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, 
+                ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
   return(invisible(output))
@@ -584,19 +626,21 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }else{
       skyarea=x$skyarea
     }
-    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$skyarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5), xlab='mag', ylab=paste('#/deg-sq/d',dmag,'mag',sep=''), grid=TRUE, verbose=FALSE)
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$skyarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5),
+                     xlab='mag', ylab=paste('#/deg-sq/d',dmag,'mag',sep=''), grid=TRUE, verbose=FALSE)
     #magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
     xmax=temphist$mids[which.max(temphist$counts)]
     abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
-      
+    legend('topleft', legend=paste('N:',length(x$segstats$mag)))
+    
     par(mar=c(3.5,3.5,0.5,0.5))
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      Rwcs::Rwcs_image(image=x$sky, header=x$header, qdiff=TRUE)
+      Rwcs::Rwcs_image(image=x$sky-median(x$sky,na.rm=TRUE), header=x$header, qdiff=TRUE)
     }else{
-      magimageWCS(x$sky, x$header, qdiff=TRUE)
+      magimageWCS(x$sky-median(x$sky,na.rm=TRUE), x$header, qdiff=TRUE)
     }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='sky',bg='white')
@@ -661,9 +705,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
+    legend('topleft', legend=paste('N:',length(x$segstats$mag)))
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    magimage(x$sky, qdiff=TRUE)
+    magimage(x$sky-median(x$sky,na.rm=TRUE), qdiff=TRUE)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft',legend='sky',bg='white')
     

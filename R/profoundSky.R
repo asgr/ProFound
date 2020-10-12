@@ -478,7 +478,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
   return(invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS)))
 }
 
-profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=box*(4/pi)/sqrt(12)){
+profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=mean(box)*(4/pi)/sqrt(12)){
   if(!is.null(objects)){
     image[objects==1]=NA
   }
@@ -488,3 +488,48 @@ profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=box*(4/pi)
     stop('The imager package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
   }
 }
+
+profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, objthresh=1-skythresh,
+                        sigma=2, iterchisel=5, itersky=5, objbias=0.5, box=100, skyconv=1e-2){
+  if(is.null(sky)){
+    sky = matrix(0, dim(image)[1], dim(image)[2])
+  }
+  
+  origimage = image
+  objcomp = matrix(1, dim(image)[1], dim(image)[2])
+  
+  for(i in 1:itersky){
+    image = origimage - sky
+    
+    objcut = quantile(image, objthresh, na.rm = TRUE)
+    objloc = image > objcut
+    objmask = profoundImBlur(objloc, sigma=sigma) > blurcut
+    objects = matrix(1, dim(image)[1], dim(image)[2])
+    
+    skyloc = matrix(0, dim(image)[1], dim(image)[2])
+    skymask = matrix(1, dim(image)[1], dim(image)[2])
+    
+    for(j in 1:iterchisel){
+      skycut = quantile(image[objects==1], skythresh, na.rm = TRUE)
+      skyloc = skymask==0 | (image < skycut)
+      skymask = profoundImBlur(skyloc, sigma=sigma) < blurcut
+      if(j > 1){
+        objcut = quantile(image[objmask==0], objthresh, na.rm = TRUE)
+        if(abs(skycut)*(1-objbias) > abs(objcut)*objbias){break}
+        objloc = objmask | (image > objcut)
+        objmask = profoundImBlur(objloc, sigma=sigma) > blurcut
+      }
+      objects = skymask | objmask
+    }
+    
+    sky = profoundMakeSkyBlur(image=image, objects=objects, box=box) + sky
+    
+    if(i > 1){
+      if(sum(abs(objcomp - objects)) / prod(dim(image)) < 1e-2){break}
+    }
+    
+    objcomp = objects
+  }
+  return(list(objects=objects, sky=sky))
+}
+

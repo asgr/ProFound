@@ -173,7 +173,12 @@
   }
 }
 
-profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, watershed = 'ProFound', ...){
+profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, 
+                           tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, 
+                           SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, 
+                           skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, 
+                           rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", 
+                           decreasing = FALSE, watershed = 'ProFound', ...){
   
   call=match.call()
   if(verbose){message(' - Running MakeSegim:')}
@@ -250,9 +255,11 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
     if(watershed=='ProFound'){
-      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
+      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
+                      reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else if(watershed=='ProFound-old'){
-      segim=water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
+      segim=water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
+                          reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else if(watershed=='EBImage'){
       if(!requireNamespace("EBImage", quietly = TRUE)){
         stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
@@ -297,7 +304,10 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   
   if(stats & any(image>0)){
     if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-    segstats=profoundSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    segstats=profoundSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, 
+                                skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, 
+                                header=header, sortcol=sortcol, decreasing=decreasing, 
+                                rotstats=rotstats, boundstats=boundstats, offset=offset)
   }else{
     if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE or no segments")}
     segstats=NULL
@@ -318,7 +328,12 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   invisible(list(segim=segim, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, call=call))
 }
 
-profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL, skycut=1, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sigma=1, smooth=TRUE, expandsigma=5, expand='all', sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
+profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL, 
+                                 skycut=1, SBlim=NULL, magzero=0, gain=NULL, pixscale=1, 
+                                 sigma=1, smooth=TRUE, expandsigma=5, expand='all', 
+                                 sky=NULL, skyRMS=NULL, header=NULL, verbose=FALSE, 
+                                 plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, 
+                                 offset=1, sortcol = "segID", decreasing = FALSE, ...){
   
   if(verbose){message(' - Running MakeSegimExpand:')}
   timestart = proc.time()[3]
@@ -407,7 +422,10 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
     
     if(stats){
       if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-      segstats=profoundSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+      segstats=profoundSegimStats(image=image_orig, segim=segim, mask=mask, sky=sky, 
+                                  skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, 
+                                  header=header, sortcol=sortcol, decreasing=decreasing, 
+                                  rotstats=rotstats, boundstats=boundstats, offset=offset)
     }else{
       if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
       segstats=NULL
@@ -468,7 +486,10 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   
   if(stats){
     if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-    segstats=profoundSegimStats(image=image_orig, segim=segim_new, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    segstats=profoundSegimStats(image=image_orig, segim=segim_new, mask=mask, sky=sky, 
+                                skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, 
+                                header=header, sortcol=sortcol, decreasing=decreasing, 
+                                rotstats=rotstats, boundstats=boundstats, offset=offset)
   }else{
     if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
     segstats=NULL
@@ -489,7 +510,11 @@ profoundMakeSegimExpand=function(image=NULL, segim=NULL, mask=NULL, objects=NULL
   return(invisible(list(segim=segim_new, objects=objects, sky=sky, skyRMS=skyRMS, segstats=segstats, header=header, SBlim=SBlim, call=call)))
 }
 
-profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shape='disc', expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, skyRMS=0, header=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", decreasing = FALSE, ...){
+profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shape='disc', 
+                                 expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, 
+                                 skyRMS=0, header=NULL, verbose=FALSE, plot=FALSE, 
+                                 stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, 
+                                 sortcol = "segID", decreasing = FALSE, ...){
   
   if(verbose){message(' - Running MakeSegimDilate:')}
   timestart = proc.time()[3]
@@ -526,7 +551,10 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     
     if(stats){
       if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+      segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, 
+                                  magzero=magzero, gain=gain, pixscale=pixscale, 
+                                  header=header, sortcol=sortcol, decreasing=decreasing, 
+                                  rotstats=rotstats, boundstats=boundstats, offset=offset)
     }else{
       if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
       segstats=NULL
@@ -575,7 +603,10 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(stats & !is.null(image)){
     if(verbose){message(paste(" - Calculating segstats -", round(proc.time()[3]-timestart,3), "sec"))}
-    segstats=profoundSegimStats(image=image, segim=segim_new, mask=mask, sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, header=header, sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, offset=offset)
+    segstats=profoundSegimStats(image=image, segim=segim_new, mask=mask, sky=sky, 
+                                skyRMS=skyRMS, magzero=magzero, gain=gain, pixscale=pixscale, 
+                                header=header, sortcol=sortcol, decreasing=decreasing, 
+                                rotstats=rotstats, boundstats=boundstats, offset=offset)
   }else{
     if(verbose){message(" - Skipping segmentation statistics - segstats set to FALSE")}
     segstats=NULL
@@ -644,7 +675,10 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
   invisible(list(propim=propim, propim_sky=propim_sky))
 }
 
-profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, cor_err_func=NULL, app_diam=1){
+profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, 
+                            magzero=0, gain=NULL, pixscale=1, header=NULL, sortcol='segID', 
+                            decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, 
+                            cor_err_func=NULL, app_diam=1){
   
   if(missing(pixscale) & !is.null(header)){
     pixscale=getpixscale(header)
@@ -1056,7 +1090,11 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   }
 }
 
-profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=NULL, loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, segID_max=NULL, ...){
+profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=NULL, 
+                          loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, 
+                          cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, 
+                          continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, 
+                          segID_max=NULL, ...){
   if(open_window){
       dev.new(noRStudioGD = TRUE)
   }
