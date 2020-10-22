@@ -56,7 +56,7 @@ std::vector<std::size_t> get_sorted_indices(const double *image, std::size_t siz
     std::vector<pix_idx> valid_pixels;
     valid_pixels.reserve(size / 10.);
     for (std::size_t i = 0; i < size; ++i) {
-        if (image[i] >= skycut) {
+        if (image[i] > skycut) {
             valid_pixels.push_back({image[i], i});
         }
     }
