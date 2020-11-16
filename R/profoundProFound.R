@@ -341,7 +341,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects_redo=profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       rm(skyRMS)
-      sky = sky + profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
+      sky = profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
                               skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, 
                               skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
                               boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, 
