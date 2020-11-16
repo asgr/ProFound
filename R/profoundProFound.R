@@ -340,15 +340,18 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste('Doing final aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
       objects_redo=profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-      rm(sky)
       rm(skyRMS)
-      sky=profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, box=box, 
+      sky = sky + profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
                               skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, 
                               skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
                               boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, 
-                              paddim=paddim)
-      skyRMS=sky$skyRMS
-      sky=sky$sky
+                              paddim=paddim)$sky
+      if(verbose){message(paste('Making final sky RMS map -',round(proc.time()[3]-timestart,3),'sec'))}
+      skyRMS = profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
+                                skygrid_type=skygrid_type, grid=grid, type=type, skytype=skytype, 
+                                skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
+                                boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, 
+                                paddim=paddim)$skyRMS
       if(verbose){message(' - Sky statistics :')}
       if(verbose){print(summary(as.numeric(sky)))}
       if(verbose){message(' - Sky-RMS statistics :')}
@@ -664,7 +667,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky> -6 & tempsky<6]
-        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
         })
@@ -727,7 +730,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky> -6 & tempsky<6]
-        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-5,5), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-5,0.5))
+        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend='sky pixels',bg='white')
         })

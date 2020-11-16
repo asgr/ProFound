@@ -62,7 +62,7 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
   Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
   \item{sky}{
-User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted!
+User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted!
 }
   \item{skyRMS}{
 User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).

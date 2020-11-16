@@ -10,16 +10,18 @@ Calculate Sky Maps
 The high level function computes the absolute sky and sky RMS level over an image at a scale defined locally by the \option{box} parameter. This coarse map can then be used to compute sky/skyRMS values for the local sky anywhere on an image. This function uses \code{\link{profoundSkyEstLoc}} to calculate the sky statistics for the subset boxcar regions.
 }
 \usage{
-profoundMakeSkyMap(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
-grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
-skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
-paddim = TRUE, cores = 1)
-profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, box = c(100,100),
-grid = box, skygrid_type = 'new', type = 'bicubic', skytype = "median",
-skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, cores = 1)
+profoundMakeSkyMap(image = NULL, objects = NULL, mask = NULL, sky = 0,
+  box = c(100,100), grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
+  skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
+  paddim = TRUE, cores = 1)
+  
+profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, sky = 0, 
+  box = c(100,100), grid = box, skygrid_type = 'new', type = 'bicubic',
+  skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
+  boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, cores = 1)
+
 profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100,
-sigma = mean(box)*(4/pi)/sqrt(12))
+  sigma = mean(box)*(4/pi)/sqrt(12))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +33,9 @@ Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provide
 }
   \item{mask}{
 Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
+}
+  \item{sky}{
+User provided estimate of the absolute sky level. Can be a scalar (value uniformly applied) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted! The sky statistics will be computed with \option{sky} removed, and then the input \option{sky} is added back on. By this route it is possible to refine a best effort sky measurement iteratively. For images with extreme gradients this might achieve a better solution, and in particular a more accurate \option{skyRMS} map, where it might be systematically high if the gradient is strong across the scale of the requested \option{box} (since this will appear to be enhanced variance).
 }
   \item{box}{
 Integer vector; the dimensions of the box car filter to estimate the sky with.

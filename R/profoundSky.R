@@ -224,7 +224,7 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   return(invisible(c(skyloc, skyRMSloc)))
 }
 
-profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100), 
+profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(100,100), 
                             grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, 
                             skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, 
                             shiftloc = FALSE, paddim = TRUE, cores=1){
@@ -232,6 +232,8 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
 
+  image = image - sky
+  
   if(cores>1 & 'foreach' %in% .packages() & 'snow' %in% .packages() & 'doSNOW' %in% .packages() & 'bigmemory'  %in% .packages()){
     cl = snow::makeCluster(cores)
     doSNOW::registerDoSNOW(cl)
@@ -260,10 +262,10 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
   tempmat_skyRMS=matrix(tempsky[,2],length(xseq))
   #tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
   #tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
-  return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))))
+  return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky+sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))))
 }
 
-profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100),
+profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(100,100),
                              grid=box, skygrid_type='new', type='bicubic', 
                              skytype='median', skyRMStype='quanlo', sigmasel=1,
                              skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE,
@@ -299,6 +301,8 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     grid[2] = ceiling(dim(image)[2]/3)
     message('dim(image)[2]/grid[2] must be >=3, grid[2] modified to ',grid[2])
   }
+  
+  image = image - sky
   
   if(skygrid_type=='new'){
     # void .Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,
@@ -475,7 +479,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, box=c(100,100)
     stop('skygrid_type must be new/old!')
   }
   
-  return(invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS)))
+  return(invisible(list(sky=temp_bi_sky+sky, skyRMS=temp_bi_skyRMS)))
 }
 
 profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=mean(box)*(4/pi)/sqrt(12)){
