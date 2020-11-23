@@ -751,18 +751,18 @@ void Cadacs_MakeSkyGrid(
   // Rcpp::Rcout << "POST AKIMA!\n";
   
   // Apply mask
-  if (mask.isNotNull()) {
-    Rcpp::IntegerMatrix imask = Rcpp::as<Rcpp::IntegerMatrix>(mask);
-    int nrows=image.nrow();
-    int ncols=image.ncol();
-    for (int i=0; i<ncols; i++) {
-      for (int j=0; j<nrows; j++) {
-        if (imask(j, i)==1) {
-          sky(j, i) = NA_REAL;
-          skyRMS(j, i) = NA_REAL;
-        }
-      }
-    }
-  }
+  // if (mask.isNotNull()) {
+  //   Rcpp::IntegerMatrix imask = Rcpp::as<Rcpp::IntegerMatrix>(mask);
+  //   int nrows=image.nrow();
+  //   int ncols=image.ncol();
+  //   for (int i=0; i<ncols; i++) {
+  //     for (int j=0; j<nrows; j++) {
+  //       if (imask(j, i)==1) {
+  //         sky(j, i) = NA_REAL;
+  //         skyRMS(j, i) = NA_REAL;
+  //       }
+  //     }
+  //   }
+  // }
 }
 

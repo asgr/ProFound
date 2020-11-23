@@ -212,7 +212,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       }else if(requireNamespace("FITSio", quietly = TRUE)){
         detect=FITSio::readFITS(paste0(dir,detectbands,'.fits'))
       }else{
-        stop('One of Rfits / FITSio is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN / CRAN.')
+        stop('One of Rfits / FITSio is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN.')
       }
     }else{
       detect=inputlist[[which(multibands==detectbands)]]
