@@ -135,13 +135,13 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   if(missing(pixscale) & !is.null(header)){
     pixscale=getpixscale(header)
-    if(verbose){message(paste('Extracted pixel scale from header provided:',signif(pixscale,3),'asec/pixel'))}
+    if(verbose){message(paste('Extracted pixel scale from header provided:',signif(pixscale,4),'asec/pixel'))}
   }else{
-    if(verbose){message(paste('Using suggested pixel scale:',signif(pixscale,3),'asec/pixel'))}
+    if(verbose){message(paste('Using suggested pixel scale:',signif(pixscale,4),'asec/pixel'))}
   }
   
   imarea=prod(dim(image))*pixscale^2/(3600^2)
-  if(verbose){message(paste('Supplied image is',signif(dim(image)[1]*pixscale/60,3),'x',signif(dim(image)[2]*pixscale/60,3),'amin, ', signif(imarea,3),'deg-sq'))}
+  if(verbose){message(paste('Supplied image is',signif(dim(image)[1]*pixscale/60,4),'x',signif(dim(image)[2]*pixscale/60,4),'amin, ', signif(imarea,4),'deg-sq'))}
   
   if(is.null(objects)){
     if(!is.null(segim)){
@@ -386,15 +386,15 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(stats & !is.null(image)){
       if(verbose){message(paste('Calculating final segstats for',length(which(tabulate(segim)>0)),'objects -',round(proc.time()[3]-timestart,3),'sec'))}
-      if(verbose){message(paste(' - magzero =', signif(magzero,3)))}
+      if(verbose){message(paste(' - magzero =', signif(magzero,4)))}
       if(verbose){
         if(is.null(gain)){
           message(paste(' - gain = NULL (ignored)'))
         }else{
-          message(paste(' - gain =', signif(gain,3)))
+          message(paste(' - gain =', signif(gain,4)))
         }
       }
-      if(verbose){message(paste(' - pixscale =', signif(pixscale,3)))}
+      if(verbose){message(paste(' - pixscale =', signif(pixscale,4)))}
       if(verbose){message(paste(' - rotstats =', rotstats))}
       if(verbose){message(paste(' - boundstats =', boundstats))}
       segstats=profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, 
@@ -519,24 +519,28 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(!is.null(badpix)){image[badpix]=NA}
     row.names(segstats)=NULL
     
-    segstats[,grep('flux',colnames(segstats))]=fluxscale*segstats[,grep('flux',colnames(segstats))]
+    segstats[,grep('flux',colnames(segstats))] = fluxscale*segstats[,grep('flux',colnames(segstats))]
     
-    cutsky = (image - sky) / skyRMS
-    cutsky[!is.finite(cutsky)] = NA
-    if(!is.null(mask)){
-      cutsky[mask==1] = NA
-    }
-    if(!is.null(objects_redo)){
-      cutsky[objects_redo == 1] = NA
+    if(stats){
+      cutsky = (image - sky) / skyRMS
+      cutsky[!is.finite(cutsky)] = NA
+      if(!is.null(mask)){
+        cutsky[mask==1] = NA
+      }
+      if(!is.null(objects_redo)){
+        cutsky[objects_redo == 1] = NA
+      }else{
+        cutsky[objects == 1] = NA
+      }
+      cutsky = cutsky[which(cutsky<=0)]
+      
+      if(length(cutsky) > 0){
+        skyLL = dchisq(sum(cutsky^2, na.rm =TRUE), df=length(cutsky)-1, log=TRUE)
+      }else{
+        skyLL = NA
+      }
     }else{
-      cutsky[objects == 1] = NA
-    }
-    cutsky = cutsky[which(cutsky<=0)]
-    
-    if(length(cutsky) > 0){
-      skyLL = dchisq(sum(cutsky^2, na.rm =TRUE), df=length(cutsky)-1, log=TRUE)
-    }else{
-      skyLL = NA
+      skyLL = NULL
     }
     
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
@@ -665,13 +669,13 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
-      stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),3)
-      stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),3)
-      stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),3)
+      stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
+      stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
+      stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
     }else{
-      stat_mean = signif(mean(x$sky, na.rm=TRUE),3)
-      stat_sd = signif(sd(x$sky, na.rm=TRUE),3)
-      stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),3)
+      stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
+      stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
+      stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
     }
     legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
     
@@ -683,11 +687,11 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
-      stat_mean = signif(mean(x$skyRMS[x$mask==0], na.rm=TRUE),3)
-      stat_sd = signif(sd(x$skyRMS[x$mask==0], na.rm=TRUE),3)
+      stat_mean = signif(mean(x$skyRMS[x$mask==0], na.rm=TRUE),4)
+      stat_sd = signif(sd(x$skyRMS[x$mask==0], na.rm=TRUE),4)
     }else{
-      stat_mean = signif(mean(x$skyRMS, na.rm=TRUE),3)
-      stat_sd = signif(sd(x$skyRMS, na.rm=TRUE),3)
+      stat_mean = signif(mean(x$skyRMS, na.rm=TRUE),4)
+      stat_sd = signif(sd(x$skyRMS, na.rm=TRUE),4)
     }
     legend('topleft',legend=c('Sky RMS',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
     
@@ -701,7 +705,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(x$skyLL,3)
+        stat_LL = signif(x$skyLL,4)
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('sky LL: ',stat_LL)), bg='white')
@@ -749,13 +753,13 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     magimage(x$sky-median(x$sky,na.rm=TRUE), qdiff=TRUE)
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
-      stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),3)
-      stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),3)
-      stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),3)
+      stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
+      stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
+      stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
     }else{
-      stat_mean = signif(mean(x$sky, na.rm=TRUE),3)
-      stat_sd = signif(sd(x$sky, na.rm=TRUE),3)
-      stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),3)
+      stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
+      stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
+      stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
     }
     legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
     
@@ -763,11 +767,11 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     magimage(x$skyRMS)
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
-      stat_mean = signif(mean(x$skyRMS[x$mask==0], na.rm=TRUE),3)
-      stat_sd = signif(sd(x$skyRMS[x$mask==0], na.rm=TRUE),3)
+      stat_mean = signif(mean(x$skyRMS[x$mask==0], na.rm=TRUE),4)
+      stat_sd = signif(sd(x$skyRMS[x$mask==0], na.rm=TRUE),4)
     }else{
-      stat_mean = signif(mean(x$skyRMS, na.rm=TRUE),3)
-      stat_sd = signif(sd(x$skyRMS, na.rm=TRUE),3)
+      stat_mean = signif(mean(x$skyRMS, na.rm=TRUE),4)
+      stat_sd = signif(sd(x$skyRMS, na.rm=TRUE),4)
     }
     legend('topleft',legend=c('Sky RMS',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
     
@@ -781,7 +785,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(x$skyLL,3)
+        stat_LL = signif(x$skyLL,4)
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('sky LL: ',stat_LL)), bg='white')
