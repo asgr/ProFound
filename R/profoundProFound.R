@@ -140,8 +140,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(verbose){message(paste('Using suggested pixel scale:',signif(pixscale,3),'asec/pixel'))}
   }
   
-  skyarea=prod(dim(image))*pixscale^2/(3600^2)
-  if(verbose){message(paste('Supplied image is',signif(dim(image)[1]*pixscale/60,3),'x',signif(dim(image)[2]*pixscale/60,3),'amin, ', signif(skyarea,3),'deg-sq'))}
+  imarea=prod(dim(image))*pixscale^2/(3600^2)
+  if(verbose){message(paste('Supplied image is',signif(dim(image)[1]*pixscale/60,3),'x',signif(dim(image)[2]*pixscale/60,3),'amin, ', signif(imarea,3),'deg-sq'))}
   
   if(is.null(objects)){
     if(!is.null(segim)){
@@ -521,12 +521,30 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     segstats[,grep('flux',colnames(segstats))]=fluxscale*segstats[,grep('flux',colnames(segstats))]
     
+    cutsky = (image - sky) / skyRMS
+    cutsky[!is.finite(cutsky)] = NA
+    if(!is.null(mask)){
+      cutsky[mask==1] = NA
+    }
+    if(!is.null(objects_redo)){
+      cutsky[objects_redo == 1] = NA
+    }else{
+      cutsky[objects == 1] = NA
+    }
+    cutsky = cutsky[which(cutsky<=0)]
+    
+    if(length(cutsky) > 0){
+      skyLL = dchisq(sum(cutsky^2, na.rm =TRUE), df=length(cutsky)-1, log=TRUE)
+    }else{
+      skyLL = NA
+    }
+    
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output=list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, 
                 sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, 
                 Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, 
                 haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), 
-                pixscale=pixscale, skyarea=skyarea, gain=gain, call=call, date=date(), 
+                pixscale=pixscale, imarea=imarea, skyLL=skyLL, gain=gain, call=call, date=date(), 
                 time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), 
                 R.version=R.version)
   }else{
@@ -539,7 +557,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, 
                 skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, 
                 group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  
-                magzero=magzero, dim=dim(segim), pixscale=pixscale, skyarea=skyarea, 
+                magzero=magzero, dim=dim(segim), pixscale=pixscale, imarea=imarea, skyLL=skyLL,
                 gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, 
                 ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
@@ -624,12 +642,12 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     
     par(mar=c(3.5,3.5,0.5,0.5))
-    if(is.null(x$skyarea)){
-      skyarea=prod(x$dim)*x$pixscale^2/(3600^2)
+    if(is.null(x$imarea)){
+      imarea=prod(x$dim)*x$pixscale^2/(3600^2)
     }else{
-      skyarea=x$skyarea
+      imarea=x$imarea
     }
-    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$skyarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5),
+    temphist=maghist(x$segstats$mag, log='y', scale=(2*dmag)/x$imarea, breaks=seq(floor(min(x$segstats$mag, na.rm = TRUE)), ceiling(max(x$segstats$mag, na.rm = TRUE)),by=0.5),
                      xlab='mag', ylab=paste('#/deg-sq/d',dmag,'mag',sep=''), grid=TRUE, verbose=FALSE)
     #magplot(temphist, log='y', xlab='mag', ylab=expression('#'/'deg-sq'/'dmag'), grid=TRUE)
     ymax=log10(max(temphist$counts,na.rm = T))
@@ -683,10 +701,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(dchisq(sum(tempsky^2, na.rm =TRUE), df=length(tempsky)-1, log=TRUE),3)
+        stat_LL = signif(x$skyLL,3)
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('LL: ',stat_LL)), bg='white')
+        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('sky LL: ',stat_LL)), bg='white')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
@@ -763,10 +781,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(dchisq(sum(tempsky^2), df=length(tempsky)-1, log=TRUE),3)
+        stat_LL = signif(x$skyLL,3)
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('LL: ',stat_LL)), bg='white')
+        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('sky LL: ',stat_LL)), bg='white')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     

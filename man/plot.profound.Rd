@@ -40,7 +40,7 @@ Run for the side effect of generating a grid of useful diagnostic plots:
   \item{Middle-left}{Magnitude (\option{x$segstats$mag}) counts histogram (max in red), scaled to counts per square degree if \option{x$header} is present}
   \item{Middle-centre}{Output \option{x$sky}, where blue is negative, yellow is 0, and red is positive}
   \item{Middle-right}{Output \option{x$skyRMS}, where dark is lower values and white larger values}
-  \item{Bottom-left}{Sky pixel (\option{x$image}-\option{x$sky})/\option{x$skyRMS} PDF, or dilation iteration (\option{x$segstats$iter}) histogram (depends of \option{hist})}
+  \item{Bottom-left}{Sky pixel (\option{x$image}-\option{x$sky})/\option{x$skyRMS} PDF, or dilation iteration (\option{x$segstats$iter}) histogram (depends on \option{hist})}
   \item{Bottom-centre}{Output mag (\option{x$segstats$mag}) versus R50 (\option{x$segstats$R50})}
   \item{Bottom-right}{Output mag (\option{x$segstats$mag}) versus axrat (\option{x$segstats$axrat})}
 }

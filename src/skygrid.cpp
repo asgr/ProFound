@@ -364,7 +364,7 @@ double Cadacs_mode(Rcpp::NumericVector x) {
   }
 
   // histogram
-  int levels = 16384*2;
+  int levels = 100;
   std::vector<int> histogram;
   histogram.resize(levels);
   for (int i=0;i<levels;i++)
