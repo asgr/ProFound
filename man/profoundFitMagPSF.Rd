@@ -124,7 +124,7 @@ Object of class "fitmagpsf", a list containing:
 \item{signif}{Numeric vector; approximate singificance of the detection using the Chi-Square distribution.}
 }
 \references{
-Expectation Maximisation \href{http://en.wikipedia.org/wiki/Expectation-maximization_algorithm}{Wikipedia}.
+Expectation Maximisation \href{https://en.wikipedia.org/wiki/Expectation-maximization_algorithm}{Wikipedia}.
 }
 \author{
 Aaron Robotham
