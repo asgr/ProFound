@@ -72,4 +72,4 @@ magimage(group$groupim==1, col=c(NA,'red'), add=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ segments }% use one of  RShowDoc("KEYWORDS")
+\concept{ segments }% use one of  RShowDoc("KEYWORDS")

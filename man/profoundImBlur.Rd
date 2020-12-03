@@ -54,4 +54,4 @@ profoundImDiff(image, plot=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ image }% use one of  RShowDoc("KEYWORDS")
+\concept{ image }% use one of  RShowDoc("KEYWORDS")

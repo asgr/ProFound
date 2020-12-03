@@ -54,5 +54,5 @@ profoundMag2Flux(17.5, 30)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ mag }% use one of  RShowDoc("KEYWORDS")
-\keyword{ flux }% __ONLY ONE__ keyword per line
+\concept{ mag }% use one of  RShowDoc("KEYWORDS")
+\concept{ flux }% __ONLY ONE__ keyword per line

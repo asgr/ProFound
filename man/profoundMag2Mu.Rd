@@ -46,4 +46,4 @@ profoundMu2Mag(mu=28, re=10, axrat=0.5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ surface-brightness }
+\concept{ surface-brightness }

@@ -112,4 +112,4 @@ abline(h=sky$sky)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ sky }% use one of  RShowDoc("KEYWORDS")
+\concept{ sky }% use one of  RShowDoc("KEYWORDS")

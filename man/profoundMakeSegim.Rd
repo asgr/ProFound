@@ -152,5 +152,5 @@ profoundMakeSegim(image, mask=mask, object=segim$objects, plot=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ segmentation }% use one of  RShowDoc("KEYWORDS")
-\keyword{ watershed }% __ONLY ONE__ keyword per line
+\concept{ segmentation }% use one of  RShowDoc("KEYWORDS")
+\concept{ watershed }% __ONLY ONE__ keyword per line

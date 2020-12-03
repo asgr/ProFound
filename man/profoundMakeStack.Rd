@@ -82,4 +82,4 @@ magimage(profoundMakeStack(list(im1, im2, im3), masking='and')$image)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ stack }% use one of  RShowDoc("KEYWORDS")
+\concept{ stack }% use one of  RShowDoc("KEYWORDS")

@@ -40,5 +40,5 @@ profoundGainConvert(1,30,0)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ gain }% use one of  RShowDoc("KEYWORDS")
-\keyword{ magzero }% __ONLY ONE__ keyword per line
+\concept{ gain }% use one of  RShowDoc("KEYWORDS")
+\concept{ magzero }% __ONLY ONE__ keyword per line

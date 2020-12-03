@@ -16,14 +16,14 @@ threshold = 1.05, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = N
 redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
 skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
 roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2, iterative = FALSE,
-doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header, verbose = FALSE, plot = FALSE,
-stats = TRUE, rotstats = FALSE, boundstats = FALSE, nearstats = boundstats,
-groupstats = boundstats, group = NULL, groupby = 'segim_orig', offset = 1,
-haralickstats = FALSE, sortcol = "segID", decreasing = FALSE, lowmemory = FALSE,
-keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
-fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
-app_diam = 1, Ndeblendlim = Inf, ...)
+boxiters = 0, conviters = 100, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
+iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
+verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
+nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
+offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
+lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE,
+deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
+convmode = 'extended', fluxtype = 'Raw', app_diam = 1, Ndeblendlim = Inf, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -121,10 +121,10 @@ Character scalar; either 'new' (the new ADACS C++ sky grid code) or 'old' (the o
 Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation. The former creates sharper edges, the later is guaranteed to be first order differentiable. As of \code{ProFound} v1.13.0 we use the IntpAkimaUniform2 version available from www.geometrictools.com under a Boost 1.0 license (replacing the older \code{Akima} package and ADACS implementations, the former being memory intensive and the latter caused some small numerical artefacts).
 }
   \item{skytype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
+Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean', 'mode' and 'converge' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
 }
   \item{skyRMStype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
+Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', 'sd' and 'converge' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
 }
   \item{roughpedestal}{
 Logical; when the initial "rough sky" is computed, should only a pedestal (based on the median of the sky map) be used for the sky? This is a good option if the image is known to contain a *very* large (many times the \option{box} size) galaxy that might otherwise be over subtracted by the initial rough sky map.
@@ -140,6 +140,9 @@ Integer vector; the dimensions to add to the \option{box} to capture more pixels
 }
   \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
+}
+  \item{conviters}{
+Integer scalar; number of iterative sky convergence steps when \option{skytype} = 'converge' and/or \option{skyRMStype} = 'converge'. 
 }
   \item{iterskyloc}{
 Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}.
@@ -394,5 +397,5 @@ plot(profoundProFound(VST_r, boxiters=2))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ Segmentation }% use one of  RShowDoc("KEYWORDS")
-\keyword{ Detection }% __ONLY ONE__ keyword per line
+\concept{ Segmentation }% use one of  RShowDoc("KEYWORDS")
+\concept{ Detection }% __ONLY ONE__ keyword per line

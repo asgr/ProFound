@@ -57,5 +57,5 @@ profoundSegimPlot(image, segim=segim_new)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ segim }% use one of  RShowDoc("KEYWORDS")
-\keyword{ merge }% __ONLY ONE__ keyword per line
+\concept{ segim }% use one of  RShowDoc("KEYWORDS")
+\concept{ merge }% __ONLY ONE__ keyword per line

@@ -81,4 +81,4 @@ magimage(segim, col=c(0,rainbow(1e3)))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ watershed }% use one of  RShowDoc("KEYWORDS")
+\concept{ watershed }% use one of  RShowDoc("KEYWORDS")

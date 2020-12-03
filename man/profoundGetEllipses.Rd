@@ -138,4 +138,4 @@ lines(rlocs, profoundFlux2SB(bulge+disk, pixscale=0.2), col='green')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ellipse }% use one of  RShowDoc("KEYWORDS")
+\concept{ ellipse }% use one of  RShowDoc("KEYWORDS")

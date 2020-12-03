@@ -78,4 +78,4 @@ segellipseID=8, col=grey(0:1), border='red', lwd=2)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ellipse }% use one of  RShowDoc("KEYWORDS")
+\concept{ ellipse }% use one of  RShowDoc("KEYWORDS")

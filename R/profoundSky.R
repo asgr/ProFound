@@ -1,70 +1,70 @@
 
-.interp.2d.akima=function (x, y, z, xo, yo, ncp = 0, extrap = FALSE, duplicate = "error",
-    dupfun = NULL){
-    if (!(all(is.finite(x)) && all(is.finite(y)) && all(is.finite(z))))
-        stop("missing values and Infs not allowed")
-    if (is.null(xo))
-        stop("xo missing")
-    if (is.null(yo))
-        stop("yo missing")
-    if (ncp > 25) {
-        ncp <- 25
-        cat("ncp too large, using ncp=25\n")
-    }
-    drx <- diff(range(x))
-    dry <- diff(range(y))
-    if (drx == 0 || dry == 0)
-        stop("all data collinear")
-    if (drx/dry > 10000 || drx/dry < 1e-04)
-        stop("scales of x and y are too dissimilar")
-    n <- length(x)
-    np <- length(xo)
-    if (length(yo) != np)
-        stop("length of xo and yo differ")
-    if (length(y) != n || length(z) != n)
-        stop("Lengths of x, y, and z do not match")
-    xy <- paste(x, y, sep = ",")
-    i <- match(xy, xy)
-    if (duplicate == "user" && !is.function(dupfun))
-        stop("duplicate=\"user\" requires dupfun to be set to a function")
-    if (duplicate != "error") {
-        centre <- function(x) {
-            switch(duplicate, mean = mean(x), median = median(x),
-                user = dupfun(x))
-        }
-        if (duplicate != "strip") {
-            z <- unlist(lapply(split(z, i), centre))
-            ord <- !duplicated(xy)
-            x <- x[ord]
-            y <- y[ord]
-            n <- length(x)
-        }
-        else {
-            ord <- (hist(i, plot = FALSE, freq = TRUE, breaks = seq(0.5,
-                max(i) + 0.5, 1))$counts == 1)
-            x <- x[ord]
-            y <- y[ord]
-            z <- z[ord]
-            n <- length(x)
-        }
-    }
-    else if (any(duplicated(xy)))
-        stop("duplicate data points")
-    zo <- rep(0, np)
-    storage.mode(zo) <- "double"
-    miss <- !extrap
-    misso <- seq(miss, np)
-    if (extrap & ncp == 0)
-        warning("Cannot extrapolate with linear option")
-    ans <- .Fortran("idbvip", as.integer(1), as.integer(ncp),
-        as.integer(n), as.double(x), as.double(y), as.double(z),
-        as.integer(np), x = as.double(xo), y = as.double(yo),
-        z = zo, integer((31 + ncp) * n + np), double(8 * n),
-        misso = as.logical(misso), PACKAGE = "akima")
-    temp <- ans[c("x", "y", "z", "misso")]
-    temp$z[temp$misso] <- NA
-    temp[c("x", "y", "z")]
-}
+# .interp.2d.akima=function (x, y, z, xo, yo, ncp = 0, extrap = FALSE, duplicate = "error",
+#     dupfun = NULL){
+#     if (!(all(is.finite(x)) && all(is.finite(y)) && all(is.finite(z))))
+#         stop("missing values and Infs not allowed")
+#     if (is.null(xo))
+#         stop("xo missing")
+#     if (is.null(yo))
+#         stop("yo missing")
+#     if (ncp > 25) {
+#         ncp <- 25
+#         cat("ncp too large, using ncp=25\n")
+#     }
+#     drx <- diff(range(x))
+#     dry <- diff(range(y))
+#     if (drx == 0 || dry == 0)
+#         stop("all data collinear")
+#     if (drx/dry > 10000 || drx/dry < 1e-04)
+#         stop("scales of x and y are too dissimilar")
+#     n <- length(x)
+#     np <- length(xo)
+#     if (length(yo) != np)
+#         stop("length of xo and yo differ")
+#     if (length(y) != n || length(z) != n)
+#         stop("Lengths of x, y, and z do not match")
+#     xy <- paste(x, y, sep = ",")
+#     i <- match(xy, xy)
+#     if (duplicate == "user" && !is.function(dupfun))
+#         stop("duplicate=\"user\" requires dupfun to be set to a function")
+#     if (duplicate != "error") {
+#         centre <- function(x) {
+#             switch(duplicate, mean = mean(x), median = median(x),
+#                 user = dupfun(x))
+#         }
+#         if (duplicate != "strip") {
+#             z <- unlist(lapply(split(z, i), centre))
+#             ord <- !duplicated(xy)
+#             x <- x[ord]
+#             y <- y[ord]
+#             n <- length(x)
+#         }
+#         else {
+#             ord <- (hist(i, plot = FALSE, freq = TRUE, breaks = seq(0.5,
+#                 max(i) + 0.5, 1))$counts == 1)
+#             x <- x[ord]
+#             y <- y[ord]
+#             z <- z[ord]
+#             n <- length(x)
+#         }
+#     }
+#     else if (any(duplicated(xy)))
+#         stop("duplicate data points")
+#     zo <- rep(0, np)
+#     storage.mode(zo) <- "double"
+#     miss <- !extrap
+#     misso <- seq(miss, np)
+#     if (extrap & ncp == 0)
+#         warning("Cannot extrapolate with linear option")
+#     ans <- .Fortran("idbvip", as.integer(1), as.integer(ncp),
+#         as.integer(n), as.double(x), as.double(y), as.double(z),
+#         as.integer(np), x = as.double(xo), y = as.double(yo),
+#         z = zo, integer((31 + ncp) * n + np), double(8 * n),
+#         misso = as.logical(misso), PACKAGE = "akima")
+#     temp <- ans[c("x", "y", "z", "misso")]
+#     temp$z[temp$misso] <- NA
+#     temp[c("x", "y", "z")]
+# }
 
 profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2, 
                         cuthi=sqrt(sum((dim(image)/2)^2)), skycut='auto', 
@@ -132,7 +132,7 @@ profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2,
 profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2, 
                            box=c(100,100), skytype='median', skyRMStype='quanlo', 
                            sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, 
-                           doclip=TRUE, shiftloc = FALSE, paddim = TRUE, plot=FALSE, ...){
+                           conviters = 100, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, plot=FALSE, ...){
   if(!is.null(objects) | !is.null(mask)){
     skyN=0
     iterN=0
@@ -200,6 +200,9 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   }else if(skytype=='mode'){
     temp=density(clip, na.rm=TRUE)
     skyloc=temp$x[which.max(temp$y)]
+  }else if(skytype=='converge'){
+    stats = .converge_sky(clip, conviters = conviters)
+    skyloc = stats[1]
   }
   
   if(skyRMStype=='quanlo'){
@@ -219,6 +222,10 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
     skyRMSloc=(skyRMSloclo+skyRMSlochi)/2
   }else if(skyRMStype=='sd'){
     skyRMSloc=sqrt(.varwt(clip, xcen=skyloc))
+  }else if(skytype=='converge' & skyRMStype=='converge'){
+    skyRMSloc = stats[2]
+  }else if(skytype!='converge' & skyRMStype=='converge'){
+    skyRMSloc = .converge_sky(clip, conviters = conviters)[2]
   }
   
   return(invisible(c(skyloc, skyRMSloc)))
@@ -226,8 +233,8 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
 
 profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(100,100), 
                             grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, 
-                            skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE, 
-                            shiftloc = FALSE, paddim = TRUE, cores=1){
+                            skypixmin=prod(box)/2, boxadd=box/2, boxiters=0,
+                            conviters = 100, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
@@ -244,7 +251,10 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
     
     tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
       image_loop = bigmemory::attach.big.matrix(image_desc)
-      profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
+                        box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel,
+                        skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, conviters=conviters,
+                        doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     }
     closeAllConnections()
     tempsky=rbind(tempsky)
@@ -254,7 +264,11 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
     }
     tempsky=matrix(0,dim(tempgrid)[1],2)
     for(i in 1:dim(tempgrid)[1]){
-      tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+      tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask,
+                                    loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype,
+                                    skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin,
+                                    boxadd=boxadd, boxiters=boxiters, conviters=conviters,
+                                    doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     }
   }
   
@@ -268,8 +282,8 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
 profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(100,100),
                              grid=box, skygrid_type='new', type='bicubic', 
                              skytype='median', skyRMStype='quanlo', sigmasel=1,
-                             skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, doclip=TRUE,
-                             shiftloc = FALSE, paddim = TRUE, cores=1){
+                             skypixmin=prod(box)/2, boxadd=box/2, boxiters=0,
+                             conviters = 100, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
   
   if(length(box)==1){
     box=rep(box,2)
@@ -361,25 +375,25 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
                         )
   }else if(skygrid_type=='old'){
   
-    if(!requireNamespace("akima", quietly = TRUE)){
-      if(type=='bicubic'){
-        stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
-      }
-      if(type=='bilinear'){
-        useakima=FALSE
-      }
-    }else{
-      useakima=TRUE
-    }
+    # if(!requireNamespace("akima", quietly = TRUE)){
+    #   if(type=='bicubic'){
+    #     stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
+    #   }
+    #   if(type=='bilinear'){
+    #     useakima=FALSE
+    #   }
+    # }else{
+    #   useakima=TRUE
+    # }
     
     if(box[1]>dim(image)[1]){box[1]=dim(image)[1]}
     if(box[2]>dim(image)[2]){box[2]=dim(image)[2]}
     if(grid[1]>dim(image)[1]){grid[1]=dim(image)[1]}
     if(grid[2]>dim(image)[2]){grid[2]=dim(image)[2]}
     
-    xseq=seq(grid[1]/2, ceiling(dim(image)[1]/grid[1])*grid[1], by=grid[1])
-    yseq=seq(grid[2]/2, ceiling(dim(image)[2]/grid[2])*grid[2], by=grid[2])
-    tempgrid=expand.grid(xseq, yseq)
+    xseq = seq(grid[1]/2, ceiling(dim(image)[1]/grid[1])*grid[1], by=grid[1])
+    yseq = seq(grid[2]/2, ceiling(dim(image)[2]/grid[2])*grid[2], by=grid[2])
+    tempgrid = expand.grid(xseq, yseq)
     
     if(cores>1 & 'foreach' %in% .packages() & 'snow' %in% .packages() & 'doSNOW' %in% .packages() & 'bigmemory'  %in% .packages()){
       cl = snow::makeCluster(cores)
@@ -391,7 +405,10 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       
       tempsky=foreach(i = 1:dim(tempgrid)[1], .combine='rbind')%dopar%{
         image_loop = bigmemory::attach.big.matrix(image_desc)
-        profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+        profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
+                          box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel,
+                          skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, conviters=conviters,
+                          doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       }
       closeAllConnections()
       tempsky=rbind(tempsky)
@@ -401,7 +418,10 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       }
       tempsky=matrix(0,dim(tempgrid)[1],2)
       for(i in 1:dim(tempgrid)[1]){
-        tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+        tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
+                                      box=box, skytype=skytype, skyRMStype=skyRMStype,
+                                      sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd,
+                                      boxiters=boxiters, conviters=conviters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       }
     }
     
@@ -435,28 +455,42 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       
       #expand out map here!! and then use akima::bilinear function
       
+      # if(type=='bilinear'){
+      #   bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
+      #   bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
+      #   if(useakima){
+      #     tempgrid=expand.grid(xseq, yseq)
+      #     temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
+      #     temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
+      #   }else{
+      #     temp_bi_sky=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_sky))
+      #     temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
+      #   }
+      # }else if(type=='bilinear_new'){
+      #   temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
+      #   .interpolateLinearGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
+      #   temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
+      #   .interpolateLinearGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+      # }else if(type=='bicubic'){
+      #   bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
+      #   bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
+      #   temp_bi_sky=akima::bicubic(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
+      #   temp_bi_skyRMS=akima::bicubic(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
+      # }else if(type=='bicubic_new'){
+      #   temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
+      #   .interpolateAkimaGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
+      #   temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
+      #   .interpolateAkimaGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+      # }else{
+      #   stop('type must be one of bilinear / bicubic !')
+      # }
+      
       if(type=='bilinear'){
-        bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
-        bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
-        if(useakima){
-          tempgrid=expand.grid(xseq, yseq)
-          temp_bi_sky=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_sky),xo=bigridx, yo=bigridy)$z
-          temp_bi_skyRMS=.interp.2d.akima(x=tempgrid[,1], y=tempgrid[,2], z=as.numeric(tempmat_skyRMS),xo=bigridx, yo=bigridy)$z
-        }else{
-          temp_bi_sky=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_sky))
-          temp_bi_skyRMS=.interp.2d(bigridx, bigridy, list(x=xseq, y=yseq, z=tempmat_skyRMS))
-        }
-      }else if(type=='bilinear_new'){
         temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateLinearGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
         temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateLinearGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
       }else if(type=='bicubic'){
-        bigridx=rep(1:dim(image)[1]-0.5,times=dim(image)[2])
-        bigridy=rep(1:dim(image)[2]-0.5,each=dim(image)[1])
-        temp_bi_sky=akima::bicubic(xseq, yseq, tempmat_sky, bigridx, bigridy)$z
-        temp_bi_skyRMS=akima::bicubic(xseq, yseq, tempmat_skyRMS, bigridx, bigridy)$z
-      }else if(type=='bicubic_new'){
         temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateAkimaGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
         temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
@@ -535,5 +569,41 @@ profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, obj
     objcomp = objects
   }
   return(list(objects=objects, sky=sky))
+}
+
+.tnorm_upper = function(mu,sd,upper){
+  ##return the expectation of a truncated normal distribution
+  upper.std=(upper-mu)/sd
+  ratio = dnorm(upper.std) / pnorm(upper.std)
+  mean = mu + -(sd * ratio)
+  sd = sd * sqrt(1 + -upper.std*ratio - ratio^2)
+  return(c(mean,sd))
+}
+
+.converge_sky = function(data, conviters = 100){
+  data = as.numeric(data)
+  if('Rfast' %in% .packages()){
+    med_data=try(Rfast::med(data, na.rm=TRUE), silent=TRUE)
+    if(class(med_data)=='try-error'){med_data=NA}
+  }else{
+    med_data = stats::median(data, na.rm=TRUE)
+  }
+  rough_sd = 2*sd(data[data < med_data])
+  data = data[data < med_data + 5*rough_sd]
+  pop_mu = mean(data)
+  pop_sd = sd(data)
+  uppercut = pop_mu + pop_sd
+  data = data[data < pop_mu + pop_sd]
+  samp_mean = mean(data)
+  samp_sd = sd(data)
+  
+  for(i in 1:conviters){
+    est_stats = .tnorm_upper(pop_mu, pop_sd, uppercut)
+    pop_mu = pop_mu + (samp_mean - est_stats[1])*2
+    pop_sd = pop_sd * samp_sd/est_stats[2]
+  }
+  #print(c(samp_mean, samp_sd))
+  #print(est_stats)
+  return(c(pop_mu, pop_sd))
 }
 

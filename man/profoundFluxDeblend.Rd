@@ -129,4 +129,4 @@ grid=TRUE, xlab='mag', ylab='mag_orig - mag_deblend')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ deblend }% use one of  RShowDoc("KEYWORDS")
+\concept{ deblend }% use one of  RShowDoc("KEYWORDS")

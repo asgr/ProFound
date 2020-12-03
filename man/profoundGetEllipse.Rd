@@ -85,4 +85,4 @@ profoundDrawEllipse(tempellipse['xcen'], tempellipse['ycen'], tempellipse['radhi
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ellipse }% use one of  RShowDoc("KEYWORDS")
+\concept{ ellipse }% use one of  RShowDoc("KEYWORDS")

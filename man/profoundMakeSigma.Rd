@@ -84,4 +84,4 @@ skyRMS=profound$skyRMS)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ sigma }% use one of  RShowDoc("KEYWORDS")
+\concept{ sigma }% use one of  RShowDoc("KEYWORDS")

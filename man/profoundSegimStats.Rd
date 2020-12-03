@@ -174,4 +174,4 @@ profoundSegimPlot(image, profound$segim)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ segmentation }% use one of  RShowDoc("KEYWORDS")
+\concept{ segmentation }% use one of  RShowDoc("KEYWORDS")

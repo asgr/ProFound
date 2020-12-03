@@ -215,5 +215,5 @@ magimage(profoundSkySplitFFT(image$imDat)$sky_hi)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ correlation }% use one of  RShowDoc("KEYWORDS")
-\keyword{ FFT }% __ONLY ONE__ keyword per line
+\concept{ correlation }% use one of  RShowDoc("KEYWORDS")
+\concept{ FFT }% __ONLY ONE__ keyword per line

@@ -170,49 +170,69 @@ profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, group
 }
 
 profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic', fluxscale='image', recentre=FALSE){
-  xseq=1:dim(image)[1]-dim(image)[1]/2-0.5
-  yseq=1:dim(image)[2]-dim(image)[2]/2-0.5
+  #xseq = 1:dim(image)[1]-dim(image)[1]/2-0.5
+  #yseq = 1:dim(image)[2]-dim(image)[2]/2-0.5
   
-  relscale=pixscale_new/pixscale_old
+  relscale = pixscale_new/pixscale_old
   
-  xout=seq(relscale,xseq[length(xseq)],by=relscale)
-  xout=c(-rev(xout),0,xout)
-  yout=seq(relscale,yseq[length(yseq)],by=relscale)
-  yout=c(-rev(yout),0,yout)
-  bigrid=expand.grid(xout,yout)
+  # xout = seq(relscale,xseq[length(xseq)],by=relscale)
+  # xout = c(-rev(xout),0,xout)
+  # yout = seq(relscale,yseq[length(yseq)],by=relscale)
+  # yout = c(-rev(yout),0,yout)
+  # bigrid = expand.grid(xout,yout)
+  xin = (1:(dim(image)[1]/2)) * relscale
+  xin = c(-rev(xin),0,xin) + dim(image)[1] * relscale/2
+
+  yin = (1:(dim(image)[2]/2)) * relscale
+  yin = c(-rev(yin),0,yin) + dim(image)[2] * relscale/2
   
-  output=matrix(0,length(xout),length(yout))
+  output = matrix(0,dim(image)[1] * relscale, dim(image)[2] * relscale)
   
   if(type=='bilinear'){
-    output[]=.interp.2d(bigrid[,1], bigrid[,2], list(x=xseq, y=yseq, z=image))
+    .interpolateLinearGrid(xin, yin, image, output)
   }else if(type=='bicubic'){
-    if(!requireNamespace("akima", quietly = TRUE)){
-      stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
-    }
-    output[]=akima::bicubic(xseq, yseq, image,bigrid[,1], bigrid[,2])$z
+    .interpolateAkimaGrid(xin, yin, image, output)
   }else{
     stop('type must be one of bilinear / bicubic !')
   }
   
+  # if(type=='bilinear'){
+  #   output[]=.interp.2d(bigrid[,1], bigrid[,2], list(x=xseq, y=yseq, z=image))
+  # }else if(type=='bicubic'){
+  #   if(!requireNamespace("akima", quietly = TRUE)){
+  #     stop('The akima package is needed for bicubic interpolation to work. Please install it from CRAN.', call. = FALSE)
+  #   }
+  #   output[]=akima::bicubic(xseq, yseq, image,bigrid[,1], bigrid[,2])$z
+  # }else{
+  #   stop('type must be one of bilinear / bicubic !')
+  # }
+  
   if(recentre){
-    maxloc=as.numeric(bigrid[which.max(output),])
-    xout=xout+maxloc[1]
-    yout=yout+maxloc[2]
-    bigrid=expand.grid(xout,yout)
+    bigrid = expand.grid(1:dim(output)[1]-0.5,1:dim(output)[2]-0.5)
+    maxloc = as.numeric(bigrid[which.max(output),])
+    xin = xin - maxloc[1] + dim(output)[1]/2
+    yin = yin - maxloc[2] + dim(output)[2]/2
+    #bigrid=expand.grid(xout,yout)
     
     if(type=='bilinear'){
-      output[]=.interp.2d(bigrid[,1], bigrid[,2], list(x=xseq, y=yseq, z=image))
-    }else{
-      output[]=akima::bicubic(xseq, yseq, image,bigrid[,1], bigrid[,2])$z
+      .interpolateLinearGrid(xin, xin, image, output)
+    }else if(type=='bicubic'){
+      .interpolateAkimaGrid(yin, yin, image, output)
     }
+    
+    # if(type=='bilinear'){
+    #   output[]=.interp.2d(bigrid[,1], bigrid[,2], list(x=xseq, y=yseq, z=image))
+    # }else{
+    #   output[]=akima::bicubic(xseq, yseq, image,bigrid[,1], bigrid[,2])$z
+    # }
   }
   
-  if(fluxscale=='image'){
-    output=output*sum(image)/sum(output)
-  }else if(fluxscale=='pixscale'){
-    output=output*relscale^2
-  }else if(fluxscale=='norm'){
-    output=output/sum(output)
+  if(fluxscale == 'image'){
+    output = output*sum(image)/sum(output)
+  }else if(fluxscale == 'pixscale'){
+    output = output*relscale^2
+  }else if(fluxscale == 'norm'){
+    output = output/sum(output)
   }else{
     stop('fluxscale must be one of image / pixscale / norm !')
   }

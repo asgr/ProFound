@@ -54,4 +54,4 @@ profoundSegimPlot(image=image$imDat, segim=segim_extend)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ segim }% use one of  RShowDoc("KEYWORDS")
+\concept{ segim }% use one of  RShowDoc("KEYWORDS")

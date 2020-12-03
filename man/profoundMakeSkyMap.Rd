@@ -1,4 +1,4 @@
-\name{profoundMakeSkyMap}
+\name{profoundMakeSky}
 \alias{profoundMakeSkyMap}
 \alias{profoundMakeSkyGrid}
 \alias{profoundMakeSkyBlur}
@@ -12,13 +12,14 @@ The high level function computes the absolute sky and sky RMS level over an imag
 \usage{
 profoundMakeSkyMap(image = NULL, objects = NULL, mask = NULL, sky = 0,
   box = c(100,100), grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
-  skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE,
-  paddim = TRUE, cores = 1)
+  skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, conviters = 100, doclip = TRUE,
+  shiftloc = FALSE, paddim = TRUE, cores = 1)
   
 profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, sky = 0, 
   box = c(100,100), grid = box, skygrid_type = 'new', type = 'bicubic',
   skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
-  boxadd = box/2, boxiters = 0, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, cores = 1)
+  boxadd = box/2, boxiters = 0, conviters = 100, doclip = TRUE, shiftloc = FALSE,
+  paddim = TRUE, cores = 1)
 
 profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100,
   sigma = mean(box)*(4/pi)/sqrt(12))
@@ -50,10 +51,10 @@ Character scalar; either 'new' (the new ADACS C++ sky grid code) or 'old' (the o
 Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation. The former creates sharper edges, the later is guaranteed to be first order differentiable. As of \code{ProFound} v1.13.0 we use the IntpAkimaUniform2 version available from www.geometrictools.com under a Boost 1.0 license (replacing the older \code{Akima} package and ADACS implementations, the former being memory intensive and the latter caused some small numerical artefacts).
 }
   \item{skytype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean' and 'mode' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
+Character scalar; the type of sky level estimator used. Allowed options are 'median' (the default), 'mean', 'mode' and 'converge' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run. 
 }
   \item{skyRMStype}{
-Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', and 'sd' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
+Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', 'sd' and 'converge' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
 }
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.
@@ -66,6 +67,9 @@ Integer vector; the dimensions to add to the \option{box} to capture more pixels
 }
   \item{boxiters}{
 Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt in order to capture \option{skypixmin} sky pixels. The default means the box will not be grown at all.
+}
+  \item{conviters}{
+Integer scalar; number of iterative sky convergence steps when \option{skytype} = 'converge' and/or \option{skyRMStype} = 'converge'. 
 }
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If an doubt, leave as TRUE.
@@ -139,5 +143,5 @@ magimage(skybil$skyRMS-skybic$skyRMS, magmap=FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ sky }% use one of  RShowDoc("KEYWORDS")
-\keyword{ RMS }% __ONLY ONE__ keyword per line
+\concept{ sky }% use one of  RShowDoc("KEYWORDS")
+\concept{ RMS }% __ONLY ONE__ keyword per line

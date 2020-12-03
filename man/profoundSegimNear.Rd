@@ -68,4 +68,4 @@ col=c(NA,'blue'), add=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ segments }
+\concept{ segments }

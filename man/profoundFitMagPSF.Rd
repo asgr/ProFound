@@ -182,4 +182,4 @@ abline(0,1, col='red')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ deblend }% use one of  RShowDoc("KEYWORDS")
+\concept{ deblend }% use one of  RShowDoc("KEYWORDS")

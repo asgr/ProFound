@@ -182,5 +182,5 @@ plot(multi2$pro_detect)
 plot(multi3$pro_detect)
 }
 }
-\keyword{ Detection }% use one of  RShowDoc("KEYWORDS")
-\keyword{ Photometry }% __ONLY ONE__ keyword per line
+\concept{ Detection }% use one of  RShowDoc("KEYWORDS")
+\concept{ Photometry }% __ONLY ONE__ keyword per line

@@ -51,6 +51,6 @@ profound_GALEX=profoundProFound(GALEX_NUV, segim=segimFUV, plot=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ WCS }% use one of  RShowDoc("KEYWORDS")
-\keyword{ gnomonic }
-\keyword{ warp }% __ONLY ONE__ keyword per line
+\concept{ WCS }% use one of  RShowDoc("KEYWORDS")
+\concept{ gnomonic }
+\concept{ warp }% __ONLY ONE__ keyword per line

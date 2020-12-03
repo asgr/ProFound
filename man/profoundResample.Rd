@@ -46,47 +46,12 @@ Aaron Robotham
 \code{\link{profoundFluxDeblend}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (image, pixscale_old = 1, pixscale_new = 1, type = "bicubic", 
-    fluxscale = "image") 
-{
-    xseq = 1:dim(image)[1] - dim(image)[1]/2 - 0.5
-    yseq = 1:dim(image)[2] - dim(image)[2]/2 - 0.5
-    relscale = pixscale_new/pixscale_old
-    xout = seq(xseq[1], xseq[length(xseq)], by = relscale)
-    yout = seq(yseq[1], yseq[length(yseq)], by = relscale)
-    bigrid = expand.grid(xout, yout)
-    output = matrix(0, length(xout), length(yout))
-    if (type == "bilinear") {
-        output[] = .interp.2d(bigrid[, 1], bigrid[, 2], list(x = xseq, 
-            y = yseq, z = image))
-    }
-    else if (type == "bicubic") {
-        output[] = akima::bicubic(xseq, yseq, image, bigrid[, 
-            1], bigrid[, 2])$z
-    }
-    else {
-        stop("type must be one of bilinear / bicubic !")
-    }
-    if (fluxscale == "image") {
-        output = output * sum(image)/sum(output)
-    }
-    else if (fluxscale == "pixscale") {
-        output = output * relscale^2
-    }
-    else if (fluxscale == "norm") {
-        output = output/sum(output)
-    }
-    else {
-        stop("fluxscale must be one of image / pixscale / norm !")
-    }
-    return(invisible(output))
-  }
-}
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))$imDat
+star = image[149 + -25:25, 74 + -25:25]
+magimage(star)
+magimage(profoundResample(star,1,2))
+magimage(profoundResample(star,1,1/2))
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
+}
 \concept{ resample }% use one of  RShowDoc("KEYWORDS")

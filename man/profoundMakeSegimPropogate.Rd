@@ -92,4 +92,4 @@ profoundMakeSegimPropagate(image$imDat, segim=profound$segim, plot=TRUE, mask=ma
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ propagate }% use one of  RShowDoc("KEYWORDS")
+\concept{ propagate }% use one of  RShowDoc("KEYWORDS")
