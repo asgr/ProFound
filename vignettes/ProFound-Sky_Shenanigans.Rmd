@@ -81,7 +81,7 @@ Now we can check how good our sky using the lo estimate is, where the black dens
 
 ```{r, eval=TRUE, fig.width=6, fig.height=6, dpi=40}
 magplot(density(sky_clip_lo$x), col='blue', grid=TRUE, xlab='Sky Pixel Value', ylab='PDF')
-lines(seq(-5,5,len=1e3), dnorm(seq(-5,5,len=1e3)), col='black', grid=TRUE)
+lines(seq(-5,5,len=1e3), dnorm(seq(-5,5,len=1e3)), col='black')
 ```
 
 Not bad! The actual sky estimates we end up with are:
