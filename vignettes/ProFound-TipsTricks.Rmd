@@ -42,11 +42,11 @@ Useful things and suggested settings:
 
 ## Some examples:
 
-```{r}
+```{r, eval=FALSE}
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 ```
 
-```{r, fig.width=8, fig.height=8}
+```{r, fig.width=8, fig.height=8, eval=FALSE}
 profound=profoundProFound(image, magzero=30, plot=TRUE)
 profound=profoundProFound(image, magzero=30, plot=TRUE, skycut = 2)
 profound=profoundProFound(image, magzero=30, plot=TRUE, tolerance = 10)
@@ -59,7 +59,7 @@ profound=profoundProFound(image, magzero=30, plot=TRUE, roughpedestal = TRUE)
 
 Some different data:
 
-```{r}
+```{r, eval=FALSE}
 GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
 VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
 VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
@@ -68,13 +68,13 @@ VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)$image
 VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)$image
 
-multi=profoundMultiBand(inputlist=list(GALEX_NUV_VST, VST_r, VISTA_K_VST),
+multi=profoundMultiBand(inputlist=list(GALEX_NUV_VST, VST_r$imDat, VISTA_K_VST),
 magzero=c(20.08,0,30), detectbands=c('r','K'), multibands=c('NUV','r','K'))
 ```
 
 Good but not perfect:
 
-```{r, fig.width=8, fig.height=8}
+```{r, fig.width=8, fig.height=8, eval=FALSE}
 profound=profoundProFound(VST_r, roughpedestal=TRUE, SBdilate=1, plot=TRUE)
 ```
 
