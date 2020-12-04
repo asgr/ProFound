@@ -283,6 +283,7 @@ An object list of class 'profound' containing:
   \item{gain}{The assumed image gain (if NULL it was not used). This is relevant to various outputs returned by the segmentation statistics.}
   \item{imarea}{The area of the provided image in degrees squared.}
   \item{skyLL}{The log-likelihood of negative sky pixel Chi-Sq distribution (the larger the better the sky estimation).}
+  \item{skyChiSq}{The Reduced Chi-Square of the sky pixel distribution (the nearer to 1 the better the sky estimation).}
   \item{call}{The original function call.}
   \item{date}{The date, more specifically the output of \code{\link{date}}.}
   \item{time}{The elapsed run time in seconds.}

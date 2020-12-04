@@ -539,12 +539,17 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       cutsky = cutsky[which(cutsky<=0)]
       
       if(length(cutsky) > 0){
-        skyLL = dchisq(sum(cutsky^2, na.rm =TRUE), df=length(cutsky)-1, log=TRUE)
+        df = length(cutsky) - 1
+        skyChiSq = sum(cutsky^2, na.rm =TRUE)
+        skyLL = dchisq(skyChiSq, df=df, log=TRUE)
+        skyChiSq = skyChiSq / df
       }else{
         skyLL = NA
+        skyChiSq = NA
       }
     }else{
       skyLL = NULL
+      skyChiSq = NULL
     }
     
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
@@ -552,7 +557,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                 sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, 
                 Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, 
                 haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), 
-                pixscale=pixscale, imarea=imarea, skyLL=skyLL, gain=gain, call=call, date=date(), 
+                pixscale=pixscale, imarea=imarea, skyLL=skyLL, skyChiSq=skyChiSq, gain=gain, call=call, date=date(), 
                 time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), 
                 R.version=R.version)
   }else{
@@ -565,7 +570,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     output=list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, 
                 skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, 
                 group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  
-                magzero=magzero, dim=dim(segim), pixscale=pixscale, imarea=imarea, skyLL=skyLL,
+                magzero=magzero, dim=dim(segim), pixscale=pixscale, imarea=imarea, skyLL=NULL, skyChiSq=NULL,
                 gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, 
                 ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
@@ -575,7 +580,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
 
 plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   
-  if(class(x)!='profound'){
+  if(!inherits(x, 'profound')){
     stop('Object class is not of type profound!')
   }
   
@@ -709,10 +714,12 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(x$skyLL,4)
+        stat_LL = signif(x$skyLL,3)
+        stat_ChiSq = signif(x$skyChiSq,3)
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('sky LL: ',stat_LL)), bg='white')
+        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor)), bg='white')
+        legend('topright',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bg='white')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
@@ -789,10 +796,12 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(x$skyLL,4)
+        stat_LL = signif(x$skyLL,3)
+        stat_ChiSq = signif(x$skyChiSq,3)
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor), paste0('sky LL: ',stat_LL)), bg='white')
+        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor)), bg='white')
+        legend('topright',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bg='white')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     

@@ -999,7 +999,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
 profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=NULL, col=rainbow(max(segim), end=2/3), profound=NULL, add=FALSE, ...){
   if(add==FALSE){
     if(!is.null(image)){
-      if(class(image)=='profound'){
+      if(inherits(image, 'profound')){
         if(is.null(segim)){segim=image$segim}
         if(is.null(mask)){mask=image$mask}
         if(is.null(sky)){sky=image$sky}
@@ -1009,7 +1009,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
       }
     }
     if(!is.null(profound)){
-      if(class(profound) != 'profound'){
+      if(!inherits(image, 'profound')){
         stop('Class of profound input must be of type \'profound\'')
       }
       if(is.null(image)){image=profound$image}
@@ -1042,7 +1042,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
     }
     
     if(!is.null(sky)){
-      image=image-sky
+      image = image - sky
     }
     
     if(is.null(header)){header=NULL}
@@ -1100,7 +1100,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
   }
   
   if(!is.null(image)){
-    if(class(image)=='profound'){
+    if(inherits(image, 'profound')){
       if(is.null(segim)){segim=image$segim}
       if(is.null(mask)){mask=image$mask}
       if(is.null(sky)){sky=image$sky}
@@ -1109,7 +1109,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     }
   }
   if(!is.null(profound)){
-    if(class(profound) != 'profound'){
+    if(!inherits(image, 'profound')){
       stop('Class of profound input must be of type \'profound\'')
     }
     if(is.null(image)){image=profound$image}
