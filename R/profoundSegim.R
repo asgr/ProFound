@@ -208,7 +208,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   hassky=!is.null(sky)
   hasskyRMS=!is.null(skyRMS)
   
-  image_orig=image
+  image_orig = image
   if(!is.null(mask)){
     image[mask==1] = NA
   }
@@ -229,50 +229,46 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     if(verbose){message(" - Skipping making initial local estimate of the sky RMS - User provided sky RMS")}
   }
   
-  image=image_sky/skyRMS
-  image[!is.finite(image)]=0
+  image = image_sky/skyRMS
+  image[!is.finite(image)] = 0
   
   if(smooth){
     if(verbose){message(paste(" - Smoothing the image -", round(proc.time()[3]-timestart,3), "sec"))}
     if(requireNamespace("imager", quietly = TRUE)){
-      ##### Need to add mask here!!!!
-      image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma, na.rm=TRUE))
+      image = as.matrix(imager::isoblur(imager::as.cimg(image), sigma, na.rm=TRUE))
     }else{
       if(!requireNamespace("EBImage", quietly = TRUE)){
         stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN/Bioconductor.', call. = FALSE)
       }
       message(" - WARNING: imager package not installed, using EBImage gblur smoothing!")
-      image=as.matrix(EBImage::gblur(image,sigma))
+      image = as.matrix(EBImage::gblur(image,sigma))
     }
   }else{
     if(verbose){message(" - Skipping smoothing - smooth set to FALSE")}
   }
-  xlen=dim(image)[1]
-  ylen=dim(image)[2]
+  xlen = dim(image)[1]
+  ylen = dim(image)[2]
   if(!is.null(SBlim) & !missing(magzero)){
     #image[image<skycut | image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
-    image[image_sky<profoundSB2Flux(SBlim, magzero, pixscale)]=0
-  }
-  if(!is.null(mask)){
-    image[mask>0]=0
+    image[image_sky<profoundSB2Flux(SBlim, magzero, pixscale)] = 0
   }
   if(verbose){message(paste(" - Watershed de-blending -", round(proc.time()[3]-timestart,3), "sec"))}
   if(any(image>0)){
     if(watershed=='ProFound'){
-      segim=water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
+      segim = water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
                       reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else if(watershed=='ProFound-old'){
-      segim=water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
+      segim = water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
                           reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
     }else if(watershed=='EBImage'){
       if(!requireNamespace("EBImage", quietly = TRUE)){
         stop('The EBImage package is needed for this function to work. Please install it from Bioconductor.', call. = FALSE)
       }
-      image[image<skycut]=0
-      segim=EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
-      segtab=tabulate(segim)
-      segim[segim %in% which(segtab<pixcut)]=0L
-      mode(segim)='integer'
+      image[image<skycut] = 0
+      segim = EBImage::imageData(EBImage::watershed(image,tolerance=tolerance,ext=ext))
+      segtab = tabulate(segim)
+      segim[segim %in% which(segtab<pixcut)] = 0L
+      mode(segim) = 'integer'
     }else{
       stop('watershed option must either be ProFound/ProFound-old/EBImage!')
     }
