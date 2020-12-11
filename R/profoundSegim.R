@@ -209,6 +209,9 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   hasskyRMS=!is.null(skyRMS)
   
   image_orig=image
+  if(!is.null(mask)){
+    image[mask==1] = NA
+  }
   
   if(hassky==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -217,7 +220,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
     if(verbose){message(" - Skipping making initial local estimate of the sky - User provided sky")}
   }
   
-  image_sky=image-sky
+  image_sky = image - sky
   
   if(hasskyRMS==FALSE){
     if(verbose){message(paste(" - Making initial local estimate of the sky RMS -", round(proc.time()[3]-timestart,3), "sec"))}
@@ -232,7 +235,8 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   if(smooth){
     if(verbose){message(paste(" - Smoothing the image -", round(proc.time()[3]-timestart,3), "sec"))}
     if(requireNamespace("imager", quietly = TRUE)){
-      image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma))
+      ##### Need to add mask here!!!!
+      image=as.matrix(imager::isoblur(imager::as.cimg(image),sigma, na.rm=TRUE))
     }else{
       if(!requireNamespace("EBImage", quietly = TRUE)){
         stop('The imager or EBImage package is needed for smoothing to work. Please install from CRAN/Bioconductor.', call. = FALSE)

@@ -237,7 +237,6 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
     for (int i = ssrow; i <= eerow; i++,ii++) {
       //Rcpp::Rcout << i << "\n";
       //Rcpp::Rcout << ii << "\n";
-      //Rcpp::Rcout << k << "\n";
       if ((iiobjects!=NULL)) {
         if (iiobjects[ii]==0 && (iimask==NULL || iimask[ii]==0)) {
           vec[k++] = iiimage[ii];

@@ -103,13 +103,19 @@ Logical; if TRUE then \code{profoundMultiBand} will return a list of per band se
 Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
   \item{\dots}{
-Further arguments to be passed to all instances of \code{\link{profoundProFound}}. E.g. if the sky \option{SBdilate} is set to a value (default is NULL) this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}.
+Further arguments to be passed to detection and multi band instances of \code{\link{profoundProFound}}. E.g. if the sky \option{SBdilate} is set to a value (default is NULL) this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}. Note in the Details below that some \dots will not be passed for safety and ambiguity reasons.
 }
 }
 \details{
 This very high level function simplifies a sequence of function calls that we found users typically needed to make, but when scripted they were prone to mistakes and made multi band photometry scripts hard to maintain.
 
 In the simplest sense this script runs \code{\link{profoundProFound}} on each detection band and uses this information to make a stacked image using \code{\link{profoundMakeStack}}. \code{\link{profoundProFound}} is then run on this stacked image to make a deep segmentation map. For good total photometry the segim object from this output is used, and allowed to further dilate to account for different observing conditions (i.e. PSFs). For good colour photometry the segim_orig object from this output is used. Only the \code{\link{profoundSegimStats}} output is kept for the target multi band images, so not all of the outputs from \code{\link{profoundProFound}} since this is usually unnecessary when operating in this mode, and creates a huge quantity of data.
+
+Re the \dots passing, these are the arguments NOT sent through to the detect and multi band phases respectively (this is either because we are setting them elsewhere, or they will cause bad interactions with how \code{profoundMultiBand} works):
+
+dotsignoredetect = c('iters', 'sky', 'skyRMS', 'plot', 'stats', 'haralickstats', 'groupby', 'pixelcov', 'box')
+
+dotsignoremulti = c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'size', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats', 'groupby', 'box', 'groupstats', 'objects', 'redosky')
 }
 \value{
 An object list of class 'profoundmulti' containing:
