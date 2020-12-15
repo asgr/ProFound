@@ -82,7 +82,7 @@ jobs:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
         run: |
           $XVFB_RUN Rscript -e "rcmdcheck::rcmdcheck(args = c('--no-manual', '--as-cran'), error_on = 'error', check_dir = 'check')"
-        shell: Rscript {0}
+        shell: bash
 
       - name: Upload check results
         if: failure()
