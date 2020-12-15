@@ -9,8 +9,8 @@ Generates a useful plot merging a rapidly changing colour mapping with the estim
 }
 \usage{
 profoundGetEllipsesPlot(image = NULL, ellipses = NULL, segim = NULL, segID = 1,
-segellipseID = "all", pixscale = 1, col = rep(rainbow(10, s = 0.5), 4), border = "auto",
-lty = 'auto', lwd = 'auto', ...)
+  segellipseID = "all", pixscale = 1, col = rep(rainbow(10, s = 0.5), 4), border = "auto",
+  lty = 'auto', lwd = 'auto', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

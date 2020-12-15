@@ -9,7 +9,7 @@ Takes two segmentation maps and merges them in a sensible manner, making sure se
 }
 \usage{
 profoundSegimMerge(image = NULL, segim_base = NULL, segim_add = NULL, mask = NULL,
-sky = 0)
+  sky = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

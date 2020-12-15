@@ -9,7 +9,7 @@ Propagates all identified segments across the full image, only ignoring masked r
 }
 \usage{
 profoundMakeSegimPropagate(image = NULL, segim = NULL, objects = NULL, mask = NULL,
-sky = 0, lambda = 1e-04, plot = FALSE, ...)
+  sky = 0, lambda = 1e-04, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

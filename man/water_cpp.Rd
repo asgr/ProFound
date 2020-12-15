@@ -10,9 +10,10 @@ This is a standalone implementation of a watershed deblend, with some astronomy 
 }
 \usage{
 water_cpp(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06, ext = 1L,
-skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
+  skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
+  
 water_cpp_old(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06,
-ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
+  ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -10,14 +10,15 @@ A high level utility to achieve decent quality image segmentation based on the e
 }
 \usage{
 profoundMakeSegimExpand(image = NULL, segim = NULL, mask = NULL, objects = NULL,
-skycut = 1, SBlim = NULL, magzero = 0, gain = NULL, pixscale = 1, sigma = 1,
-smooth = TRUE, expandsigma = 5, expand = "all", sky = NULL, skyRMS = NULL, header = NULL,
-verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+  skycut = 1, SBlim = NULL, magzero = 0, gain = NULL, pixscale = 1, sigma = 1,
+  smooth = TRUE, expandsigma = 5, expand = "all", sky = NULL, skyRMS = NULL,
+  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+  
 profoundMakeSegimDilate(image = NULL, segim = NULL, mask = NULL, size = 9, shape = "disc",
-expand = "all", magzero = 0, gain = NULL, pixscale = 1, sky = 0, skyRMS = 0,
-header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+  expand = "all", magzero = 0, gain = NULL, pixscale = 1, sky = 0, skyRMS = 0,
+  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

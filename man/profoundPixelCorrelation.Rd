@@ -10,10 +10,10 @@ Returns the x and y dimension pixel-to-pixel correlation (often called covarianc
 }
 \usage{
 profoundPixelCorrelation(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
-lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
-ylim=c(-1,1), log='x', grid=TRUE, ...)
+  lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
+  ylim=c(-1,1), log='x', grid=TRUE, ...)
 profoundSkySplitFFT(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
-skyscale = 100, profound = NULL)
+  skyscale = 100, profound = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

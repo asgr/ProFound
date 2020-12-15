@@ -132,7 +132,8 @@ profoundSkyEst=function(image=NULL, objects=NULL, mask=NULL, cutlo=cuthi/2,
 profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2, 
                            box=c(100,100), skytype='median', skyRMStype='quanlo', 
                            sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, 
-                           conviters = 100, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, plot=FALSE, ...){
+                           conviters = 100, doChiSq = FALSE, doclip=TRUE, shiftloc = FALSE,
+                           paddim = TRUE, plot=FALSE, ...){
   if(!is.null(objects) | !is.null(mask)){
     skyN=0
     iterN=0
@@ -184,7 +185,7 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   
   if(length(clip)==1){
     if(is.na(clip)){
-      return(invisible(c(NA, NA)))
+      return(invisible(c(NA, NA, NA)))
     }
   }
   
@@ -203,6 +204,8 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   }else if(skytype=='converge'){
     stats = .converge_sky(clip, conviters = conviters)
     skyloc = stats[1]
+  }else{
+    skyloc = NA
   }
   
   if(skyRMStype=='quanlo'){
@@ -226,15 +229,26 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
     skyRMSloc = stats[2]
   }else if(skytype!='converge' & skyRMStype=='converge'){
     skyRMSloc = .converge_sky(clip, conviters = conviters)[2]
+  }else{
+    skyRMSloc = NA
   }
   
-  return(invisible(c(skyloc, skyRMSloc)))
+  if(doChiSq){
+    df = length(clip) - 1
+    skyChiSq = sum(((clip - skyloc)/skyRMSloc)^2, na.rm =TRUE)
+    skyChiSqloc = dchisq(skyChiSq, df=df, log=TRUE)
+  }else{
+    skyChiSqloc = NA
+  }
+  
+  return(invisible(c(skyloc, skyRMSloc, skyChiSqloc)))
 }
 
 profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(100,100), 
                             grid=box, skytype='median', skyRMStype='quanlo', sigmasel=1, 
                             skypixmin=prod(box)/2, boxadd=box/2, boxiters=0,
-                            conviters = 100, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
+                            conviters = 100, doChiSq=FALSE, doclip=TRUE, shiftloc=FALSE,
+                            paddim = TRUE, cores=1){
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
@@ -254,7 +268,7 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
       profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
                         box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel,
                         skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, conviters=conviters,
-                        doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+                        doChiSq=doChiSq, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     }
     closeAllConnections()
     tempsky=rbind(tempsky)
@@ -262,28 +276,38 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
     if(cores>1){
       message('Missing parallel backend packages (need foreach, snow, doSNOW and bigmemory)')
     }
-    tempsky=matrix(0,dim(tempgrid)[1],2)
+    tempsky=matrix(0,dim(tempgrid)[1],3)
     for(i in 1:dim(tempgrid)[1]){
-      tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask,
+      tempsky[i,] = profoundSkyEstLoc(image=image, objects=objects, mask=mask,
                                     loc=as.numeric(tempgrid[i,]), box=box, skytype=skytype,
                                     skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin,
                                     boxadd=boxadd, boxiters=boxiters, conviters=conviters,
-                                    doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+                                    doChiSq=doChiSq, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     }
   }
   
-  tempmat_sky=matrix(tempsky[,1],length(xseq))
-  tempmat_skyRMS=matrix(tempsky[,2],length(xseq))
+  tempmat_sky = matrix(tempsky[,1],length(xseq))
+  tempmat_skyRMS = matrix(tempsky[,2],length(xseq))
+  if(doChiSq){
+    tempmat_skyChiSq = matrix(tempsky[,3],length(xseq))
+    return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky+sky),
+                          skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS),
+                          skyChiSq=list(x=xseq, y=yseq, z=tempmat_skyChiSq))))
+  }else{
+    return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky+sky),
+                          skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS),
+                          skyChiSq=NA)))
+  }
   #tempmat_sky[is.na(tempmat_sky)]=median(tempmat_sky, na.rm = TRUE)
   #tempmat_skyRMS[is.na(tempmat_skyRMS)]=median(tempmat_skyRMS, na.rm = TRUE)
-  return(invisible(list(sky=list(x=xseq, y=yseq, z=tempmat_sky+sky), skyRMS=list(x=xseq, y=yseq, z=tempmat_skyRMS))))
 }
 
 profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(100,100),
                              grid=box, skygrid_type='new', type='bicubic', 
                              skytype='median', skyRMStype='quanlo', sigmasel=1,
                              skypixmin=prod(box)/2, boxadd=box/2, boxiters=0,
-                             conviters = 100, doclip=TRUE, shiftloc = FALSE, paddim = TRUE, cores=1){
+                             conviters = 100, doChiSq = FALSE, doclip=TRUE,
+                             shiftloc = FALSE, paddim = TRUE, cores=1){
   
   if(length(box)==1){
     box=rep(box,2)
@@ -373,6 +397,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
                         skyRMStype = skyRMStype,
                         sigmasel = sigmasel
                         )
+    temp_bi_skyChiSq = NA
   }else if(skygrid_type=='old'){
   
     # if(!requireNamespace("akima", quietly = TRUE)){
@@ -408,7 +433,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
         profoundSkyEstLoc(image=image_loop, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
                           box=box, skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel,
                           skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, conviters=conviters,
-                          doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+                          doChiSq=doChiSq, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       }
       closeAllConnections()
       tempsky=rbind(tempsky)
@@ -416,12 +441,13 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       if(cores>1){
         message('Missing parallel backend packages (need foreach, snow, doSNOW and bigmemory)')
       }
-      tempsky=matrix(0,dim(tempgrid)[1],2)
+      tempsky=matrix(0,dim(tempgrid)[1],3)
       for(i in 1:dim(tempgrid)[1]){
         tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
                                       box=box, skytype=skytype, skyRMStype=skyRMStype,
                                       sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd,
-                                      boxiters=boxiters, conviters=conviters, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
+                                      boxiters=boxiters, conviters=conviters, doChiSq=doChiSq,
+                                      doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       }
     }
     
@@ -435,6 +461,12 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
     tempmat_skyRMS=matrix(0,length(xseq),length(yseq))
     tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
     tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempsky[,2], na.rm = TRUE)
+    
+    if(doChiSq){
+      tempmat_skyChiSq=matrix(0,length(xseq),length(yseq))
+      tempmat_skyChiSq[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,3]
+      tempmat_skyChiSq[is.na(tempmat_skyChiSq)]=stats::median(tempsky[,3], na.rm = TRUE)
+    }
     
     xstart=min(3,dim(tempmat_sky)[1]-1)
     ystart=min(3,dim(tempmat_sky)[2]-1)
@@ -450,6 +482,13 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
     tempmat_skyRMS[length(xseq),]=tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[xend,]
     tempmat_skyRMS[,1]=tempmat_skyRMS[,2]*2-tempmat_skyRMS[,ystart]
     tempmat_skyRMS[,length(yseq)]=tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,yend]
+    
+    if(doChiSq){
+      tempmat_skyChiSq[1,]=tempmat_skyChiSq[2,]*2-tempmat_skyChiSq[xstart,]
+      tempmat_skyChiSq[length(xseq),]=tempmat_skyChiSq[length(xseq)-1,]*2-tempmat_skyChiSq[xend,]
+      tempmat_skyChiSq[,1]=tempmat_skyChiSq[,2]*2-tempmat_skyChiSq[,ystart]
+      tempmat_skyChiSq[,length(yseq)]=tempmat_skyChiSq[,length(yseq)-1]*2-tempmat_skyChiSq[,yend]
+    }
     
     if(dim(tempmat_sky)[1]>1){
       
@@ -485,35 +524,48 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       #   stop('type must be one of bilinear / bicubic !')
       # }
       
+      temp_bi_sky = matrix(0, dim(image)[1], dim(image)[2])
+      temp_bi_skyRMS = matrix(0, dim(image)[1], dim(image)[2])
+      if(doChiSq){
+        temp_bi_skyChiSq = matrix(0, dim(image)[1], dim(image)[2])
+      }else{
+        temp_bi_skyChiSq = NA
+      }
+      
       if(type=='bilinear'){
-        temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateLinearGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
-        temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateLinearGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+        if(doChiSq){
+          .interpolateLinearGrid(xseq, yseq, tempmat_skyChiSq, temp_bi_skyChiSq)
+        }
       }else if(type=='bicubic'){
-        temp_bi_sky=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateAkimaGrid(xseq, yseq, tempmat_sky, temp_bi_sky)
-        temp_bi_skyRMS=matrix(0, dim(image)[1], dim(image)[2])
         .interpolateAkimaGrid(xseq, yseq, tempmat_skyRMS, temp_bi_skyRMS)
+        if(doChiSq){
+          .interpolateAkimaGrid(xseq, yseq, tempmat_skyChiSq, temp_bi_skyChiSq)
+        }
       }else{
         stop('type must be one of bilinear / bicubic !')
       }
     
-      temp_bi_sky=matrix(temp_bi_sky, dim(image)[1], dim(image)[2])
-      temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1], dim(image)[2])
+      #temp_bi_sky=matrix(temp_bi_sky, dim(image)[1], dim(image)[2])
+      #temp_bi_skyRMS=matrix(temp_bi_skyRMS, dim(image)[1], dim(image)[2])
     }else{
-      temp_bi_sky=matrix(tempmat_sky[1,1], dim(image)[1], dim(image)[2])
-      temp_bi_skyRMS=matrix(tempmat_skyRMS[1,1], dim(image)[1], dim(image)[2])
+      temp_bi_sky = matrix(tempmat_sky[1,1], dim(image)[1], dim(image)[2])
+      temp_bi_skyRMS = matrix(tempmat_skyRMS[1,1], dim(image)[1], dim(image)[2])
+      if(doChiSq){
+        temp_bi_skyChiSq = matrix(tempmat_skyChiSq[1,1], dim(image)[1], dim(image)[2])
+      }
     }
-    if(!is.null(mask)){
-      temp_bi_sky[mask>0]=NA
-      temp_bi_skyRMS[mask>0]=NA
-    }
+    # if(!is.null(mask)){
+    #   temp_bi_sky[mask>0]=NA
+    #   temp_bi_skyRMS[mask>0]=NA
+    # }
   }else{
     stop('skygrid_type must be new/old!')
   }
   
-  return(invisible(list(sky=temp_bi_sky+sky, skyRMS=temp_bi_skyRMS)))
+  return(invisible(list(sky=temp_bi_sky+sky, skyRMS=temp_bi_skyRMS, skyChiSq=temp_bi_skyChiSq)))
 }
 
 profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=mean(box)*(4/pi)/sqrt(12)){

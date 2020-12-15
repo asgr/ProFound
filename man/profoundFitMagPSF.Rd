@@ -9,10 +9,10 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 }
 \usage{
 profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen = NULL, Deccen = NULL, mag = NULL,
-image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
-modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
-fluxtype = 'Raw', psf_redosky = FALSE, fluxext = FALSE, header = NULL, doProFound = FALSE,
-findextra = FALSE, verbose = FALSE, ...)
+  image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
+  modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
+  fluxtype = 'Raw', psf_redosky = FALSE, fluxext = FALSE, header = NULL,
+  doProFound = FALSE, findextra = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

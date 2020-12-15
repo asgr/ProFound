@@ -5,7 +5,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                           redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box,
                           skygrid_type = 'new', type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE,
                           sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, conviters=100, iterskyloc=TRUE,
-                          deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doclip=TRUE,
+                          deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doChiSq=FALSE, doclip=TRUE,
                           shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE,
                           plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE,
                           nearstats=boundstats, groupstats=boundstats, group=NULL,
@@ -356,13 +356,24 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                                 skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
                                 boxadd=boxadd, boxiters=boxiters, conviters=conviters, doclip=doclip, shiftloc=shiftloc, 
                                 paddim=paddim)$skyRMS
+      if(doChiSq){
+        if(verbose){message(paste('Making sky LL ChiSq map -',round(proc.time()[3]-timestart,3),'sec'))}
+        skyChiSqMap = profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
+                                       skygrid_type='old', grid=grid, type=type, skytype=skytype, 
+                                       skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
+                                       boxadd=boxadd, boxiters=boxiters, conviters=conviters, doChiSq=TRUE,
+                                       doclip=doclip, shiftloc=shiftloc, paddim=paddim)$skyChiSq
+      }else{
+        skyChiSqMap = NA
+      }
       if(verbose){message(' - Sky statistics :')}
       if(verbose){print(summary(as.numeric(sky)))}
       if(verbose){message(' - Sky-RMS statistics :')}
       if(verbose){print(summary(as.numeric(skyRMS)))}
     }else{
       if(verbose){message("Skipping making final sky map - redosky set to FALSE")}
-      objects_redo=NULL
+      objects_redo = NULL
+      skyChiSqMap = NA
     }
     
     Norig=tabulate(segim_orig)
@@ -557,8 +568,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                 sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, 
                 Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, 
                 haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), 
-                pixscale=pixscale, imarea=imarea, skyLL=skyLL, skyChiSq=skyChiSq, gain=gain, call=call, date=date(), 
-                time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), 
+                pixscale=pixscale, imarea=imarea, skyLL=skyLL, skyChiSq=skyChiSq, skyChiSqMap=skyChiSqMap,
+                gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), 
                 R.version=R.version)
   }else{
     if(is.null(header)){header=NULL}
@@ -571,7 +582,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                 skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, 
                 group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  
                 magzero=magzero, dim=dim(segim), pixscale=pixscale, imarea=imarea, skyLL=NULL, skyChiSq=NULL,
-                gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, 
+                skyChiSqMap=NULL, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, 
                 ProFound.version=packageVersion('ProFound'), R.version=R.version)
   }
   class(output)='profound'
@@ -609,14 +620,12 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   segdiff=x$segim-x$segim_orig
   segdiff[segdiff<0]=0
   
-  if(all(x$skyRMS>0, na.rm=TRUE)){
-    image = (x$image-x$sky)/x$skyRMS
-  }else{
-    image = (x$image-x$sky)
-  }
+  image = (x$image-x$sky)/x$skyRMS
+  image[x$skyRMS < 0] = NA
   
   if(!is.null(x$mask)){
     image[x$mask==1]=NA
+    x$mask[is.na(image)] = 1
   }
   
   cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
@@ -714,8 +723,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(x$skyLL,3)
-        stat_ChiSq = signif(x$skyChiSq,3)
+        if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
+        if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor)), bg='white')
@@ -796,8 +805,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
           tempsky=image[x$objects==0]
         }
         tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
-        stat_LL = signif(x$skyLL,3)
-        stat_ChiSq = signif(x$skyChiSq,3)
+        if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
+        if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
         legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor)), bg='white')

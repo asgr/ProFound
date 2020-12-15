@@ -12,14 +12,14 @@ The high level function computes the absolute sky and sky RMS level over an imag
 \usage{
 profoundMakeSkyMap(image = NULL, objects = NULL, mask = NULL, sky = 0,
   box = c(100,100), grid = box, skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
-  skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, conviters = 100, doclip = TRUE,
-  shiftloc = FALSE, paddim = TRUE, cores = 1)
+  skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, conviters = 100,
+  doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, cores = 1)
   
 profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, sky = 0, 
   box = c(100,100), grid = box, skygrid_type = 'new', type = 'bicubic',
   skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
-  boxadd = box/2, boxiters = 0, conviters = 100, doclip = TRUE, shiftloc = FALSE,
-  paddim = TRUE, cores = 1)
+  boxadd = box/2, boxiters = 0, conviters = 100, doChiSq = FALSE, doclip = TRUE,
+  shiftloc = FALSE, paddim = TRUE, cores = 1)
 
 profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100,
   sigma = mean(box)*(4/pi)/sqrt(12))
@@ -71,6 +71,9 @@ Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt
   \item{conviters}{
 Integer scalar; number of iterative sky convergence steps when \option{skytype} = 'converge' and/or \option{skyRMStype} = 'converge'. 
 }
+  \item{doChiSq}{
+Logical; should a map of the log-likelihood of the local sky (this is output to list element \option{skyChiSq}) be created? If TRUE, this basically tells us if the local estimate of the sky is reliable of not. The value of the LL will vary depending on the \option{box} size, so this should only be used in a relative sense for each image. If FALSE output \option{skyChiSq} is NA.
+}
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If an doubt, leave as TRUE.
 }
@@ -91,9 +94,9 @@ Numeric scalar; the standard deviation of the blur (positive) used for smoothing
 The matrix generated will have many fewer pixels than the original \option{image}, so it will need to be interpolated back onto the full grid by some mechanism in order to have 1-1 values for the sky and sky RMS.
 }
 \value{
-\code{profoundMakeSkyMap} produces a list of two lists. The first (called \option{sky}) contains a list of x,y,z values for the absolute sky, and second (called \option{skyRMS}) contains a list of x,y,z values for the sky RMS. The grids returned are as coarse as the \option{grid} option provided.
+\code{profoundMakeSkyMap} produces a list of 3 lists. The first (called \option{sky}) contains a list of x,y,z values for the absolute sky; the second (called \option{skyRMS}) contains a list of x,y,z values for the sky RMS; and the third (called \option{skyChiSq}, present if \code{doChiSq}=TRUE else NA) contains a list of x,y,z values for the sky log-likelihood (see \code{\link{profoundSkyEstLoc}}). The grids returned are as coarse as the \option{grid} option provided.
 
-\code{profoundMakeSkyGrid} produces a list of two lists. The first (called \option{sky}) is a matrix of values for the absolute sky. The second (called \option{skyRMS}) is a matrix of values for the absolute sky RMS. The image matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
+\code{profoundMakeSkyGrid} produces a list of 3 matrices. The first (called \option{sky}) is a matrix of values for the absolute sky; the second (called \option{skyRMS}) is a matrix of values for the absolute sky RMS; and the third (called \option{skyChiSq}, present if \code{doChiSq}=TRUE else NA) if a matrix of values for the sky log-likelihood (see \code{\link{profoundSkyEstLoc}}). The matrices returned are pixel matched to the input \option{image} using the specified interpolation scheme.
 
 \code{profoundMakeSkyBlur} produces a matrix of the sky map (there is no sky RMS component). To work well sources must be well masked either with NA in the \option{image}, or using the \option{objects} matrix. Since this function can only provide the additive sky, it cannot be used in isolation to computer the necessary sky information (we need the sky RMS map for \code{\link{profoundProFound}}), but it might offer a better smoother sky (so replacing the sky component of \code{profoundMakeSkyGrid}.
 }

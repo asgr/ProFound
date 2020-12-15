@@ -9,7 +9,7 @@ Merges segmentation and grouped segmentation catalogues based on which groups ar
 }
 \usage{
 profoundCatMerge(segstats = NULL, groupstats = NULL, groupsegID = NULL,
-groupID_merge = NULL, flag = TRUE, rowreset = FALSE)
+  groupID_merge = NULL, flag = TRUE, rowreset = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -9,7 +9,7 @@ A utility function to resample input PSFs to different pixel scales on a consist
 }
 \usage{
 profoundResample(image, pixscale_old = 1, pixscale_new = 1, type = "bicubic",
-fluxscale = "image", recentre = FALSE)
+  fluxscale = "image", recentre = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -9,7 +9,7 @@ Given a higher resolution input segmentation map, this function calculates how t
 }
 \usage{
 profoundSegimShare(segim_in = NULL, header_in = NULL, header_out = NULL, pixcut = 1, 
-weights = NULL)
+  weights = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

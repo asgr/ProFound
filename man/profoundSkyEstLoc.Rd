@@ -9,9 +9,9 @@ Calculate the sky and sky RMS for a subset region of a larger image, as used in 
 }
 \usage{
 profoundSkyEstLoc(image = NULL, objects = NULL, mask = NULL, loc = dim(image)/2,
-box = c(100, 100), skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
-skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, conviters = 100, doclip = TRUE,
-shiftloc = FALSE, paddim = TRUE, plot = FALSE, ...)
+  box = c(100, 100), skytype = "median", skyRMStype = "quanlo", sigmasel = 1,
+  skypixmin = prod(box)/2, boxadd = box/2, boxiters = 0, conviters = 100,
+  doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -51,6 +51,9 @@ Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt
   \item{conviters}{
 Integer scalar; number of iterative sky convergence steps when \option{skytype} = 'converge' and/or \option{skyRMStype} = 'converge'. 
 }
+  \item{doChiSq}{
+Logical; create a map of the log-likelihood of the local sky. This basically tells us if the local estimate of the sky is reliable of not. The value of the LL will vary depending on the \option{box} size, so this should only be used in a relative sense for each image.
+}
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If an doubt, leave as TRUE.
 }
@@ -79,7 +82,7 @@ There are many questions to think about when choosing the best combination of sk
 If the package \code{Rfast} is loaded, then this function will use the faster Rfast::med median function over the base median. This is about a factor 2-3 faster.
 }
 \value{
-A length two vector where the first element is the sky and the second is the skyRMS.
+A length 3 vector where the first element is the sky; the second is the skyRM; the third (if \code{doChiSq}=TRUE) is the log-likelihood of the local sky, else this is NA.
 }
 \author{
 Aaron Robotham

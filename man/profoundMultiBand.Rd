@@ -9,12 +9,12 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 }
 \usage{
 profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL,
-detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6, iters_tot = 0,
-sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box, boxadd=box/2, app_diam = 1,
-bandappend = multibands, totappend = "t", colappend = "c", grpappend = 'g', dotot = TRUE,
-docol = TRUE, dogrp = TRUE, deblend = FALSE, groupstats = FALSE,
-groupby_det = 'segim_orig', groupby_mul = 'segim_orig', keepsegims = FALSE,
-masking = 'and', ...)
+  detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6,
+  iters_tot = 0, sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box,
+  boxadd=box/2, app_diam = 1, bandappend = multibands, totappend = "t", colappend = "c",
+  grpappend = 'g', dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE,
+  groupstats = FALSE, groupby_det = 'segim_orig', groupby_mul = 'segim_orig',
+  keepsegims = FALSE, masking = 'and', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -100,7 +100,7 @@ Character scalar; How should the grouped segmentation map be formed that will be
 Logical; if TRUE then \code{profoundMultiBand} will return a list of per band segmentation maps in \option{segimlist}. This is useful since they can be slightly different per band.
 }
   \item{masking}{
-Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
+Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' (default) then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
   \item{\dots}{
 Further arguments to be passed to detection and multi band instances of \code{\link{profoundProFound}}. E.g. if the sky \option{SBdilate} is set to a value (default is NULL) this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}. Note in the Details below that some \dots will not be passed for safety and ambiguity reasons.

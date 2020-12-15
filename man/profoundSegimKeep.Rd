@@ -9,7 +9,7 @@ Allows users to safely merge a standard segim with a groupim, where you can spec
 }
 \usage{
 profoundSegimKeep(segim = NULL, groupim = NULL, groupID_merge = NULL, segID_merge = NULL,
-clean = FALSE)
+  clean = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

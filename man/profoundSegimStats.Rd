@@ -10,11 +10,12 @@ Basic summary statistics for image segments, e.g. aperture parameters, fluxes an
 }
 \usage{
 profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS = NULL,
-magzero = 0, gain = NULL, pixscale = 1, header = NULL, sortcol = "segID",
-decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1, cor_err_func = NULL,
-app_diam = 1)
+  magzero = 0, gain = NULL, pixscale = 1, header = NULL, sortcol = "segID",
+  decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1,
+  cor_err_func = NULL, app_diam = 1)
+  
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, header = NULL,
-col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE, ...)
+  col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

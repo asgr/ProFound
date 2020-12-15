@@ -10,20 +10,21 @@ This is the highest level source detection function provided in \code{ProFit}, c
 }
 \usage{
 profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycut = 1,
-pixcut = 3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
-SBlim, SBdilate = NULL, SBN100 = 100, size = 5, shape = "disc", iters = 6,
-threshold = 1.05, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
-redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
-skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
-roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-boxiters = 0, conviters = 100, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
-iterative = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE, header,
-verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-nearstats = boundstats, groupstats = boundstats, group = NULL, groupby = 'segim_orig',
-offset = 1, haralickstats = FALSE, sortcol = "segID", decreasing = FALSE,
-lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound', pixelcov = FALSE,
-deblendtype = 'fit', psf = NULL, fluxweight = 'sum', convtype = 'brute',
-convmode = 'extended', fluxtype = 'Raw', app_diam = 1, Ndeblendlim = Inf, ...)
+  pixcut = 3, tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
+  SBlim = NULL, SBdilate = NULL, SBN100 = 100, size = 5, shape = "disc", iters = 6,
+  threshold = 1.05, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
+  redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
+  skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
+  roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
+  boxiters = 0, conviters = 100, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
+  iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
+  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  boundstats = FALSE, nearstats = boundstats, groupstats = boundstats, group = NULL,
+  groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
+  decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound',
+  pixelcov = FALSE, deblendtype = 'fit', psf = NULL, fluxweight = 'sum',
+  convtype = 'brute', convmode = 'extended', fluxtype = 'Raw', app_diam = 1,
+  Ndeblendlim = Inf, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -159,6 +160,9 @@ Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to
   \item{iterative}{
 Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top. Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
+  \item{doChiSq}{
+Logical; should a map of the log-likelihood of the local sky (this is output to list element \option{skyChiSq}) be created? If TRUE, this basically tells us if the local estimate of the sky is reliable of not. The value of the LL will vary depending on the \option{box} size, so this should only be used in a relative sense for each image. If FALSE output \option{skyChiSq} is NA.
+}
   \item{doclip}{
 Logical; should the unmasked non-object pixels used to estimate to local sky value be further sigma-clipped using \code{\link{magclip}}? Whether this is used or not is a product of the quality of the objects extraction. If all detectable objects really have been found and the dilated objects mask leaves only apparent sky pixels then an advanced user might be confident enough to set this to FALSE. If in doubt, leave as TRUE.
 }
@@ -284,6 +288,7 @@ An object list of class 'profound' containing:
   \item{imarea}{The area of the provided image in degrees squared.}
   \item{skyLL}{The log-likelihood of negative sky pixel Chi-Sq distribution (the larger the better the sky estimation).}
   \item{skyChiSq}{The Reduced Chi-Square of the sky pixel distribution (the nearer to 1 the better the sky estimation).}
+  \item{skyChiSqMap}{If \code{doChiSq}=TRUE else NA) if a matrix of values for the sky log-likelihood (see \code{\link{profoundSkyEstLoc}}).}
   \item{call}{The original function call.}
   \item{date}{The date, more specifically the output of \code{\link{date}}.}
   \item{time}{The elapsed run time in seconds.}

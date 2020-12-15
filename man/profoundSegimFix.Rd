@@ -9,10 +9,10 @@ This function will launch an interactive session to let users reassemble segment
 }
 \usage{
 profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound = NULL,
-loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
-crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
-continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL,
-...)
+  loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
+  crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
+  continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL,
+  ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

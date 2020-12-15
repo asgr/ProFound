@@ -9,8 +9,8 @@ A high level utility to estimate the sky properties of a supplied \option{image}
 }
 \usage{
 profoundSkyEst(image = NULL, objects = NULL, mask = NULL, cutlo = cuthi/2,
-cuthi = sqrt(sum((dim(image)/2)^2)), skycut = 'auto', clipiters = 5, radweight = 0,
-plot = FALSE, ...)
+  cuthi = sqrt(sum((dim(image)/2)^2)), skycut = 'auto', clipiters = 5, radweight = 0,
+  plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

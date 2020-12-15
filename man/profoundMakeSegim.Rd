@@ -9,10 +9,11 @@ A mid level utility to achieve decent quality image segmentation. It uses a mixt
 }
 \usage{
 profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut = 3,
-tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE, SBlim = NULL,
-magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL, header = NULL,
-verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE, boundstats = FALSE,
-offset = 1, sortcol = "segID", decreasing = FALSE, watershed = 'ProFound', ...)
+  tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
+  SBlim = NULL, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
+  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE,
+  watershed = 'ProFound', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

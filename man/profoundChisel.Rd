@@ -9,8 +9,8 @@ This is an implementation of a Noise Chisel like approach method of identifying 
 }
 \usage{
 profoundChisel(image = NULL, sky = NULL, skythresh = 0.005, blurcut = 0.01,
-objthresh = 1 - skythresh, sigma = 2, iterchisel = 5, itersky = 5,
-objbias = 0.5, box = 100, skyconv = 0.01)
+  objthresh = 1 - skythresh, sigma = 2, iterchisel = 5, itersky = 5,
+  objbias = 0.5, box = 100, skyconv = 0.01)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

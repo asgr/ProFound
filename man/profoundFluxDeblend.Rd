@@ -9,9 +9,10 @@ Given a target image, a segmentation map, image segstats and group properties, t
 }
 \usage{
 profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
-groupsegID = NULL, sky = 0, profound = NULL, magzero = 0,  df = 3, radtrunc = 2,
-iterative = FALSE, doallstats = TRUE, lowmemory = FALSE, deblendtype = 'fit', psf = NULL,
-fluxweight = 'sum', convtype = 'brute', convmode = 'extended', Ndeblendlim = Inf) 
+  groupsegID = NULL, sky = 0, profound = NULL, magzero = 0,  df = 3, radtrunc = 2,
+  iterative = FALSE, doallstats = TRUE, lowmemory = FALSE, deblendtype = 'fit',
+  psf = NULL, fluxweight = 'sum', convtype = 'brute', convmode = 'extended',
+  Ndeblendlim = Inf) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
