@@ -1,5 +1,9 @@
 # ProFound (R package)
 
+<!-- badges: start -->
+![R-CMD-check](https://github.com/asgr/ProFound/workflows/R-CMD-check/badge.svg)
+<!-- badges: end -->
+
 ## Synopsis
 
 Core package containing all the tools for simple and advanced source extraction. This is used for source detection, extraction and photometry, and also to create inputs for **ProFit**.
