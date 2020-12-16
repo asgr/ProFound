@@ -8,19 +8,22 @@ Stack Images
 Stacks multiple images based on their signal-to-noise.
 }
 \usage{
-profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL, magzero_in = 0,
-  magzero_out = 0, masking = 'and')
+profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL,
+  mask_list = NULL, magzero_in = 0, magzero_out = 0, masking = 'and')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image_list}{
-List; each list element is a numeric matrix representing the image to be stacked.
+List; required. Each list element is a numeric matrix representing the image to be stacked. Note, image NAs are treated as masked pixels.
 }
   \item{sky_list}{
-List; each list element is a numeric matrix representing the sky to be subtracted.
+List; optional. Each list element is a numeric matrix representing the sky to be subtracted.
 }
   \item{skyRMS_list}{
-List; each list element is a numeric matrix representing the sky-RMS to weight the stack with.
+List; optional. Each list element is a numeric matrix representing the sky-RMS to weight the stack with.
+}
+  \item{mask_list}{
+List optional. Each list element is a integer matrix representing a mask for each image in \option{image_list}, where 1 means mask out and 0 means use for analysis. This can be used in conjuction with setting pixels in \option{image_list} to NA.
 }
   \item{magzero_in}{
 Numeric vector; the input mag-zero points. If length 1 then it is assumed all input frames have the same mag-zero point.

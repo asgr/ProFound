@@ -1,4 +1,4 @@
-profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, magzero_in=0, magzero_out=0, masking='and'){
+profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mask_list=NULL, magzero_in=0, magzero_out=0, masking='and'){
   if(is.list(image_list)){
     if(is.null(sky_list)==FALSE){
       if(length(image_list)!=length(sky_list)){stop('sky_list length does not match image_list length!')}
@@ -18,6 +18,11 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mag
     masked_and_master={}
     masked_and_initial=TRUE
     for(i in 1:length(image_list)){
+      if(!is.null(mask_list)){
+        if(!is.null(mask_list[[i]])){
+          image_list[[i]][mask_list[[i]] != 0] = NA
+        }
+      }
       masked={}
       if(is.list(sky_list) & is.list(skyRMS_list)){
         if(is.null(image_list[[i]])==FALSE & is.null(sky_list[[i]])==FALSE & is.null(skyRMS_list[[i]])==FALSE){
