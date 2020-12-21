@@ -189,6 +189,11 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
     }
   }
   
+  if(skytype=='converge' & missing(skyRMStype)){
+    message('Setting skyRMStype to \'converge\' since not specified!')
+    skyRMStype = 'converge'
+  }
+  
   if(skytype=='median'){
     if('Rfast' %in% .packages()){
       skyloc=try(Rfast::med(clip, na.rm=TRUE), silent=TRUE)
@@ -254,6 +259,10 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
   tempgrid=expand.grid(xseq, yseq)
 
   image = image - sky
+  
+  if(skytype == 'mode' | skytype == 'converge'){
+    skygrid_type = 'old'
+  }
   
   if(cores>1 & 'foreach' %in% .packages() & 'snow' %in% .packages() & 'doSNOW' %in% .packages() & 'bigmemory'  %in% .packages()){
     cl = snow::makeCluster(cores)
@@ -341,6 +350,10 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
   }
   
   image = image - sky
+  
+  if(skytype == 'mode' | skytype == 'converge'){
+    skygrid_type = 'old'
+  }
   
   if(skygrid_type=='new'){
     # void .Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image,

@@ -1,0 +1,123 @@
+---
+title: "Multiband Stacking"
+author: "Aaron Robotham"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Multiband Stacking}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=FALSE, echo = TRUE)
+```
+
+```{r}
+library(ProFound)
+library(Rfits)
+```
+
+## R Markdown
+
+```{r}
+im_r = Rfits_read_image(system.file("extdata", 'MultiBand/r.fits', package="ProFound"),ext=2)$imDat
+im_i = Rfits_read_image(system.file("extdata", 'MultiBand/i.fits', package="ProFound"),ext=2)$imDat
+im_Z = Rfits_read_image(system.file("extdata", 'MultiBand/Z.fits', package="ProFound"),ext=2)$imDat
+im_Y = Rfits_read_image(system.file("extdata", 'MultiBand/Y.fits', package="ProFound"),ext=2)$imDat
+```
+
+```{r fig.height=5, fig.width=5}
+magimage(im_r)
+magimage(im_i)
+magimage(im_Z)
+magimage(im_Y)
+```
+
+```{r}
+pro_r = profoundProFound(im_r, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
+pro_i = profoundProFound(im_i, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
+pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
+pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
+```
+
+```{r}
+sky_r = profoundMakeSkyGrid(im_r, objects=pro_r$objects_redo, doclip=T, grid=50, box=100, boxiters=4)
+sky_i = profoundMakeSkyGrid(im_i, objects=pro_i$objects_redo, doclip=T, grid=50, box=50, boxiters=4)
+sky_Z = profoundMakeSkyGrid(im_Z, objects=pro_Z$objects_redo, doclip=T, grid=50, box=50, boxiters=4)
+sky_Y = profoundMakeSkyGrid(im_Y, objects=pro_Y$objects_redo, doclip=T, grid=50, box=50, boxiters=4)
+```
+
+```{r}
+mask_r = sky_r$sky > (median(sky_r$sky,na.rm=TRUE) + 0.5*(median(sky_r$sky,,na.rm=TRUE) - quantile(sky_r$sky,0.01,na.rm=TRUE)))
+mask_i = sky_i$sky > (median(sky_i$sky,na.rm=TRUE) + 1*(median(sky_i$sky,na.rm=TRUE) - quantile(sky_i$sky,0.01,na.rm=TRUE)))
+mask_Z = sky_Z$skyRMS > (median(sky_Z$skyRMS,na.rm=TRUE) + 1*(median(sky_Z$skyRMS,na.rm=TRUE) - quantile(sky_Z$skyRMS,0.01,na.rm=TRUE)))
+mask_Y = sky_Y$skyRMS > (median(sky_Y$skyRMS,na.rm=TRUE) + 1*(median(sky_Y$skyRMS,na.rm=TRUE) - quantile(sky_Y$skyRMS,0.01,na.rm=TRUE)))
+```
+
+```{r}
+unmask = profoundImBlur(im_r,20) > 1e-11
+mask_r[unmask] = 0
+mask_i[unmask] = 0
+mask_Z[unmask] = 0
+mask_Y[unmask] = 0
+```
+
+```{r fig.height=5, fig.width=5}
+magimage(pro_r$image); magimage(mask_r, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
+magimage(pro_i$image); magimage(mask_i, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
+magimage(pro_Z$image); magimage(mask_Z, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
+magimage(pro_Y$image); magimage(mask_Y, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
+```
+
+```{r}
+stack_rZ = profoundMakeStack(image_list = list(pro_r$image, pro_Z$image), 
+                         sky_list = list(pro_r$sky, pro_Z$sky), 
+                         skyRMS_list = list(pro_r$skyRMS, pro_Z$skyRMS),
+                         mask_list = list(mask_r, mask_Z),
+                         magzero_in = c(0,30)
+                         )
+```
+
+```{r}
+stack_riZ = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$image), 
+                         sky_list = list(pro_r$sky, pro_i$sky, pro_Z$sky), 
+                         skyRMS_list = list(pro_r$skyRMS, pro_i$skyRMS, pro_Z$skyRMS),
+                         mask_list = list(mask_r, mask_i, mask_Z),
+                         magzero_in = c(0,0,30)
+                         )
+```
+
+```{r}
+stack_riZY = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$image, pro_Y$image), 
+                         sky_list = list(pro_r$sky, pro_i$sky, pro_Z$sky, pro_Y$sky), 
+                         skyRMS_list = list(pro_r$skyRMS, pro_i$skyRMS, pro_Z$skyRMS, pro_Y$skyRMS),
+                         mask_list = list(mask_r, mask_i, mask_Z, mask_Y),
+                         magzero_in = c(0,0,30,30)
+                         )
+```
+
+```{r fig.height=5, fig.width=5}
+magimage(stack_rZ$image)
+magimage(stack_riZ$image)
+magimage(stack_riZY$image)
+```
+
+```{r}
+pro_detect_rZ = profoundProFound(stack_rZ$image, skycut=2, sky=0, grid=50, boxiters=4, SBdilate=2, tolerance=2, sigma=0.8)
+pro_detect_riZ = profoundProFound(stack_riZ$image, skycut=2, sky=0, grid=50, boxiters=4, SBdilate=2, tolerance=2, sigma=0.8)
+pro_detect_riZY = profoundProFound(stack_riZY$image, skycut=2, sky=0, grid=50, boxiters=4, SBdilate=2, tolerance=2, sigma=0.8)
+```
+
+```{r fig.height=5, fig.width=5}
+plot(pro_detect_rZ)
+plot(pro_detect_riZ)
+plot(pro_detect_riZY)
+```
+
+```{r fig.height=5, fig.width=5}
+profoundSegimPlot(pro_detect_rZ$image[1000+ -500:499,700+ -500:499], segim=pro_detect_rZ$segim[1000+ -500:499,700+ -500:499])
+profoundSegimPlot(pro_detect_riZ$image[1000+ -500:499,700+ -500:499], segim=pro_detect_riZ$segim[1000+ -500:499,700+ -500:499])
+profoundSegimPlot(pro_detect_riZY$image[1000+ -500:499,700+ -500:499], segim=pro_detect_riZY$segim[1000+ -500:499,700+ -500:499])
+```
+
