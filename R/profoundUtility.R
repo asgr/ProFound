@@ -128,26 +128,28 @@ profoundMakeSigma=function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0,
 
 profoundGainEst=function(image=NULL, mask=0, objects=0, sky=0, skyRMS=1){
   if(missing(sky)){
-    sky=profoundSkyEst(image=image, mask=mask, objects=objects,plot=FALSE)$sky
+    sky = profoundSkyEst(image=image, mask=mask, objects=objects,plot=FALSE)$sky
   }
-  image_sky=image-sky
+  image_sky = image - sky
   if(missing(skyRMS)){
-    skyRMS=profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects,plot=FALSE)$skyRMS
+    skyRMS = profoundSkyEst(image=profoundImDiff(image_sky,3), mask=mask, objects=objects,plot=FALSE)$skyRMS
+  }else{
+    skyRMS = mean(skyRMS)
   }
-  tempval=as.numeric(image_sky[mask==0 & objects==0])
+  tempval = as.numeric(image_sky[mask==0 & objects==0])
   
-  startgain=ceiling(log10(abs(min(tempval, na.rm=T)-sky)/(skyRMS^2)))+1
+  startgain = ceiling(log10(abs(min(tempval, na.rm=T))/(skyRMS^2)))+1
   
   tempfunc=function(gain,tempval,skyRMS){
-    gain=10^gain
-    floor=(skyRMS*gain)^2
-    trialdata=tempval*gain+floor
-    value=-sum(dpois(x=round(trialdata), lambda=floor, log=T))
+    gain = 10^gain
+    floor = (skyRMS*gain)^2
+    trialdata = tempval*gain+floor
+    value = -sum(dpois(x=round(trialdata), lambda=floor, log=T))
     invisible(value)
   }
 
   suppressWarnings({findgain=optim(par=startgain, fn=tempfunc, method="Brent", tempval=tempval, skyRMS=skyRMS, lower=startgain-2, upper=startgain+2)})
-  invisible(10^findgain$par)
+  return(10^findgain$par)
 }
 
 profoundCatMerge=function(segstats=NULL, groupstats=NULL, groupsegID=NULL, groupID_merge=NULL, flag=TRUE, rowreset=FALSE){

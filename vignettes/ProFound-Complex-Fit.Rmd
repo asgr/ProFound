@@ -174,7 +174,7 @@ group1_tolog=list(
 
 
 ```{r, eval=evalglobal, fig.width=5, fig.height=5, dpi=40}
-sigma=profoundMakeSigma(image$imDat, objects=profound$objects, gain=0.5, sky=profound$sky, skyRMS =profound$skyRMS, plot=TRUE)
+sigma=profoundMakeSigma(image$imDat, objects=profound$objects, gain=0.5, sky=profound$sky, skyRMS=profound$skyRMS, plot=TRUE)
 ```
 
 ```{r, eval=evalglobal}
