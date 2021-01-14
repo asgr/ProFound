@@ -349,7 +349,9 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
     message('dim(image)[2]/grid[2] must be >=3, grid[2] modified to ',grid[2])
   }
   
-  image = image - sky
+  if(!is.null(sky)){
+    image = image - sky
+  }
   
   if(skytype == 'mode' | skytype == 'converge'){
     skygrid_type = 'old'
@@ -578,7 +580,11 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
     stop('skygrid_type must be new/old!')
   }
   
-  return(invisible(list(sky=temp_bi_sky+sky, skyRMS=temp_bi_skyRMS, skyChiSq=temp_bi_skyChiSq)))
+  if(!is.null(sky)){
+    temp_bi_sky = temp_bi_sky + sky
+  }
+  
+  return(invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS, skyChiSq=temp_bi_skyChiSq)))
 }
 
 profoundMakeSkyBlur=function(image=NULL, objects=NULL, box=100, sigma=mean(box)*(4/pi)/sqrt(12)){
