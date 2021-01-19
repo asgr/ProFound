@@ -540,7 +540,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       cutsky = (image - sky) / skyRMS
       cutsky[!is.finite(cutsky)] = NA
       if(!is.null(mask)){
-        cutsky[mask==1] = NA
+        cutsky[mask>0] = NA
       }
       if(!is.null(objects_redo)){
         cutsky[objects_redo == 1] = NA
@@ -624,7 +624,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   image[x$skyRMS < 0] = NA
   
   if(!is.null(x$mask)){
-    image[x$mask==1]=NA
+    image[x$mask>0]=NA
     x$mask[is.na(image)] = 1
   }
   
