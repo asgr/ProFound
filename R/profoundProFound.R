@@ -773,13 +773,17 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     magimage(x$sky-median(x$sky,na.rm=TRUE), qdiff=TRUE)
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
-      stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
-      stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
-      stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
+      suppressWarnings({
+        stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
+        stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
+        stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
+      })
     }else{
-      stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
-      stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
-      stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
+      suppressWarnings({
+        stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
+        stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
+        stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
+      })
     }
     legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
     
