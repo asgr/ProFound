@@ -20,7 +20,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
     for(i in 1:length(image_list)){
       if(!is.null(mask_list)){
         if(!is.null(mask_list[[i]])){
-          image_list[[i]][mask_list[[i]] != 0] = NA
+          image_list[[i]][mask_list[[i]] > 0] = NA
         }
       }
       masked={}
