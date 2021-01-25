@@ -175,7 +175,7 @@ profoundResample=function(image, pixscale_old=1, pixscale_new=1, type='bicubic',
   #xseq = 1:dim(image)[1]-dim(image)[1]/2-0.5
   #yseq = 1:dim(image)[2]-dim(image)[2]/2-0.5
   
-  relscale = pixscale_new/pixscale_old
+  relscale = pixscale_old/pixscale_new
   
   # xout = seq(relscale,xseq[length(xseq)],by=relscale)
   # xout = c(-rev(xout),0,xout)

@@ -17,10 +17,10 @@ profoundResample(image, pixscale_old = 1, pixscale_new = 1, type = "bicubic",
 Numeric matrix; required, the image we want to resample.
 }
   \item{pixscale_old}{
-Numeric scalar; the current (old) pixel scale of the supplied \option{image}.
+Numeric scalar; the current (old) pixel scale of the supplied \option{image}. This should be in the sense of angular units per pixel (e.g. asec/pix), to smaller values mean higher spatial resolution.
 }
   \item{pixscale_new}{
-Numeric scalar; the target (new) pixel scale of the desired output.
+Numeric scalar; the target (new) pixel scale of the desired output. This should be in the sense of angular units per pixel (e.g. asec/pix), to smaller values mean higher spatial resolution.
 }
   \item{type}{
 Character scalar; either "bilinear" for bilinear interpolation or "bicubic" for bicubic interpolation (default, requires \code{akima} package).
