@@ -325,7 +325,7 @@ void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix
     //Rcpp::Rcout << "x="<<x<<" xleft="<<myx[left_index]<<" "<<myx[right_index]<<"\n";
     int top_index = -1;
     int bottom_index = -1;
-    for (int j = 1; j < myynpts; j++) {
+    for (int j = 1; j <= myynpts; j++) {
       double y = -0.5+j;
       for (int jj = 1; jj < ncol; jj++) {
         if (myy[jj-1] <= y && myy[jj] >= y) {

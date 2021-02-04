@@ -456,9 +456,9 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       if(cores>1){
         message('Missing parallel backend packages (need foreach, snow, doSNOW and bigmemory)')
       }
-      tempsky=matrix(0,dim(tempgrid)[1],3)
+      tempsky = matrix(0,dim(tempgrid)[1],3)
       for(i in 1:dim(tempgrid)[1]){
-        tempsky[i,]=profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
+        tempsky[i,] = profoundSkyEstLoc(image=image, objects=objects, mask=mask, loc=as.numeric(tempgrid[i,]),
                                       box=box, skytype=skytype, skyRMStype=skyRMStype,
                                       sigmasel=sigmasel, skypixmin=skypixmin, boxadd=boxadd,
                                       boxiters=boxiters, conviters=conviters, doChiSq=doChiSq,
@@ -466,43 +466,43 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
       }
     }
     
-    xseq=c(-grid[1]/2,xseq,max(xseq)+grid[1]/2)
-    yseq=c(-grid[2]/2,yseq,max(yseq)+grid[2]/2)
+    xseq = c(-grid[1]/2,xseq,max(xseq)+grid[1]/2)
+    yseq = c(-grid[2]/2,yseq,max(yseq)+grid[2]/2)
     
-    tempmat_sky=matrix(0,length(xseq),length(yseq))
-    tempmat_sky[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,1]
-    tempmat_sky[is.na(tempmat_sky)]= stats::median(tempsky[,1], na.rm = TRUE)
+    tempmat_sky = matrix(0,length(xseq),length(yseq))
+    tempmat_sky[2:(length(xseq)-1),2:(length(yseq)-1)] = tempsky[,1]
+    tempmat_sky[is.na(tempmat_sky)] = stats::median(tempsky[,1], na.rm = TRUE)
     
-    tempmat_skyRMS=matrix(0,length(xseq),length(yseq))
-    tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,2]
-    tempmat_skyRMS[is.na(tempmat_skyRMS)]=stats::median(tempsky[,2], na.rm = TRUE)
+    tempmat_skyRMS = matrix(0,length(xseq),length(yseq))
+    tempmat_skyRMS[2:(length(xseq)-1),2:(length(yseq)-1)] = tempsky[,2]
+    tempmat_skyRMS[is.na(tempmat_skyRMS)] = stats::median(tempsky[,2], na.rm = TRUE)
     
     if(doChiSq){
-      tempmat_skyChiSq=matrix(0,length(xseq),length(yseq))
-      tempmat_skyChiSq[2:(length(xseq)-1),2:(length(yseq)-1)]=tempsky[,3]
-      tempmat_skyChiSq[is.na(tempmat_skyChiSq)]=stats::median(tempsky[,3], na.rm = TRUE)
+      tempmat_skyChiSq = matrix(0,length(xseq),length(yseq))
+      tempmat_skyChiSq[2:(length(xseq)-1),2:(length(yseq)-1)] = tempsky[,3]
+      tempmat_skyChiSq[is.na(tempmat_skyChiSq)] = stats::median(tempsky[,3], na.rm = TRUE)
     }
     
-    xstart=min(3,dim(tempmat_sky)[1]-1)
-    ystart=min(3,dim(tempmat_sky)[2]-1)
-    xend=max(length(xseq)-2,2)
-    yend=max(length(yseq)-2,2)
+    xstart = min(3,dim(tempmat_sky)[1]-1)
+    ystart = min(3,dim(tempmat_sky)[2]-1)
+    xend = max(length(xseq)-2,2)
+    yend = max(length(yseq)-2,2)
     
-    tempmat_sky[1,]=tempmat_sky[2,]*2-tempmat_sky[xstart,]
-    tempmat_sky[length(xseq),]=tempmat_sky[length(xseq)-1,]*2-tempmat_sky[xend,]
-    tempmat_sky[,1]=tempmat_sky[,2]*2-tempmat_sky[,ystart]
-    tempmat_sky[,length(yseq)]=tempmat_sky[,length(yseq)-1]*2-tempmat_sky[,yend]
+    tempmat_sky[1,] = tempmat_sky[2,]*2-tempmat_sky[xstart,]
+    tempmat_sky[length(xseq),] = tempmat_sky[length(xseq)-1,]*2-tempmat_sky[xend,]
+    tempmat_sky[,1] = tempmat_sky[,2]*2-tempmat_sky[,ystart]
+    tempmat_sky[,length(yseq)] = tempmat_sky[,length(yseq)-1]*2-tempmat_sky[,yend]
     
-    tempmat_skyRMS[1,]=tempmat_skyRMS[2,]*2-tempmat_skyRMS[xstart,]
-    tempmat_skyRMS[length(xseq),]=tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[xend,]
-    tempmat_skyRMS[,1]=tempmat_skyRMS[,2]*2-tempmat_skyRMS[,ystart]
-    tempmat_skyRMS[,length(yseq)]=tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,yend]
+    tempmat_skyRMS[1,] = tempmat_skyRMS[2,]*2-tempmat_skyRMS[xstart,]
+    tempmat_skyRMS[length(xseq),] = tempmat_skyRMS[length(xseq)-1,]*2-tempmat_skyRMS[xend,]
+    tempmat_skyRMS[,1] = tempmat_skyRMS[,2]*2-tempmat_skyRMS[,ystart]
+    tempmat_skyRMS[,length(yseq)] = tempmat_skyRMS[,length(yseq)-1]*2-tempmat_skyRMS[,yend]
     
     if(doChiSq){
-      tempmat_skyChiSq[1,]=tempmat_skyChiSq[2,]*2-tempmat_skyChiSq[xstart,]
-      tempmat_skyChiSq[length(xseq),]=tempmat_skyChiSq[length(xseq)-1,]*2-tempmat_skyChiSq[xend,]
-      tempmat_skyChiSq[,1]=tempmat_skyChiSq[,2]*2-tempmat_skyChiSq[,ystart]
-      tempmat_skyChiSq[,length(yseq)]=tempmat_skyChiSq[,length(yseq)-1]*2-tempmat_skyChiSq[,yend]
+      tempmat_skyChiSq[1,] = tempmat_skyChiSq[2,]*2-tempmat_skyChiSq[xstart,]
+      tempmat_skyChiSq[length(xseq),] = tempmat_skyChiSq[length(xseq)-1,]*2-tempmat_skyChiSq[xend,]
+      tempmat_skyChiSq[,1] = tempmat_skyChiSq[,2]*2-tempmat_skyChiSq[,ystart]
+      tempmat_skyChiSq[,length(yseq)] = tempmat_skyChiSq[,length(yseq)-1]*2-tempmat_skyChiSq[,yend]
     }
     
     if(dim(tempmat_sky)[1]>1){
