@@ -18,7 +18,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   
   timestart=proc.time()[3]
   
-  call=match.call()
+  call=match.call(expand.dots=TRUE)
   
   dots=list(...)
   

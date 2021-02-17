@@ -1009,7 +1009,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
       }
     }
     if(!is.null(profound)){
-      if(!inherits(image, 'profound')){
+      if(!inherits(profound, 'profound')){
         stop('Class of profound input must be of type \'profound\'')
       }
       if(is.null(image)){image=profound$image}

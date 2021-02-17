@@ -17,7 +17,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
-  call=match.call()
+  call=match.call(expand.dots=TRUE)
   
   if(length(box)==1){
     box=rep(box,2)
@@ -535,6 +535,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     row.names(segstats) = NULL
     
     segstats[,grep('flux',colnames(segstats))] = fluxscale*segstats[,grep('flux',colnames(segstats))]
+    
+    if(!is.null(groupstats)){
+      groupstats[,grep('flux',colnames(groupstats))] = fluxscale*groupstats[,grep('flux',colnames(groupstats))]
+    }
     
     if(stats){
       cutsky = (image - sky) / skyRMS
