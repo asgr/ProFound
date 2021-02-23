@@ -1,4 +1,4 @@
-profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype='brute', convmode='extended', Ndeblendlim=Inf){
+profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype='brute', convmode='extended', Ndeblendlim=Inf, image_reweight=FALSE){
   
   if(!is.null(image)){
     if(class(image)=='profound'){
@@ -192,6 +192,13 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     output[Npad:(Npad+Ngroup-1),"Qgroup_db"]=Qgroup_db
     output[Npad:(Npad+Ngroup-1),"beamcorrect"]=beamcorrect
     Npad=Npad+Ngroup
+    
+    if(image_reweight){
+      for(j in 1:length(segIDlist)){
+        tempgridseg = which(segim[tempgridgroup]==segIDlist[j])
+        image[tempgridgroup[tempgridseg,]] = image[tempgridgroup[tempgridseg,]] * weightmatrix[tempgridseg,j]
+      }
+    }
   }
   
   output[,"mag_db"]=profoundFlux2Mag(flux=output[,'flux_db'], magzero=magzero)
@@ -226,5 +233,9 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   row.names(output)=NULL
   
-  invisible(output)
+  if(image_reweight){
+    output = list(segstats = output, image=image)
+  }
+  
+  return(invisible(output))
 }

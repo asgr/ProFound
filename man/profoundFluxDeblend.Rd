@@ -12,7 +12,7 @@ profoundFluxDeblend(image = NULL, segim = NULL, segstats = NULL, groupim = NULL,
   groupsegID = NULL, sky = 0, profound = NULL, magzero = 0,  df = 3, radtrunc = 2,
   iterative = FALSE, doallstats = TRUE, lowmemory = FALSE, deblendtype = 'fit',
   psf = NULL, fluxweight = 'sum', convtype = 'brute', convmode = 'extended',
-  Ndeblendlim = Inf) 
+  Ndeblendlim = Inf, image_reweight = FALSE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -72,6 +72,9 @@ Scalar character, only relevent when \option{deblendtype}='psf'. Either 'extende
 }
   \item{Ndeblendlim}{
 Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments).
+}
+  \item{image_reweight}{
+Logical; if TRUE then the image will be re-scaled by the weight map relevant to each segment, but only for pixels within that segment. This means that neighbouring object flux is approximately removed within each segment of a group. This obviously does not conserve flux, but it potentially makes the image within a segment more appropriate for \code{ProFit} source fitting without doing full simultaneous fitting.
 }
 }
 \details{
