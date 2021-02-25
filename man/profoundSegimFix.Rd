@@ -12,7 +12,7 @@ profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound =
   loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
   crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
   continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL,
-  ...)
+  legend_extra = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -72,6 +72,9 @@ Logical; should users be allowed to add and delete segments. Since this behaviou
 }
   \item{segID_max}{
 Integer; the maximum segment ID to assume for the input \option{segim} when adding or replacing segments (so only relevant if \option{allow_seg_modify}=TRUE), where the default segID for a new segment becomes \option{segID_max} + 1. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k). If set to 'auto' then it will check the input \option{segim}, if left at the default NULL it will check the available segim when it is creating a new segment. Since this will be on a segmentation image subset when specifying a box, this might mean the segID is not unique on the larger input \option{segim}, but it will be unique on the cut down one being processed internally, and the ones returned (\option{segim} and \option{segim_start}).
+}
+  \item{legend_extra}{
+Character vector; extra legend writing that will be added to the top-right of the initial plot screen if provided. Each vector element will be on a different line.  
 }
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.

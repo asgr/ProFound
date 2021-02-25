@@ -1094,7 +1094,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
                           loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, 
                           cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, 
                           continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, 
-                          segID_max=NULL, ...){
+                          segID_max=NULL, legend_extra=NULL, ...){
   if(open_window){
       dev.new(noRStudioGD = TRUE)
   }
@@ -1172,6 +1172,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
     legend('topleft', legend=c('ESC to stop','Multi: merge','1: ungroup','2: undo seg','3: skip check'), text.col='magenta', bg='black')
+    if(!is.null(legend_extra)){
+      legend('topright', legend=legend_extra, text.col='magenta', bg='black')
+    }
     cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
     check=NULL
