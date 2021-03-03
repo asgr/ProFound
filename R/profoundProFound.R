@@ -158,8 +158,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   hasskyRMS = !is.null(skyRMS)
   
   if((hassky==FALSE | hasskyRMS==FALSE) & is.null(segim)){
+    if(hassky==FALSE){
+      sky = 0
+    }
     if(verbose){message(paste('Making initial sky map -',round(proc.time()[3]-timestart,3),'sec'))}
-    roughsky = profoundMakeSkyGrid(image=image, objects=objects, mask=mask, box=box, 
+    roughsky = profoundMakeSkyGrid(image=image, objects=objects, mask=mask, sky=sky, box=box, 
                                  grid=grid, skygrid_type=skygrid_type, type=type, 
                                  skytype=skytype, skyRMStype=skyRMStype, sigmasel=sigmasel, 
                                  skypixmin=skypixmin, boxadd=boxadd, boxiters=0, conviters=conviters,
@@ -320,6 +323,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segstats$flux = segstats$flux + (skystats * segstats$N100) #add back the local sky component
         skyseg_mean=(segstats_new$flux-segstats$flux)/(segstats_new$N100-segstats$N100)
         skyseg_mean[!is.finite(skyseg_mean)]=0
+      }else{
+        skyseg_mean = NA
       }
       
       objects = matrix(0L,dim(segim)[1],dim(segim)[2])
@@ -334,10 +339,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       skyseg_mean = NA
     }
     
+    objects_redo = profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+    
     if(redosky){
       if(redoskysize %% 2 == 0){redoskysize=redoskysize+1}
       if(verbose){message(paste('Doing final aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
-      objects_redo = profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+      
       if(verbose){message(paste('Making final sky map -',round(proc.time()[3]-timestart,3),'sec'))}
       rm(skyRMS)
       sky = profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
@@ -367,7 +374,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){print(summary(as.numeric(skyRMS)))}
     }else{
       if(verbose){message("Skipping making final sky map - redosky set to FALSE")}
-      objects_redo = NULL
       skyChiSqMap = NA
     }
     
