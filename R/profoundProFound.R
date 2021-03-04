@@ -312,8 +312,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         segim_skyloc = profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
         segstats_sky = .profoundFluxCalcMin(image=image, segim=segim_skyloc-segim, mask=mask)
         #segstats$flux = segstats$flux + (skystats * segstats$N100) #add back the local sky component
-        skyseg_mean = segstats_sky$flux / segstats_sky$N100
-        skyseg_mean[!is.finite(skyseg_mean)] = 0
+        skyseg_temp = segstats_sky$flux / segstats_sky$N100
+        skyseg_temp[!is.finite(skyseg_temp)] = 0
+        skyseg_mean = rep(NA,length(segstats$segID))
+        skyseg_mean[match(segstats_sky$segID,segstats$segID)] = skyseg_temp
       }else{
         skyseg_mean = NA
       }
