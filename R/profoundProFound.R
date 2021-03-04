@@ -1,6 +1,6 @@
-profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1, pixcut=3,
+profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycut=1.5, pixcut=3,
                           tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE,
-                          SBlim=NULL, SBdilate=NULL, SBN100=100, size=5, shape='disc', iters=6,
+                          SBlim=NULL, SBdilate=2, SBN100=100, size=5, shape='disc', iters=6,
                           threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL,
                           redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box,
                           skygrid_type = 'new', type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE,
@@ -199,19 +199,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     segim = segim$segim
   }else{
     redosegim = FALSE
-    # Commented out. New profoundExtendSegim function made instead.
-    # if(extendsegim){
-    #   if(verbose){message("Finding additional sources - User provided segim")}
-    #   segimadd=profoundMakeSegim(image=image, mask=objects, tolerance=tolerance, ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  sky=sky, skyRMS=skyRMS, magzero=magzero, pixscale=pixscale, verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
-    #   newloc=which(segimadd$segim>0)
-    #   segimadd$segim[newloc]=segimadd$segim[newloc]+max(segim)
-    #   segim=segim+segimadd$segim
-    #   objects[newloc]=1
-    #   rm(newloc)
-    #   rm(segimadd)
-    # }else{
     if(verbose){message("Skipping making an initial segmentation image - User provided segim")}
-    #}
   }
   
   if(any(segim>0)){
@@ -255,6 +243,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         }
         segim[imagescale==0] = 0
         objects[segim==0] = 0
+        rm(imagescale)
       }
     }else{
       if(verbose){message("Skipping making better sky map - User provided sky and sky RMS")}
@@ -262,17 +251,18 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     
     if(iters>0 | iterskyloc){
       if(verbose){message(paste('Calculating initial segstats -',round(proc.time()[3]-timestart,3),'sec'))}
-      if(length(sky)>1){
-        skystats = .profoundFluxCalcMin(image=sky, segim=segim, mask=mask) #run on sky
-        skystats = skystats$flux/skystats$N100 #get per pixel mean flux per segment
-        skymed = median(skystats, na.rm=TRUE) #median per pixel mean flux per segment for the whole image
-      }else{
-        skystats = sky #specified
-        skymed = sky #specified
-      }
+      # if(length(sky)>1){
+      #   skystats = .profoundFluxCalcMin(image = sky - median(sky,na.rm=TRUE), segim=segim, mask=mask) #run on sky
+      #   skystats = skystats$flux / skystats$N100 #get per pixel mean flux per segment
+      #   #skymed = median(skystats, na.rm=TRUE) #median per pixel mean flux per segment for the whole image
+      # }else{
+      #   skystats = 0 #specified
+      #   #skymed = sky #specified
+      # }
       
-      segstats = .profoundFluxCalcMin(image=image, segim=segim, mask=mask) #run on initial image
-      segstats$flux = segstats$flux - (skystats * segstats$N100) #remove the local sky component
+      image_sky = image - sky
+      segstats = .profoundFluxCalcMin(image=image_sky, segim=segim, mask=mask) #run on initial image
+      #segstats$flux = segstats$flux - (skystats * segstats$N100) #remove the local sky component
       origfrac = segstats$flux #set to initial fluxes
       
       segim_orig = segim
@@ -294,17 +284,16 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(iters>0){
         for(i in 1:(iters)){
           if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-          segim_new=profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
-          segstats_new=.profoundFluxCalcMin(image=image, segim=segim_new, mask=mask) #run on image with dilated segments
-          segstats_new$flux = segstats_new$flux - (skystats * segstats_new$N100) #subtract local sky levels
-          N100diff = (segstats_new$N100-segstats$N100)
-          SBnew=(segstats_new$flux - segstats$flux) / N100diff #calculate the surface brightness of the new grown anulus only
+          segim_new = profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
+          segstats_new = .profoundFluxCalcMin(image=image_sky, segim=segim_new, mask=mask) #run on image with dilated segments
+          N100diff = (segstats_new$N100 - segstats$N100)
+          SBnew = (segstats_new$flux - segstats$flux) / N100diff #calculate the surface brightness of the new grown anulus only
           fluxgrowthratio = segstats_new$flux / segstats$flux #calculate flux growth ratio
-          skyfrac = abs(((skystats-skymed) * N100diff) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
-          expand_segID=segstats[which((fluxgrowthratio > threshold | (SBnew > SBdilate & N100diff>SBN100)) & segstats_new$flux>0 & SBnew < SBlast & skyfrac < 0.5 & selseg==(i-1)),'segID']
-          expand_segID=expand_segID[is.finite(expand_segID)] #safety first
+          #skyfrac = abs((skystats * N100diff) / (segstats_new$flux - segstats$flux)) #estimate how much of the flux growth might be coming from unusual local sky
+          expand_segID = segstats[which((fluxgrowthratio > threshold | (SBnew > SBdilate & N100diff>SBN100)) & segstats_new$flux>0 & SBnew < SBlast & selseg==(i-1)),'segID']
+          expand_segID = expand_segID[is.finite(expand_segID)] #safety first
           if(length(expand_segID)==0){break}
-          updateID=which(segstats$segID %in% expand_segID)
+          updateID = which(segstats$segID %in% expand_segID)
           selseg[updateID] = i #iteration number for segments flagged for growth
           segstats[updateID,] = segstats_new[updateID,] #update only the segstats for things that are growing, the rest can be ignored
           SBlast = SBnew
@@ -317,12 +306,14 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         }
       }
       
+      origfrac = origfrac / segstats$flux
+      
       if(iterskyloc){
         segim_skyloc = profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
-        segstats_new = .profoundFluxCalcMin(image=image, segim=segim_skyloc, mask=mask)
-        segstats$flux = segstats$flux + (skystats * segstats$N100) #add back the local sky component
-        skyseg_mean=(segstats_new$flux-segstats$flux)/(segstats_new$N100-segstats$N100)
-        skyseg_mean[!is.finite(skyseg_mean)]=0
+        segstats_sky = .profoundFluxCalcMin(image=image, segim=segim_skyloc-segim, mask=mask)
+        #segstats$flux = segstats$flux + (skystats * segstats$N100) #add back the local sky component
+        skyseg_mean = segstats_sky$flux / segstats_sky$N100
+        skyseg_mean[!is.finite(skyseg_mean)] = 0
       }else{
         skyseg_mean = NA
       }
@@ -330,7 +321,6 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects = matrix(0L,dim(segim)[1],dim(segim)[2])
       objects[] = as.logical(segim)
       
-      origfrac = origfrac / (segstats$flux - (skystats * segstats$N100))
     }else{
       if(verbose){message('Iters set to 0 - keeping segim un-dilated')}
       segim_orig = segim
@@ -424,7 +414,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                                   boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, 
                                   app_diam=app_diam)
       segstats = cbind(segstats, iter=selseg, origfrac=origfrac, Norig=Norig[segstats$segID], skyseg_mean=skyseg_mean)
-      segstats = cbind(segstats, flag_keep=segstats$origfrac>= median(segstats$origfrac[segstats$iter==iters]) | segstats$iter<iters)
+      segstats = cbind(segstats, flag_keep=segstats$origfrac >= median(segstats$origfrac[segstats$iter==iters]) | segstats$iter<iters)
     }else{
       if(verbose){message("Skipping segmentation statistics - segstats set to FALSE")}
       segstats = NULL

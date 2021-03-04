@@ -32,7 +32,7 @@ Numeric vector; the input mag-zero points. If length 1 then it is assumed all in
 Numeric scalar; the output mag-zero point desired.
 }
   \item{masking}{
-Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
+Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or'/'|'/'||' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and'/'&'/'&&' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
 }
 \details{
