@@ -679,7 +679,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
-    legend('topleft', legend=paste('N:',length(x$segstats$mag)))
+    legend('topleft', legend=paste('N:',length(x$segstats$mag)), bty='n', text.col='green4')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     if(requireNamespace("Rwcs", quietly = TRUE)){
@@ -691,13 +691,23 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
       stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
       stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
-      stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
+      stat_cor_sky_skyRMS = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
+      if(!is.null(x$objects_redo)){
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$mask==0 & x$objects_redo>0]), as.numeric(x$image[x$mask==0 & x$objects_redo>0] - as.numeric(x$sky[x$mask==0 & x$objects_redo>0])), use="pairwise.complete.obs"),4)
+      }else{
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$mask==0 & x$objects>0]), as.numeric(x$image[x$mask==0 & x$objects>0] - as.numeric(x$sky[x$mask==0 & x$objects>0])), use="pairwise.complete.obs"),4)
+      }
     }else{
       stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
       stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
-      stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
+      stat_cor_sky_skyRMS = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
+      if(!is.null(x$objects_redo)){
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$objects_redo>0]), as.numeric(x$image[x$objects_redo>0] - as.numeric(x$sky[x$objects_redo>0])), use="pairwise.complete.obs"),4)
+      }else{
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$objects>0]), as.numeric(x$image[x$objects>0] - as.numeric(x$sky[x$objects>0])), use="pairwise.complete.obs"),4)
+      }
     }
-    legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
+    legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)), bty='n', text.col='green4')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     if(requireNamespace("Rwcs", quietly = TRUE)){
@@ -713,24 +723,24 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
       stat_mean = signif(mean(x$skyRMS, na.rm=TRUE),4)
       stat_sd = signif(sd(x$skyRMS, na.rm=TRUE),4)
     }
-    legend('topleft',legend=c('Sky RMS',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
+    legend('topleft',legend=c('Sky RMS',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)), bty='n', text.col='green4')
     
     if(hist=='iters'){
       maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#', verbose=FALSE)
     }else if(hist=='sky'){
       try({
         if(!is.null(x$objects_redo)){
-          tempsky=image[x$objects_redo==0]
+          tempsky = image[x$objects_redo==0]
         }else{
-          tempsky=image[x$objects==0]
+          tempsky = image[x$objects==0]
         }
-        tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
+        tempsky = tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
         if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
         if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor)), bg='white')
-        legend('topright',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bg='white')
+        legend('topleft',legend=c('Sky Pixels',paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='green4')
+        legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='green4')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
@@ -769,25 +779,31 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
-    legend('topleft', legend=paste('N:',length(x$segstats$mag)))
+    legend('topleft', legend=paste('N:',length(x$segstats$mag)), bty='n', text.col='green4')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$sky-median(x$sky,na.rm=TRUE), qdiff=TRUE)
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
-      suppressWarnings({
-        stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
-        stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
-        stat_cor = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
-      })
+      stat_mean = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
+      stat_sd = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
+      stat_cor_sky_skyRMS = signif(cor(as.numeric(x$sky[x$mask==0]), as.numeric(x$skyRMS[x$mask==0])^2, use="pairwise.complete.obs"),4)
+      if(!is.null(x$objects_redo)){
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$mask==0 & x$objects_redo>0]), as.numeric(x$image[x$mask==0 & x$objects_redo>0] - as.numeric(x$sky[x$mask==0 & x$objects_redo>0])), use="pairwise.complete.obs"),4)
+      }else{
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$mask==0 & x$objects>0]), as.numeric(x$image[x$mask==0 & x$objects>0] - as.numeric(x$sky[x$mask==0 & x$objects>0])), use="pairwise.complete.obs"),4)
+      }
     }else{
-      suppressWarnings({
-        stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
-        stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
-        stat_cor = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
-      })
+      stat_mean = signif(mean(x$sky, na.rm=TRUE),4)
+      stat_sd = signif(sd(x$sky, na.rm=TRUE),4)
+      stat_cor_sky_skyRMS = signif(cor(as.numeric(x$sky), as.numeric(x$skyRMS)^2, use="pairwise.complete.obs"),4)
+      if(!is.null(x$objects_redo)){
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$objects_redo>0]), as.numeric(x$image[x$objects_redo>0] - as.numeric(x$sky[x$objects_redo>0])), use="pairwise.complete.obs"),4)
+      }else{
+        stat_cor_sky_image = signif(cor(as.numeric(x$sky[x$objects>0]), as.numeric(x$image[x$objects>0] - as.numeric(x$sky[x$objects>0])), use="pairwise.complete.obs"),4)
+      }
     }
-    legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
+    legend('topleft',legend=c('Sky',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)), bty='n', text.col='green4')
     
     par(mar=c(3.5,3.5,0.5,0.5))
     magimage(x$skyRMS)
@@ -799,24 +815,24 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
       stat_mean = signif(mean(x$skyRMS, na.rm=TRUE),4)
       stat_sd = signif(sd(x$skyRMS, na.rm=TRUE),4)
     }
-    legend('topleft',legend=c('Sky RMS',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)),bg='white')
+    legend('topleft',legend=c('Sky RMS',paste0('Mean: ',stat_mean),paste0('SD: ',stat_sd)), bty='n', text.col='green4')
     
     if(hist=='iters'){
       maghist(x$segstats$iter, breaks=seq(-0.5,max(x$segstats$iter, na.rm=TRUE)+0.5,by=1), majorn=max(x$segstats$iter, na.rm=TRUE)+1, xlab='Number of Dilations', ylab='#', verbose=FALSE)
     }else if(hist=='sky'){
       try({
         if(!is.null(x$objects_redo)){
-          tempsky=image[x$objects_redo==0]
+          tempsky = image[x$objects_redo==0]
         }else{
-          tempsky=image[x$objects==0]
+          tempsky = image[x$objects==0]
         }
-        tempsky=tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
+        tempsky = tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
         if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
         if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
         magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='red', lty=2)
-        legend('topleft',legend=c('Sky Pixels',paste0('Cor: ',stat_cor)), bg='white')
-        legend('topright',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bg='white')
+        legend('topleft',legend=c('Sky Pixels',paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='green4')
+        legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='green4')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
