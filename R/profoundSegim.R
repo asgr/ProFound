@@ -1086,7 +1086,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   magimage(segim, col=c(NA,col), add=TRUE, magmap=FALSE)
   
   if(!is.null(mask)){
-    magimage(mask!=0, col=c(NA,hsv(alpha=0.3)), add=TRUE, magmap=FALSE, zlim=c(0,1))
+    magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
   }
 }
 
