@@ -716,7 +716,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
-    legend('topleft', legend=paste('N:',length(x$segstats$mag)), bty='n', text.col='green4')
+    legend('topleft', legend=paste('N:',length(x$segstats$mag)), bty='n', text.col='black')
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 5 sky
     if(requireNamespace("Rwcs", quietly = TRUE)){
@@ -763,8 +763,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='green4', lty=2)
         lines(density((x$sky[x$objects==1] - stat_mean_sky)/ stat_sd_sky), col='red')
         lines(density((x$sky[x$objects==0] - stat_mean_sky)/ stat_sd_sky), col='blue')
-        legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='green4')
-        legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='green4')
+        legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='black')
+        legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='black')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
@@ -807,7 +807,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     abline(ymax - xmax*0.4, 0.4, col='red')
     abline(v=xmax+0.25, col='red')
     axis(side=1, at=xmax+0.25, labels=xmax+0.25, tick=FALSE, line=-1, col.axis='red')
-    legend('topleft', legend=paste('N:',length(x$segstats$mag)), bty='n', text.col='green4')
+    legend('topleft', legend=paste('N:',length(x$segstats$mag)), bty='n', text.col='black')
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 5 sky
     magimage(x$sky-median(x$sky,na.rm=TRUE), qdiff=TRUE)
@@ -846,8 +846,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
         curve(dnorm(x, mean=0, sd=1), add=TRUE, col='green4', lty=2)
         lines(density((x$sky[x$objects==1] - stat_mean_sky)/ stat_sd_sky), col='red')
         lines(density((x$sky[x$objects==0] - stat_mean_sky)/ stat_sd_sky), col='blue')
-        legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='green4')
-        legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='green4')
+        legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='black')
+        legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='black')
         })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
