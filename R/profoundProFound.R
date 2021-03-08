@@ -284,7 +284,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(iters>0){
         for(i in 1:(iters)){
           if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-          segim_new = profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
+          segim_new = profoundDilate(segim=segim, size=size, shape=shape, expand=expand_segID, iters=1)
+          #segim_new = profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
           segstats_new = .profoundFluxCalcMin(image=image_sky, segim=segim_new, mask=mask) #run on image with dilated segments
           N100diff = (segstats_new$N100 - segstats$N100)
           SBnew = (segstats_new$flux - segstats$flux) / N100diff #calculate the surface brightness of the new grown anulus only

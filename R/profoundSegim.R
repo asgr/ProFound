@@ -565,15 +565,6 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(expand[1]=='all'){
     segim_new = .dilate_cpp(segim, kern)
-    # segim_new=segim
-    # maxorig=max(segim_new, na.rm=TRUE)+1L
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
-    # segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
-    # replace=which(segim!=0) #put back non-dilated segments
-    # segim_new[replace]=segim[replace] #put back non-dilated segments
   }else{
     segim_new=segim
     if('fastmatch' %in% .packages()){ #remove things that will not be dilated
@@ -581,12 +572,6 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     }else{
       segim_new[!(segim_new %in% expand)] = 0L
     }
-    # maxorig=max(segim_new, na.rm=TRUE)+1L
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
-    # segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
     segim_new = .dilate_cpp(segim_new, kern)
     replace=which(segim!=0) #put back non-dilated segments
     segim_new[replace]=segim[replace] #put back non-dilated segments
@@ -1542,6 +1527,7 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   invisible(segim)
 }
 
+
 .profoundFluxCalcMin=function(image=NULL, segim=NULL, mask=NULL){
   
   #Set masked things to NA, to be safe:
@@ -1558,4 +1544,29 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   setkey(output, segID)
   
   return(as.data.frame(output))
+}
+
+profoundDilate = function(segim=NULL, size=3, shape='disc', expand='all', iters=1){
+  kern = .makeBrush(size, shape=shape)
+  for(i in 1:iters){
+    if(expand[1]=='all'){
+      segim = .dilate_cpp(segim, kern)
+    }else{
+      if(i==1){
+        segim_new = segim
+      }
+      if('fastmatch' %in% .packages()){ #remove things that will not be dilated
+        segim_new[fastmatch::fmatch(segim_new, expand, nomatch = 0L) == 0L] = 0L
+      }else{
+        segim_new[!(segim_new %in% expand)] = 0L
+      }
+      segim_new = .dilate_cpp(segim_new, kern)
+      replace = which(segim!=0) #put back non-dilated segments
+      segim_new[replace] = segim[replace] #put back non-dilated segments
+      mode(segim_new) = 'integer'
+      segim = segim_new
+      rm(replace)
+    }
+  }
+  return(segim)
 }
