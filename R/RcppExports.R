@@ -16,8 +16,8 @@
     invisible(.Call(`_ProFound_interpolateLinearGrid`, xseq, yseq, tempmat_sky, output))
 }
 
-.dilate_cpp <- function(segim, kern) {
-    .Call(`_ProFound_dilate_cpp`, segim, kern)
+.dilate_cpp <- function(segim, kern, expand = 0L) {
+    .Call(`_ProFound_dilate_cpp`, segim, kern, expand)
 }
 
 .point_in_polygon_cpp <- function(x, y, poly_x, poly_y) {

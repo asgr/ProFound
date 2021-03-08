@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export(".dilate_cpp")]]
-IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern){
+IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector expand=0){
   
   int srow = segim.nrow();
   int scol = segim.ncol();
@@ -10,27 +10,54 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern){
   int kcol = kern.ncol();
   int krow_off = ((krow - 1) / 2);
   int kcol_off = ((kcol - 1) / 2);
+  int checkseg;
+  int max_segim = max(segim);
   IntegerMatrix segim_new(srow, scol);
+  LogicalVector seglogic  (max_segim);
   
-  for (int j = 0; j < scol; j++) {
-    for (int i = 0; i < srow; i++) {
+  // if(expand(0) == 0){
+  //   expandall = true;
+  // }else{
+  //   expandall = false;
+  //   
+  // }
+  
+  if(expand(0) > 0){
+    for(int k = 0; k < expand.length(); k++){
+      if(expand(k) <= max_segim){
+        seglogic(expand(k)-1) = true;
+      }
+    }
+  }
+  
+  for (int i = 0; i < srow; i++) {
+    for (int j = 0; j < scol; j++) {
       if(segim(i,j) > 0){
-        for (int n = std::max(0,kcol_off - j); n < std::min(kcol, kcol_off - (j - scol)); n++) {
-          for (int m = std::max(0,krow_off - i); m < std::min(krow, krow_off - (i - srow)); m++) {
-            if(kern(m,n) > 0){
-              if(m != krow_off || n != kcol_off){
-                if(segim(i + m - krow_off,j + n - kcol_off) == 0){
-                  int xloc = i + m - krow_off;
-                  int yloc = j + n - kcol_off;
-                  if(segim(i,j) < segim_new(xloc,yloc) || segim_new(xloc,yloc) == 0) {
-                    segim_new(xloc,yloc) = segim(i,j);
+        if(expand(0) == 0){
+          checkseg = true;
+        }else{
+          checkseg = seglogic(segim(i,j)-1);
+        }
+        if(checkseg){
+          for (int m = std::max(0, krow_off - i); m < std::min(krow, krow_off - (i - srow)); m++) {
+            for (int n = std::max(0, kcol_off - j); n < std::min(kcol, kcol_off - (j - scol)); n++) {
+              if(kern(m,n) > 0){
+                if(m != krow_off || n != kcol_off){
+                  if(segim(i + m - krow_off,j + n - kcol_off) == 0){
+                    int xloc = i + m - krow_off;
+                    int yloc = j + n - kcol_off;
+                    if(segim(i,j) < segim_new(xloc,yloc) || segim_new(xloc,yloc) == 0) {
+                      segim_new(xloc,yloc) = segim(i,j);
+                    }
                   }
+                }else{
+                  segim_new(i,j) = segim(i,j);
                 }
-              }else{
-                segim_new(i,j) = segim(i,j);
               }
             }
           }
+        }else{
+          segim_new(i,j) = segim(i,j);
         }
       }
     }
