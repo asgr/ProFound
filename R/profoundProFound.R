@@ -759,18 +759,19 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
         tempsky = tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
         if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
         if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
-        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
-        curve(dnorm(x, mean=0, sd=1), add=TRUE, col='green4', lty=2)
+        magplot(function(x){dnorm(x,mean=0, sd=1)}, grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5), lty=2, type='l', col='green4')
+        lines(density(tempsky[is.finite(tempsky)], bw=0.1), col='black')
         lines(density((x$sky[x$objects==1] - stat_mean_sky)/ stat_sd_sky), col='red')
         lines(density((x$sky[x$objects==0] - stat_mean_sky)/ stat_sd_sky), col='blue')
         legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='black')
         legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='black')
-        })
+        legend('bottom', legend=c('Sky pixels','Normal Dist','Sky in objects','Sky in sky'), lty=c(1,2,1,1), col=c('black','green4', 'red','blue'))
+      })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 8 size v mag
     if(logR50){
-      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(min(x$segstats$R50, 0.1, na.rm = TRUE), max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE, log='y')
+      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(min(x$segstats$R50, 0.3, na.rm = TRUE), max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE, log='y')
     }else{
       magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE)
     }
@@ -842,18 +843,19 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
         tempsky = tempsky[tempsky > -8 & tempsky < 8 & !is.na(tempsky)]
         if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
         if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
-        magplot(density(tempsky[is.finite(tempsky)], bw=0.1), grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5))
-        curve(dnorm(x, mean=0, sd=1), add=TRUE, col='green4', lty=2)
+        magplot(function(x){dnorm(x,mean=0, sd=1)}, grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5), lty=2, type='l', col='green4')
+        lines(density(tempsky[is.finite(tempsky)], bw=0.1), col='black')
         lines(density((x$sky[x$objects==1] - stat_mean_sky)/ stat_sd_sky), col='red')
         lines(density((x$sky[x$objects==0] - stat_mean_sky)/ stat_sd_sky), col='blue')
         legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='black')
         legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='black')
-        })
+        legend('bottom', legend=c('Sky pixels','Normal Dist','Sky in objects','Sky in sky'), lty=c(1,2,1,1), col=c('black','green4', 'red','blue'))
+      })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 8 size v mag
     if(logR50){
-      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(min(x$segstats$R50, 0.1, na.rm = TRUE), max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE, log='y')
+      magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(min(x$segstats$R50, 0.3, na.rm = TRUE), max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE, log='y')
     }else{
       magplot(x$segstats$mag, x$segstats$R50, pch='.', col=hsv(alpha=0.5), ylim=c(0, max(x$segstats$R50, 1, na.rm = TRUE)), cex=3, xlab='mag', ylab='R50 / asec', grid=TRUE)
     }
