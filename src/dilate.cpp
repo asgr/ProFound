@@ -10,7 +10,7 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector 
   int kcol = kern.ncol();
   int krow_off = ((krow - 1) / 2);
   int kcol_off = ((kcol - 1) / 2);
-  int checkseg;
+  bool checkseg = true;
   int max_segim = max(segim);
   IntegerMatrix segim_new(srow, scol);
   LogicalVector seglogic  (max_segim);
@@ -33,9 +33,7 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector 
   for (int i = 0; i < srow; i++) {
     for (int j = 0; j < scol; j++) {
       if(segim(i,j) > 0){
-        if(expand(0) == 0){
-          checkseg = true;
-        }else{
+        if(expand(0) > 0){
           checkseg = seglogic(segim(i,j)-1);
         }
         if(checkseg){

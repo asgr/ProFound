@@ -1,5 +1,6 @@
 \name{profoundSegimInfo}
 \alias{profoundSegimStats}
+\alias{segstats}
 \alias{profoundSegimPlot}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
