@@ -148,9 +148,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects = matrix(0L,dim(segim)[1],dim(segim)[2])
       objects[] = as.logical(segim)
     }
-  }else{
-    objects = objects*1L #Looks silly, but this ensures a logical mask becomes integer.
-  }
+  }#else{
+  #   objects = objects*1L #Looks silly, but this ensures a logical mask becomes integer.
+  # }
   
   #Check for user provided sky, and compute if missing:
   
@@ -620,7 +620,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     x$skyRMS=matrix(x$skyRMS, x$dim[1], x$dim[2])
   }
   
-  segdiff=x$segim-x$segim_orig
+  segdiff = x$segim - x$segim_orig
   segdiff[segdiff<0]=0
   
   if(!is.null(x$mask)){
@@ -630,6 +630,11 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   
   image = (x$image-x$sky)/x$skyRMS
   image[x$skyRMS < 0] = NA
+  
+  if(is.null(x$objects)){
+    x$objects = matrix(0L,dim(x$segim)[1],dim(x$segim)[2])
+    x$objects[] = as.logical(x$segim)
+  }
   
   #Masked and unmasked stats:
   

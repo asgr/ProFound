@@ -99,9 +99,11 @@ Currently fixed segment complexes (as per the internal version of \option{segID_
 
 If you see one of these coloured polygon complexes and do not like the solution you can click once in it and hit ESC in the plot window. This will tell the code to unpick the complex and return all filled segments back to their original solution. You can then try to fix it again, if needed.
 
-If you make a number of clicks and then change your mind, click on the unwanted segment twice and make some other this will ignore the segment when merging- this allows you to fix silly click errors by clicking again.
+If you make a number of clicks and then change your mind, click on the unwanted segment twice (or in fact any even number of times)- this will ignore the segment when merging. This allows you to fix silly click errors by clicking again.
 
 If you click on any segment three times and hit ESC in the plot window it will tell the code that you are both definitely happy *and* that you want to stop fixing segments, ending the session instantly. This allows you to make rapid progress when doing lots of easy fixes since you do not need to then type anything at all into the command prompt (which slows down progress).
+
+If you click on the sky exactly twice it will set the output flag \option{goback} = TRUE. This is really for scripts that are looping through a large number of objects to be fixed, making it easy for them to detect when the user want to go back one image (sometimes you skip over one you would like to fix).
 
 If \option{allow_seg_modify}=TRUE and you just click on a segment twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky). It will ask what segID you want for the segment, where the default of "auto" will make a new segID one larger than the current maximum. You can specify your own choice manually, where if you use a current segID it will merge the sources. It is possible to delete the segment by setting the segID when asked to "0", which means it will become sky.
 
@@ -113,6 +115,7 @@ List containing:
 \item{segim_start}{Numeric matrix; reference starting segmentation map.}
 \item{segID_merge}{List; fixed version of the list of segIDs to be merged. Usefully, this can be directly passed into \code{\link{profoundSegimKeep}} (see Examples).}
 \item{segID_max}{Integer; the current maximum segment ID in the output \option{segim}. This should only be modified compared to the input \option{segim} if new segments have be drawn on the image.}
+\item{goback}{Logical; flag to say whether the user would like to go back one image (TRUE) or not (FALSE). This is really for the use of controller scripts.}
 
 It is always the case that \option{segim_start} combined with \option{segID_merge} will produce \option{segim} via \code{\link{profoundSegimKeep}}. We provide \option{segim_start} for reference since the segment creation mode (see Details above) will also modify the base segmentation map in order to guarantee the internal consistency. This means the output \option{segim_start} and differ from the input \option{segim_start}, but only if new segments have been manually drawn.
 }
@@ -124,32 +127,32 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
-VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
-VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
+GALEX_NUV = readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
+VST_r = readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+VISTA_K = readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 
 # Warp to common WCS:
 
-GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)$image
-VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)$image
+GALEX_NUV_VST = magwarp(GALEX_NUV, VST_r$hdr)$image
+VISTA_K_VST = magwarp(VISTA_K, VST_r$hdr)$image
 
 #Good but not perfect:
 
-profound=profoundProFound(VST_r, roughpedestal=TRUE, plot=TRUE)
+profound = profoundProFound(VST_r, roughpedestal=TRUE, plot=TRUE)
 
 #Let's fix it:
 
-fixed=profoundSegimFix(profound)
+fixed = profoundSegimFix(profound)
 
 #Colour might help:
 
-fixedRGB=profoundSegimFix(list(R=VISTA_K_VST, G=VST_r$imDat, B=GALEX_NUV_VST),
-segim=profound$segim)
+fixedRGB = profoundSegimFix(list(R=VISTA_K_VST, G=VST_r$imDat, B=GALEX_NUV_VST),
+  segim=profound$segim)
 
-#Assuming you made some fixes you can also recreate the fixed segim using the output
-# \option{segID_merge})(i.e. you only really need to save \option{segID_merge}):
+# Assuming you made some fixes you can also recreate the fixed segim using the output
+# segID_merge (i.e. you only really need to save segID_merge):
 
-fixedRGB2=profoundSegimKeep(segim=profound$segim, segID_merge=fixedRGB$segID_merge)
+fixedRGB2 = profoundSegimKeep(segim=profound$segim, segID_merge=fixedRGB$segID_merge)
 
 #Check things look the same:
 
@@ -158,7 +161,7 @@ profoundSegimPlot(image=VST_r$imDat, segim=fixedRGB2)
 
 #We can now feed this back into ProFound for our best final effort:
 
-profound2=profoundProFound(VST_r, segim=fixedRGB$segim, plot=TRUE, SBdilate=1)
+profound2 = profoundProFound(VST_r, segim=fixedRGB$segim, plot=TRUE, SBdilate=1)
 
 #The object at 300, 300 is the new merged object (if you have merged the main galaxy).
 #On a local run this had segID=6, old mag=15.5, new mag=15.2 (i.e. flux increase of 30\%).

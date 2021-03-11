@@ -1141,7 +1141,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     segim_progress[]=0
   }
   
-  continue=TRUE
+  continue = TRUE
+  goback = FALSE
   
   par(mar=c(0.1,0.1,0.1,0.1))
   if(is.list(image)){
@@ -1174,13 +1175,18 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       if(any(ceiling(temploc$x)<0) | any(ceiling(temploc$y)<0) | any(ceiling(temploc$x)>dim(segim)[1]) | any(ceiling(temploc$y)>dim(segim)[2])){
         legend('bottomleft', legend='Selected outside of image!', text.col='magenta', bg='black')
       }else{
-        mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-        check=tabulate(mergeIDs)
-        mergeIDs=list(which(check %% 2 == 1))
+        mergeIDs = segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+        check = tabulate(mergeIDs)
+        if(!all(mergeIDs==0)){
+          mergeIDs = list(which(check %% 2 == 1))
+        }
       }
       
       if(!is.null(check)){
-        if(length(check)==1 & check[1]==0  & allow_seg_modify){ #entering segment polygon mode
+        if(length(check)==1 & length(mergeIDs) == 2 & all(mergeIDs==0)){ #flag to go back
+          legend('bottomleft', legend='Go back', text.col='magenta', bg='black')
+          goback = TRUE
+        }else if(length(check)==1 & length(mergeIDs) == 1 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
           mergeIDs=list()
           legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
           temploc=locator(type='o', col=col, pch=pch, cex=cex)
@@ -1257,8 +1263,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     }
     
     if(happy){
-      if(any(check==3)){
-        continue=FALSE
+      if(any(check==3) | goback){
+        continue = FALSE
       }else{
         par(mar=c(0.1,0.1,0.1,0.1))
         if(is.list(image)){
@@ -1298,7 +1304,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     dev.off()
   }
   
-  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max)))
+  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max, goback=goback)))
 }
 
 # .inpoly=function(polyx,polyy,x0,y0){ #defunct code, not working properly anyway...
