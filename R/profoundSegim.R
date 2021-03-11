@@ -1157,7 +1157,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
-    legend('topleft', legend=c('ESC to stop','Multi: merge','1: ungroup','2: undo seg','3: skip check'), text.col='magenta', bg='black')
+    legend('topleft', legend=c('ESC to stop','Click to merge','Seg 1: ungroup','Seg 2: undo seg','Seg 3: skip check','Sky 2: go back'), text.col='magenta', bg='black')
     if(!is.null(legend_extra)){
       legend('topright', legend=legend_extra, text.col='magenta', bg='black')
     }
