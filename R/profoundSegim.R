@@ -1163,10 +1163,10 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     }
     cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
-    check=NULL
-    seggrid=NULL
-    mergeIDs=list()
-    temploc=locator(type='p', col=col, pch=pch, cex=cex)
+    check = NULL
+    seggrid = NULL
+    mergeIDs = {}
+    temploc = locator(type='p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){ #if nothing is selected move on
       legend('bottomleft', legend='Done!', text.col='magenta', bg='black')
@@ -1178,7 +1178,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         mergeIDs = segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
         check = tabulate(mergeIDs)
         if(!all(mergeIDs==0)){
-          mergeIDs = list(which(check %% 2 == 1))
+          mergeIDs = which(check %% 2 == 1)
         }
       }
       
@@ -1187,7 +1187,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
           legend('bottomleft', legend='Go back', text.col='magenta', bg='black')
           goback = TRUE
         }else if(length(check)==1 & length(mergeIDs) == 1 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
-          mergeIDs=list()
+          mergeIDs = {}
           legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
           temploc=locator(type='o', col=col, pch=pch, cex=cex)
           if(!is.null(temploc)){
@@ -1195,7 +1195,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
             seggrid=.inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
           }
         }else if(length(which(check>0))==1){
-          mergeIDs=list()
+          mergeIDs = {}
           if(max(check)==2 & allow_seg_modify){ #select segment
             seggrid=which(segim==which(check==2), arr.ind=TRUE)
           }else{ #group de-merge
@@ -1249,8 +1249,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         segim_progress[seggrid]=newsegID
         segim_start[seggrid]=newsegID
       }
-      if(length(unlist(mergeIDs))>0){
-        segID_merge=c(segID_merge,mergeIDs)
+      if(length(mergeIDs)>0){
+        segID_merge=c(segID_merge,list(mergeIDs))
       }
       if(length(segID_merge)>0){
         segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
