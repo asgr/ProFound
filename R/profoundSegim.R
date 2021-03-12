@@ -1166,7 +1166,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
     if(allow_seg_modify){
-      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: make seg'), text.col='magenta', bg='black')
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo/mod seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: make seg'), text.col='magenta', bg='black')
     }else{
       legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit'), text.col='magenta', bg='black')
     }
