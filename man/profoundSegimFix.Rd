@@ -12,7 +12,7 @@ profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound =
   loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
   crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
   continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL,
-  legend_extra = NULL, ...)
+  legend_extra = NULL, group_limit = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -76,6 +76,9 @@ Integer; the maximum segment ID to assume for the input \option{segim} when addi
   \item{legend_extra}{
 Character vector; extra legend writing that will be added to the top-right of the initial plot screen if provided. Each vector element will be on a different line.  
 }
+  \item{group_limit}{
+Logical; should segment linking be limited to contiguous groups. Usually this should be TRUE since you do not really want discontinuous segment photometry, and indeed many measurement do not make sense in this regime.  
+}
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.
 }
@@ -105,9 +108,9 @@ If you click on any segment three times and hit ESC in the plot window it will t
 
 If you click on the sky exactly twice it will set the output flag \option{goback} = TRUE. This is really for scripts that are looping through a large number of objects to be fixed, making it easy for them to detect when the user want to go back one image (sometimes you skip over one you would like to fix).
 
-If \option{allow_seg_modify}=TRUE and you just click on a segment twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky). It will ask what segID you want for the segment, where the default of "auto" will make a new segID one larger than the current maximum. You can specify your own choice manually, where if you use a current segID it will merge the sources. It is possible to delete the segment by setting the segID when asked to "0", which means it will become sky.
+If \option{allow_seg_modify}=TRUE and you just click on a segment twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky). It will ask what segID you want for the segment, where the default of "auto" will make a new segID one larger than the current maximum. You can specify your own choice manually, where if you use a current segID it will merge the sources.
 
-If \option{allow_seg_modify}=TRUE and you click on the sky once and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. Double clicking a single segment (see above) also enters this mode, and the segment is changed in the same manner as if it were drawn manually. In both cases it is possible to delete segments contained within the polygon simply by setting the segID when asked to "0", which means it will become sky. In this manner you can delete potentially many at once by drawing round large groups of unwanted segments.
+If \option{allow_seg_modify}=TRUE and you click on the sky twice and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. Double clicking a single segment (see above) also enters this mode, and the segment is changed in the same manner as if it were drawn manually. In both cases it is possible to delete segments contained within the polygon simply by setting the segID when asked to "0", which means it will become sky. In this manner you can delete potentially many at once by drawing round large groups of unwanted segments.
 }
 \value{
 List containing:
