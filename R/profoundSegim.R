@@ -1189,11 +1189,15 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       }else{
         mergeIDs = segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
         check = tabulate(mergeIDs)
-        if(!all(mergeIDs==0)){
+        if(all(mergeIDs>0)){
           mergeIDs = which(check %% 2 == 1)
           if(group_limit){
             groupIDs = groupim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-            if(length(unique(groupIDs))>1){
+            if(any(groupIDs==0)){
+              mergeIDs = {}
+              check = NULL
+              legend('bottomleft', legend='Will not merge with sky (will ignore)!', text.col='magenta', bg='black')
+            }else if(length(unique(groupIDs))>1){
               mergeIDs = {}
               check = NULL
               legend('bottomleft', legend='Discontinuous segments (will ignore)!', text.col='magenta', bg='black')
@@ -1221,6 +1225,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
             lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
             seggrid = .inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
           }
+        }else if(any(mergeIDs==0)){
+          mergeIDs = {}
+          legend('bottomleft', legend='Ambiguous segment/sky click/s (will ignore)!', text.col='magenta', bg='black')
         }else if(length(which(check>0))==1){
           #If only one segment appears in the check vector
           mergeIDs = {}
