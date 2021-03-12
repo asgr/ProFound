@@ -119,6 +119,7 @@ List containing:
 \item{segID_merge}{List; fixed version of the list of segIDs to be merged. Usefully, this can be directly passed into \code{\link{profoundSegimKeep}} (see Examples).}
 \item{segID_max}{Integer; the current maximum segment ID in the output \option{segim}. This should only be modified compared to the input \option{segim} if new segments have be drawn on the image.}
 \item{goback}{Logical; flag to say whether the user would like to go back one image (TRUE) or not (FALSE). This is really for the use of controller scripts.}
+\item{quit}{Logical; carries through the users desire to quit segment fixing (useful if doing a long session of fixing).}
 
 It is always the case that \option{segim_start} combined with \option{segID_merge} will produce \option{segim} via \code{\link{profoundSegimKeep}}. We provide \option{segim_start} for reference since the segment creation mode (see Details above) will also modify the base segmentation map in order to guarantee the internal consistency. This means the output \option{segim_start} and differ from the input \option{segim_start}, but only if new segments have been manually drawn.
 }

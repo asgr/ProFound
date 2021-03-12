@@ -1149,6 +1149,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
   }
   
   continue = TRUE
+  quit = FALSE
   goback = FALSE
   
   par(mar=c(0.1,0.1,0.1,0.1))
@@ -1165,9 +1166,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
     if(allow_seg_modify){
-      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: make seg'), text.col='magenta', bg='black')
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: make seg'), text.col='magenta', bg='black')
     }else{
-      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back'), text.col='magenta', bg='black')
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit'), text.col='magenta', bg='black')
     }
     if(!is.null(legend_extra)){
       legend('topright', legend=legend_extra, text.col='magenta', bg='black')
@@ -1206,7 +1207,12 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
           #Will set to go back if exactly one sky pixel and nothing else has been selected
           legend('bottomleft', legend='Go back', text.col='magenta', bg='black')
           goback = TRUE
-        }else if(length(check)==1 & length(mergeIDs) == 2 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
+        }else if(length(check)==1 & length(mergeIDs) == 2 & all(mergeIDs==0)){ #quit!
+          #Will set to quit if exactly two sky pixels and nothing else have been selected
+          mergeIDs = {}
+          legend('bottomleft', legend='Quit', text.col='magenta', bg='black')
+          quit = TRUE
+        }else if(length(check)==1 & length(mergeIDs) == 3 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
           #Will set to enter segment making mode if exactly two sky pixels and nothing else have been selected
           mergeIDs = {}
           legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
@@ -1300,22 +1306,29 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         }
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
-        if(continue_default){
-          legend('topleft', legend='Cont? [y]/n', text.col='magenta', bg='black')
-          cat('CONTINUE fixing segments on current image? [y]/n: ')
-          continue = readLines(n=1L)
-          continue = tolower(continue)
-          continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        if(quit == FALSE){
+          if(continue_default){
+            legend('topleft', legend='Cont? [y]/n/q', text.col='magenta', bg='black')
+            cat('CONTINUE fixing segments on current image? [y]/n/q: ')
+            continue = readLines(n=1L)
+            continue = tolower(continue)
+            quit = continue == 'q' | continue == 'quit'
+            continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+          }else{
+            legend('topleft', legend='Cont? y/[n]/q', text.col='magenta', bg='black')
+            cat('CONTINUE fixing segments on current image? y/[n]/q: ')
+            continue = readLines(n=1L)
+            continue = tolower(continue)
+            quit = continue == 'q' | continue == 'quit'
+            continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+          }
         }else{
-          legend('topleft', legend='Cont? y/[n]', text.col='magenta', bg='black')
-          cat('CONTINUE fixing segments on current image? y/[n]: ')
-          continue = readLines(n=1L)
-          continue = tolower(continue)
-          continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+          continue = FALSE
         }
       }
     }else{
-      continue=TRUE
+      continue = TRUE
+      quit = FALSE
       par(mar=c(0.1,0.1,0.1,0.1))
       if(is.list(image)){
         magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
@@ -1330,7 +1343,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     dev.off()
   }
   
-  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max, goback=goback)))
+  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max, goback=goback, quit=quit)))
 }
 
 # .inpoly=function(polyx,polyy,x0,y0){ #defunct code, not working properly anyway...
