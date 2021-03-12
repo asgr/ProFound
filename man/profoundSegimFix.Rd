@@ -32,7 +32,7 @@ User provided estimate of the absolute sky level. Can be a scalar or a matrix ma
 List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure. As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
   \item{loc}{
-Numeric vector; the [x,y] location where we want to cutout the image.
+Numeric vector; the [x,y] location where we want to cutout the image. If not provided it will simply show the full input \option{image}.
 }
   \item{box}{
 Numeric vector; the dimensions of the box to cut out from \option{image} centred on \option{loc}.
@@ -94,7 +94,7 @@ Follow the prompts when you run the function (see Example).
 
 3)  You will then be asked if you want to continute fixing. If you want to continue fixing other broken segments in the current image then type 'y' in the command prompt and hit enter. If you want to stop type 'n' and hit enter. The former will then prompt you to fix more segments with another round of clicking, the latter will stop the fixing session and return the results as they stand.
 
-Features:
+Advanced Features:
 
 You cannot merge segments into the sky! All clicks on the sky are ignored, and they will not produce any of the multi-click results discussed below.
 
