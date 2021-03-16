@@ -1177,7 +1177,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     
     check = NULL #this will be the tabulation of clicked segments, mainly used to count multi-clicks on segments and sky etc
     seggrid = NULL #used to store in-concave hull pixel IDs when drawing segments
-    mergeIDs = {}
+    mergeIDs = NULL
     temploc = locator(type='p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){ #if nothing is selected move on
@@ -1194,11 +1194,11 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
           if(group_limit){
             groupIDs = groupim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
             if(any(groupIDs==0)){
-              mergeIDs = {}
+              mergeIDs = NULL
               check = NULL
               legend('bottomleft', legend='Will not merge with sky (will ignore)!', text.col='magenta', bg='black')
             }else if(length(unique(groupIDs))>1){
-              mergeIDs = {}
+              mergeIDs = NULL
               check = NULL
               legend('bottomleft', legend='Discontinuous segments (will ignore)!', text.col='magenta', bg='black')
             }
@@ -1209,16 +1209,18 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       if(!is.null(check)){
         if(length(check)==1 & length(mergeIDs) == 1 & all(mergeIDs==0)){ #flag to go back
           #Will set to go back if exactly one sky pixel and nothing else has been selected
+          mergeIDs = NULL
+          check = NULL
           legend('bottomleft', legend='Go back', text.col='magenta', bg='black')
           goback = TRUE
         }else if(length(check)==1 & length(mergeIDs) == 2 & all(mergeIDs==0)){ #quit!
           #Will set to quit if exactly two sky pixels and nothing else have been selected
-          mergeIDs = {}
+          mergeIDs = NULL
           legend('bottomleft', legend='Quit', text.col='magenta', bg='black')
           quit = TRUE
         }else if(length(check)==1 & length(mergeIDs) == 3 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
           #Will set to enter segment making mode if exactly two sky pixels and nothing else have been selected
-          mergeIDs = {}
+          mergeIDs = NULL
           legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
           temploc = locator(type='o', col=col, pch=pch, cex=cex)
           if(!is.null(temploc)){
@@ -1226,11 +1228,11 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
             seggrid = .inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
           }
         }else if(any(mergeIDs==0)){
-          mergeIDs = {}
+          mergeIDs = NULL
           legend('bottomleft', legend='Ambiguous segment/sky click/s (will ignore)!', text.col='magenta', bg='black')
         }else if(length(which(check>0))==1){
           #If only one segment appears in the check vector
-          mergeIDs = {}
+          mergeIDs = NULL
           if(max(check)==1){ #group de-merge
             
             legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')

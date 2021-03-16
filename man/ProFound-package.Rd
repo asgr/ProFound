@@ -12,7 +12,7 @@
 \tabular{ll}{
 Package: \tab ProFound\cr
 Type: \tab Package\cr
-Version: \tab 1.17.1\cr
+Version: \tab 1.17.2\cr
 Date: \tab 2021-03-16\cr
 License: \tab LGPL-3\cr
 Depends: \tab R (>= 3.1), FITSio, magicaxis (>= 2.0.8), Rcpp (>= 1.0.2)\cr
