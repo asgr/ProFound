@@ -639,7 +639,6 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   #Masked and unmasked stats:
   
   if(!is.null(x$mask)){
-    magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
     stat_mean_sky = signif(mean(x$sky[x$mask==0], na.rm=TRUE),4)
     stat_sd_sky = signif(sd(x$sky[x$mask==0], na.rm=TRUE),4)
     stat_mean_skyRMS = signif(mean(x$skyRMS[x$mask==0], na.rm=TRUE),4)
