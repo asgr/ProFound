@@ -1,6 +1,7 @@
 \name{profoundMakeSegimExpand}
 \alias{profoundMakeSegimExpand}
 \alias{profoundMakeSegimDilate}
+\alias{profoundDilate}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Segmentation Map Expansion and Dilation
@@ -19,6 +20,8 @@ profoundMakeSegimDilate(image = NULL, segim = NULL, mask = NULL, size = 9, shape
   expand = "all", magzero = 0, gain = NULL, pixscale = 1, sky = 0, skyRMS = 0,
   header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
   boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+  
+profoundDilate(segim = NULL, size = 3, shape = 'disc', expand = "all", iters = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -67,6 +70,9 @@ Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels.
   \item{shape}{
 Character scalar; the shape of the dilation kernel. See \code{makeBrush}.
 }
+  \item{iters}{
+Integer scalar; how many times the dilation kernel should be applied to the image.  
+}
   \item{sky}{
 User provided estimate of the absolute sky level. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted!
 }
@@ -112,6 +118,8 @@ The \code{profoundMakeSegimExpand} defaults should work reasonably well on moder
 \code{profoundMakeSegimDilate} is similar in nature to the pixel growing \code{objmask} routine in \code{IRAF} (see the \option{ngrow} and \option{agrow} description at \url{http://iraf.noao.edu/projects/ccdmosaic/objmasks/objmasks.html}). This similarity was discovered after implementation, but it is worth noting that the higher level curve of growth function \code{\link{profoundProFound}} is not trivially replicated by other astronomy tools.
 
 The main difference between \code{profoundMakeSegimExpand} and  \code{profoundMakeSegimDilate} is the former grows the expansion a bit more organically, whereas the latter always gives new pixels to the brighter object if in doubt. That said, \code{profoundMakeSegimDilate} often gives very similar solutions and runs about 10+ times faster, so might be the only option for larger images.
+
+\code{profoundDilate} just does the simple task of dilating the target segmentation map with the target kernel defined by \option{size} and \option{shape}, with the returned object being an interger matrix with the same dimensions as the input \option{segim} (but with segments appropriately dilated).
 }
 \value{
 A list containing:

@@ -100,7 +100,7 @@ Character scalar; How should the grouped segmentation map be formed that will be
 Logical; if TRUE then \code{profoundMultiBand} will return a list of per band segmentation maps in \option{segimlist}. This is useful since they can be slightly different per band.
 }
   \item{masking}{
-Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and' (default) then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
+Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or'/'|'/'||' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and'/'&'/'&&' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
   \item{\dots}{
 Further arguments to be passed to detection and multi band instances of \code{\link{profoundProFound}}. E.g. if the sky \option{SBdilate} is set to a value (default is NULL) this will be propogated to all of the multi band photometry runs of \code{\link{profoundProFound}}. Note in the Details below that some \dots will not be passed for safety and ambiguity reasons.

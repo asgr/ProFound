@@ -43,8 +43,8 @@ We run ProFound in different modes in the optical and NIR. In the optical we wan
 ```{r}
 pro_r = profoundProFound(im_r, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
 pro_i = profoundProFound(im_i, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
-pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
-pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
+pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30)
+pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30)
 ```
 
 We create a new sky map using a finer background to find the sharp undesired features.

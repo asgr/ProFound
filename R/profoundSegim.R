@@ -565,15 +565,6 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
   
   if(expand[1]=='all'){
     segim_new = .dilate_cpp(segim, kern)
-    # segim_new=segim
-    # maxorig=max(segim_new, na.rm=TRUE)+1L
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
-    # segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
-    # replace=which(segim!=0) #put back non-dilated segments
-    # segim_new[replace]=segim[replace] #put back non-dilated segments
   }else{
     segim_new=segim
     if('fastmatch' %in% .packages()){ #remove things that will not be dilated
@@ -581,12 +572,6 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     }else{
       segim_new[!(segim_new %in% expand)] = 0L
     }
-    # maxorig=max(segim_new, na.rm=TRUE)+1L
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
-    # segim_new=EBImage::imageData(EBImage::dilate(segim_new, kern)) #Run Dilate
-    # replace=which(segim_new!=0)
-    # segim_new[replace]=maxorig-segim_new[replace]
     segim_new = .dilate_cpp(segim_new, kern)
     replace=which(segim!=0) #put back non-dilated segments
     segim_new[replace]=segim[replace] #put back non-dilated segments
@@ -1086,7 +1071,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
   magimage(segim, col=c(NA,col), add=TRUE, magmap=FALSE)
   
   if(!is.null(mask)){
-    magimage(mask!=0, col=c(NA,hsv(alpha=0.3)), add=TRUE, magmap=FALSE, zlim=c(0,1))
+    magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
   }
 }
 
@@ -1094,7 +1079,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
                           loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, 
                           cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, 
                           continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, 
-                          segID_max=NULL, legend_extra=NULL, ...){
+                          segID_max=NULL, legend_extra=NULL, group_limit=TRUE, ...){
   if(open_window){
       dev.new(noRStudioGD = TRUE)
   }
@@ -1127,27 +1112,34 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
   
   if(!is.null(loc)){
     if(is.list(image)){
-      imageR=magcutout(image$R, loc=loc, box=box)$image
-      imageG=magcutout(image$G, loc=loc, box=box)$image
-      imageB=magcutout(image$B, loc=loc, box=box)$image
-      image=list(R=imageR, G=imageG, B=imageB)
+      imageR = magcutout(image$R, loc=loc, box=box)$image
+      imageG = magcutout(image$G, loc=loc, box=box)$image
+      imageB = magcutout(image$B, loc=loc, box=box)$image
+      image = list(R=imageR, G=imageG, B=imageB)
     }else{
-      image=magcutout(image, loc=loc, box=box)$image
+      image = magcutout(image, loc=loc, box=box)$image
     }
-    segim=magcutout(segim, loc=loc, box=box)$image
+    segim = magcutout(segim, loc=loc, box=box)$image
     if(!is.null(mask)){
-      mask=magcutout(mask, loc=loc, box=box)$image
+      mask = magcutout(mask, loc=loc, box=box)$image
     }else{
-      mask=NULL
+      mask = NULL
     }
     if(!is.null(sky)){
-      sky=magcutout(sky, loc=loc, box=box)$image
+      sky = magcutout(sky, loc=loc, box=box)$image
     }else{
-      sky=NULL
+      sky = NULL
     }
   }
   
-  segim_start=segim
+  if(group_limit){
+    if(!requireNamespace("imager", quietly = TRUE)){
+      stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
+    }
+    groupim = as.matrix(imager::label(imager::as.cimg(segim>0)))
+  }
+  
+  segim_start = segim
   segim_progress=segim_start
   if(length(segID_merge)>0){
     segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
@@ -1156,7 +1148,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     segim_progress[]=0
   }
   
-  continue=TRUE
+  continue = TRUE
+  quit = FALSE
+  goback = FALSE
   
   par(mar=c(0.1,0.1,0.1,0.1))
   if(is.list(image)){
@@ -1171,16 +1165,20 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
-    legend('topleft', legend=c('ESC to stop','Multi: merge','1: ungroup','2: undo seg','3: skip check'), text.col='magenta', bg='black')
+    if(allow_seg_modify){
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo/mod seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: make seg'), text.col='magenta', bg='black')
+    }else{
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: undo seg','Seg 3: skip check','Grp 1: ungroup','Sky 1: go back', 'Sky 2: quit'), text.col='magenta', bg='black')
+    }
     if(!is.null(legend_extra)){
       legend('topright', legend=legend_extra, text.col='magenta', bg='black')
     }
     cat('Click on contiguous segments to merge, and hit ESC in the plot window (not this one) when done.\n')
     
-    check=NULL
-    seggrid=NULL
-    mergeIDs=list()
-    temploc=locator(type='p', col=col, pch=pch, cex=cex)
+    check = NULL #this will be the tabulation of clicked segments, mainly used to count multi-clicks on segments and sky etc
+    seggrid = NULL #used to store in-concave hull pixel IDs when drawing segments
+    mergeIDs = NULL
+    temploc = locator(type='p', col=col, pch=pch, cex=cex)
     
     if(is.null(temploc)){ #if nothing is selected move on
       legend('bottomleft', legend='Done!', text.col='magenta', bg='black')
@@ -1189,31 +1187,65 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       if(any(ceiling(temploc$x)<0) | any(ceiling(temploc$y)<0) | any(ceiling(temploc$x)>dim(segim)[1]) | any(ceiling(temploc$y)>dim(segim)[2])){
         legend('bottomleft', legend='Selected outside of image!', text.col='magenta', bg='black')
       }else{
-        mergeIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-        check=tabulate(mergeIDs)
-        mergeIDs=list(which(check %% 2 == 1))
+        mergeIDs = segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+        check = tabulate(mergeIDs)
+        if(all(mergeIDs>0)){
+          mergeIDs = which(check %% 2 == 1)
+          if(group_limit){
+            groupIDs = groupim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+            if(any(groupIDs==0)){
+              mergeIDs = NULL
+              check = NULL
+              legend('bottomleft', legend='Will not merge with sky (will ignore)!', text.col='magenta', bg='black')
+            }else if(length(unique(groupIDs))>1){
+              mergeIDs = NULL
+              check = NULL
+              legend('bottomleft', legend='Discontinuous segments (will ignore)!', text.col='magenta', bg='black')
+            }
+          }
+        }
       }
       
       if(!is.null(check)){
-        if(length(check)==1 & check[1]==0  & allow_seg_modify){ #entering segment polygon mode
-          mergeIDs=list()
+        if(length(check)==1 & length(mergeIDs) == 1 & all(mergeIDs==0)){ #flag to go back
+          #Will set to go back if exactly one sky pixel and nothing else has been selected
+          mergeIDs = NULL
+          check = NULL
+          legend('bottomleft', legend='Go back', text.col='magenta', bg='black')
+          goback = TRUE
+        }else if(length(check)==1 & length(mergeIDs) == 2 & all(mergeIDs==0)){ #quit!
+          #Will set to quit if exactly two sky pixels and nothing else have been selected
+          mergeIDs = NULL
+          legend('bottomleft', legend='Quit', text.col='magenta', bg='black')
+          quit = TRUE
+        }else if(length(check)==1 & length(mergeIDs) == 3 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
+          #Will set to enter segment making mode if exactly two sky pixels and nothing else have been selected
+          mergeIDs = NULL
           legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
-          temploc=locator(type='o', col=col, pch=pch, cex=cex)
+          temploc = locator(type='o', col=col, pch=pch, cex=cex)
           if(!is.null(temploc)){
             lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
-            seggrid=.inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
+            seggrid = .inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
           }
+        }else if(any(mergeIDs==0)){
+          mergeIDs = NULL
+          legend('bottomleft', legend='Ambiguous segment/sky click/s (will ignore)!', text.col='magenta', bg='black')
         }else if(length(which(check>0))==1){
-          mergeIDs=list()
-          if(max(check)==2 & allow_seg_modify){ #select segment
-            seggrid=which(segim==which(check==2), arr.ind=TRUE)
-          }else{ #group de-merge
+          #If only one segment appears in the check vector
+          mergeIDs = NULL
+          if(max(check)==1){ #group de-merge
+            
             legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
-            zapIDs=segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-            if(length(which(zapIDs>0))>0){
-              zapIDs=segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
-              segID_merge=profoundZapSegID(zapIDs, segID_merge)
-            }
+            # zapIDs = segim_progress[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+            # if(length(which(zapIDs>0))>0){
+            #   zapIDs = segim[cbind(ceiling(temploc$x),ceiling(temploc$y))]
+            #   segID_merge = profoundZapSegID(zapIDs, segID_merge)
+            # }
+            zapIDs = which(check>0)
+            segID_merge = profoundZapSegID(zapIDs, segID_merge)
+          }else if(max(check)==2 & allow_seg_modify){ #select segment
+            #If that object has been clicked twice flag for seg ID modification
+            seggrid = which(segim==which(check==2), arr.ind=TRUE)
           }
         }else{
           legend('bottomleft', legend='Merge segments', text.col='magenta', bg='black')
@@ -1258,8 +1290,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         segim_progress[seggrid]=newsegID
         segim_start[seggrid]=newsegID
       }
-      if(length(unlist(mergeIDs))>0){
-        segID_merge=c(segID_merge,mergeIDs)
+      if(length(mergeIDs)>0){
+        segID_merge=c(segID_merge,list(mergeIDs))
       }
       if(length(segID_merge)>0){
         segim=profoundSegimKeep(segim_start, segID_merge=segID_merge)
@@ -1272,8 +1304,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     }
     
     if(happy){
-      if(any(check==3)){
-        continue=FALSE
+      if(any(check==3) | goback){
+        continue = FALSE
       }else{
         par(mar=c(0.1,0.1,0.1,0.1))
         if(is.list(image)){
@@ -1283,22 +1315,29 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         }
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
-        if(continue_default){
-          legend('topleft', legend='Cont? [y]/n', text.col='magenta', bg='black')
-          cat('CONTINUE fixing segments on current image? [y]/n: ')
-          continue = readLines(n=1L)
-          continue = tolower(continue)
-          continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+        if(quit == FALSE){
+          if(continue_default){
+            legend('topleft', legend='Cont? [y]/n/q', text.col='magenta', bg='black')
+            cat('CONTINUE fixing segments on current image? [y]/n/q: ')
+            continue = readLines(n=1L)
+            continue = tolower(continue)
+            quit = continue == 'q' | continue == 'quit'
+            continue = continue == "" | continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+          }else{
+            legend('topleft', legend='Cont? y/[n]/q', text.col='magenta', bg='black')
+            cat('CONTINUE fixing segments on current image? y/[n]/q: ')
+            continue = readLines(n=1L)
+            continue = tolower(continue)
+            quit = continue == 'q' | continue == 'quit'
+            continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+          }
         }else{
-          legend('topleft', legend='Cont? y/[n]', text.col='magenta', bg='black')
-          cat('CONTINUE fixing segments on current image? y/[n]: ')
-          continue = readLines(n=1L)
-          continue = tolower(continue)
-          continue = continue == 'yes' | continue == 'y' | continue == 't' | continue == 'true'
+          continue = FALSE
         }
       }
     }else{
-      continue=TRUE
+      continue = TRUE
+      quit = FALSE
       par(mar=c(0.1,0.1,0.1,0.1))
       if(is.list(image)){
         magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
@@ -1313,7 +1352,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     dev.off()
   }
   
-  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max)))
+  return(invisible(list(segim=segim, segim_start=segim_start, segID_merge=segID_merge, segID_max=segID_max, goback=goback, quit=quit)))
 }
 
 # .inpoly=function(polyx,polyy,x0,y0){ #defunct code, not working properly anyway...
@@ -1404,26 +1443,25 @@ profoundSegimGroup=function(segim=NULL){
   
   Ngroup=NULL; segID=NULL; Npix=NULL
   
-  ##groupim=EBImage::bwlabel(segim)
   groupim = as.matrix(imager::label(imager::as.cimg(segim>0)))
-  segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
+  segimDT = data.table(segID=as.integer(segim), groupID=as.integer(groupim))
   segimDT[groupID>0,groupID:=which.max(tabulate(groupID)),by=segID]
-  groupID=segimDT[groupID>0,.BY,by=groupID]$groupID
-  segIDmin=segimDT[groupID>0,min(segID, na.rm=FALSE),by=groupID]$V1
-  remap=vector(length=max(groupID))
-  remap[groupID]=segIDmin
-  groupim[groupim>0]=remap[segimDT[groupID>0,groupID]]
+  groupID = segimDT[groupID>0,.BY,by=groupID]$groupID
+  segIDmin = segimDT[groupID>0,min(segID, na.rm=FALSE),by=groupID]$V1
+  remap = vector(length=max(groupID))
+  remap[groupID] = segIDmin
+  groupim[groupim>0] = remap[segimDT[groupID>0,groupID]]
   
-  segimDT=data.table(segID=as.integer(segim), groupID=as.integer(groupim))
-  segimDT=segimDT[groupID>0,]
-  groups=segimDT[,.N,by=groupID]
-  groupsegID=segimDT[,list(segID=list(sort(unique(segID)))),by=groupID]
+  segimDT = data.table(segID=as.integer(segim), groupID=as.integer(groupim))
+  segimDT = segimDT[groupID>0,]
+  groups = segimDT[,.N,by=groupID]
+  groupsegID = segimDT[,list(segID=list(sort(unique(segID)))),by=groupID]
   groupsegID[,Npix:=groups$N]
   setkey(groupsegID,groupID)
-  groupsegID=groupsegID[groupID %in% which(tabulate(unlist(groupsegID$segID))==1),]
+  groupsegID = groupsegID[groupID %in% which(tabulate(unlist(groupsegID$segID))==1),]
   groupsegID[,Ngroup:=length(unlist(segID)),by=groupID]
-  groupim[!groupim %in% groupsegID$groupID]=0
-  invisible(list(groupim=groupim, groupsegID=as.data.frame(groupsegID[,list(groupID, segID, Ngroup, Npix)])))
+  groupim[!groupim %in% groupsegID$groupID] = 0
+  invisible(list(groupim=groupim, groupsegID = as.data.frame(groupsegID[,list(groupID, segID, Ngroup, Npix)])))
 }
 
 profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NULL, sky=0){
@@ -1432,18 +1470,18 @@ profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NU
   
   image=image-sky
   
-  stats_base=profoundSegimStats(image=image, segim=segim_base, mask=mask)[,c('segID','uniqueID','flux')]
-  stats_add=profoundSegimStats(image=image, segim=segim_add, mask=mask)[,c('segID','uniqueID','flux')]
+  stats_base = profoundSegimStats(image=image, segim=segim_base, mask=mask)[,c('segID','uniqueID','flux')]
+  stats_add = profoundSegimStats(image=image, segim=segim_add, mask=mask)[,c('segID','uniqueID','flux')]
   
-  compID=cbind(1:length(stats_base$uniqueID), match(stats_base$uniqueID, stats_add$uniqueID))
-  flux_base=stats_base[compID[,1],'flux']
-  flux_add=stats_add[compID[,2],'flux']
+  compID = cbind(1:length(stats_base$uniqueID), match(stats_base$uniqueID, stats_add$uniqueID))
+  flux_base = stats_base[compID[,1],'flux']
+  flux_add = stats_add[compID[,2],'flux']
   
-  segim_base[segim_base %in% stats_base[compID[flux_base<flux_add,1],'segID']]=0
-  segim_add[segim_add %in% stats_add[compID[flux_base>flux_add,2],'segID']]=0
+  segim_base[segim_base %in% stats_base[compID[flux_base<flux_add,1],'segID']] = 0
+  segim_add[segim_add %in% stats_add[compID[flux_base>flux_add,2],'segID']] = 0
   
-  segim_merge=segim_base
-  segim_merge[segim_add>0]=segim_add[segim_add>0]
+  segim_merge = segim_base
+  segim_merge[segim_add>0] = segim_add[segim_add>0]
   
   invisible(segim_merge)
 }
@@ -1542,6 +1580,7 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   invisible(segim)
 }
 
+
 .profoundFluxCalcMin=function(image=NULL, segim=NULL, mask=NULL){
   
   #Set masked things to NA, to be safe:
@@ -1558,4 +1597,31 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   setkey(output, segID)
   
   return(as.data.frame(output))
+}
+
+profoundDilate = function(segim=NULL, size=3, shape='disc', expand='all', iters=1){
+  kern = .makeBrush(size, shape=shape)
+  if(expand[1] == 'all'){
+    expand = 0
+  }
+  for(i in 1:iters){
+    segim = .dilate_cpp(segim=segim, kern=kern, expand=expand)
+    # }else{
+    #   if(i==1){
+    #     segim_new = segim
+    #   }
+    #   if('fastmatch' %in% .packages()){ #remove things that will not be dilated
+    #     segim_new[fastmatch::fmatch(segim_new, expand, nomatch = 0L) == 0L] = 0L
+    #   }else{
+    #     segim_new[!(segim_new %in% expand)] = 0L
+    #   }
+    #   segim_new = .dilate_cpp(segim_new, kern)
+    #   replace = which(segim!=0) #put back non-dilated segments
+    #   segim_new[replace] = segim[replace] #put back non-dilated segments
+    #   mode(segim_new) = 'integer'
+    #   segim = segim_new
+    #   rm(replace)
+    # }
+  }
+  return(segim)
 }

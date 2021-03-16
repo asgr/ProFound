@@ -10,7 +10,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
       if(length(magzero_in)!=1){stop('Length of magzero_in should be the number of images in image_list or 1')}
       magzero_in=rep(magzero_in,length(image_list))
     }
-    if(!masking %in% c('and', 'or')){
+    if(!masking %in% c('and', 'or', '&', '&&', '|', '||')){
       stop('masking needs to be one of and/or.')
     }
     stack=matrix(0,dim(image_list[[1]])[1],dim(image_list[[1]])[2])
@@ -26,7 +26,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
       masked={}
       if(is.list(sky_list) & is.list(skyRMS_list)){
         if(is.null(image_list[[i]])==FALSE & is.null(sky_list[[i]])==FALSE & is.null(skyRMS_list[[i]])==FALSE){
-          if(masking=='and'){
+          if(masking=='and' | masking=='&' | masking=='&&'){
             if(anyNA(image_list[[i]])){
               masked=which(is.na(image_list[[i]]))
               image_list[[i]][masked]=0
@@ -45,7 +45,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
       }
       if(is.list(sky_list) & is.list(skyRMS_list)==FALSE){
         if(is.null(image_list[[i]])==FALSE & is.null(sky_list[[i]])==FALSE){
-          if(masking=='and'){
+          if(masking=='and' | masking=='&' | masking=='&&'){
             if(anyNA(image_list[[i]])){
               masked=which(is.na(image_list[[i]]))
               image_list[[i]][masked]=0
@@ -62,7 +62,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)){
         if(is.null(image_list[[i]])==FALSE & is.null(skyRMS_list[[i]])==FALSE){
-          if(masking=='and'){
+          if(masking=='and' | masking=='&' | masking=='&&'){
             if(anyNA(image_list[[i]])){
               masked=which(is.na(image_list[[i]]))
               image_list[[i]][masked]=0
@@ -79,7 +79,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
       }
       if(is.list(sky_list)==FALSE & is.list(skyRMS_list)==FALSE){
         if(is.null(image_list[[i]])==FALSE){
-          if(masking=='and'){
+          if(masking=='and' | masking=='&' | masking=='&&'){
             if(anyNA(image_list[[i]])){
               masked=which(is.na(image_list[[i]]))
               image_list[[i]][masked]=0
@@ -92,7 +92,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
         }
       }
       
-      if(masking=='and'){
+      if(masking=='and' | masking=='&' | masking=='&&'){
         if(masked_and_initial){
           masked_and_master = masked
           masked_and_initial = FALSE
@@ -104,7 +104,7 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
     stack=stack/inv_var
     skyRMS=sqrt(1/inv_var)
     
-    if(masking=='and' & length(masked_and_master)>0){
+    if((masking=='and' | masking=='&' | masking=='&&') & length(masked_and_master)>0){
       stack[masked_and_master] = NA
     }
   }else{

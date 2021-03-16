@@ -34,15 +34,15 @@ Run for the side effect of generating a grid of useful diagnostic plots.
 \value{
 Run for the side effect of generating a grid of useful diagnostic plots:
   
-  \item{Top-left}{Sky subracted image \option{x$image}-\option{x$sky}, where blue is negative, yellow is 0, and red is positive}
-  \item{Top-centre}{Output segmentation map \option{x$segim}}
-  \item{Top-right}{Sky subracted and normalised image (\option{x$image}-\option{x$sky})/\option{x$skyRMS}, with segment dilation extent shown in colour}
-  \item{Middle-left}{Magnitude (\option{x$segstats$mag}) counts histogram (max in red), scaled to counts per square degree if \option{x$header} is present}
-  \item{Middle-centre}{Output \option{x$sky}, where blue is negative, yellow is 0, and red is positive}
-  \item{Middle-right}{Output \option{x$skyRMS}, where dark is lower values and white larger values}
-  \item{Bottom-left}{Sky pixel (\option{x$image}-\option{x$sky})/\option{x$skyRMS} PDF, or dilation iteration (\option{x$segstats$iter}) histogram (depends on \option{hist})}
-  \item{Bottom-centre}{Output mag (\option{x$segstats$mag}) versus R50 (\option{x$segstats$R50})}
-  \item{Bottom-right}{Output mag (\option{x$segstats$mag}) versus axrat (\option{x$segstats$axrat})}
+  \item{Top-left}{Sky subracted image \option{x$image}-\option{x$sky}, where blue is negative, yellow is 0, and red is positive. Black outline shows the extracted objects.}
+  \item{Top-centre}{Output segmentation map \option{x$segim} using \code{\link{profoundSegimPlot}}.}
+  \item{Top-right}{Sky subracted and normalised image (\option{x$image}-\option{x$sky})/\option{x$skyRMS}, with segment dilation extent shown in colour.}
+  \item{Middle-left}{Magnitude (\option{x$segstats$mag}) counts histogram (max in red), scaled to counts per square degree if \option{x$header} is present.}
+  \item{Middle-centre}{Output \option{x$sky}, where blue is negative, yellow is 0, and red is positive. Black outline shows the extracted objects, where we want to be alert to suspicious association between the map and the objects. \option{x$sky} stats are in magenta.}
+  \item{Middle-right}{Output \option{x$skyRMS}, where dark is lower values and white larger values. Orange outline shows the extracted objects, where we want to be alert to suspicious association between the map and the objects. \option{x$skyRMS} stats are in magenta.}
+  \item{Bottom-left}{For \option{hist} = 'sky': black line shows the sky pixels PDF normalised by \option{x$image}-\option{x$sky})/\option{x$skyRMS}; the green dashed is the idealised Normal distribution, where we might hope the negative wing agrees well with the black line; the red line shows the PDF of the \option{x$sky} map for pixels inside the object mask; the blue line shows the PDF of the \option{x$sky} map for pixels outside the object mask which should nominally be 'sky' (we might hope that the blue and red distributions look visually similar, else we might be associating object flux with 'sky'). For \option{hist} = 'iters': dilation iteration (\option{x$segstats$iter}) histogram.}
+  \item{Bottom-centre}{Output mag (\option{x$segstats$mag}) versus R50 (\option{x$segstats$R50}).}
+  \item{Bottom-right}{Output mag (\option{x$segstats$mag}) versus axrat (\option{x$segstats$axrat}).}
 }
 
 \author{
@@ -50,7 +50,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profoundProFound}}
+\code{\link{profoundProFound}}, \code{\link{profoundSegimPlot}}
 }
 \examples{
 \dontrun{
