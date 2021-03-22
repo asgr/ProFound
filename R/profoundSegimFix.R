@@ -163,6 +163,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
             for(i in 1:length(segID_merge)){
               segID_merge[[i]] = segID_merge[[i]][!(segID_merge[[i]] %in% delete_seg)]
             }
+            segim = profoundSegimKeep(segim_start, segID_merge=segID_merge)
+            segim_progress = segim_start
+            segim_progress[!segim_progress %in% unlist(segID_merge)] = 0
           }else if(max(check)==1 & allow_seg_modify){ #select segment for segID mod
             mergeIDs = NULL
             #If that object has been clicked twice flag for seg ID modification
@@ -171,6 +174,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
             legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
             zapIDs = which(check>0)
             segID_merge = profoundZapSegID(zapIDs, segID_merge)
+            segim = profoundSegimKeep(segim_start, segID_merge=segID_merge)
+            segim_progress = segim_start
+            segim_progress[!segim_progress %in% unlist(segID_merge)] = 0
           }
         }else{
           legend('bottomleft', legend='Merge segments', text.col='magenta', bg='black')
