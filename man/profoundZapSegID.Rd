@@ -1,13 +1,15 @@
-\name{profoundZapSegID}
+\name{profoundMergeSegID}
+\alias{profoundMergeSegID}
 \alias{profoundZapSegID}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Zap Elements of segID_merge
 }
 \description{
-This function allows for safe zapping of the \option{segID_merge} structure. This is important since it can be tricky to remove elements with logic if you are not an R guru.
+This function allows for safe merging or zapping of the \option{segID_merge} structure. This is important since it can be tricky to remove elements with logic if you are not an R guru.
 }
 \usage{
+profoundMergeSegID(segID_merge)
 profoundZapSegID(segID, segID_merge)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -20,12 +22,12 @@ Integer list; each list element should specify collections of segments to be mer
 }
 }
 \details{
-Zaps unwanted list entries easily.
+Merges complex lists of desired merging to their simplest form (\code{profoundMergeSegID}). Zaps unwanted list entries easily (\code{profoundZapSegID}).
 }
 \value{
-Output is the zapped version of \option{segID_merge}:
+\code{profoundMergeSegID}: Output is the simplified version of \option{segID_merge}. This means all potentially quite complex friend-of-friends groups are brought together to form a single \option{segID_merge} list item. This means each \option{segID} will occur at most 1 time in the structure.
 
-Integer list; each list element should specify collections of segments to be merged.
+\code{profoundZapSegID}: Output is the zapped version of \option{segID_merge}.
 }
 \author{
 Aaron Robotham
