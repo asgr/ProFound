@@ -13,7 +13,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                           decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound',
                           pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum',
                           convtype = 'brute', convmode = 'extended', fluxtype='Raw',
-                          app_diam=1, Ndeblendlim=Inf, ...){
+                          app_diam=1, Ndeblendlim=Inf, static_photom = FALSE, ...){
+
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
   
@@ -32,7 +33,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     boxadd=rep(boxadd,2)
   }
   
-  fluxtype=tolower(fluxtype)
+  fluxtype = tolower(fluxtype)
   
   if(fluxtype=='raw' | fluxtype=='adu' | fluxtype=='adus'){
     if(verbose){message('Using raw flux units')}
@@ -151,6 +152,14 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   }#else{
   #   objects = objects*1L #Looks silly, but this ensures a logical mask becomes integer.
   # }
+  
+  if(static_photom & !is.null(segim)){
+    #set all the flags to make static photom
+    sky = 0
+    iters = 0
+    redosky = FALSE
+    redosegim = FALSE
+  }
   
   #Check for user provided sky, and compute if missing:
   

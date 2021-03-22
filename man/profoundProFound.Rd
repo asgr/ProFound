@@ -24,7 +24,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound',
   pixelcov = FALSE, deblendtype = 'fit', psf = NULL, fluxweight = 'sum',
   convtype = 'brute', convmode = 'extended', fluxtype = 'Raw', app_diam = 1,
-  Ndeblendlim = Inf, ...)
+  Ndeblendlim = Inf, static_photom = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -249,6 +249,8 @@ Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometr
 }
   \item{Ndeblendlim}{
 Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
+}
+  \item{static_photom}{Logical; if TRUE and a segmentation map has been provided to \option{segim}, this conveniently sets the main parameters when trying to force static photometry. In detail this sets: \option{sky} = 0, \option{iters} = 0, \option{redosky} = FALSE, \option{redosegim} = FALSE.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
