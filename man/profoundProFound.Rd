@@ -16,7 +16,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
   skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
   roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-  boxiters = 0, conviters = 100, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
+  boxiters = 0, conviters = 100, iterskyloc = FALSE, deblend = FALSE, df = 3, radtrunc = 2,
   iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
   header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
   boundstats = FALSE, nearstats = boundstats, groupstats = boundstats, group = NULL,
@@ -146,7 +146,7 @@ Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt
 Integer scalar; number of iterative sky convergence steps when \option{skytype} = 'converge' and/or \option{skyRMStype} = 'converge'. 
 }
   \item{iterskyloc}{
-Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}.
+Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}. DEfault is FALSE, since it adds computational overhead.
 }
   \item{deblend}{
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  

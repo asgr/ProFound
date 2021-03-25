@@ -1113,7 +1113,7 @@ profoundSegimGroup=function(segim=NULL){
   
   Ngroup=NULL; segID=NULL; Npix=NULL
   
-  selsegim = segim>0
+  selsegim = segim > 0
   groupim = as.matrix(imager::label(imager::as.cimg(selsegim)))
   groupim = groupim + 1 #because sometimes the sky is not 0!
   groupim[segim==0] = 0

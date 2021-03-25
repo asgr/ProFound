@@ -4,7 +4,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                           threshold=1.05, magzero=0, gain=NULL, pixscale=1, sky=NULL, skyRMS=NULL,
                           redosegim=FALSE, redosky=TRUE, redoskysize=21, box=c(100,100), grid=box,
                           skygrid_type = 'new', type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE,
-                          sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, conviters=100, iterskyloc=TRUE,
+                          sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, conviters=100, iterskyloc=FALSE,
                           deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doChiSq=FALSE, doclip=TRUE,
                           shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE,
                           plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE,
@@ -288,9 +288,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         SBdilate[!is.finite(SBdilate)]=Inf
       }
       
-      if(verbose){message('Doing dilations:')}
-      
       if(iters>0){
+        if(verbose){message('Doing dilations:')}
         for(i in 1:(iters)){
           if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
           segim_new = profoundDilate(segim=segim, size=size, shape=shape, expand=expand_segID, iters=1)

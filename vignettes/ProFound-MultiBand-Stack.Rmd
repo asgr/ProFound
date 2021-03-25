@@ -13,6 +13,12 @@ vignette: >
 knitr::opts_chunk$set(eval=FALSE)
 ```
 
+Set global evaluate (basically TRUE for GitHub version and FALSE for CRAN):
+
+```{r}
+evalglobal=FALSE
+```
+
 ```{r}
 library(ProFound)
 library(Rfits)
@@ -40,16 +46,16 @@ magimage(im_Y)
 
 We run ProFound in different modes in the optical and NIR. In the optical we want to detect right into the outskirts of faint extended sources, and in the NIR we want to avoid finding spurious objects in the very noisy regions we occassionally see (this is for WAVES image analysis, this particular frame is okay).
 
-```{r}
-pro_r = profoundProFound(im_r, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
-pro_i = profoundProFound(im_i, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
-pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30)
-pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30)
+```{r, eval=evalglobal}
+pro_r = profoundProFound(im_r, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, stats=FALSE)
+pro_i = profoundProFound(im_i, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, stats=FALSE)
+pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30, stats=FALSE)
+pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30, stats=FALSE)
 ```
 
 We create a new sky map using a finer background to find the sharp undesired features.
 
-```{r}
+```{r, eval=evalglobal}
 sky_r = profoundMakeSkyGrid(im_r, objects=pro_r$objects_redo, doclip=T, grid=50, box=50, boxiters=4)
 sky_i = profoundMakeSkyGrid(im_i, objects=pro_i$objects_redo, doclip=T, grid=50, box=50, boxiters=4)
 sky_Z = profoundMakeSkyGrid(im_Z, objects=pro_Z$objects_redo, doclip=T, grid=50, box=50, boxiters=4)
@@ -58,7 +64,7 @@ sky_Y = profoundMakeSkyGrid(im_Y, objects=pro_Y$objects_redo, doclip=T, grid=50,
 
 We mask pixels out based on global statistics. For the optical we want to avoid the detector edges (so mask based on sky), whereas in the NIR we want to avoid the really noisy regions (so mask based on sky RMS).
 
-```{r}
+```{r, eval=evalglobal}
 mask_r = sky_r$sky > (median(sky_r$sky,na.rm=TRUE) + 0.5*(median(sky_r$sky,,na.rm=TRUE) - quantile(sky_r$sky,0.01,na.rm=TRUE)))
 mask_i = sky_i$sky > (median(sky_i$sky,na.rm=TRUE) + 1*(median(sky_i$sky,na.rm=TRUE) - quantile(sky_i$sky,0.01,na.rm=TRUE)))
 mask_Z = sky_Z$skyRMS > (median(sky_Z$skyRMS,na.rm=TRUE) + 1*(median(sky_Z$skyRMS,na.rm=TRUE) - quantile(sky_Z$skyRMS,0.01,na.rm=TRUE)))
@@ -67,7 +73,7 @@ mask_Y = sky_Y$skyRMS > (median(sky_Y$skyRMS,na.rm=TRUE) + 1*(median(sky_Y$skyRM
 
 We unmask based on a highly blurred r band image.
 
-```{r}
+```{r, eval=evalglobal}
 unmask = profoundImBlur(im_r,20) > 1e-11
 mask_r[unmask] = 0
 mask_i[unmask] = 0
@@ -75,7 +81,7 @@ mask_Z[unmask] = 0
 mask_Y[unmask] = 0
 ```
 
-```{r fig.height=5, fig.width=5}
+```{r fig.height=5, fig.width=5, eval=evalglobal}
 magimage(pro_r$image); magimage(mask_r, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
 magimage(pro_i$image); magimage(mask_i, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
 magimage(pro_Z$image); magimage(mask_Z, magmap=F, col=c(NA,hsv(alpha=0.3)),add=TRUE)
@@ -84,7 +90,7 @@ magimage(pro_Y$image); magimage(mask_Y, magmap=F, col=c(NA,hsv(alpha=0.3)),add=T
 
 Now we can do some stacking. We try rZ, riZ and riZY variants.
 
-```{r}
+```{r, eval=evalglobal}
 stack_rZ = profoundMakeStack(image_list = list(pro_r$image, pro_Z$image), 
                          sky_list = list(pro_r$sky, pro_Z$sky), 
                          skyRMS_list = list(pro_r$skyRMS, pro_Z$skyRMS),
@@ -93,7 +99,7 @@ stack_rZ = profoundMakeStack(image_list = list(pro_r$image, pro_Z$image),
                          )
 ```
 
-```{r}
+```{r, eval=evalglobal}
 stack_riZ = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$image), 
                          sky_list = list(pro_r$sky, pro_i$sky, pro_Z$sky), 
                          skyRMS_list = list(pro_r$skyRMS, pro_i$skyRMS, pro_Z$skyRMS),
@@ -102,7 +108,7 @@ stack_riZ = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$
                          )
 ```
 
-```{r}
+```{r, eval=evalglobal}
 stack_riZY = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$image, pro_Y$image), 
                          sky_list = list(pro_r$sky, pro_i$sky, pro_Z$sky, pro_Y$sky), 
                          skyRMS_list = list(pro_r$skyRMS, pro_i$skyRMS, pro_Z$skyRMS, pro_Y$skyRMS),
@@ -113,7 +119,7 @@ stack_riZY = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z
 
 Check out the different stacks. Overall, riZY looks best.
 
-```{r fig.height=5, fig.width=5}
+```{r fig.height=5, fig.width=5, eval=evalglobal}
 magimage(stack_rZ$image)
 magimage(stack_riZ$image)
 magimage(stack_riZY$image)
@@ -121,7 +127,7 @@ magimage(stack_riZY$image)
 
 Run ProFound on the different detection images.
 
-```{r}
+```{r, eval=evalglobal}
 pro_detect_rZ = profoundProFound(stack_rZ$image, skycut=2, sky=0, grid=50, boxiters=4, SBdilate=2, tolerance=2, sigma=0.8)
 pro_detect_riZ = profoundProFound(stack_riZ$image, skycut=2, sky=0, grid=50, boxiters=4, SBdilate=2, tolerance=2, sigma=0.8)
 pro_detect_riZY = profoundProFound(stack_riZY$image, skycut=2, sky=0, grid=50, boxiters=4, SBdilate=2, tolerance=2, sigma=0.8)
@@ -129,7 +135,7 @@ pro_detect_riZY = profoundProFound(stack_riZY$image, skycut=2, sky=0, grid=50, b
 
 Check the summary plots.
 
-```{r fig.height=5, fig.width=5}
+```{r fig.height=5, fig.width=5, eval=evalglobal}
 plot(pro_detect_rZ)
 plot(pro_detect_riZ)
 plot(pro_detect_riZY)
@@ -137,9 +143,22 @@ plot(pro_detect_riZY)
 
 Zoom in to an interesting region showing a variety of difficult detection issues. Again, riZY look to do the best overall.
 
-```{r fig.height=5, fig.width=5}
+```{r fig.height=5, fig.width=5, eval=evalglobal}
 profoundSegimPlot(pro_detect_rZ$image[1000+ -500:499,700+ -500:499], segim=pro_detect_rZ$segim[1000+ -500:499,700+ -500:499])
 profoundSegimPlot(pro_detect_riZ$image[1000+ -500:499,700+ -500:499], segim=pro_detect_riZ$segim[1000+ -500:499,700+ -500:499])
 profoundSegimPlot(pro_detect_riZY$image[1000+ -500:499,700+ -500:499], segim=pro_detect_riZY$segim[1000+ -500:499,700+ -500:499])
 ```
 
+```{r, eval=evalglobal}
+pro_r_detect = profoundProFound(im_r, segim=pro_detect_rZ$segim, sky=pro_r$sky, skyRMS=pro_r$skyRMS, static_photom=TRUE)
+pro_Z_detect = profoundProFound(im_Z, segim=pro_detect_rZ$segim, sky=pro_Z$sky, skyRMS=pro_Z$skyRMS, static_photom=TRUE, magzero=30)
+```
+
+```{r}
+segstats = cbind(pro_r_detect$segstats,col=pro_r_detect$segstats$mag-pro_Z_detect$segstats$mag)
+```
+
+```{r}
+groups = profoundAutoMerge(pro_detect_rZ$segim, segstats = segstats, spur_lim=4e-3, col_lim = c(0,0.8))
+segim_fix = profoundSegimKeep(pro_detect_rZ$segim, segID_merge=groups$segID)
+```
