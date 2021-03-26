@@ -16,15 +16,15 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
   skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
   roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-  boxiters = 0, conviters = 100, iterskyloc = FALSE, deblend = FALSE, df = 3, radtrunc = 2,
-  iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
-  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-  boundstats = FALSE, nearstats = boundstats, groupstats = boundstats, group = NULL,
-  groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
-  decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound',
-  pixelcov = FALSE, deblendtype = 'fit', psf = NULL, fluxweight = 'sum',
-  convtype = 'brute', convmode = 'extended', fluxtype = 'Raw', app_diam = 1,
-  Ndeblendlim = Inf, static_photom = FALSE, ...)
+  boxiters = 0, conviters = 100, iterskyloc = FALSE, deblend = FALSE, df = 3,
+  radtrunc = 2, iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE,
+  paddim = TRUE, header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE,
+  rotstats = FALSE, boundstats = FALSE, nearstats = boundstats, groupstats = boundstats,
+  group = NULL, groupby = 'segim_orig', offset = 1, haralickstats = FALSE,
+  sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE,
+  watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
+  fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
+  app_diam = 1, Ndeblendlim = Inf, static_photom = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
