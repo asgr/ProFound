@@ -22,8 +22,8 @@ profoundAutoMerge = function(segim, segstats, spur_lim=4e-3, col_lim=NULL, Ncut=
       segim_temp = segim
       segim_temp[!segim_temp %in% merge_segIDS] = 0
       group = profoundSegimGroup(segim_temp)$groupsegID
-      if(any(group$Ngroup <= Ncut)){
-        merge_segIDS = merge_segIDS[!merge_segIDS %in% group[group$Ngroup <= Ncut,"groupID"]]
+      if(any(group$Ngroup < Ncut)){
+        merge_segIDS = merge_segIDS[!merge_segIDS %in% group[group$Ngroup < Ncut,"groupID"]]
         segim_temp[!segim_temp %in% merge_segIDS] = 0
         if(any(segim_temp > 0)){
           group = profoundSegimGroup(segim_temp)$groupsegID
