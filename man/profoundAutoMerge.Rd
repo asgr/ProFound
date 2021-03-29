@@ -38,10 +38,11 @@ The output is exactly the same as the \option{groupsegID} from \code{\link{profo
 
 The data.frame returned by \option{groupsegID} is a slightly unusal structure to see in R, but it allows for a compact manner of storing uneven vectors of grouped segments. E.g. you might have a massive group containing 30 other segments and many groups containing a single segment. Padding a normal matrix out to accommodate the larger figure would be quite inefficient. It contains the following:
 
-  \item{groupID}{Group ID, which can be matched against values in \option{groupim}}
-  \item{segID}{An embedded list of segmentation IDs for segments in the group. I.e. each list element of \option{segID} is a vector (see Examples for clarity).}
-  \item{Ngroup}{The total number of segments that are in the group.}
-  \item{Npix}{The total number of pixels that are in the group.}
+  \item{mergeID}{Merging group ID. This is different to the usual \option{groupID} since it is possible to have islands that have been identified to be re-grouped that lie within superset groups.}
+  \item{segID}{An embedded list of segmentation IDs for segments in the merging group. I.e. each list element of \option{segID} is a vector (see Examples for clarity).}
+  \item{Nemrge}{The total number of segments that are in the merging group.}
+  \item{Npix}{The total number of pixels that are in the merging group.}
+  \item{groupID}{Group ID of the superset group based on the provided \option{segim}.}
 }
 \author{
 Aaron Robotham

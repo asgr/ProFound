@@ -16,8 +16,8 @@ profoundAutoMerge = function(segim, segstats, spur_lim=4e-3, col_lim=NULL, Ncut=
   
   if(length(sel) > 0){
     merge_segIDS = segstats[sel,"segID"]
-    group_old = profoundSegimGroup(segim)$groupsegID
-    merge_segIDS = merge_segIDS[!merge_segIDS %in% group_old[group_old$Ngroup == 1,'groupID']]
+    group_old = profoundSegimGroup(segim)
+    merge_segIDS = merge_segIDS[!merge_segIDS %in% group_old$groupsegID[group_old$groupsegID$Ngroup == 1,'groupID']]
     if(length(merge_segIDS) > 0){
       segim_temp = segim
       segim_temp[!segim_temp %in% merge_segIDS] = 0
@@ -29,6 +29,9 @@ profoundAutoMerge = function(segim, segstats, spur_lim=4e-3, col_lim=NULL, Ncut=
           group = profoundSegimGroup(segim_temp)$groupsegID
         }
       }
+      names(group)[1] = 'mergeID'
+      names(group)[3] = 'Nmerge'
+      group = cbind(group, groupID = group_old$groupim[as.matrix(segstats[match(group$mergeID, segstats$segID),c('xmax','ymax')])])
     }
   }
   return(group)
