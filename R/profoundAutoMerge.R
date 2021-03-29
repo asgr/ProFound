@@ -31,7 +31,7 @@ profoundAutoMerge = function(segim, segstats, spur_lim=4e-3, col_lim=NULL, Ncut=
       }
       names(group)[1] = 'mergeID'
       names(group)[3] = 'Nmerge'
-      group = cbind(group, groupID = group_old$groupim[as.matrix(segstats[match(group$mergeID, segstats$segID),c('xmax','ymax')])])
+      group = cbind(group, groupID = group_old$groupim[ceiling(as.matrix(segstats[match(group$mergeID, segstats$segID),c('xmax','ymax')]))])
     }
   }
   return(group)
