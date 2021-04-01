@@ -9,9 +9,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+Set global evaluate (basically TRUE for GitHub version and FALSE for CRAN):
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval=FALSE)
 ```
+
+Load some packages.
 
 ```{r}
 library(ProFound)
@@ -41,10 +45,10 @@ magimage(im_Y)
 We run ProFound in different modes in the optical and NIR. In the optical we want to detect right into the outskirts of faint extended sources, and in the NIR we want to avoid finding spurious objects in the very noisy regions we occassionally see (this is for WAVES image analysis, this particular frame is okay).
 
 ```{r}
-pro_r = profoundProFound(im_r, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
-pro_i = profoundProFound(im_i, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200)
-pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30)
-pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30)
+pro_r = profoundProFound(im_r, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, stats=FALSE)
+pro_i = profoundProFound(im_i, skycut=2, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, stats=FALSE)
+pro_Z = profoundProFound(im_Z, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30, stats=FALSE)
+pro_Y = profoundProFound(im_Y, skycut=5, sigma=5, roughpedestal=T, grid=50, boxiters=4, verbose=F, SBdilate=2, box=200, magzero=30, stats=FALSE)
 ```
 
 We create a new sky map using a finer background to find the sharp undesired features.
@@ -129,7 +133,7 @@ pro_detect_riZY = profoundProFound(stack_riZY$image, skycut=2, sky=0, grid=50, b
 
 Check the summary plots.
 
-```{r fig.height=5, fig.width=5}
+```{r, fig.height=5, fig.width=5}
 plot(pro_detect_rZ)
 plot(pro_detect_riZ)
 plot(pro_detect_riZY)
@@ -137,9 +141,26 @@ plot(pro_detect_riZY)
 
 Zoom in to an interesting region showing a variety of difficult detection issues. Again, riZY look to do the best overall.
 
-```{r fig.height=5, fig.width=5}
+```{r, fig.height=5, fig.width=5}
 profoundSegimPlot(pro_detect_rZ$image[1000+ -500:499,700+ -500:499], segim=pro_detect_rZ$segim[1000+ -500:499,700+ -500:499])
 profoundSegimPlot(pro_detect_riZ$image[1000+ -500:499,700+ -500:499], segim=pro_detect_riZ$segim[1000+ -500:499,700+ -500:499])
 profoundSegimPlot(pro_detect_riZY$image[1000+ -500:499,700+ -500:499], segim=pro_detect_riZY$segim[1000+ -500:499,700+ -500:499])
 ```
 
+```{r}
+pro_r_detect = profoundProFound(im_r, segim=pro_detect_rZ$segim, sky=pro_r$sky, skyRMS=pro_r$skyRMS, static_photom=TRUE)
+pro_Z_detect = profoundProFound(im_Z, segim=pro_detect_rZ$segim, sky=pro_Z$sky, skyRMS=pro_Z$skyRMS, static_photom=TRUE, magzero=30)
+```
+
+```{r}
+segstats = cbind(pro_r_detect$segstats, col=pro_r_detect$segstats$mag-pro_Z_detect$segstats$mag)
+```
+
+```{r}
+groups = profoundAutoMerge(pro_detect_rZ$segim_orig, segstats = segstats, spur_lim=4e-3, col_lim = c(0,0.8))
+segim_fix = profoundSegimKeep(pro_detect_rZ$segim, segID_merge=groups$segID)
+```
+
+```{r}
+profoundSegimPlot(pro_detect_riZY$image, segim=segim_fix)
+```

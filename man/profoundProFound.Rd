@@ -16,15 +16,15 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   redosegim = FALSE, redosky = TRUE, redoskysize = 21, box = c(100,100), grid = box,
   skygrid_type = 'new', type = "bicubic", skytype = "median", skyRMStype = "quanlo",
   roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
-  boxiters = 0, conviters = 100, iterskyloc = TRUE, deblend = FALSE, df = 3, radtrunc = 2,
-  iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE, paddim = TRUE,
-  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-  boundstats = FALSE, nearstats = boundstats, groupstats = boundstats, group = NULL,
-  groupby = 'segim_orig', offset = 1, haralickstats = FALSE, sortcol = "segID",
-  decreasing = FALSE, lowmemory = FALSE, keepim = TRUE, watershed = 'ProFound',
-  pixelcov = FALSE, deblendtype = 'fit', psf = NULL, fluxweight = 'sum',
-  convtype = 'brute', convmode = 'extended', fluxtype = 'Raw', app_diam = 1,
-  Ndeblendlim = Inf, ...)
+  boxiters = 0, conviters = 100, iterskyloc = FALSE, deblend = FALSE, df = 3,
+  radtrunc = 2, iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE,
+  paddim = TRUE, header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE,
+  rotstats = FALSE, boundstats = FALSE, nearstats = boundstats, groupstats = boundstats,
+  group = NULL, groupby = 'segim_orig', offset = 1, haralickstats = FALSE,
+  sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE,
+  watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
+  fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
+  app_diam = 1, Ndeblendlim = Inf, static_photom = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -146,7 +146,7 @@ Integer scalar; the number of \option{box}+\option{boxadd} iterations to attempt
 Integer scalar; number of iterative sky convergence steps when \option{skytype} = 'converge' and/or \option{skyRMStype} = 'converge'. 
 }
   \item{iterskyloc}{
-Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}.
+Logical; should the last segment dilation be used to estimate a local sky value? If this is TRUE then this estimate is used to determine flux convergence for the dilations. It will also be used to return the additional \option{skyseg_mean} column in the segstats output provided. If TRUE then one additional dilation is made compared to the specified \option{iters}. DEfault is FALSE, since it adds computational overhead.
 }
   \item{deblend}{
 Logical; should segment flux be deblended using \code{\link{profoundFluxDeblend}} and these columns appended to the end of the output \option{segstats}?  
@@ -249,6 +249,8 @@ Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometr
 }
   \item{Ndeblendlim}{
 Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
+}
+  \item{static_photom}{Logical; if TRUE and a segmentation map has been provided to \option{segim}, this conveniently sets the main parameters when trying to force static photometry. In detail this sets: \option{sky} = 0, \option{iters} = 0, \option{redosky} = FALSE, \option{redosegim} = FALSE.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

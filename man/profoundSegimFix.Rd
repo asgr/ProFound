@@ -17,7 +17,7 @@ profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound =
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Required, the image we want to display. If a numeric matrix is passed in then \code{\link{magimage}} is used to display the image. If the \option{image} has components R/G/B then then \code{\link{magimageRGB}} is used to display a colour image.
+Required, the image we want to display. If a numeric matrix is passed in then \code{\link{magimage}} is used to display the image. If the \option{image} has list components R/G/B then then \code{\link{magimageRGB}} is used to display a colour image.
 }
   \item{segim}{
 Integer matrix; required, the segmentation map of the \option{image}. This matrix *must* be the same dimensions as \option{image}.
