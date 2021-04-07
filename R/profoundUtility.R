@@ -70,14 +70,46 @@ profoundImDiff=function(image=NULL,sigma=1, plot=FALSE, ...){
   invisible(output)
 }
 
-profoundMakeSigma=function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0, darkRMS=0, skycut=0, gain=1, image_units='ADU', sky_units='ADU', read_units='ADU', dark_units='ADU', output_units='ADU', plot=FALSE, ...){
-  if(!is.null(objects)){
-    if(length(objects)==length(image)){
-      image[objects==0]=0
+profoundMakeSigma = function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0, darkRMS=0,
+                           skycut=0, gain=1, exptime=NULL, image_units='ADU', sky_units='ADU', read_units='ADU',
+                           dark_units='ADU', output_units='ADU', plot=FALSE, ...){
+  
+  if(length(grep('/s', c(image_units,sky_units,read_units,dark_units,output_units))) > 0){
+    if(is.null(exptime)){
+      stop('exptime cannot be NULL if any units is provided per second!')
+    }
+    if(length(grep('/s', image_units))==1){
+      image = image*exptime
+      if(image_units == 'ADU/s'){image_units = 'ADU'}
+      if(image_units == 'elec/s'){image_units = 'elec'}
+    }
+    if(length(grep('/s', sky_units))==1){
+      sky = sky*exptime
+      skyRMS = skyRMS*exptime
+      if(sky_units == 'ADU/s'){sky_units = 'ADU'}
+      if(sky_units == 'elec/s'){sky_units = 'elec'}
+    }
+    if(length(grep('/s', read_units))==1){
+      message('Read noise (readRMS) is rarely provided per second- user should check!')
+      readRMS = readRMS*exptime
+      if(read_units == 'ADU/s'){read_units = 'ADU'}
+      if(read_units == 'elec/s'){read_units = 'elec'}
+    }
+    if(length(grep('/s', dark_units))==1){
+      darkRMS = darkRMS*exptime
+      if(dark_units == 'ADU/s'){dark_units = 'ADU'}
+      if(dark_units == 'elec/s'){dark_units = 'elec'}
     }
   }
+  
+  if(!is.null(objects)){
+    if(length(objects)==length(image)){
+      image[objects==0] = 0
+    }
+  }
+  
   if(image_units=='ADU'){
-    image=gain*image
+    image = gain*image
   }else if(image_units=='elec'){
     NULL
   }else{
@@ -109,14 +141,22 @@ profoundMakeSigma=function(image=NULL, objects=NULL, sky=0, skyRMS=0, readRMS=0,
     stop(paste('dark_units unit type of',dark_units,'not recognised, must be ADU or elec'))
   }
   
-  image=image-sky
-  image[image < skyRMS*skycut]=0
+  image = image-sky
+  image[image < skyRMS*skycut] = 0
   
-  if(output_units=='ADU'){
-    sigma=sqrt(image+skyRMS^2+readRMS^2+darkRMS^2)/gain
-  }else if(output_units=='elec'){
-    sigma=sqrt(image+skyRMS^2+readRMS^2+darkRMS^2)
-  }else{
+  #Since everything is not in electrons, we can calculate sigma using the usual Poisson relationship.
+  
+  sigma = sqrt(image + skyRMS^2 + readRMS^2 + darkRMS^2)
+  
+  if(length(grep('/s', output_units))==1){
+    sigma = sigma/exptime
+    if(output_units == 'ADU/s'){output_units = 'ADU'}
+    if(output_units == 'elec/s'){output_units = 'elec'}
+  }
+  
+  if(output_units == 'ADU'){
+    sigma = sigma/gain
+  }else if(output_units != 'elec'){
     stop(paste('output_units unit type of',output_units,'not recognised, must be ADU or elec'))
   }
   

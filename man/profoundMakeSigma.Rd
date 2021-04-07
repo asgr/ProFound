@@ -9,8 +9,9 @@ A utility function to construct a \code{ProFit} legal sigma map that can be inpu
 }
 \usage{
 profoundMakeSigma(image = NULL, objects = NULL, sky = 0, skyRMS = 0, readRMS = 0,
-  darkRMS = 0, skycut = 0, gain = 1, image_units = 'ADU', sky_units = 'ADU',
-  read_units = 'ADU', dark_units = 'ADU', output_units = 'ADU', plot = FALSE, ...)
+  darkRMS = 0, skycut = 0, gain = 1, exptime = NULL, image_units = 'ADU',
+  sky_units = 'ADU', read_units = 'ADU', dark_units = 'ADU', output_units = 'ADU',
+  plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,20 +39,23 @@ How many multiples of \option{skyRMS} above the \option{sky} to start calculatin
   \item{gain}{
 Numeric; the gain (in photo-electrons per ADU). For a very rough estimate consider using the gain output from \code{\link{profoundGainEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
+  \item{exptime}{
+Numeric; the exposure time in seconds. This needs to be provided if any of the units are per second ('ADU/s' or 'elec/s').  
+}
   \item{image_units}{
-Character; the units of the \option{image}. Must either be 'ADU' for generic astronomical data units, or 'elec' for photo-electrons.
+Character; the units of the \option{image}. Must either be 'ADU' for generic astronomical data units, or 'elec' for photo-electrons. Can also be defined per second ('ADU/s' or 'elec/s') if \option{exptime} is provided in seconds.
 }
   \item{sky_units}{
-Character; the units of \option{sky} and \option{skyRMS}. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons.
+Character; the units of \option{sky} and \option{skyRMS}. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons. Can also be defined per second ('ADU/s' or 'elec/s') if \option{exptime} is provided in seconds.
 }
   \item{read_units}{
-Character; the units of \option{read}. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons.
+Character; the units of \option{read}. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons. Can also be defined per second ('ADU/s' or 'elec/s') if \option{exptime} is provided in seconds.
 }
   \item{dark_units}{
-Character; the units of \option{dark}. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons.
+Character; the units of \option{dark}. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons. Can also be defined per second ('ADU/s' or 'elec/s') if \option{exptime} is provided in seconds.
 }
   \item{output_units}{
-Character; the units of the output sigma map. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons.
+Character; the units of the output sigma map. Must either be 'ADU' for generic astronomical data units (the same type and scaling as per \option{image}), or 'elec' for photo-electrons. Can also be defined per second ('ADU/s' or 'elec/s') if \option{exptime} is provided in seconds.
 }
   \item{plot}{
 Logical; should a \code{\link{magimage}} plot of the output be generated?
@@ -74,12 +78,12 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))
-profound=profoundProFound(image)
+image = readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
+profound = profoundProFound(image)
 
-sigma_est=profoundMakeSigma(image$imDat, objects=profound$objects, sky=profound$sky,
-skyRMS=profound$skyRMS)
+sigma_est = profoundMakeSigma(image$imDat, objects=profound$objects, sky=profound$sky,
+  skyRMS=profound$skyRMS)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
