@@ -60,6 +60,8 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
     }
     groupim = as.matrix(imager::label(imager::as.cimg(segim>0)))
+    groupim = groupim + 1 #because sometimes the sky is not 0!
+    groupim[segim==0] = 0
   }
   
   segim_start = segim
