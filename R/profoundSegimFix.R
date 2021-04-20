@@ -250,6 +250,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
         profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
         
         if(quit == FALSE){
+          if(!is.null(legend_extra)){
+            legend('topright', legend=legend_extra, text.col='magenta', bg='black')
+          }
           if(continue_default){
             legend('topleft', legend='Cont? [y]/n/q', text.col='magenta', bg='black')
             cat('CONTINUE fixing segments on current image? [y]/n/q: ')
