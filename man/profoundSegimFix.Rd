@@ -11,8 +11,8 @@ This function will launch an interactive session to let users reassemble segment
 profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound = NULL,
   loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
   crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
-  continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE, segID_max = NULL,
-  legend_extra = NULL, group_limit = TRUE, ...)
+  continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE,
+  poly_merge = FALSE, segID_max = NULL, legend_extra = NULL, group_limit = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -70,6 +70,9 @@ Logical; should a new Quartz or X11 window be opened. When looping through diffe
   \item{allow_seg_modify}{
 Logical; should users be allowed to add and delete segments. Since this behaviour will modify the input \option{segim} it is not always desirable. To be safe, it is off (FALSE) by default. See Details.
 }
+  \item{poly_merge}{
+Logical; allow groups of segments to be merged by drawing a polygon around them. To enter this mode \option{allow_seg_modify}=FALSE must be set. See Details.
+}
   \item{segID_max}{
 Integer; the maximum segment ID to assume for the input \option{segim} when adding or replacing segments (so only relevant if \option{allow_seg_modify}=TRUE), where the default segID for a new segment becomes \option{segID_max} + 1. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k). If set to 'auto' then it will check the input \option{segim}, if left at the default NULL it will check the available segim when it is creating a new segment. Since this will be on a segmentation image subset when specifying a box, this might mean the segID is not unique on the larger input \option{segim}, but it will be unique on the cut down one being processed internally, and the ones returned (\option{segim} and \option{segim_start}).
 }
@@ -110,9 +113,11 @@ If you click on the sky exactly once it will set the output flag \option{goback}
 
 If you click on the sky exactly twice it will set the output flag \option{quit} = TRUE. This is really for scripts that are looping through a large number of objects to be fixed, making it easy for them to detect when the user wants to quit the fixing session and quit elegantly.
 
-If \option{allow_seg_modify}=TRUE and you click on the sky exactly three times and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. Double clicking a single segment (see above) also enters this mode, and the segment is changed in the same manner as if it were drawn manually. In both cases it is possible to delete segments contained within the polygon simply by setting the segID when asked to "0", which means it will become sky. In this manner you can delete potentially many at once by drawing round large groups of unwanted segments.
+If \option{allow_seg_modify}=TRUE and you click on the sky exactly three times and hit ESC you will enter the segment creation mode. Now all clicks made will form a concave polygon, with the contained pixels becoming a new segment with a new segID (\option{segID_max} + 1, or user specified). This new segment will be registered on both the \option{segim_start} and \option{segim} outputs to ensure internal consistency. It is possible to delete segments contained within the polygon simply by setting the segID when asked to "0", which means it will become sky. In this manner you can delete potentially many at once by drawing round large groups of unwanted segments.
 
-If \option{allow_seg_modify}=TRUE and you just click on a segment exactly twice and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky). It will ask what segID you want for the segment, where the default of "auto" will make a new segID one larger than the current maximum. You can specify your own choice manually, where if you use a current segID it will merge the sources.
+If \option{allow_seg_modify}=TRUE and you just click on a segment exactly once and nothing else it will flag it for having its segID changed or potentially deleted by setting to 0 (sky). It will ask what segID you want for the segment, where the default of "auto" will make a new segID one larger than the current maximum. You can specify your own choice manually, where if you use a current segID it will merge the sources.
+
+If \option{poly_merge}=TRUE then large complexes of segments can be grouped together quickly by drawing round them. The group limit restriction is not obeyed in this mode since it is really designed for very large flocculent systems that might be discontinuous on sky.
 }
 \value{
 List containing:

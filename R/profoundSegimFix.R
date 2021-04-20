@@ -1,7 +1,7 @@
 profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=NULL, 
                           loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, 
                           cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, 
-                          continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, 
+                          continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, poly_merge=FALSE,
                           segID_max=NULL, legend_extra=NULL, group_limit=TRUE, ...){
   if(open_window){
     dev.new(noRStudioGD = TRUE)
@@ -65,7 +65,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
   }
   
   segim_start = segim
-  segim_progress=segim_start
+  segim_progress = segim_start
   if(length(segID_merge)>0){
     segim = profoundSegimKeep(segim_start, segID_merge=segID_merge)
     segim_progress[!segim_progress %in% unlist(segID_merge)] = 0
@@ -91,7 +91,9 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
     if(allow_seg_modify){
-      legend('topleft', legend=c('ESC to stop','Seg 1: merge/mod','Seg 2: ignore','Seg 3: skip check','Grp 1: rem seg','Grp 2: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: make seg'), text.col='magenta', bg='black')
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge/mod','Seg 2: ignore','Seg 3: skip check','Grp 1: rem seg','Grp 2: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: poly seg'), text.col='magenta', bg='black')
+    }else if (poly_merge){
+      legend('topleft', legend=c('ESC to stop','Seg 1: merge/mod','Seg 2: ignore','Seg 3: skip check','Grp 1: rem seg','Grp 2: ungroup','Sky 1: go back', 'Sky 2: quit', 'Sky 3: poly merge'), text.col='magenta', bg='black')
     }else{
       legend('topleft', legend=c('ESC to stop','Seg 1: merge','Seg 2: ignore','Seg 3: skip check','Grp 1: rem seg','Grp 2: ungroup','Sky 1: go back', 'Sky 2: quit'), text.col='magenta', bg='black')
     }
@@ -144,14 +146,25 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
           legend('bottomleft', legend='Quit', text.col='magenta', bg='black')
           quit = TRUE
         }else if(length(check)==1 & length(mergeIDs) == 3 & all(mergeIDs==0) & allow_seg_modify){ #entering segment polygon mode
-          #Will set to enter segment making mode if exactly two sky pixels and nothing else have been selected
+          #Will set to enter segment making mode if exactly three sky pixels and nothing else have been selected
           mergeIDs = NULL
-          legend('bottomleft', legend='Segment polygon mode', text.col='magenta', bg='black')
+          legend('bottomleft', legend='Segment create mode', text.col='magenta', bg='black')
           temploc = locator(type='o', col=col, pch=pch, cex=cex)
           if(!is.null(temploc)){
             lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
             seggrid = .inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
           }
+        }else if(length(check)==1 & length(mergeIDs) == 3 & all(mergeIDs==0) & allow_seg_modify==FALSE & poly_merge){ #entering polygon merge mode
+          #Will set to enter segment making mode if exactly three sky pixels and nothing else have been selected
+          mergeIDs = NULL
+          legend('bottomleft', legend='Polygon merge mode', text.col='magenta', bg='black')
+          temploc = locator(type='o', col=col, pch=pch, cex=cex)
+          if(!is.null(temploc)){
+            lines(temploc$x[c(1,length(temploc$x))], temploc$y[c(1,length(temploc$y))], col='magenta')
+            seggrid = .inpoly_pix(temploc$x, temploc$y) #new c++ code to find pixels in segment
+          }
+          mergeIDs = unique(segim_start[seggrid])
+          mergeIDs = mergeIDs[mergeIDs>0]
         }else if(any(mergeIDs==0)){
           mergeIDs = NULL
           legend('bottomleft', legend='Ambiguous segment/sky click/s (will ignore)!', text.col='magenta', bg='black')
@@ -170,7 +183,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
             segim_progress[!segim_progress %in% unlist(segID_merge)] = 0
           }else if(max(check)==1 & allow_seg_modify){ #select segment for segID mod
             mergeIDs = NULL
-            #If that object has been clicked twice flag for seg ID modification
+            #If that object has been clicked once flag for seg ID modification
             seggrid = which(segim==which(check==1), arr.ind=TRUE)
           }else if(max(check)==2){ #group de-merge
             legend('bottomleft', legend='Will de-merge group', text.col='magenta', bg='black')
