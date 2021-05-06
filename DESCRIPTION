@@ -1,8 +1,8 @@
 Package: ProFound
 Type: Package
 Title: Photometry Tools
-Version: 1.17.10
-Date: 2021-04-20
+Version: 1.17.11
+Date: 2021-05-06
 Author: Aaron Robotham
 Maintainer: Aaron Robotham <aaron.robotham@uwa.edu.au>
 Description: Core package containing all the tools for simple and advanced source extraction. This is used to create inputs for 'ProFit', or for source detection, extraction and photometry in its own right.
