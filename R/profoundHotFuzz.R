@@ -101,17 +101,20 @@ profoundHotFuzz = function(image=NULL, region=NULL, sigma=NULL, segstats=NULL, m
     intervals = intervals,
     constraints = constraints,
     magzero = magzero,
-    algo.func = 'LD',
+    algo.func = 'CMA',
     verbose = FALSE,
     rough = rough
   )
   
-  lowers = unlist(Data$intervals)[c(T, F)]
-  lowers[unlist(Data$tolog) == T] = log10(lowers[unlist(Data$tolog) == T])
-  lowers = lowers[which(unlist(Data$tofit))]
-  uppers = unlist(Data$intervals)[c(F, T)]
-  uppers[unlist(Data$tolog) == T] = log10(uppers[unlist(Data$tolog) == T])
-  uppers = uppers[which(unlist(Data$tofit))]
+  # lowers = unlist(Data$intervals)[c(T, F)]
+  # lowers[unlist(Data$tolog) == T] = log10(lowers[unlist(Data$tolog) == T])
+  # lowers = lowers[which(unlist(Data$tofit))]
+  # uppers = unlist(Data$intervals)[c(F, T)]
+  # uppers[unlist(Data$tolog) == T] = log10(uppers[unlist(Data$tolog) == T])
+  # uppers = uppers[which(unlist(Data$tofit))]
+  
+  lowers = c(segstats[,'mag'] - 1, rep(0, Ncomp))
+  uppers = c(segstats[,'mag'] + 1, rep(log10(maxsize), Ncomp))
   
   Data$lowers = lowers
   Data$uppers = uppers
@@ -121,7 +124,9 @@ profoundHotFuzz = function(image=NULL, region=NULL, sigma=NULL, segstats=NULL, m
       parm = Data$init,
       Data = Data,
       likefunc = ProFit::profitLikeModel,
-      Niters=Niters,
+      likefunctype = 'CMA',
+      liketype = 'max',
+      Niters = Niters,
       lower = lowers,
       upper = uppers,
       applyintervals = FALSE,
