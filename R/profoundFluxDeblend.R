@@ -1,4 +1,8 @@
-profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL, sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE, doallstats=TRUE, lowmemory=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum', convtype='brute', convmode='extended', Ndeblendlim=Inf, image_reweight=FALSE){
+profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL, groupsegID=NULL,
+                             sky=0, profound=NULL, magzero=0, df=3, radtrunc=2, iterative=FALSE,
+                             doallstats=TRUE, lowmemory=FALSE, deblendtype='fit', psf=NULL,
+                             fluxweight='sum', convtype='brute', convmode='extended', Ndeblendlim=Inf,
+                             image_reweight=FALSE){
   
   if(!is.null(image)){
     if(class(image)=='profound'){
