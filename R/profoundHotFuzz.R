@@ -1,5 +1,6 @@
-profoundHotFuzz = function(image=NULL, region=NULL, sigma=NULL, segstats=NULL, magzero=0, pixscale=1,
-                            rough=TRUE, profound=NULL, nser=2, dofit=TRUE, Niters=c(200,0)){
+profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
+                           magzero=0, pixscale=1, size=21, shape="disc", select=NULL,
+                           rough=TRUE, nser=2, dofit=TRUE, Niters=c(200,0)){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for smoothing to work. Please install from ICRAR/ProFit', call. = FALSE)
@@ -8,33 +9,41 @@ profoundHotFuzz = function(image=NULL, region=NULL, sigma=NULL, segstats=NULL, m
     stop('The Highlander package is needed for smoothing to work. Please install from asgr/Highlander', call. = FALSE)
   }
   
-  if(!is.null(image)){
-    if(inherits(image, 'profound')){
-      profound = image
-      image = NULL
-    }
+  image = profound$image - profound$sky
+  segim_orig = profound$segim_orig
+  segim = profound$segim
+  sigma = profound$skyRMS
+  
+  segstats = profound$segstats
+  magzero = profound$magzero
+  pixscale = profound$pixscale
+  
+  if(!is.null(select)){
+    segstats = segstats[select,]
+    segim_orig[!segim_orig %in% segstats$segID] = 0L
+    segim[!segim %in% segstats$segID] = 0L
   }
   
-  if(!is.null(profound)){
-    if(is.null(image)){
-      image = profound$image - profound$sky
-    }
-    if(is.null(region)){
-      region = profound$objects_redo - (profound$segim_orig > 0)
-    }
-    if(is.null(sigma)){
-      sigma = profound$skyRMS
-    }
-    if(is.null(segstats)){
-      segstats = profound$segstats
-    }
-    if(missing(magzero)){
-      magzero = profound$magzero
-    }
-    if(missing(pixscale)){
-      pixscale = profound$pixscale
-    }
+  segim_redo = profoundMakeSegimDilate(segim=segim, size=size, shape=shape)$segim
+  
+  if(!is.null(loc)){
+    image = magcutout(image, loc=loc, box=box)
+    loc.diff = image$loc.diff
+    image = image$image
+    segim_orig = magcutout(segim_orig, loc=loc, box=box)$image
+    segim = magcutout(segim, loc=loc, box=box)$image
+    segim_redo = magcutout(segim_redo, loc=loc, box=box)$image
+    sigma = magcutout(sigma, loc=loc, box=box)$image
+    
+    segstats = segstats[segstats$segID %in% segim_redo,]
+    
+    segstats[,'xcen'] = segstats[,'xcen'] - loc.diff[1]
+    segstats[,'ycen'] = segstats[,'ycen'] - loc.diff[2]
+    segstats[,'xmax'] = segstats[,'xmax'] - loc.diff[1]
+    segstats[,'ymax'] = segstats[,'ymax'] - loc.diff[2]
   }
+  
+  region = (segim_redo - segim > 0)
   
   Ncomp = dim(segstats)[1]
   
@@ -113,8 +122,8 @@ profoundHotFuzz = function(image=NULL, region=NULL, sigma=NULL, segstats=NULL, m
   # uppers[unlist(Data$tolog) == T] = log10(uppers[unlist(Data$tolog) == T])
   # uppers = uppers[which(unlist(Data$tofit))]
   
-  lowers = c(segstats[,'mag'] - 1, rep(0, Ncomp))
-  uppers = c(segstats[,'mag'] + 1, rep(log10(maxsize), Ncomp))
+  lowers = c(segstats[,'mag'] - 5, rep(0, Ncomp))
+  uppers = c(segstats[,'mag'] + 5, rep(log10(maxsize), Ncomp))
   
   Data$lowers = lowers
   Data$uppers = uppers
@@ -133,12 +142,18 @@ profoundHotFuzz = function(image=NULL, region=NULL, sigma=NULL, segstats=NULL, m
       applyconstraints = FALSE
     )
     
+    highfit$image = image
+    highfit$segim_orig = segim_orig
+    highfit$segim = segim
+    highfit$segim_redo = segim_redo
+    highfit$sigma = sigma
+    highfit$segstats = segstats
     highfit$modellist = ProFit::profitRemakeModellist(highfit$parm, Data=Data)$modellist
     highfit$image_model = ProFit::profitMakeModel(highfit$modellist, magzero=magzero, dim=dim(image))$z
     
     highfit$Data = Data
     return(highfit)
   }else{
-    return(Data)
+    return(list(Data, image=image, segim_orig = segim_orig, segim = segim, segim_redo = segim_redo, sigma = sigma, segstats = segstats))
   }
 }
