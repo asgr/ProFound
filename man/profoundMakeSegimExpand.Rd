@@ -65,10 +65,10 @@ Numeric scalar; standard deviation of the blur used when expanding out the \opti
 Integer vector; specifies which segmentation regions should be expanded by the segID integer reference. If left with the default \option{expand}='all' then all segments will be expanded.
 }
   \item{size}{
-Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number. See \code{makeBrush}.
+Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number.
 }
   \item{shape}{
-Character scalar; the shape of the dilation kernel. See \code{makeBrush}.
+Character scalar; the shape of the dilation kernel. Options are 'box', 'disc', 'diamond', 'Gaussian', 'line'.
 }
   \item{iters}{
 Integer scalar; how many times the dilation kernel should be applied to the image.  
