@@ -10,8 +10,8 @@ Run multiband \code{ProFound} photometry either with loaded data, or images on a
 \usage{
 profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL,
   detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6,
-  iters_tot = 0, sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid=box,
-  boxadd=box/2, app_diam = 1, bandappend = multibands, totappend = "t", colappend = "c",
+  iters_tot = 0, sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid = box,
+  boxadd = box/2, app_diam = 1, bandappend = multibands, totappend = "t", colappend = "c",
   grpappend = 'g', dotot = TRUE, docol = TRUE, dogrp = TRUE, deblend = FALSE,
   groupstats = FALSE, groupby_det = 'segim_orig', groupby_mul = 'segim_orig',
   keepsegims = FALSE, masking = 'and', ...)
