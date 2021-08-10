@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // interpolateAkimaGrid
 void interpolateAkimaGrid(NumericVector x, NumericVector y, NumericMatrix grid, NumericMatrix output);
 RcppExport SEXP _ProFound_interpolateAkimaGrid(SEXP xSEXP, SEXP ySEXP, SEXP gridSEXP, SEXP outputSEXP) {
