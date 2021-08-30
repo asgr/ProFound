@@ -1042,37 +1042,76 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, header=N
     }
   }
   
-  segim[is.na(segim)]=0L
-
-  if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
-  #segvec=which(tabulate(segim)>0)
-  # for(i in segvec){
-  #   z=segim==i
-  #   z=z[ceiling(temp$x), ceiling(temp$y)]
-  #   contour(temp$x,temp$y,z,add=T,col=col[i],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
-  # }
-  xrun=1:(dim(segim)[1]-1)
-  yrun=1:(dim(segim)[2]-1)
+  # segim[is.na(segim)] = 0L
+  # 
+  # if(min(segim,na.rm=TRUE)!=0){segim=segim-min(segim,na.rm=TRUE)}
+  # #segvec=which(tabulate(segim)>0)
+  # # for(i in segvec){
+  # #   z=segim==i
+  # #   z=z[ceiling(temp$x), ceiling(temp$y)]
+  # #   contour(temp$x,temp$y,z,add=T,col=col[i],zlim=c(0,1),drawlabels=FALSE,nlevels=1)
+  # # }
+  # xrun = 1:(dim(segim)[1]-1)
+  # yrun = 1:(dim(segim)[2]-1)
+  # 
+  # segim_lb = segim[xrun,yrun]
+  # segim_lt = segim[xrun+1,yrun]
+  # segim_rt = segim[xrun+1,yrun+1]
+  # segim_rb = segim[xrun,yrun+1]
+  # 
+  # segim_temp = (segim_lb == segim_lt) & (segim_rt == segim_rb) & (segim_lb == segim_rb) & (segim_lt == segim_rt) 
+  # 
+  # segim_edge = matrix(0L,dim(segim)[1],dim(segim)[2])
+  # segim_edge[xrun,yrun] = segim_edge[xrun,yrun] + segim_temp
+  # segim_edge[xrun+1,yrun] = segim_edge[xrun+1,yrun] + segim_temp
+  # segim_edge[xrun+1,yrun+1] = segim_edge[xrun+1,yrun+1] + segim_temp
+  # segim_edge[xrun,yrun+1] = segim_edge[xrun,yrun+1] + segim_temp
+  # segim[segim_edge==4L] = 0L
   
-  segim_lb=segim[xrun,yrun]
-  segim_lt=segim[xrun+1,yrun]
-  segim_rt=segim[xrun+1,yrun+1]
-  segim_rb=segim[xrun,yrun+1]
+  segim = profoundSegimEdge(segim)
   
-  segim_temp = (segim_lb == segim_lt) & (segim_rt == segim_rb) & (segim_lb == segim_rb) & (segim_lt == segim_rt) 
-  
-  segim_edge=matrix(0,dim(segim)[1],dim(segim)[2])
-  segim_edge[xrun,yrun]=segim_edge[xrun,yrun]+segim_temp
-  segim_edge[xrun+1,yrun]=segim_edge[xrun+1,yrun]+segim_temp
-  segim_edge[xrun+1,yrun+1]=segim_edge[xrun+1,yrun+1]+segim_temp
-  segim_edge[xrun,yrun+1]=segim_edge[xrun,yrun+1]+segim_temp
-  segim[segim_edge==4]=0
-  
-  magimage(segim, col=c(NA,col), add=TRUE, magmap=FALSE)
+  magimage(segim, col=c(NA, col), add=TRUE, magmap=FALSE)
   
   if(!is.null(mask)){
     magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
   }
+}
+
+profoundSegimEdge = function(segim=NULL, fill=NULL){
+  if(anyNA(segim)){
+    segim[is.na(segim)] = 0L
+  }
+  
+  # if(min(segim,na.rm=TRUE)!=0){
+  #   offset = min(segim,na.rm=TRUE)
+  #   segim = segim - offset
+  # }else{
+  #   offset = 0
+  # }
+  
+  xrun = 1:(dim(segim)[1]-1)
+  yrun = 1:(dim(segim)[2]-1)
+  
+  segim_lb = segim[xrun,yrun]
+  segim_lt = segim[xrun+1,yrun]
+  segim_rt = segim[xrun+1,yrun+1]
+  segim_rb = segim[xrun,yrun+1]
+  
+  segim_temp = (segim_lb == segim_lt) & (segim_rt == segim_rb) & (segim_lb == segim_rb) & (segim_lt == segim_rt) 
+  
+  segim_edge = matrix(0L,dim(segim)[1],dim(segim)[2])
+  segim_edge[xrun,yrun] = segim_edge[xrun,yrun] + segim_temp
+  segim_edge[xrun+1,yrun] = segim_edge[xrun+1,yrun] + segim_temp
+  segim_edge[xrun+1,yrun+1] = segim_edge[xrun+1,yrun+1] + segim_temp
+  segim_edge[xrun,yrun+1] = segim_edge[xrun,yrun+1] + segim_temp
+  segim[segim_edge==4L] = 0L
+  
+  if(!is.null(fill)){
+    segim[segim == 0L] = fill
+  }
+  
+  #segim = segim + offset
+  return(segim)
 }
 
 profoundSegimNear=function(segim=NULL, offset=1){
