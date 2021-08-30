@@ -54,7 +54,7 @@ Aaron Robotham
 \examples{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
-profound=profoundProFound(image, magzero=30)
+profound = profoundProFound(image, magzero=30)
 
 #Below is just to see how it works, this is clearly over-merging.
 

@@ -279,7 +279,7 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
                         skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, conviters=conviters,
                         doChiSq=doChiSq, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
     }
-    doSNOW::stopCluster(cl)
+    snow::stopCluster(cl)
     tempsky=rbind(tempsky)
   }else{
     if(cores>1){
