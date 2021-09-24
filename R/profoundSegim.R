@@ -563,6 +563,13 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     return(invisible(list(segim=segim, objects=objects, segstats=segstats, header=header, call=call)))
   }
   
+  if(anyNA(segim)){
+    NAmask = which(is.na(segim))
+    segim[is.na(segim)] = 0L
+  }else{
+    NAmask = NULL
+  }
+  
   if(expand[1]=='all'){
     segim_new = .dilate_cpp(segim, kern)
   }else{
@@ -573,13 +580,16 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
       segim_new[!(segim_new %in% expand)] = 0L
     }
     segim_new = .dilate_cpp(segim_new, kern)
-    replace=which(segim!=0) #put back non-dilated segments
-    segim_new[replace]=segim[replace] #put back non-dilated segments
+    replace = which(segim!=0) #put back non-dilated segments
+    segim_new[replace] = segim[replace] #put back non-dilated segments
     rm(replace)
   }
   mode(segim_new)='integer'
-  
   rm(segim)
+  
+  if(!is.null(NAmask)){
+    segim_new[NAmask] = NA
+  }
   
   if(!is.null(mask) & !is.null(image)){
     segim_new[mask!=0]=0
@@ -1283,24 +1293,21 @@ profoundDilate = function(segim=NULL, size=3, shape='disc', expand='all', iters=
   if(expand[1] == 'all'){
     expand = 0
   }
+  
+  if(anyNA(segim)){
+    NAmask = which(is.na(segim))
+    segim[is.na(segim)] = 0L
+  }else{
+    NAmask = NULL
+  }
+  
   for(i in 1:iters){
     segim = .dilate_cpp(segim=segim, kern=kern, expand=expand)
-    # }else{
-    #   if(i==1){
-    #     segim_new = segim
-    #   }
-    #   if('fastmatch' %in% .packages()){ #remove things that will not be dilated
-    #     segim_new[fastmatch::fmatch(segim_new, expand, nomatch = 0L) == 0L] = 0L
-    #   }else{
-    #     segim_new[!(segim_new %in% expand)] = 0L
-    #   }
-    #   segim_new = .dilate_cpp(segim_new, kern)
-    #   replace = which(segim!=0) #put back non-dilated segments
-    #   segim_new[replace] = segim[replace] #put back non-dilated segments
-    #   mode(segim_new) = 'integer'
-    #   segim = segim_new
-    #   rm(replace)
-    # }
   }
+  
+  if(!is.null(NAmask)){
+    segim[NAmask] = NA
+  }
+  
   return(segim)
 }
