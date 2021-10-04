@@ -56,7 +56,7 @@ Logical; specifies whether the output catalogue is matched against all rows of t
 Logical; if TRUE then a low memory mode of FluxDeblend will be used. This is quite a bit slower, so the default of FALSE is usually preferred unless you are running into serious memory issues.
 }
   \item{deblendtype}{
-Scalar character, either 'fit' (where the segments in the image are approximately fitted for deblending) or 'psf' (where a PSF must be provided to argument \option{psf}). The former makes more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend.
+Scalar character, either 'fit' (where the segments in the image are approximately fitted for deblending), 'gauss' (where the deblending is approximated with a covariant Gaussian distribution, you will need the package 'mvtnorm' in this case), or 'psf' (where a PSF must be provided to argument \option{psf}). The first two make more sense for well resolved images (say optical) where the main issue in the deblending is the overlapping of resolved flux components. The latter works better in the regime where the image is barely resolved beyond the PSF, and this dominate the uncertainty of the deblend.
 }
   \item{psf}{
 Numeric matrix; must be provided if \option{deblendtype}='psf'. This should be a small image (usually square) of the image PSF/beam to use for deblending.
@@ -82,9 +82,9 @@ This routine only deblends with detected groups, so it is quite fast if the numb
 
 Since there are a few ways to run it, here is some advice:
 
-For clearly extended sources you probably want to run with deblendtype='fit', iterative=TRUE / deblendtype='psf', fluxweight='sum', convtype='extend'. The former works better for very complex source geometry (since it fits it), the latter might be a bit more stable though.
+For clearly extended sources you probably want to run with deblendtype='fit', iterative=TRUE/ deblendtype='gauss' / deblendtype='psf', fluxweight='sum', convtype='extend'. The former works better for very complex source geometry (since it fits it), the other options might be a bit more stable though. 'gauss' should be the fastest deblending solution in most cases.
 
-For poorly resolved images you probably want to run with deblendtype='psf', fluxweight='peak', convtype='psf'.
+For poorly resolved images you probably want to run with deblendtype='psf', fluxweight='peak', convtype='psf' (and you obviously need a PSF to use in this case).
 }
 \value{
 A data.frame containing deblended flux information:

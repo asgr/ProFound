@@ -135,6 +135,12 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
         if(iterative){
           image_temp[tempgridgroup]=image_temp[tempgridgroup]-weightmatrix[,j]
         }
+      }else if(deblendtype=='gauss'){
+        if(requireNamespace("mvtnorm", quietly = TRUE)){
+          weightmatrix[,j] = segstats[segstats$segID==segIDlist[j],"flux"] * mvtnorm::dmvnorm(tempgridgroup, mean = c(segstats[segstats$segID==segIDlist[j],"xcen"], segstats[segstats$segID==segIDlist[j],"ycen"]), sigma = .covmat(segstats[segstats$segID==segIDlist[j],"xsd"],segstats[segstats$segID==segIDlist[j],"ysd"],segstats[segstats$segID==segIDlist[j],"covxy"]), checkSymmetry = FALSE)
+        }else{
+          stop('The mvtnorm package is needed for deblendtype=\'gauss\'. Please install from CRAN.', call. = FALSE)
+        }
       }else if(deblendtype=='psf'){
         if(is.null(psf)){
           stop("psf must be provided if deblendtype=psf !")
@@ -243,3 +249,9 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   
   return(invisible(output))
 }
+
+.covmat = function(sx, sy, covxy){
+  return(matrix(c(sx^2, covxy, covxy, sy^2),2,2))
+}
+
+
