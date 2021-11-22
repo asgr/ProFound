@@ -676,7 +676,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     outline = NULL
   }
   
-  cmap = rev(colorRampPalette(brewer.pal(9,'RdYlBu'))(100))
+  cmap = hcl.colors(100, 'RdYlBu', rev=TRUE)
   maximg = quantile(abs(image[is.finite(image)]), 0.995, na.rm=TRUE)
   stretchscale = 1/median(abs(image), na.rm=TRUE)
   

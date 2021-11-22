@@ -450,7 +450,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
                           skypixmin=skypixmin, boxadd=boxadd, boxiters=boxiters, conviters=conviters,
                           doChiSq=doChiSq, doclip=doclip, shiftloc=shiftloc, paddim=paddim)
       }
-      closeAllConnections()
+      snow::stopCluster()
       tempsky=rbind(tempsky)
     }else{
       if(cores>1){

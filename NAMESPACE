@@ -12,7 +12,6 @@ import("foreach")
 
 importFrom("Rcpp", "evalCpp")
 importFrom("utils", "relist", "packageVersion")
-importFrom("RColorBrewer", "brewer.pal")
 importFrom("celestial", "getpixscale")
 
 S3method("plot","profound")
