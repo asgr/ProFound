@@ -4,3 +4,6 @@ README.md
 vignettes/rsconnect
 rsconnect
 .github
+#extdata/MultiBand
+#vignettes/ProFound-MultiBand-Stack.Rmd
+#vignettes/ProFound-Complex-Fit.Rmd
