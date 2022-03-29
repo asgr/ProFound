@@ -59,7 +59,7 @@ profound = profoundProFound(image, magzero=30)
 #Below is just to see how it works, this is clearly over-merging.
 
 groupsegID = profoundAutoMerge(segim=profound$segim_orig, segstats=profound$segstats,
-  spur=3e-2)
+  spur_lim=3e-2)
 
 segimfix = profoundSegimKeep(segim=profound$segim, segID_merge=groupsegID$segID)
 }

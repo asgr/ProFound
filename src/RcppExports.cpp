@@ -49,17 +49,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// point_in_polygon
-LogicalVector point_in_polygon(NumericVector x, NumericVector y, NumericVector poly_x, NumericVector poly_y);
-RcppExport SEXP _ProFound_point_in_polygon(SEXP xSEXP, SEXP ySEXP, SEXP poly_xSEXP, SEXP poly_ySEXP) {
+// pnpoly
+LogicalVector pnpoly(NumericVector testx, NumericVector testy, NumericVector vertx, NumericVector verty);
+RcppExport SEXP _ProFound_pnpoly(SEXP testxSEXP, SEXP testySEXP, SEXP vertxSEXP, SEXP vertySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type poly_x(poly_xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type poly_y(poly_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(point_in_polygon(x, y, poly_x, poly_y));
+    Rcpp::traits::input_parameter< NumericVector >::type testx(testxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type testy(testySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vertx(vertxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type verty(vertySEXP);
+    rcpp_result_gen = Rcpp::wrap(pnpoly(testx, testy, vertx, verty));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -174,7 +174,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_interpolateAkimaGrid", (DL_FUNC) &_ProFound_interpolateAkimaGrid, 4},
     {"_ProFound_interpolateLinearGrid", (DL_FUNC) &_ProFound_interpolateLinearGrid, 4},
     {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 3},
-    {"_ProFound_point_in_polygon", (DL_FUNC) &_ProFound_point_in_polygon, 4},
+    {"_ProFound_pnpoly", (DL_FUNC) &_ProFound_pnpoly, 4},
     {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 18},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
     {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},

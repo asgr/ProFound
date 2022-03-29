@@ -20,8 +20,8 @@
     .Call(`_ProFound_dilate_cpp`, segim, kern, expand)
 }
 
-.point_in_polygon_cpp <- function(x, y, poly_x, poly_y) {
-    .Call(`_ProFound_point_in_polygon`, x, y, poly_x, poly_y)
+.point_in_polygon_cpp_short <- function(testx, testy, vertx, verty) {
+    .Call(`_ProFound_pnpoly`, testx, testy, vertx, verty)
 }
 
 .Cadacs_MakeSkyGrid <- function(image, sky, skyRMS, objects = NULL, mask = NULL, box1 = 100L, box2 = 100L, grid1 = 100L, grid2 = 100L, boxadd1 = 50L, boxadd2 = 50L, type = 2L, skypixmin = 5000L, boxiters = 0L, doclip = 1L, skytype = 1L, skyRMStype = 2L, sigmasel = 1) {

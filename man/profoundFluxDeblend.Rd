@@ -50,7 +50,7 @@ Numeric scalar; the maximum allowed radius beyond the edge-most segment pixel to
 Logical; should each segment profile fit be subtracted as it goes along? TRUE tends to remove the pedestal from a large galaxy that has faint objects embedded on top.
 }
   \item{doallstats}{
-Logical; specifies whether the output catalogue is matched against all rows of the supplied \option{segstats} (TRUE), or only the rows containing grouped (and therefore deblended) galaxies are returned and the core flux columns (see below)s.
+Logical; specifies whether the output catalogue is matched against all rows of the supplied \option{segstats} (TRUE), or only the rows containing grouped (and therefore deblended) galaxies are returned and the core flux columns (see below).
 }
   \item{lowmemory}{
 Logical; if TRUE then a low memory mode of FluxDeblend will be used. This is quite a bit slower, so the default of FALSE is usually preferred unless you are running into serious memory issues.
