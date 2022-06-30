@@ -5,7 +5,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
                              image_reweight=FALSE){
   
   if(!is.null(image)){
-    if(class(image)=='profound'){
+    if(inherits(image,'profound')){
       if(is.null(segim)){segim=image$segim}
       if(is.null(segstats)){segstats=image$segstats}
       if(is.null(groupim)){groupim=image$group$groupim}
@@ -18,7 +18,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
   }
   
   if(!is.null(profound)){
-    if(class(profound) != 'profound'){
+    if(!inherits(profound,'profound')){
       stop('Class of profound input must be of type \'profound\'')
     }
     if(is.null(image)){image=profound$image}
@@ -111,7 +111,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
         uniq_xlen=length(unique(round(segout[select,1],6)))
         if(uniq_xlen>max(3,df) & df>=2){
           tempsafe=try(10^predict(smooth.spline(segout[select,1],log10(segout[select,2]), df=df)$fit, x=groupellip[,1])$y)
-          if(class(tempsafe)=="try-error"){
+          if(inherits(tempsafe, "try-error")){
             weightmatrix[,j]=10^predict(lm(y~x, data=list(x=segout[select,1],y=log10(segout[select,2]))), newdata=list(x=groupellip[,1]))
           }else{
             weightmatrix[,j]=tempsafe

@@ -1,6 +1,6 @@
 profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
                            size=21, shape="disc", select=NULL,
-                           rough=TRUE, nser=2, dofit=TRUE, Niters=c(200,0), fitRe=TRUE){
+                           rough=TRUE, nser=2, dofit=TRUE, Niters=c(200,0), fitRe=TRUE, axrat='profound', ...){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for smoothing to work. Please install from ICRAR/ProFit', call. = FALSE)
@@ -53,7 +53,7 @@ profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
       re = segstats[,'R50'],
       nser = rep(nser, Ncomp),
       ang = segstats[,'ang'],
-      axrat = segstats[,'axrat']
+      axrat = ifelse(axrat=='profound',segstats[,'axrat'],axrat)
     )
   )
 
@@ -143,7 +143,8 @@ profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
         lower = lowers,
         upper = uppers,
         applyintervals = FALSE,
-        applyconstraints = FALSE
+        applyconstraints = FALSE,
+        ...
       )
       
       highfit$modellist = ProFit::profitRemakeModellist(highfit$parm, Data=Data)$modellist
@@ -168,7 +169,7 @@ profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
 
 profoundPSFFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
                            size=21, shape="disc", select=NULL,
-                           rough=TRUE, nser=2, dofit=TRUE, Niters=c(200,0)){
+                           rough=TRUE, nser=2, dofit=TRUE, Niters=c(200,0), ...){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for smoothing to work. Please install from ICRAR/ProFit', call. = FALSE)

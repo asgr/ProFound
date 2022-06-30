@@ -10,10 +10,11 @@ Functions to fit the tenuous outer fuzz of extended sources.
 }
 \usage{
 profoundHotFuzz(profound = NULL, loc = NULL, box = c(200, 200), size = 21, shape = "disc",
-  select = NULL, rough = TRUE, nser = 2, dofit = TRUE, Niters = c(200, 0), fitRe = TRUE)
+  select = NULL, rough = TRUE, nser = 2, dofit = TRUE, Niters = c(200, 0), fitRe = TRUE,
+  axrat = 'profound', ...)
   
 profoundPSFFuzz(profound = NULL, loc = NULL, box = c(200,200), size = 21, shape = "disc",
-  select = NULL, rough = TRUE, nser = 2, dofit = TRUE, Niters = c(200, 0))
+  select = NULL, rough = TRUE, nser = 2, dofit = TRUE, Niters = c(200, 0), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -49,6 +50,12 @@ Integer vector; if \option{dofit} = TRUE, the number of CMA and MCMC steps to ma
 }
   \item{fitRe}{
 Logical; if \option{dofit} = TRUE, should Re also be fitted?
+}
+  \item{axrat}{
+Character or numeric; either set to 'profound' (so \option{axrat} in inherited from ProFound), or set to the desired value.  
+}
+  \item{\dots}{
+Other arguments to pass to \code{Highlander}.  
 }
 }
 \details{

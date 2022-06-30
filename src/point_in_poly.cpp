@@ -94,7 +94,7 @@ LogicalVector pnpoly(NumericVector testx, NumericVector testy, NumericVector ver
     temp = 0;
     for (i = 0, j = vertx.size() - 1; i < vertx.size(); j = i++) {
       if ( ((verty[i] > testy[k]) != (verty[j] > testy[k])) &&
-           (testx[k] < (vertx[j]-vertx[i]) * (testy[k] - verty[i]) / (verty[j] - verty[i]) + vertx[i]) )
+           (testx[k] < (vertx[j] - vertx[i]) * (testy[k] - verty[i]) / (verty[j] - verty[i]) + vertx[i]) )
       temp = !temp;
     }
     c[k] = temp;

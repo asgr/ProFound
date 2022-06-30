@@ -1208,8 +1208,11 @@ profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NU
   invisible(segim_merge)
 }
 
-profoundSegimWarp=function(segim_in=NULL, header_in=NULL, header_out=NULL){
-  invisible(magwarp(image_in = segim_in, header_out = header_out, header_in = header_in, doscale = FALSE, interpolation = 'nearest')$image)
+profoundSegimWarp=function(segim_in=NULL, ...){
+  if(!requireNamespace("Rwcs", quietly = TRUE)){
+    stop('The Rwcs package is needed for this function to work. Please install it from GitHub asgr/Rwcs', call. = FALSE)
+  }
+  invisible(Rwcs::Rwcs_warp(image_in=segim_in, direction='backward', interpolation='nearest', doscale=FALSE, ...)$imDat)
 }
 
 profoundSegimShare=function(segim_in=NULL, header_in=NULL, header_out=NULL, pixcut=1, weights=NULL){

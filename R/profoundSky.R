@@ -197,7 +197,7 @@ profoundSkyEstLoc=function(image=NULL, objects=NULL, mask=NULL, loc=dim(image)/2
   if(skytype=='median'){
     if('Rfast' %in% .packages()){
       skyloc=try(Rfast::med(clip, na.rm=TRUE), silent=TRUE)
-      if(class(skyloc)=='try-error'){skyloc=NA}
+      if(inherits(skyloc, 'try-error')){skyloc=NA}
     }else{
       skyloc=stats::median(clip, na.rm=TRUE)
     }
@@ -257,12 +257,14 @@ profoundMakeSkyMap=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(10
   xseq=seq(grid[1]/2,dim(image)[1],by=grid[1])
   yseq=seq(grid[2]/2,dim(image)[2],by=grid[2])
   tempgrid=expand.grid(xseq, yseq)
-
-  image = image - sky
   
-  if(skytype == 'mode' | skytype == 'converge'){
-    skygrid_type = 'old'
+  if(any(sky > 0)){
+    image = image - sky
   }
+  
+  # if(skytype == 'mode' | skytype == 'converge'){
+  #   skygrid_type = 'old'
+  # }
   
   if(cores>1 & 'foreach' %in% .packages() & 'snow' %in% .packages() & 'doSNOW' %in% .packages() & 'bigmemory'  %in% .packages()){
     cl = snow::makeCluster(cores)
@@ -350,7 +352,9 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
   }
   
   if(!is.null(sky)){
-    image = image - sky
+    if(any(sky > 0)){
+      image = image - sky
+    }
   }
   
   if(skytype == 'mode' | skytype == 'converge'){
@@ -572,12 +576,13 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
         temp_bi_skyChiSq = matrix(tempmat_skyChiSq[1,1], dim(image)[1], dim(image)[2])
       }
     }
-    # if(!is.null(mask)){
-    #   temp_bi_sky[mask>0]=NA
-    #   temp_bi_skyRMS[mask>0]=NA
-    # }
   }else{
     stop('skygrid_type must be new/old!')
+  }
+  
+  if(!is.null(mask)){
+    temp_bi_sky[mask>0] = NA
+    temp_bi_skyRMS[mask>0] = NA
   }
   
   if(!is.null(sky)){
@@ -655,7 +660,7 @@ profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, obj
   data = as.numeric(data)
   if('Rfast' %in% .packages()){
     med_data=try(Rfast::med(data, na.rm=TRUE), silent=TRUE)
-    if(class(med_data)=='try-error'){med_data=NA}
+    if(inherits(med_data, 'try-error')){med_data=NA}
   }else{
     med_data = stats::median(data, na.rm=TRUE)
   }

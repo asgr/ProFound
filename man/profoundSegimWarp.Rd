@@ -2,28 +2,27 @@
 \alias{profoundSegimWarp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Remap Segmentation Map via Warping
+Remap Segmentation Map via Rwcs Warping
 }
 \description{
-Remaps an input segmentation map WCS Tan Gnomonic projection system to a different target WCS. This uses \code{\link{magwarp}} with sensible settings, but \code{\link{magwarp}} can be used more directly if the other lower level options are required. This interface should cover most practical use cases though. Using \code{\link{profoundProFound}} with a remapped segmentation map is likely to be more sensible than remapping image flux since it will not produce flux interpolation errors.
+Remaps an input segmentation map WCS Tan Gnomonic projection system to a different target WCS. This uses \code{Rwcs_warp} with sensible settings \option{doscale} = FALSE, \option{interpolation} = 'nearest', \option{direction} = 'backward', but \code{Rwcs_warp} can be used more directly if the other lower level options are required (Note the \code{Rwcs} package will be needed from asgr/Rwcs GitHub.
+
+This interface should cover most practical use cases though. Using \code{\link{profoundProFound}} with a remapped segmentation map is likely to be more sensible than remapping image flux since it will not produce flux interpolation errors.
 }
 \usage{
-profoundSegimWarp(segim_in = NULL, header_in = NULL, header_out = NULL)
+profoundSegimWarp(segim_in = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{segim_in}{
-Integer matrix; required, the segmentation map we want to remap. If \option{segim_in} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of the list is parsed to \option{segim_in} and the correct header part is passed to \option{header_in}.
+Integer matrix; required, the segmentation map we want to remap. If \option{segim_in} is a list as created by \code{Rfits} then the image part of the list is passed to \option{segim_in} and the correct header part is passed to \option{header_in}.
 }
-  \item{header_in}{
-Full FITS header in table or vector format. This should be the header WCS that matches \option{segim_in}. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If \option{header_in} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
-}
-  \item{header_out}{
-Full FITS header in table or vector format. This is the target WCS projection that \option{segim_in} will be mapped onto. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If \option{header_out} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
+  \item{\dots}{
+Additional arguments passed into \code{Rwcs_warp} (note you should not set \option{doscale}, \option{interpolation}, \option{direction}).
 }
 }
 \details{
-This function uses the \option{interpolation}='nearest' and \option{doscale}=FALSE in \code{\link{magwarp}}.
+This function uses the \option{doscale} = FALSE, \option{interpolation} = 'nearest', \option{direction} = 'backward' in \code{Rwcs_warp}.
 }
 \value{
 Integer matrix; the remapped image using the target WCS.
@@ -33,7 +32,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{magwarp}}
+\code{Rwcs_warp}
 }
 \examples{
 \dontrun{
