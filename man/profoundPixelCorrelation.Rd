@@ -107,9 +107,9 @@ A list containing three objects:
 
 A list containing three numeric matrices:
 
-\item{sky}{The new sky estimate, defined as the input \option{sky}+\option{sky_lo}.}
-\item{sky_lo}{The low k modes extracted from the objects masked \option{image}-\option{sky}.}
-\item{sky_hi}{The high k modes extracted from the objects masked \option{image}-\option{sky}.}
+\item sky: The new sky estimate, defined as the input \option{sky}+\option{sky_lo}.
+\item sky_lo: The low k modes extracted from the objects masked \option{image}-\option{sky}.
+\item sky_hi: The high k modes extracted from the objects masked \option{image}-\option{sky}.
 }
 }
 \author{
