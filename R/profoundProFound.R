@@ -703,8 +703,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     # }
     profoundSegimPlot(profound=x)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
-    abline(v=c(0,dim(x$image)[1]))
-    abline(h=c(0,dim(x$image)[2]))
+    #abline(v=c(0,dim(x$image)[1]))
+    #abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 3 dilate
     if(requireNamespace("Rwcs", quietly = TRUE)){
@@ -811,8 +811,8 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     # magimage(x$segim, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
     # if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     profoundSegimPlot(profound=x)
-    abline(v=c(0,dim(image)[1]))
-    abline(h=c(0,dim(image)[2]))
+    #abline(v=c(0,dim(image)[1]))
+    #abline(h=c(0,dim(image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 3 dilate
     magimage(image)

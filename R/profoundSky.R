@@ -586,7 +586,9 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
   }
   
   if(!is.null(sky)){
-    temp_bi_sky = temp_bi_sky + sky
+    if(any(sky > 0)){
+      temp_bi_sky = temp_bi_sky + sky
+    }
   }
   
   return(invisible(list(sky=temp_bi_sky, skyRMS=temp_bi_skyRMS, skyChiSq=temp_bi_skyChiSq)))
