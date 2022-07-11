@@ -128,7 +128,7 @@ Character scalar; the type of sky level estimator used. Allowed options are 'med
 Character scalar; the type of sky level estimator used. Allowed options are 'quanlo' (the default), 'quanhi', 'quanboth', 'sd' and 'converge' (see \code{\link{profoundSkyEstLoc}} for an explanation of what these estimators do). In all cases this is the estimator applied to unmasked and non-object pixels. If \option{doclip}=TRUE then the pixels will be dynamically sigma clipped before the estimator is run.
 }
   \item{roughpedestal}{
-Logical; when the initial "rough sky" is computed, should only a pedestal (based on the median of the sky map) be used for the sky? This is a good option if the image is known to contain a *very* large (many times the \option{box} size) galaxy that might otherwise be over subtracted by the initial rough sky map.
+Logical; when the initial "rough sky" is computed, should only a pedestal (based on the median of the sky/skYRMS map) be used for the sky/skYRMS? This is a good option if the image is known to contain a *very* large (many times the \option{box} size) galaxy that might otherwise be over subtracted by the initial rough sky map.
 }
   \item{sigmasel}{
 Numeric scalar; the quantile to use when trying to estimate the true standard-deviation of the sky distribution. If contamination is low then the default of 1 is about optimal in terms of S/N, but you might need to make the value lower when contamination is very high.

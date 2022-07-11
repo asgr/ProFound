@@ -82,7 +82,7 @@ There are many questions to think about when choosing the best combination of sk
 If the package \code{Rfast} is loaded, then this function will use the faster Rfast::med median function over the base median. This is about a factor 2-3 faster.
 }
 \value{
-A length 3 vector where the first element is the sky; the second is the skyRM; the third (if \code{doChiSq}=TRUE) is the log-likelihood of the local sky, else this is NA.
+A length 3 vector where the first element is the sky; the second is the skyRMS; the third (if \code{doChiSq}=TRUE) is the log-likelihood of the local sky, else this is NA.
 }
 \author{
 Aaron Robotham
