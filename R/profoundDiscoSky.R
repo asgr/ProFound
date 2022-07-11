@@ -8,9 +8,9 @@ profoundDiscoSky = function(image, disco, sky_arg_list=NULL, roughpedestal=FALSE
   
   for(i in disoc_IDs){
     if(is.null(mask)){
-      temp_mask = !(disco == i)
+      temp_mask = ! disco == i
     }else{
-      temp_mask = !(disco == i) & mask > 0L
+      temp_mask = (! disco == i) | mask > 0L
     }
     replace = which(!temp_mask)
     if(is.null(sky_arg_list[[i]])){
