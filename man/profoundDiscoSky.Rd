@@ -49,6 +49,7 @@ Aaron Robotham
 \code{\link{profoundMakeSkyGrid}}
 }
 \examples{
+\dontrun{
 image = readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))$imDat
 profound = profoundProFound(image) #We want this for the object mask.
@@ -72,6 +73,7 @@ sky = profoundDiscoSky(image, disco=disco, objects=profound$objects_redo,
   roughpedestal=TRUE)
 magimage(sky$sky)
 table(sky$sky) #just two different sky values for the two disco regions.
+}
 }
 
 \concept{ sky }

@@ -19,7 +19,7 @@ profoundMakeSkyGrid(image = NULL, objects = NULL, mask = NULL, sky = 0,
   box = c(100,100), grid = box, skygrid_type = 'new', type = 'bicubic',
   skytype = "median", skyRMStype = "quanlo", sigmasel = 1, skypixmin = prod(box)/2,
   boxadd = box/2, boxiters = 0, conviters = 100, doChiSq = FALSE, doclip = TRUE,
-  shiftloc = FALSE, paddim = TRUE, cores = 1)
+  shiftloc = FALSE, paddim = TRUE, cores = 1, rem_mask = FALSE)
 
 profoundMakeSkyBlur(image = NULL, objects = NULL, box = 100,
   sigma = mean(box)*(4/pi)/sqrt(12))
@@ -85,6 +85,9 @@ Logical; should the cutout be padded with image data until it meets the desired 
 }
   \item{cores}{
 Integer scalar; how many cores should be used to calculate sky properties of the image. Given the overhead for parallel computing, this should probably only be above 1 for larger images. 
+}
+  \item{rem_mask}{
+Logical; should masked regions be set to NA in \option{sky} and \option{skyRMS} maps. Whether this makes sense or not probably depends on the nature of the mask. If they are pixels within the \option{image} then you might well want values to be interpolated across these regions (so set \option{rem_mask} = FALSE), but if they represent regions outside the bounds of the \option{image} you would probably prefer these to be set to NA, since the "sky" does not mean much here (so set \option{rem_mask} = TRUE). Of course if you leave it set to FALSE then you can make edits to the \option{sky} and \option{skyRMS} after \code{profoundMakeSkyGrid} is run to suit more complicated use cases (e.g. a mixture of both scenarios above).
 }
   \item{sigma}{
 Numeric scalar; the standard deviation of the blur (positive) used for smoothing the sky pixels to make a sky map (see \code{isoblur} in \code{imager} package).

@@ -52,6 +52,7 @@ Aaron Robotham
 \code{\link{profoundSegimGroup}}
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
 profound = profoundProFound(image, magzero=30)
@@ -62,6 +63,7 @@ groupsegID = profoundAutoMerge(segim=profound$segim_orig, segstats=profound$segs
   spur_lim=3e-2)
 
 segimfix = profoundSegimKeep(segim=profound$segim, segID_merge=groupsegID$segID)
+}
 }
 
 \concept{ segmentation }

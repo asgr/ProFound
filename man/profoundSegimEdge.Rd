@@ -32,6 +32,7 @@ Aaron Robotham
 \code{\link{profoundSegimPlot}}, ~~~
 }
 \examples{
+\dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 
 profound = profoundProFound(image, magzero=30, verbose=TRUE)
@@ -40,6 +41,7 @@ segim_edge = profoundSegimEdge(profound$segim)
 
 magimage(image$imDat)
 magimage(segim_edge, col=colvec, magmap=FALSE, add=TRUE)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

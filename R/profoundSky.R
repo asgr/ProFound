@@ -318,7 +318,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
                              skytype='median', skyRMStype='quanlo', sigmasel=1,
                              skypixmin=prod(box)/2, boxadd=box/2, boxiters=0,
                              conviters = 100, doChiSq = FALSE, doclip=TRUE,
-                             shiftloc = FALSE, paddim = TRUE, cores=1){
+                             shiftloc = FALSE, paddim = TRUE, cores=1, rem_mask=FALSE){
   
   if(length(box)==1){
     box=rep(box,2)
@@ -580,7 +580,7 @@ profoundMakeSkyGrid=function(image=NULL, objects=NULL, mask=NULL, sky=0, box=c(1
     stop('skygrid_type must be new/old!')
   }
   
-  if(!is.null(mask)){
+  if(!is.null(mask) & rem_mask){
     temp_bi_sky[mask>0] = NA
     temp_bi_skyRMS[mask>0] = NA
   }

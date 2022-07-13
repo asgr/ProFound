@@ -24,7 +24,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE,
   watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
   fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
-  app_diam = 1, Ndeblendlim = Inf, static_photom = FALSE, ...)
+  app_diam = 1, Ndeblendlim = Inf, static_photom = FALSE, rem_mask = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -250,7 +250,11 @@ Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometr
   \item{Ndeblendlim}{
 Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.
 }
-  \item{static_photom}{Logical; if TRUE and a segmentation map has been provided to \option{segim}, this conveniently sets the main parameters when trying to force static photometry. In detail this sets: \option{sky} = 0, \option{iters} = 0, \option{redosky} = FALSE, \option{redosegim} = FALSE.
+  \item{static_photom}{
+Logical; if TRUE and a segmentation map has been provided to \option{segim}, this conveniently sets the main parameters when trying to force static photometry. In detail this sets: \option{sky} = 0, \option{iters} = 0, \option{redosky} = FALSE, \option{redosegim} = FALSE.
+}
+  \item{rem_mask}{
+Logical; should masked regions be set to NA in \option{sky} and \option{skyRMS} maps. Whether this makes sense or not probably depends on the nature of the mask. If they are pixels within the \option{image} then you might well want values to be interpolated across these regions (so set \option{rem_mask} = FALSE), but if they represent regions outside the bounds of the \option{image} you would probably prefer these to be set to NA, since the "sky" does not mean much here (so set \option{rem_mask} = TRUE). Of course if you leave it set to FALSE then you can make edits to the \option{sky} and \option{skyRMS} after \code{profoundProFound} is run to suit more complicated use cases (e.g. a mixture of both scenarios above).
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
