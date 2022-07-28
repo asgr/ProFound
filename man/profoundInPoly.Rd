@@ -32,7 +32,7 @@ Nothing else currently.
 Logical vector of length \option{x}. This will be a flag specifying if the point is inside or outside the polygon provided.
 }
 \references{
-Uses code provided on \url{https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html} by W. Randolph Franklin.
+Uses code provided on \url{https://wrfranklin.org/Research/Short_Notes/pnpoly.html} by W. Randolph Franklin.
 }
 \author{
 Aaron Robotham (and C code W. Randolph Franklin)

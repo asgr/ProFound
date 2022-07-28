@@ -685,3 +685,66 @@ profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, obj
   return(c(pop_mu, pop_sd))
 }
 
+profoundZap1overF = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(image), sky_quan=0.4, scan_direction='xy'){
+  
+  im_dim = dim(image)
+  
+  image_orig = image
+  
+  if(clip[1] > 0){
+    image[image < quantile(image, clip[1], na.rm=TRUE)] = NA
+  }
+  if(clip[2] < 1){
+    image[image > quantile(image, clip[2], na.rm=TRUE)] = NA
+  }
+  
+  if(!is.null(mask)){
+    image[mask!=0] = NA
+  }
+  
+  if(scan_direction == 'yx'){
+    #Since we reverse the order of operations, we need to reverse the order of scan_block in this case
+    scan_block = rev(scan_block)
+  }
+  
+  if(substr(scan_direction,1,1) == 'y'){
+    #transpose for scanning columns first
+    image = t(image)
+  }
+  
+  rem_matrix_rows = NULL
+  rem_matrix_cols = NULL
+  
+  temp_mat = matrix(image, nrow = scan_block[1])
+  temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=T)
+  rem_matrix_rows = matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[1]), im_dim[1], im_dim[2])
+  
+  if(scan_direction == 'xy' | scan_direction == 'yx'){
+    #we only do this is scanning the second dimension too
+    temp_mat = matrix(t(image - rem_matrix_rows), nrow = scan_block[2])
+    temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=T)
+    rem_matrix_cols = t(matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[2]), im_dim[1], im_dim[2]))
+  }
+  
+  if(substr(scan_direction,1,1) == 'y'){
+    #rearrange if scanning columns first
+    if(scan_direction == 'yx'){
+      #if we scan both directions
+      temp = rem_matrix_rows
+      rem_matrix_rows = t(rem_matrix_cols)
+      rem_matrix_cols = t(temp)
+    }else{
+      #if we only scan in y
+      rem_matrix_cols = t(rem_matrix_rows)
+      rem_matrix_rows = NULL
+    }
+    
+  }
+  
+  image_fix = image_orig -
+              ifelse(!is.null(rem_matrix_rows), rem_matrix_rows, 0) -
+              ifelse(!is.null(rem_matrix_cols), rem_matrix_cols, 0)
+  image_fix[is.na(image_fix)] = image_orig[is.na(image_fix)]
+  
+  return(list(image_fix = image_fix, row_map = rem_matrix_rows, col_map = rem_matrix_cols))
+}

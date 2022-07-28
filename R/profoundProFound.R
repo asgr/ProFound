@@ -558,7 +558,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       }else{
         cutsky[objects == 1] = NA
       }
-      cutsky = cutsky[which(cutsky<=0)]
+      cutsky = cutsky[which(cutsky<=0)] #Only consider sky pixels below the mode
       
       if(length(cutsky) > 0){
         df = length(cutsky) - 1
