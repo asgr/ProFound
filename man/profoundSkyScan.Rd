@@ -1,5 +1,5 @@
-\name{profoundZap1overF}
-\alias{profoundZap1overF}
+\name{profoundSkyScan}
+\alias{profoundSkyScan}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Remove Sensor 1/f Noise
@@ -8,8 +8,9 @@ Remove Sensor 1/f Noise
 Removes classic row and column noise artefacts that are common the CCDs and CMOS due to 1/f read noise and other electronic effects.
 }
 \usage{
-profoundZap1overF(image, mask = NULL, clip = c(0,0.9), scan_block = dim(image),
-  sky_quan = 0.4, scan_direction = 'xy')
+profoundSkyScan(image, mask = NULL, clip = c(0,0.9), scan_block = dim(image),
+  sky_quan = 0.4, scan_direction = 'xy', good_frac = 0, keep_trend = TRUE,
+  trend_block = 21)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +31,15 @@ Numeric scalar; the quantile level to analyse to remove 1/f features. Lower is g
 }
   \item{scan_direction}{
 Character scalar; how to scan image. Either x then y (default), y the x, just x or just y.
+}
+  \item{good_frac}{
+Integer scalar; the fraction of real values pixels that must be available on a scan block for the value to be trusted (at the extreme this would be not compute the median of a single value).
+}
+  \item{keep_trend}{
+Logical; should large scale trends (correlations between neighbouring scan blocks) be preserved? Usually the answer to this will be TRUE, to not self subtract e.g. large galaxies from themselves. If in a very empty field with not "real" large scale trends then a better answer might be FALSE.
+}
+  \item{trend_block}{
+Integer scalar; the size of the running median to use to detect and recover large scalre trends when \option{keep_trend} = TRUE. 
 }
 }
 \details{
@@ -54,7 +64,7 @@ Aaron Robotham
 \examples{
 image = readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))$imDat
-temp_fix = profoundZap1overF(image)
+temp_fix = profoundSkyScan(image)
 magimage(image)
 magimage(temp_fix$image_fix)
 magimage(temp_fix$row_map)

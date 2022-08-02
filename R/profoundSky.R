@@ -685,11 +685,17 @@ profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, obj
   return(c(pop_mu, pop_sd))
 }
 
-profoundZap1overF = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(image), sky_quan=0.4, scan_direction='xy'){
+profoundSkyScan = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(image),
+                             sky_quan=0.4, scan_direction='xy', good_frac=0, keep_trend=TRUE,
+                             trend_block=21){
   
   im_dim = dim(image)
   
   image_orig = image
+  
+  if(!is.null(mask)){
+    image[mask!=0] = NA
+  }
   
   if(clip[1] > 0){
     image[image < quantile(image, clip[1], na.rm=TRUE)] = NA
@@ -698,16 +704,12 @@ profoundZap1overF = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(ima
     image[image > quantile(image, clip[2], na.rm=TRUE)] = NA
   }
   
-  if(!is.null(mask)){
-    image[mask!=0] = NA
-  }
-  
   if(scan_direction == 'yx'){
     #Since we reverse the order of operations, we need to reverse the order of scan_block in this case
     scan_block = rev(scan_block)
   }
   
-  if(substr(scan_direction,1,1) == 'y'){
+  if(scan_direction == 'y'){
     #transpose for scanning columns first
     image = t(image)
   }
@@ -716,35 +718,64 @@ profoundZap1overF = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(ima
   rem_matrix_cols = NULL
   
   temp_mat = matrix(image, nrow = scan_block[1])
+  NAfrac = colCounts(temp_mat, value=NA) / scan_block[1]
   temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=T)
+  temp_sum[NAfrac > (1 - good_frac)] = NA
   rem_matrix_rows = matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[1]), im_dim[1], im_dim[2])
+  
+  if(keep_trend){
+    for(i in seq(0,im_dim[1] - scan_block[1], by=scan_block[1]) + 1){
+      chunk_i = i:(i + scan_block[1] - 1L)
+      mean_rows = colMeans(rem_matrix_rows[chunk_i,])
+      trends_rows = runmed(mean_rows, trend_block)
+      rem_matrix_rows[chunk_i,] = rem_matrix_rows[chunk_i,] - rep(trends_rows, each=scan_block[1])
+    }
+  }
   
   if(scan_direction == 'xy' | scan_direction == 'yx'){
     #we only do this is scanning the second dimension too
-    temp_mat = matrix(t(image - rem_matrix_rows), nrow = scan_block[2])
+    temp_mat = matrix(t(image), nrow = scan_block[2])
+    NAfrac = colCounts(temp_mat, value=NA) / scan_block[2]
     temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=T)
+    temp_sum[NAfrac > (1 - good_frac)] = NA
     rem_matrix_cols = t(matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[2]), im_dim[1], im_dim[2]))
   }
   
-  if(substr(scan_direction,1,1) == 'y'){
+  if(keep_trend & !is.null(rem_matrix_cols)){
+    for(j in seq(0,im_dim[2] - scan_block[2], by=scan_block[2]) + 1){
+      chunk_j = j:(j + scan_block[2] - 1L)
+      mean_cols = rowMeans(rem_matrix_cols[,chunk_j])
+      trends_cols = runmed(mean_cols, trend_block)
+      rem_matrix_cols[,chunk_j] = rem_matrix_cols[,chunk_j] - trends_cols
+    }
+  }
+  
+  if(scan_direction == 'y'){
     #rearrange if scanning columns first
     if(scan_direction == 'yx'){
-      #if we scan both directions
-      temp = rem_matrix_rows
-      rem_matrix_rows = t(rem_matrix_cols)
-      rem_matrix_cols = t(temp)
+       #if we scan both directions
+       temp = rem_matrix_rows
+       rem_matrix_rows = t(rem_matrix_cols)
+       rem_matrix_cols = t(temp)
     }else{
       #if we only scan in y
       rem_matrix_cols = t(rem_matrix_rows)
       rem_matrix_rows = NULL
     }
-    
   }
   
-  image_fix = image_orig -
-              ifelse(!is.null(rem_matrix_rows), rem_matrix_rows, 0) -
-              ifelse(!is.null(rem_matrix_cols), rem_matrix_cols, 0)
-  image_fix[is.na(image_fix)] = image_orig[is.na(image_fix)]
+  if(is.null(rem_matrix_rows)){
+    rem_matrix_rows = 0
+  }
+  
+  if(is.null(rem_matrix_cols)){
+    rem_matrix_cols = 0
+  }
+  
+  image_fix = image_orig - rem_matrix_rows - rem_matrix_cols
+  if(!is.null(mask)){
+    image_fix[mask != 0] = image_orig[mask != 0]
+  }
   
   return(list(image_fix = image_fix, row_map = rem_matrix_rows, col_map = rem_matrix_cols))
 }

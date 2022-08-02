@@ -13,7 +13,7 @@ import("foreach")
 importFrom("Rcpp", "evalCpp")
 importFrom("utils", "relist", "packageVersion")
 importFrom("celestial", "getpixscale")
-importFrom("matrixStats", "colQuantiles")
+importFrom("matrixStats", "colQuantiles", "colCounts")
 
 S3method("plot","profound")
 S3method("plot","fitmagpsf")
