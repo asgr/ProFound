@@ -227,7 +227,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         )
       }
       
-      image=image_orig-fullmodel
+      image = image_orig - fullmodel
     }
     
     if(j==1){
@@ -313,18 +313,18 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
         if(j<fit_iters){
           diffmag[i] = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)$par
         }else{
-          finaloptim=optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)
-          diffmag[i]=finaloptim$par
-          psfLL[i]=-finaloptim$value
-          flux[i]=profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
-          fluxhess=optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut)
-          flux_err[i]=sqrt(1/abs(as.numeric(fluxhess)))
-          beam_err[i]=mean(sigma_cut,na.rm =TRUE)*beamscale
+          finaloptim = optim(par=0, fn=.minlike_mag, method='Brent', singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut, lower=-magdiff, upper=magdiff)
+          diffmag[i] = finaloptim$par
+          psfLL[i] = -finaloptim$value
+          flux[i] = profoundMag2Flux(mag=mag[i]+diffmag[i], magzero=magzero)
+          fluxhess = optimHess(par=flux[i]*(10^(-0.4*diffmag[i])-1), fn=.minlike_flux, singmodel = singmodel, image=image_cut$image, im_sigma = sigma_cut)
+          flux_err[i] = sqrt(1/abs(as.numeric(fluxhess)))
+          beam_err[i] = mean(sigma_cut,na.rm =TRUE)*beamscale
         }
         if(itersub){
           rescale=10^(-0.4*diffmag[i])-1
           #Now this is a weird thing. Much more efficient memory wise to use this Rcpp function to allocate matrix subsets. Not clear why since it should not be copying on modification in this case...?
-          image=.addmat_cpp(image, -singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale, range(image_cut$xsel), range(image_cut$ysel))
+          image = .addmat_cpp(image, -singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale, range(image_cut$xsel), range(image_cut$ysel))
           #image[image_cut$xsel,image_cut$ysel]=image[image_cut$xsel,image_cut$ysel]-(singmodel[image_cut$xsel-image_cut$loc.diff[1], image_cut$ysel-image_cut$loc.diff[2]]*rescale)
         }
       }else{

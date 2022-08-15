@@ -119,5 +119,6 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
       skyRMS=NULL
     }
   }
+  skyRMS[!is.finite(skyRMS)] = NA
 invisible(list(image=stack, skyRMS=skyRMS, magzero=magzero_out))
 }
