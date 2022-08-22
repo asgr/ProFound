@@ -685,7 +685,7 @@ profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, obj
   return(c(pop_mu, pop_sd))
 }
 
-profoundSkyScan = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(image),
+profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
                              sky_quan=0.4, scan_direction='xy', good_frac=0, keep_trend=TRUE,
                              trend_block=21){
   
@@ -726,17 +726,21 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(image
   if(keep_trend){
     for(i in seq(0,im_dim[1] - scan_block[1], by=scan_block[1]) + 1){
       chunk_i = i:(i + scan_block[1] - 1L)
-      mean_rows = colMeans(rem_matrix_rows[chunk_i,])
+      mean_rows = colMeans(rem_matrix_rows[chunk_i,], na.rm=TRUE)
       trends_rows = runmed(mean_rows, trend_block)
       rem_matrix_rows[chunk_i,] = rem_matrix_rows[chunk_i,] - rep(trends_rows, each=scan_block[1])
     }
+  }
+  
+  if(anyNA(rem_matrix_rows)){
+    rem_matrix_rows[is.na(rem_matrix_rows)] = 0
   }
   
   if(scan_direction == 'xy' | scan_direction == 'yx'){
     #we only do this is scanning the second dimension too
     temp_mat = matrix(t(image), nrow = scan_block[2])
     NAfrac = colCounts(temp_mat, value=NA) / scan_block[2]
-    temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=T)
+    temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=TRUE)
     temp_sum[NAfrac > (1 - good_frac)] = NA
     rem_matrix_cols = t(matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[2]), im_dim[1], im_dim[2]))
   }
@@ -744,9 +748,13 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,0.9), scan_block=dim(image
   if(keep_trend & !is.null(rem_matrix_cols)){
     for(j in seq(0,im_dim[2] - scan_block[2], by=scan_block[2]) + 1){
       chunk_j = j:(j + scan_block[2] - 1L)
-      mean_cols = rowMeans(rem_matrix_cols[,chunk_j])
+      mean_cols = rowMeans(rem_matrix_cols[,chunk_j], na.rm=TRUE)
       trends_cols = runmed(mean_cols, trend_block)
       rem_matrix_cols[,chunk_j] = rem_matrix_cols[,chunk_j] - trends_cols
+    }
+    
+    if(anyNA(rem_matrix_cols)){
+      rem_matrix_cols[is.na(rem_matrix_cols)] = 0
     }
   }
   

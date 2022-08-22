@@ -8,7 +8,7 @@ Remove Sensor 1/f Noise
 Removes classic row and column noise artefacts that are common the CCDs and CMOS due to 1/f read noise and other electronic effects.
 }
 \usage{
-profoundSkyScan(image, mask = NULL, clip = c(0,0.9), scan_block = dim(image),
+profoundSkyScan(image, mask = NULL, clip = c(0,1), scan_block = dim(image),
   sky_quan = 0.4, scan_direction = 'xy', good_frac = 0, keep_trend = TRUE,
   trend_block = 21)
 }
@@ -21,7 +21,7 @@ Numeric matrix; required, the image we want to analyse. Note, image NAs are trea
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}.
 }
   \item{clip}{
-Numeric scalar; the quantile clip level to apply to the internal scan blocks to remove bright real sources.
+Numeric scalar; the quantile clip level to apply to the internal scan blocks to remove bright real sources. The default does nothing, and is probably only appropriate when \option{keep_trend} = TRUE.
 }
   \item{scan_block}{
 Integer vector; the scan blocks to use for x/rows (x direction) and y/columns (y direction). Generally larger means less aggressive feature removal. These must be integer divisors of dim(\option{numeric}).
