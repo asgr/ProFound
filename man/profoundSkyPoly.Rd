@@ -6,7 +6,7 @@
 Fit N-order Polynomial Sky
 }
 \description{
-Functions to fit polynomial sky planes to image data. Includes a useful summary plot.
+Functions to fit polynomial sky planes to image data. Includes a useful summary plot. These might be preferable in complicated situations where a large amount of the image is masked by source/s, e.g. a large foreground cluster in the centre of the image. In these cases the restrictions of the fits here might interpolated over masked regions more nicely than the default \code{\link{profoundMakeSkyGrid}} behaviour. The downside is much more care is needed to mask out the image appropriately, hence the inclusion of a quancut argument and diagnostic plots.
 }
 \usage{
 profoundSkyPoly(image, objects = NULL, degree = 1, quancut = NULL, mask = NULL, 
@@ -31,10 +31,10 @@ Numeric scalar; optional, the level at which to mask out brighter pixels for ana
 Boolean matrix or integer scalar (1,0); optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis.
 }
   \item{plot}{
-Logical; should a summary plot be made for human inspection?
+Logical; should a diagnostic plot be made for human inspection?
 }
   \item{\dots}{
-Argument to pass to the 'Original' and 'Final' panels of the summary plot of \option{plot} = TRUE.
+Argument to pass to the 'Original' and 'Final' panels of the diagnostic plot when \option{plot} = TRUE.
 }
 }
 \details{
