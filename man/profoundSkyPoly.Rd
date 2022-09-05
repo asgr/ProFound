@@ -1,0 +1,76 @@
+\name{profoundSkyPoly}
+\alias{profoundSkyPoly}
+\alias{profoundSkyPlane}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{
+Fit N-order Polynomial Sky
+}
+\description{
+Functions to fit polynomial sky planes to image data. Includes a useful summary plot.
+}
+\usage{
+profoundSkyPoly(image, objects = NULL, degree = 1, quancut = NULL, mask = NULL, 
+  plot = FALSE, ...)
+profoundSkyPlane(image, objects = NULL, quancut = NULL, mask = NULL, plot = FALSE, ...)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{image}{
+Numeric matrix; required, the image we want to analyse.
+}
+  \item{objects}{
+Boolean matrix (1,0); optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}. If provided then this is used to initially mask pixels for determining the correct \option{sky}.
+}
+  \item{degree}{
+Integer scalar; the polynomial degree to model the sky with. \option{degree} = 1 is a linear plane, 2 is quadratic, 3 cubic, 4 quartic and 5 quintic etc.
+}
+  \item{quancut}{
+Numeric scalar; optional, the level at which to mask out brighter pixels for analysis. This might be useful if \option{objects} has not already been computed.
+}
+  \item{mask}{
+Boolean matrix or integer scalar (1,0); optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis.
+}
+  \item{plot}{
+Logical; should a summary plot be made for human inspection?
+}
+  \item{\dots}{
+Argument to pass to the 'Original' and 'Final' panels of the summary plot of \option{plot} = TRUE.
+}
+}
+\details{
+Internally this uses the R \code{\link{lm}} and \code{\link{poly}} functions.
+
+\code{profoundSkyPlane} is just a convenience function to setting \code{profoundSkyPoly} \option{degree} = 1 (i.e. a linear plane), since sometimes this confuses people.
+}
+\value{
+\item{sky}{Numeric matrix; the predicted sky map that should be subtract from the user supplied \option{sky}.}
+\item{lm_out}{List; the output of the \code{\link{lm}} run internally. This might be useful for additional analysis.}
+\item{good_pix}{Integer matrix; mask of the 'good' pix, i.e. those valued 1 were used for analysis, and those valued 0 were not.}
+\item{skyChiSq}{Integer scalar; the Reduced Chi-Square of the sky pixel distribution (the nearer to 1 the better the sky estimation).}
+}
+\author{
+Aaron Robotham
+}
+
+\seealso{
+\code{\link{lm}}, \code{\link{profoundMakeSkyGrid}}
+}
+\examples{
+\dontrun{
+image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+
+profoundSkyPoly(image$imDat, degree=1, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image$imDat, degree=1, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image$imDat, degree=1, quancut=0.999, plot=TRUE) #over cut
+
+profoundSkyPoly(image$imDat, degree=2, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image$imDat, degree=2, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image$imDat, degree=2, quancut=0.999, plot=TRUE) #over cut
+
+profoundSkyPoly(image$imDat, degree=3, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image$imDat, degree=3, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image$imDat, degree=3, quancut=0.999, plot=TRUE) #over cut
+}
+}
+
+\concept{ sky }

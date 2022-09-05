@@ -787,3 +787,80 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
   
   return(list(image_fix = image_fix, row_map = rem_matrix_rows, col_map = rem_matrix_cols))
 }
+
+profoundSkyPoly = function(image, objects=NULL, degree=1, quancut=NULL, mask=NULL,
+                           plot=FALSE, ...){
+  
+  if(plot){
+    image_orig = image
+  }
+  
+  im_dim = dim(image)
+  
+  if(!is.null(mask)){
+    image[mask!=0] = NA
+  }
+  
+  if(!is.null(objects)){
+    image[objects!=0] = NA
+  }
+  
+  if(!is.null(quancut)){
+    image[image >= quantile(image, quancut, na.rm=TRUE)] = NA
+  }
+  
+  im_pix = expand.grid(x=1:im_dim[1], y=1:im_dim[2])
+  sel = which(!is.na(image))
+  im_pix_sub = im_pix[sel,]
+  
+  if(degree > 0){
+    lm_out = lm(image[sel] ~ poly(x, degree=degree) + poly(y, degree=degree), data=im_pix_sub)
+    sky = matrix(predict(lm_out, im_pix), im_dim[1], im_dim[2])
+  }else if(degree == 0){
+    sky = mean(image[sel], na.rm=TRUE)
+    lm_out = list()
+    lm_out$residuals = image[sel] - sky
+    sky = matrix(sky, im_dim[1], im_dim[2])
+  }else if(degree == -1){
+    lm_out = list()
+    lm_out$residuals = image[sel]
+    sky = matrix(0, im_dim[1], im_dim[2])
+  }
+  
+  good_pix = !is.na(image)
+  
+  cutsky = image_orig[good_pix] - sky[good_pix]
+  cutsky = cutsky[cutsky < 0]
+  skyRMS = abs(quantile(cutsky, pnorm(-1)*2))
+  cutsky = cutsky/skyRMS
+  
+  df = length(cutsky) - 1L
+  skyChiSq = sum(cutsky^2, na.rm =TRUE)
+  skyChiSq = skyChiSq / df
+  
+  if(plot){
+    layout(matrix(1:4,2,2))
+    
+    magimage(image_orig, qdiff=TRUE)
+    legend('topleft', legend='Original', ...)
+    
+    magimage(image_orig - sky, qdiff=TRUE, ...)
+    legend('topleft', legend='Final')
+    
+    magimage(sky, qdiff=TRUE, rem_med=TRUE)
+    magimage(good_pix, col=c(hsv(v=0, alpha=0.5), NA), add=TRUE, magmap=FALSE)
+    legend('topleft', legend='Sky')
+    
+    magplot(function(x){dnorm(x,mean=0, sd=1)}, grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS',
+            ylab='PDF', log='y', ylim=c(1e-8,0.5), lty=2, type='l', col='green4')
+    lines(density(lm_out$residuals/skyRMS, bw=0.1, na.rm=TRUE), col='black')
+    legend('topleft', legend=c('Sky pixels','Normal Dist'), lty=c(1,2), col=c('black','green4'))
+    legend('bottom', legend=paste('Chi-Sq:',round(skyChiSq, 2)))
+  }
+  
+  return(invisible(list(sky=sky, lm_out=lm_out, good_pix=good_pix, skyChiSq=skyChiSq)))
+}
+
+profoundSkyPlane = function(image, objects=NULL, quancut=NULL, mask=NULL, plot=FALSE, ...){
+  return(profoundSkyPoly(image=image, objects=objects, degree=1, quancut=quancut, mask=mask, plot=plot, ...))
+}
