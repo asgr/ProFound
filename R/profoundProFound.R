@@ -773,17 +773,16 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
         if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
         if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
         magplot(function(x){dnorm(x,mean=0, sd=1)}, grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5), lty=2, type='l', col='green4')
-        lines(density(tempsky[is.finite(tempsky)], bw=0.1, na.rm=TRUE), col='black')
+        lines(density(tempsky[is.finite(tempsky)], bw=0.1, na.rm=TRUE, from=-8, to=8), col='black')
         if(stat_sd_sky > 0){
-          lines(density((x$sky[x$objects==1] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE), col='red')
-          lines(density((x$sky[x$objects==0] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE), col='blue')
+          lines(density((x$sky[x$objects==1] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE, from=-8, to=8), col='red')
+          lines(density((x$sky[x$objects==0] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE, from=-8, to=8), col='blue')
           legend('bottom', legend=c('Sky pixels','Normal Dist','Sky in objects','Sky in sky'), lty=c(1,2,1,1), col=c('black','green4', 'red','blue'))
           legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='black')
         }else{
           legend('bottom', legend=c('Sky pixels','Normal Dist'), lty=c(1,2), col=c('black','green4'))
         }
         legend('topleft',legend=c(paste0('LL: ',stat_LL), paste0('Chi-Sq: ',stat_ChiSq)), bty='n', text.col='black')
-        legend('bottom', legend=c('Sky pixels','Normal Dist','Sky in objects','Sky in sky'), lty=c(1,2,1,1), col=c('black','green4', 'red','blue'))
       })
     }else{stop('Not a recognised hist type! Must be iters / sky.')}
     
@@ -862,10 +861,10 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
         if(!is.null(x$skyLL)){stat_LL = signif(x$skyLL,3)}else{stat_LL = NA}
         if(!is.null(x$skyChiSq)){stat_ChiSq = signif(x$skyChiSq,3)}else{stat_ChiSq = NA}
         magplot(function(x){dnorm(x,mean=0, sd=1)}, grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS', ylab='PDF', log='y', ylim=c(1e-8,0.5), lty=2, type='l', col='green4')
-        lines(density(tempsky[is.finite(tempsky)], bw=0.1, na.rm=TRUE), col='black')
+        lines(density(tempsky[is.finite(tempsky)], bw=0.1, na.rm=TRUE, from=-8, to=8), col='black')
         if(stat_sd_sky > 0){
-          lines(density((x$sky[x$objects==1] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE), col='red')
-          lines(density((x$sky[x$objects==0] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE), col='blue')
+          lines(density((x$sky[x$objects==1] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE, from=-8, to=8), col='red')
+          lines(density((x$sky[x$objects==0] - stat_mean_sky) / stat_sd_sky, na.rm=TRUE, from=-8, to=8), col='blue')
           legend('bottom', legend=c('Sky pixels','Normal Dist','Sky in objects','Sky in sky'), lty=c(1,2,1,1), col=c('black','green4', 'red','blue'))
           legend('topright',legend=c(paste0('Cor RMS: ',stat_cor_sky_skyRMS), paste0('Cor Image: ',stat_cor_sky_image)), bty='n', text.col='black')
         }else{

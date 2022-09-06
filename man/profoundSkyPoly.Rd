@@ -10,8 +10,9 @@ Functions to fit polynomial sky planes to image data. Includes a useful summary 
 }
 \usage{
 profoundSkyPoly(image, objects = NULL, degree = 1, quancut = NULL, mask = NULL, 
+  mode_shift = FALSE, plot = FALSE, ...)
+profoundSkyPlane(image, objects = NULL, quancut = NULL, mask = NULL, mode_shift = FALSE, 
   plot = FALSE, ...)
-profoundSkyPlane(image, objects = NULL, quancut = NULL, mask = NULL, plot = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,8 +31,11 @@ Numeric scalar; optional, the level at which to mask out brighter pixels for ana
   \item{mask}{
 Boolean matrix or integer scalar (1,0); optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis.
 }
+  \item{mode_shift}{
+Logical; should the mode be shifted to zero regardless of best polynomical regression found? As long as the non-\option{object}, non-\option{mask} and non-\option{quancut} excluded pixels contain the true sky mode, this is usually a good idea.
+}
   \item{plot}{
-Logical; should a diagnostic plot be made for human inspection?
+Logical; should a diagnostic plot be made for human inspection? Top-left is the original \option{image}; top-right the median subtract sky polynomial; bottom-left the final sky subtract image (i.e. \option{image}[in] - \option{sky}[out]); bottom-right sky pixel density scaled by RMS (green dash is the Normal expectation, which is hopefully 1-1 in the negative domain).
 }
   \item{\dots}{
 Argument to pass to the 'Original' and 'Final' panels of the diagnostic plot when \option{plot} = TRUE.
@@ -44,6 +48,7 @@ Internally this uses the R \code{\link{lm}} and \code{\link{poly}} functions.
 }
 \value{
 \item{sky}{Numeric matrix; the predicted sky map that should be subtract from the user supplied \option{sky}.}
+\item{skyRMS}{Numeric scalar; the calculated sky RMS. This is only indicative if the input \option{image} is from a single detector, in more complex cases a full map as provided by \code{\link{profoundMakeSkyGrid}} might be required.}
 \item{lm_out}{List; the output of the \code{\link{lm}} run internally. This might be useful for additional analysis.}
 \item{good_pix}{Integer matrix; mask of the 'good' pix, i.e. those valued 1 were used for analysis, and those valued 0 were not.}
 \item{skyChiSq}{Integer scalar; the Reduced Chi-Square of the sky pixel distribution (the nearer to 1 the better the sky estimation).}
@@ -58,6 +63,10 @@ Aaron Robotham
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+
+profoundSkyPoly(image$imDat, degree=0, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image$imDat, degree=0, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image$imDat, degree=0, quancut=0.999, plot=TRUE) #over cut
 
 profoundSkyPoly(image$imDat, degree=1, quancut=0.5, plot=TRUE) #under cut
 profoundSkyPoly(image$imDat, degree=1, quancut=0.9, plot=TRUE) #about right
