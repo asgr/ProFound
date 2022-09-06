@@ -858,16 +858,20 @@ profoundSkyPoly = function(image, objects=NULL, degree=1, quancut=NULL, mask=NUL
   if(plot){
     layout(matrix(1:4,2,2))
     
+    par(mar=c(3.1,3.1,0.5,0.5))
     magimage(image_orig, qdiff=TRUE)
     legend('topleft', legend='Original', ...)
     
+    par(mar=c(3.1,3.1,0.5,0.5))
     magimage(image_orig - sky, qdiff=TRUE, ...)
     legend('topleft', legend='Final')
     
+    par(mar=c(3.1,3.1,0.5,0.5))
     magimage(sky, qdiff=TRUE, rem_med=TRUE)
     magimage(good_pix, col=c(hsv(v=0, alpha=0.5), NA), add=TRUE, magmap=FALSE)
     legend('topleft', legend='Sky')
     
+    par(mar=c(3.1,3.1,0.5,0.5))
     magplot(function(x){dnorm(x,mean=0, sd=1)}, grid=TRUE, xlim=c(-6,6), xlab='(image - sky) / skyRMS',
             ylab='PDF', log='y', ylim=c(1e-8,0.5), lty=2, type='l', col='green4')
     lines(density(lm_out$residuals/skyRMS, bw=0.1, na.rm=TRUE, from=-8, to=8), col='black')
