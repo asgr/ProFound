@@ -830,7 +830,7 @@ profoundSkyPoly = function(image, objects=NULL, degree=1, quancut=NULL, mask=NUL
   
   good_pix = !is.na(image)
   
-  cutsky = image_orig[good_pix] - sky[good_pix]
+  cutsky = image[good_pix] - sky[good_pix]
   cutsky = cutsky[cutsky < 0]
   skyRMS = abs(quantile(cutsky, pnorm(-1)*2))
   cutsky = cutsky/skyRMS
@@ -845,7 +845,7 @@ profoundSkyPoly = function(image, objects=NULL, degree=1, quancut=NULL, mask=NUL
     lm_out$coefficients['(Intercept)'] = lm_out$coefficients['(Intercept)'] + mode_x
     lm_out$residuals = lm_out$residuals - mode_x*skyRMS
     
-    cutsky = image_orig[good_pix] - sky[good_pix]
+    cutsky = image[good_pix] - sky[good_pix]
     cutsky = cutsky[cutsky < 0]
     skyRMS = abs(quantile(cutsky, pnorm(-2)*2))/2
     cutsky = cutsky/skyRMS
