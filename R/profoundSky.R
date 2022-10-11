@@ -705,8 +705,7 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
   }
   
   if(scan_direction == 'yx'){
-    #Since we reverse the order of operations, we need to reverse the order of scan_block in this case
-    scan_block = rev(scan_block)
+    image = t(image)
   }
   
   if(scan_direction == 'y'){
@@ -742,7 +741,7 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
     NAfrac = colCounts(temp_mat, value=NA) / scan_block[2]
     temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=TRUE)
     temp_sum[NAfrac > (1 - good_frac)] = NA
-    rem_matrix_cols = t(matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[2]), im_dim[1], im_dim[2]))
+    rem_matrix_cols = t(matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[2]), im_dim[2], im_dim[1]))
   }
   
   if(keep_trend & !is.null(rem_matrix_cols)){

@@ -64,9 +64,9 @@ These codes are probably not general user at the moment (although feel free to u
 In brief they construct a \code{ProFit} region map that is defined by the segmentation map from ProFound and a dilation of this (using the provided kernel arguments). This region map becomes the target for a large \code{ProFit} model that is in effect only attempting to fit the outer "Hot Fuzz" that is not inside the standard \code{ProFound} segmentation map. Because of how far out this fuzz usually easier, a computationally cheaper 'rough' model can usually be used. 
 }
 \value{
-\code{profoundHotFuzz} fits the outer profile of target galaxies. This is model the "Hot Fuzz" in the outer parts of galaxy profiles. It inherits the ellipticity and orientation of the \code{\link{profoundProFound}} output, allowing variable magnitude and Re by default per source.
+\code{profoundHotFuzz} fits the outer profile of target galaxies. This is used to model the "Hot Fuzz" in the outer parts of galaxy profiles. It inherits the ellipticity and orientation of the \code{\link{profoundProFound}} output, allowing variable magnitude and Re by default per source.
 
-\code{profoundPSFFuzz} fits the outer profile of target stars. This is model the "Hot Fuzz" in the outer parts of star profiles. It assume the stars are circular, allowing variable Re and Index shared for all sources (so a common PSF profile), and variable magnitude per source (different flux stars).
+\code{profoundPSFFuzz} fits the outer profile of target stars. This is used to model the "Hot Fuzz" in the outer parts of star profiles. It assumes the stars are circular, allowing variable Re and Index shared for all sources (so a common PSF profile), and variable magnitude per source (different flux stars).
 
 The either function the output is:
 
@@ -96,6 +96,7 @@ Aaron Robotham
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
 profound = profoundProFound(image, magzero=30)
 
+#This takes a few minutes to run
 fuzz_fit = profoundHotFuzz(profound)
 
 magimage(fuzz_fit$image, qdiff=TRUE)

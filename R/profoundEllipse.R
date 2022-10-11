@@ -30,6 +30,30 @@
   invisible(output)
 }
 
+profoundEllipseSeg = function(dim=c(100,100), image=NULL, xcen=dim[1]/2, ycen=dim[2]/2, rad=10,
+                              ang=0, axrat=1, box=0){
+  if(!is.null(image)){
+    dim = dim(image)
+  }
+  
+  grid = expand.grid(1:dim[1] - 0.5, 1:dim[2] - 0.5)
+  
+  radtemp = sqrt((grid[,1] - xcen)^2+(grid[,2] - ycen)^2)
+  angrad = -ang*pi/180
+  angmod = atan2((grid[,1] - xcen), (grid[,2] - ycen)) - angrad
+  xmod = radtemp*sin(angmod)
+  ymod = radtemp*cos(angmod)
+  xmod = xmod/axrat
+  if(box==0){
+    radmod = sqrt(xmod^2 + ymod^2)
+  }else{
+    radmod = (abs(xmod)^(2+box) + abs(ymod)^(2+box))^(1/(2+box))
+  }
+  output = matrix(0L, dim[1], dim[2])
+  output[] = radmod < rad
+  return(output)
+}
+
 profoundGetEllipse=function(x, y, z, xcen=NULL, ycen=NULL, scale=sqrt(2), pixscale=1, dobox=FALSE, plot=FALSE, ...){
   if(is.matrix(x)){
     if(dim(x)[2]==3){

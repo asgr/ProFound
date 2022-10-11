@@ -359,22 +359,22 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                                 skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
                                 boxadd=boxadd, boxiters=boxiters, conviters=conviters, doclip=doclip, shiftloc=shiftloc, 
                                 paddim=paddim, rem_mask=rem_mask)$skyRMS
-      if(doChiSq){
-        if(verbose){message(paste('Making sky LL ChiSq map -',round(proc.time()[3]-timestart,3),'sec'))}
-        skyChiSqMap = profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
-                                       skygrid_type='old', grid=grid, type=type, skytype=skytype, 
-                                       skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
-                                       boxadd=boxadd, boxiters=boxiters, conviters=conviters, doChiSq=TRUE,
-                                       doclip=doclip, shiftloc=shiftloc, paddim=paddim, rem_mask=rem_mask)$skyChiSq
-      }else{
-        skyChiSqMap = NA
-      }
       if(verbose){message(' - Sky statistics :')}
       if(verbose){print(summary(as.numeric(sky[!is.na(sky)])))}
       if(verbose){message(' - Sky-RMS statistics :')}
       if(verbose){print(summary(as.numeric(skyRMS[!is.na(skyRMS)])))}
     }else{
       if(verbose){message("Skipping making final sky map - redosky set to FALSE")}
+    }
+    
+    if(doChiSq){
+      if(verbose){message(paste('Making sky LL ChiSq map -',round(proc.time()[3]-timestart,3),'sec'))}
+      skyChiSqMap = profoundMakeSkyGrid(image=image, objects=objects_redo, mask=mask, sky=sky, box=box, 
+                                        skygrid_type='old', grid=grid, type=type, skytype=skytype, 
+                                        skyRMStype=skyRMStype, sigmasel=sigmasel, skypixmin=skypixmin, 
+                                        boxadd=boxadd, boxiters=boxiters, conviters=conviters, doChiSq=TRUE,
+                                        doclip=doclip, shiftloc=shiftloc, paddim=paddim, rem_mask=rem_mask)$skyChiSq
+    }else{
       skyChiSqMap = NA
     }
     
