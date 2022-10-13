@@ -30,7 +30,7 @@
   invisible(output)
 }
 
-profoundEllipseSeg = function(dim=c(100,100), image=NULL, xcen=dim[1]/2, ycen=dim[2]/2, rad=10,
+profoundEllipseSeg = function(dim=c(101,101), image=NULL, xcen=dim[1]/2, ycen=dim[2]/2, rad=dim[1]/2,
                               ang=0, axrat=1, box=0){
   if(!is.null(image)){
     dim = dim(image)

@@ -8,8 +8,8 @@ Create Elliptical Segment
 Creates of a logic matrix for an elliptical segment. This can be useful to allow the extraction of elliptical apertures on a target image (you can just sum the multiplication of the two).
 }
 \usage{
-profoundEllipseSeg(dim = c(100, 100), image = NULL, xcen = dim[1]/2, ycen = dim[2]/2,
-  rad = 10, ang = 0, axrat = 1, box = 0)
+profoundEllipseSeg(dim = c(101, 101), image = NULL, xcen = dim[1]/2, ycen = dim[2]/2,
+  rad = dim[1]/2, ang = 0, axrat = 1, box = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
