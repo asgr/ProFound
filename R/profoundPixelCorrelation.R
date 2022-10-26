@@ -177,11 +177,11 @@ profoundCovMat = function(image, objects=NULL, mask=NULL, profound=NULL, xsel=NU
     image[mask > 0] = NA
   }
   
-  if(!is.null(xlim)){
+  if(!is.null(xsel)){
     image = image[xsel,]
   }
   
-  if(!is.null(ylim)){
+  if(!is.null(ysel)){
     image = image[,ysel]
   }
   
