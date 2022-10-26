@@ -1,4 +1,6 @@
-profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE, plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
+profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1,
+                                  lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE,
+                                  plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
   
   xlen=dim(image)[1]
   ylen=dim(image)[2]
@@ -11,11 +13,11 @@ profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, sk
   flag_pos=image>0
   
   if(!is.null(objects)){
-    image[objects>0]=NA
+    image[objects > 0] = NA
   }
   
   if(!is.null(mask)){
-    image[mask>0]=NA
+    image[mask > 0] = NA
   }
   
   image_neg=image
@@ -158,4 +160,36 @@ profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=
   
   image_new=Re(fft(fft_orig,inverse=TRUE))/prod(xlen,ylen)
   invisible(list(sky=sky+image-image_new, sky_lo=image-image_new, sky_hi=image_new))
+}
+
+profoundCovMat = function(image, objects=NULL, mask=NULL, profound=NULL, xsel=NULL, ysel=NULL){
+  if(!is.null(profound)){
+    image = median(profound$skyRMS, na.rm=TRUE)*(profound$image - profound$sky) / profound$skyRMS
+    objects = profound$objects_redo
+    mask = profound$mask
+  }
+  
+  if(!is.null(objects)){
+    image[objects > 0] = NA
+  }
+  
+  if(!is.null(mask)){
+    image[mask > 0] = NA
+  }
+  
+  if(!is.null(xlim)){
+    image = image[xsel,]
+  }
+  
+  if(!is.null(ylim)){
+    image = image[,ysel]
+  }
+  
+  cov_mat_x = cov(image, use = 'pairwise.complete.obs')
+  cov_mat_y = cov(t(image), use = 'pairwise.complete.obs')
+  cov_mat = cov_mat_x
+  cov_mat[upper.tri(cov_mat)] = cov_mat_y[upper.tri(cov_mat)]
+  var2cov = sum(diag(cov_mat), na.rm=TRUE)/sum(cov_mat, na.rm=TRUE)
+  
+  return(list(cov_mat=cov_mat, var2cov=var2cov))
 }

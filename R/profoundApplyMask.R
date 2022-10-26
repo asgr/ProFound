@@ -1,9 +1,13 @@
-profoundApplyMask = function(image = NULL, mask=matrix(1L,3,3),
-                             xcen, ycen, xsize=dim(mask)[1], ysize=dim(mask)[2], rot=0,
+profoundApplyMask = function(image = NULL, mask='disc',
+                             xcen=xsize/2, ycen=ysize/2, xsize=101, ysize=101, rot=0,
                              direction='backward', dim = c(101, 101)){
   
   if(!requireNamespace("imager", quietly = TRUE)){
     stop('The imager package is needed for smoothing to work. Please install from CRAN.', call. = FALSE)
+  }
+  
+  if(!is.matrix(mask)){
+    mask = profoundMakeMask(size=max(xsize, ysize), shape=mask)
   }
   
   if(!is.null(image)){
@@ -103,4 +107,8 @@ profoundApplyMask = function(image = NULL, mask=matrix(1L,3,3),
   x = x + in_size[1]/2
   y = y + in_size[2]/2
   list(x = x, y = y)
+}
+
+profoundMakeMask = function(size=101, shape='disc'){
+  return(.makeBrush(size, shape=shape))
 }

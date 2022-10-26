@@ -1,5 +1,6 @@
 \name{profoundPixelCorrelation}
 \alias{profoundPixelCorrelation}
+\alias{profoundCovMat}
 \alias{profoundSkySplitFFT}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -12,6 +13,10 @@ Returns the x and y dimension pixel-to-pixel correlation (often called covarianc
 profoundPixelCorrelation(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
   lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
   ylim=c(-1,1), log='x', grid=TRUE, ...)
+  
+profoundCovMat(image, objects = NULL, mask = NULL, profound = NULL, xsel = NULL,
+  ysel = NULL)
+
 profoundSkySplitFFT(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
   skyscale = 100, profound = NULL)
 }
@@ -56,6 +61,12 @@ Numeric scalar; required, the pixel scale that the FFT should split the provided
   \item{profound}{
 List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples). As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
+  \item{xsel}{
+Integer vector; the x dimension subset of the input \option{image} to process. Much above 1,000 x 1,000 pixels the computation of covariance becomes very slow (10s of seconds). Generally sub-sampling a representative 1,000 x 1,000 is a pragmatic solution.
+}
+  \item{ysel}{
+Integer vector; the y dimension subset of the input \option{image} to process. Much above 1,000 x 1,000 pixels the computation of covariance becomes very slow (10s of seconds). Generally sub-sampling a representative 1,000 x 1,000 is a pragmatic solution.
+}
   \item{\dots}{
 Further arguments to passe to \code{\link{magplot}}. Only relevant if \option{plot}=TRUE.
 }
@@ -73,6 +84,10 @@ The slightly weird units used for the k modes of the FFT (see the value section 
 
 The relative standard-deviations returned in \option{cortab} are calculated by taking the standard-deviation of the lagged pixel differences of (\option{image}-\option{sky})/\option{skyRMS} and dividing through by sqrt(2). This means for well behaved data they should be 1, and the dashed lines on the diagnostic plot should fall on 1.
 
+\code{profoundCovMat}:
+
+Computes the covariance matrix for background pixels (i.e. bad pixels and object pixels need to be flagged for removal using the \option{mask} and \option{objects} arguments). How diagonal this is tells you about the pixel covariance, i.e. if all the covariance matrix mass is in the diagonal then there can be no significant spatial covariance.
+
 \code{profoundSkySplitFFT}:
 
 The FFT split output separates the provided image into hi k (\option{sky_hi}) and low k (\option{sky_lo}) modes. The idea is that \option{sky_lo} might represent additional sky with complex structure (not captured by the bicubic/bilinear extimated sky) that still needs to be subtracted off the image, whilst \option{sky_hi} might contain some as yet un-subtracted sources.
@@ -84,8 +99,8 @@ In principle \code{profoundSkySplitFFT} can be run with any image, but the separ
 
 A list containing three objects:
 
-\itemize{
-  \item cortab: A data.frame containing: 
+  \item{cortab}{A data.frame containing: }
+  
   \itemize{
     \item lag: The pixel lag
     \item corx: The correlation in the x-dimension
@@ -99,19 +114,27 @@ A list containing three objects:
     \item relsdx: The pixel lag implied relative standard-deviation in x
     \item relsdy: The pixel lag implied relative standard-deviation in y
   }
-  \item fft: if \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in units of (2.pi)/(L.pix), where L is the original dimensions of the image being Fourier transformed in x and y respectively. z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. We use the optical representation, where the DC (or k=0) mode is in the absolute centre. This means larger scale produce power in the central parts of the FFT image, and smaller scales produce power in the outer parts of the FFT image.
-  \item image_sky: Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.
-  \item cor_err_func: the error function between \option{N100} (the number of pixels in the segment) and the relative flux error. This will never be less than 0, and can be near 1 for small segments in highly correlated data (which is what should be expected).
   
+  \item{fft}{If \option{fft}=TRUE this object contains a list containing x, y, and z. If \option{fft}=FALSE it is NULL. x and y contain the k mode values of the 2D FFT in units of (2.pi)/(L.pix), where L is the original dimensions of the image being Fourier transformed in x and y respectively. z contains the power component of the 2D FFT image as a numeric matrix; the modulus of the 2D FFT of the \option{image} with the same dimensions. We use the optical representation, where the DC (or k=0) mode is in the absolute centre. This means larger scale produce power in the central parts of the FFT image, and smaller scales produce power in the outer parts of the FFT image.}
+  \item{image_sky}{Numeric matrix; if \option{fft}=TRUE this object contains the (\option{image}-\option{sky})/\option{skyRMS}, if \option{fft}=FALSE it is NULL.}
+  \item{cor_err_func}{The error function between \option{N100} (the number of pixels in the segment) and the relative flux error. This will never be less than 0, and can be near 1 for small segments in highly correlated data (which is what should be expected).}
+
+\code{profoundCovMat}:
+
+A list containing:
+
+  \item{cov_mat}{The covriance matrix the masked \option{image.}}
+  \item{var2cov}{The fraction of variance mass in the diagonal of \option{cov_mat} (so square root of this would be fraction of RMS mass).}
+
 \code{profoundSkySplitFFT}:
 
 A list containing three numeric matrices:
 
-\item sky: The new sky estimate, defined as the input \option{sky}+\option{sky_lo}.
-\item sky_lo: The low k modes extracted from the objects masked \option{image}-\option{sky}.
-\item sky_hi: The high k modes extracted from the objects masked \option{image}-\option{sky}.
+  \item{sky}{The new sky estimate, defined as the input \option{sky}+\option{sky_lo}.}
+  \item{sky_lo}{The low k modes extracted from the objects masked \option{image}-\option{sky}.}
+  \item{sky_hi}{The high k modes extracted from the objects masked \option{image}-\option{sky}.}
 }
-}
+
 \author{
 Aaron Robotham
 }

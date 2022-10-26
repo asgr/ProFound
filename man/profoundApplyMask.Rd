@@ -1,5 +1,6 @@
 \name{profoundApplyMask}
 \alias{profoundApplyMask}
+\alias{profoundMakeMask}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Apply a Mask to an Image
@@ -8,9 +9,10 @@ Apply a Mask to an Image
 Allows the application of a scale-able and rotate-able mask to an image.
 }
 \usage{
-profoundApplyMask(image = NULL, mask = matrix(1L, 3, 3), xcen, ycen,
-  xsize = dim(mask)[1], ysize = dim(mask)[2], rot = 0, direction = 'backward',
-  dim = c(101, 101))
+profoundApplyMask(image = NULL, mask = 'disc', xcen = xsize/2, ycen = ysize/2,
+  xsize = 101, ysize = 101, rot = 0, direction = 'backward', dim = c(101, 101))
+  
+profoundMakeMask(size = 101, shape = 'disc')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,7 +20,7 @@ profoundApplyMask(image = NULL, mask = matrix(1L, 3, 3), xcen, ycen,
 Numeric matrix; the image we want to apply the \option{mask}. If provided this will be used to compute the \option{dim} also.
 }
   \item{mask}{
-Numeric matrix; the input mask. Any values above 0 will be considered pixels that we wisk to mask. Note for centreing to make sense the provided mask should nearly always be odd dimensions (since even dimensions will have ambiguous application solutions at pixel centres).
+Numeric matrix or scalar character; the input mask. If a matrix input, any values above 0 will be considered pixels that we wisk to mask. Note for centreing to make sense the provided mask should nearly always be odd dimensions (since even dimensions will have ambiguous application solutions at pixel centres). If character then an internal mask maker is called as per \code{profoundMakeMask}, where the \option{size} argument is the maximum of \option{xsize} or \option{ysize}, and the character scalar of \option{mask} is passed into the \option{shape} argument. The default therfore creates a circular mask of diameter 101.
 }
   \item{xcen}{
 Numeric scalar/vector; the x position to centre the mask at (i.e. it will be centred on dim(mask)[1]/2). If a vector then multiple masks will be applied to the image.
@@ -40,6 +42,12 @@ Character scalar/vector; "forward" or "backward", see \code{imwarp}. For masking
 }
   \item{dim}{
 Integer vector; the dimension of the complex mask to return. This is used if \option{image} is not provided.
+}
+  \item{size}{
+Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number.
+}
+  \item{shape}{
+Character scalar; the shape of the dilation kernel. Options are 'box', 'disc', 'diamond', 'Gaussian', 'line'.
 }
 }
 \details{
