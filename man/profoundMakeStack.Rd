@@ -1,5 +1,7 @@
-\name{profoundMakeStack}
+\name{profoundStack}
+\alias{profoundStack}
 \alias{profoundMakeStack}
+\alias{profoundCombine}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Stack Images
@@ -10,6 +12,8 @@ Stacks multiple images based on their signal-to-noise.
 \usage{
 profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL,
   mask_list = NULL, magzero_in = 0, magzero_out = 0, masking = 'and')
+
+profoundCombine(image_list = NULL, imager_func = NULL, na.rm = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -34,9 +38,15 @@ Numeric scalar; the output mag-zero point desired.
   \item{masking}{
 Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or'/'|'/'||' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and'/'&'/'&&' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
+  \item{imager_func}{
+Function; the \code{imager} combine function to apply. This can be any of the ones in ?imager.combine. The default of NULL means it will use the \code{average} function.
+}
+  \item{na.rm}{
+Logical; should NA be ignored in images when stacking (default TRUE)? Only applied to \option{imager_func} that has this as an option (otherwise ignored).
+}
 }
 \details{
-The stack is actually done based on variance weighting. In pseudo code:
+The \code{profoundMakeStack} stacking is actually done based on variance weighting. In pseudo code:
 
 stack = 0
 stackRMS = 0
@@ -49,10 +59,14 @@ stack = stack*sky_stack/(length(skyRMS_list)^2)
 The output is explictly sky subtracted (so the sky is now 0 everywhere by definition as far as \code{\link{profoundProFound}} is concerned). The stacked sky is not returned. However, it can be computed by running \code{profoundMakeStack} again, but passing the sky list originally passed to the \option{sky_list} argument to the \option{image_list} argument instead, and not providing any input to the \option{sky_list} argument (or setting this to 0).
 }
 \value{
-A list containing:
+For \code{profoundmakeStack} a list containing:
   \item{image}{Numeric matrix; the variance-weighted sky-subtracted stacked image. Masked pixels are NA.}
   \item{skyRMS}{Numeric matrix/scalar; the sky RMS image/value of the final stacked image}
   \item{magzero}{The mag-zero point of the stacked image.}
+  
+For \code{profoundCombine} a list containing:
+  \item{image}{Numeric matrix; the combine image. Masked pixels are NA.}
+  \item{weight}{Integer matrix; the pixel weights (number of non-masked pixels considered). Only relevant if \option{na.rm} is TRUE, and \code{imager} function being used has that as an option.}
 }
 \author{
 Aaron Robotham

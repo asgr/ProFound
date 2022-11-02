@@ -8,7 +8,7 @@ Calculate multiple annulus properties of iso-photal ellipses
 Returns multiple ellipse properties for an image, assumed to be monotonically decreasing in flux from a bright centre (i.e. a classic galaxy).
 }
 \usage{
-profoundGetEllipses(image = NULL, segim = NULL, segID = 1, levels = 10, magzero = 0,
+profoundGetEllipses(image = NULL, segim = NULL, segID = 1L, levels = 10, magzero = 0,
   pixscale = 1, fixcen = TRUE, dobox = FALSE, plot = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.

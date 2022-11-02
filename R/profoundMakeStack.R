@@ -122,3 +122,42 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
   skyRMS[!is.finite(skyRMS)] = NA
 invisible(list(image=stack, skyRMS=skyRMS, magzero=magzero_out))
 }
+
+profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE){
+  if(!requireNamespace("imager", quietly = TRUE)){
+    stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
+  }
+  
+  check = unlist(lapply(image_list, FUN=imager::is.cimg))
+  
+  if(!all(check)){
+    for(i in 1:length(image_list)){
+      image_list[[i]] = imager::as.cimg(image_list[[i]])
+    }
+  }
+  
+  if(na.rm == TRUE){
+    weight_list = list()
+    for(i in 1:length(image_list)){
+      weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]))))
+    }
+  }
+  
+  if(is.null(imager_func)){
+    imager_func = imager::average
+  }
+  
+  if('na.rm' %in% names(formals(imager_func))){
+    stack = as.matrix(imager_func(image_list, na.rm=na.rm))
+    if(na.rm){
+      weight = as.matrix(imager::add(weight_list))
+    }else{
+      weight = NULL
+    }
+  }else{
+    stack = as.matrix(imager_func(image_list))
+    weight = NULL
+  }
+  
+  return(invisible(list(stack=stack, weight=weight)))
+}

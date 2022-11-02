@@ -98,8 +98,8 @@ profoundGetEllipse=function(x, y, z, xcen=NULL, ycen=NULL, scale=sqrt(2), pixsca
   invisible(c(xcen=xcen, ycen=ycen, radhi=rad$hi*scale*pixscale, radlo=rad$lo*scale*pixscale, radav=radav*pixscale, axrat=axrat, ang=ang, box=box, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy))
 }
 
-profoundGetEllipses=function(image=NULL, segim=NULL, segID=1, levels=10, magzero=0, pixscale=1, fixcen=TRUE, dobox=FALSE, plot=TRUE, ...){
-  if(is.null(segim)){segim=segID}
+profoundGetEllipses=function(image=NULL, segim=NULL, segID=1L, levels=10, magzero=0, pixscale=1, fixcen=TRUE, dobox=FALSE, plot=TRUE, ...){
+  if(is.null(segim)){segim = matrix(segID, dim(image)[1], dim(image)[2])}
   tempxy=which(segim==segID, arr.ind = T)-0.5
   tempxy=cbind(tempxy,image[segim==segID])
   tempxy=tempxy[order(tempxy[,3],decreasing = T),]
