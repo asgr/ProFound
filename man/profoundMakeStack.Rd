@@ -13,7 +13,7 @@ Stacks multiple images based on their signal-to-noise.
 profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL,
   mask_list = NULL, magzero_in = 0, magzero_out = 0, masking = 'and')
 
-profoundCombine(image_list = NULL, imager_func = NULL, na.rm = TRUE)
+profoundCombine(image_list = NULL, imager_func = NULL, na.rm = TRUE, weights = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,6 +44,9 @@ Function; the \code{imager} combine function to apply. This can be any of the on
   \item{na.rm}{
 Logical; should NA be ignored in images when stacking (default TRUE)? Only applied to \option{imager_func} that has this as an option (otherwise ignored).
 }
+  \item{weights}{
+Numeric vector; weights to use when stacking (must be the same length as the \option{image_list}). Only used when \option{imager_func} is \code{wsum}.
+}
 }
 \details{
 The \code{profoundMakeStack} stacking is actually done based on variance weighting. In pseudo code:
@@ -65,7 +68,7 @@ For \code{profoundmakeStack} a list containing:
   \item{magzero}{The mag-zero point of the stacked image.}
   
 For \code{profoundCombine} a list containing:
-  \item{image}{Numeric matrix; the combine image. Masked pixels are NA.}
+  \item{image}{Numeric matrix; the combined image. Masked pixels are NA.}
   \item{weight}{Integer matrix; the pixel weights (number of non-masked pixels considered). Only relevant if \option{na.rm} is TRUE, and \code{imager} function being used has that as an option.}
 }
 \author{
