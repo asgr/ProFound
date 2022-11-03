@@ -13,7 +13,8 @@ Stacks multiple images based on their signal-to-noise.
 profoundMakeStack(image_list = NULL, sky_list = NULL, skyRMS_list = NULL,
   mask_list = NULL, magzero_in = 0, magzero_out = 0, masking = 'and')
 
-profoundCombine(image_list = NULL, imager_func = NULL, na.rm = TRUE, weights = NULL)
+profoundCombine(image_list = NULL, imager_func = NULL, na.rm = TRUE, weights = NULL,
+  increasing = TRUE, probs = c(0.159, 0.5, 0.841), parallel = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,13 +40,22 @@ Numeric scalar; the output mag-zero point desired.
 Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or'/'|'/'||' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and'/'&'/'&&' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
 }
   \item{imager_func}{
-Function; the \code{imager} combine function to apply. This can be any of the ones in ?imager.combine. The default of NULL means it will use the \code{average} function.
+Function (or character scalar for special case); the \code{imager} combine function to apply. This can be any of the ones in ?imager.combine. The default of NULL means it will use the \code{average} function. As a special case you can use \option{imager_func} = 'quantile' (with the speech marks) which uses \code{colQuantiles} in the \code{matrixStats} package.
 }
   \item{na.rm}{
 Logical; should NA be ignored in images when stacking (default TRUE)? Only applied to \option{imager_func} that has this as an option (otherwise ignored).
 }
   \item{weights}{
 Numeric vector; weights to use when stacking (must be the same length as the \option{image_list}). Only used when \option{imager_func} is \code{wsum}.
+}
+  \item{increasing}{
+Logical; if TRUE, sort in increasing order (default TRUE). Only relevant for the \code{parsort}, \code{parorder}, \option{code} \option{imager_func} \code{imager} combining functions.
+}
+  \item{probs}{
+Numeric vector; quantile probabilites between 0-1. This is only used in the specific case of \option{imager_func} = 'quantile' (with the speech marks). Behind the scenes it uses \code{colQuantiles} in the \code{matrixStats} package.
+}
+  \item{parallel}{
+Logical; do you want to compute quantiles in parallel. Only relevant for \option{imager_func} = 'quantile'.
 }
 }
 \details{

@@ -123,17 +123,10 @@ profoundMakeStack=function(image_list=NULL, sky_list=NULL, skyRMS_list=NULL, mas
 invisible(list(image=stack, skyRMS=skyRMS, magzero=magzero_out))
 }
 
-profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weights=NULL){
+profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weights=NULL,
+                           increasing=TRUE, probs=c(0.159, 0.5, 0.841), parallel=TRUE){
   if(!requireNamespace("imager", quietly = TRUE)){
     stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
-  }
-  
-  check = unlist(lapply(image_list, FUN=imager::is.cimg))
-  
-  if(!all(check)){
-    for(i in 1:length(image_list)){
-      image_list[[i]] = imager::as.cimg(image_list[[i]])
-    }
   }
   
   if(na.rm == TRUE){
@@ -145,26 +138,61 @@ profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weight
         weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]))*weights[i]))
       }
     }
+    
+    weight_stack = as.matrix(imager::add(weight_list))
+  }else{
+    weight_stack = NULL
   }
   
   if(is.null(imager_func)){
     imager_func = imager::average
   }
   
-  if('na.rm' %in% names(formals(imager_func))){
-    if('w' %in% names(formals(imager_func))){
-      image_stack = as.matrix(imager_func(image_list, w=weights, na.rm=na.rm))
-    }else{
-      image_stack = as.matrix(imager_func(image_list, na.rm=na.rm))
+  if(is.function(imager_func)){
+    
+    check = unlist(lapply(image_list, FUN=imager::is.cimg))
+    
+    if(!all(check)){
+      for(i in 1:length(image_list)){
+        image_list[[i]] = imager::as.cimg(image_list[[i]])
+      }
     }
-    if(na.rm){
-      weight_stack = as.matrix(imager::add(weight_list))
+    
+    if('na.rm' %in% names(formals(imager_func))){
+      if('w' %in% names(formals(imager_func))){
+        image_stack = as.matrix(imager_func(image_list, w=weights, na.rm=na.rm))
+      }else{
+        image_stack = as.matrix(imager_func(image_list, na.rm=na.rm))
+      }
     }else{
-      weight_stack = NULL
+      if('increasing' %in% names(formals(imager_func))){
+        image_stack = imager_func(image_list, increasing=increasing)
+      }else{
+        image_stack = as.matrix(imager_func(image_list))
+      }
     }
   }else{
-    image_stack = as.matrix(imager_func(image_list))
-    weight_stack = NULL
+    #special cases:
+    imager_func = tolower(imager_func)
+    
+    if(imager_func == 'quantile' | imager_func == 'quan' ){
+      
+      if(!requireNamespace("Rfast2", quietly = TRUE)){
+        stop('The Rfast2 package is needed for this function to work. Please install it from CRAN', call. = FALSE)
+      }
+      
+      if(na.rm==TRUE){
+        stop('colQuantile does not work with NA!')
+      }
+      
+      im_dim = dim(image_list[[1]])
+      temp_mat = matrix(unlist(image_list), nrow=length(image_list), byrow = TRUE)
+      temp_out = Rfast2::colQuantile(temp_mat, probs=probs, parallel=parallel)
+      image_stack = list()
+      for(i in 1:length(image_list)){
+        image_stack = c(image_stack, list(matrix(temp_out[i,], im_dim[1], im_dim[2])))
+      }
+    }
   }
   
   return(invisible(list(image=image_stack, weight=weight_stack)))

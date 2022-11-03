@@ -718,7 +718,7 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
   
   temp_mat = matrix(image, nrow = scan_block[1])
   NAfrac = colCounts(temp_mat, value=NA) / scan_block[1]
-  temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=T)
+  temp_sum = colQuantiles(temp_mat, probs=sky_quan, na.rm=TRUE)
   temp_sum[NAfrac > (1 - good_frac)] = NA
   rem_matrix_rows = matrix(rep(temp_sum - median(temp_sum, na.rm=TRUE), each=scan_block[1]), im_dim[1], im_dim[2])
   
