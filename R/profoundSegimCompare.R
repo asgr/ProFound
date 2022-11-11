@@ -6,8 +6,11 @@ profoundSegimCompare = function(segim_1, segim_2, threshold=0.5, cores=1, ignore
   
   segID = NULL
   
+  segim_1_unique = sort(unique(as.integer(segim_1)))[-1]
+  segim_2_unique = sort(unique(as.integer(segim_2)))[-1]
+  
   seg1_in_seg2 = foreach(segID = 1:segim_max, .combine='rbind')%dopar%{
-    if(! segID %in% segim_1){
+    if(! segID %in% segim_1_unique){
       return(rep(NA, segim_max))
     }
     sel = which(segim_1 == segID)
@@ -27,7 +30,7 @@ profoundSegimCompare = function(segim_1, segim_2, threshold=0.5, cores=1, ignore
   }
   
   seg2_in_seg1 = foreach(segID = 1:segim_max, .combine='rbind')%dopar%{
-    if(! segID %in% segim_2){
+    if(! segID %in% segim_2_unique){
       return(rep(NA, segim_max))
     }
     sel = which(segim_2 == segID)
@@ -54,9 +57,6 @@ profoundSegimCompare = function(segim_1, segim_2, threshold=0.5, cores=1, ignore
   seg_bij = seg1_in_seg2 * t(seg2_in_seg1)
   
   tab_match = which(seg_bij > threshold, arr.ind = TRUE)
-  
-  segim_1_unique = sort(unique(as.integer(segim_1)))[-1]
-  segim_2_unique = sort(unique(as.integer(segim_2)))[-1]
   
   tab_match = cbind(tab_match, match(tab_match[,1], segim_1_unique), match(tab_match[,2], segim_2_unique))
   
