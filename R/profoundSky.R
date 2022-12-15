@@ -688,9 +688,6 @@ profoundChisel=function(image=NULL, sky=NULL, skythresh=0.005, blurcut=0.01, obj
 profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
                              sky_quan=0.4, scan_direction='xy', good_frac=0, keep_trend=TRUE,
                              trend_block=21){
-  
-  im_dim = dim(image)
-  
   image_orig = image
   
   if(!is.null(mask)){
@@ -712,6 +709,8 @@ profoundSkyScan = function(image, mask=NULL, clip=c(0,1), scan_block=dim(image),
     #transpose for scanning columns first
     image = t(image)
   }
+  
+  im_dim = dim(image)
   
   rem_matrix_rows = NULL
   rem_matrix_cols = NULL
