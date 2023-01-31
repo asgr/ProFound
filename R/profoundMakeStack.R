@@ -133,9 +133,17 @@ profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weight
     weight_list = list()
     for(i in 1:length(image_list)){
       if(is.null(weights)){
-        weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]))))
+        if(inherits(image_list[[i]], 'Rfits_image')){
+          weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]$imDat))))
+        }else{
+          weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]))))
+        }
       }else{
-        weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]))*weights[i]))
+        if(inherits(image_list[[i]], 'Rfits_image')){
+          weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]$imDat))*weights[i]))
+        }else{
+          weight_list = c(weight_list, list(imager::as.cimg(!is.na(image_list[[i]]))*weights[i]))
+        }
       }
     }
     
@@ -154,7 +162,11 @@ profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weight
     
     if(!all(check)){
       for(i in 1:length(image_list)){
-        image_list[[i]] = imager::as.cimg(image_list[[i]])
+        if(inherits(image_list[[i]], 'Rfits_image')){
+          image_list[[i]] = imager::as.cimg(image_list[[i]]$imDat)
+        }else{
+          image_list[[i]] = imager::as.cimg(image_list[[i]])
+        }
       }
     }
     
@@ -176,21 +188,24 @@ profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weight
     imager_func = tolower(imager_func)
     
     if(imager_func == 'quantile' | imager_func == 'quan' ){
-      
-      if(!requireNamespace("Rfast2", quietly = TRUE)){
-        stop('The Rfast2 package is needed for this function to work. Please install it from CRAN', call. = FALSE)
-      }
-      
-      if(na.rm==TRUE){
-        stop('colQuantile does not work with NA!')
-      }
-      
       im_dim = dim(image_list[[1]])
       temp_mat = matrix(unlist(image_list), nrow=length(image_list), byrow = TRUE)
-      temp_out = Rfast2::colQuantile(temp_mat, probs=probs, parallel=parallel)
-      image_stack = list()
-      for(i in 1:length(image_list)){
-        image_stack = c(image_stack, list(matrix(temp_out[i,], im_dim[1], im_dim[2])))
+      
+      if(na.rm){
+        image_stack = list()
+        for(i in 1:length(probs)){
+          temp_out = apply(temp_mat, MARGIN=2, FUN=quantile, probs=probs[i], na.rm=TRUE)
+          image_stack = c(image_stack, list(matrix(temp_out, im_dim[1], im_dim[2])))
+        }
+      }else{
+        if(!requireNamespace("Rfast2", quietly = TRUE)){
+          stop('The Rfast2 package is needed for this function to work. Please install it from CRAN', call. = FALSE)
+        }
+        temp_out = Rfast2::colQuantile(temp_mat, probs=probs, parallel=parallel)
+        image_stack = list()
+        for(i in 1:length(probs)){
+          image_stack = c(image_stack, list(matrix(temp_out[i,], im_dim[1], im_dim[2])))
+        }
       }
     }
   }
