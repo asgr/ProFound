@@ -119,11 +119,13 @@ profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'
 
   if(isRfits){
     if(requireNamespace("Rfits", quietly = TRUE)){
+      dev.new(noRStudioGD = TRUE)
       plot(image)
     }else{
       stop("The Rfits package is need to process the header. Install from GitHub asgr/Rfits.")
     }
   }else{
+    dev.new(noRStudioGD = TRUE)
     magimage(image)
   }
   
