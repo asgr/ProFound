@@ -869,14 +869,14 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     if(requireNamespace("Rwcs", quietly = TRUE)){
       coord=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', header=header)
     }else{
-      coord=magWCSxy2radec(x = xcen, y = ycen, header=header)
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
     RAcen=coord[,1]
     Deccen=coord[,2]
     if(requireNamespace("Rwcs", quietly = TRUE)){
       coord=Rwcs::Rwcs_p2s(x = xmax, y = ymax, pixcen = 'R', header=header)
     }else{
-      coord=magWCSxy2radec(x = xmax, y = ymax, header=header)
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
     RAmax=coord[,1]
     Decmax=coord[,2]
@@ -1053,7 +1053,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=N
       if(requireNamespace("Rwcs", quietly = TRUE)){
         Rwcs::Rwcs_image(image, header=header, ...)
       }else{
-        magimageWCS(image, header=header, ...)
+        stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rwcs")
       }
     }
   }

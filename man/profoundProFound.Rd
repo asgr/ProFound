@@ -29,7 +29,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image}  then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
 Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
@@ -173,7 +173,7 @@ Logical; should the cutout centre for the sky shift from \option{loc} of the des
 Logical; should the cutout be padded with image data until it meets the desired \option{box} size (if \option{shiftloc} is true) or padded with NAs for data outside the image boundary otherwise? (See \code{\link{magcutout}} for details).
 }
   \item{header}{
-Full FITS header in table or vector format. If this is provided then the segmentations statistics table will gain \option{RAcen} and \option{Decen} coordinate outputs. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. Missing header keywords are printed out and other header option arguments are used in these cases. See \code{\link{magWCSxy2radec}}.
+Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since a big \option{image} can take a long time to run, you might want to monitor progress.  

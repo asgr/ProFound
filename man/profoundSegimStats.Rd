@@ -45,7 +45,7 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
   Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
   \item{header}{
-Full FITS header in table or vector format. If this is provided then the segmentations statistics table will gain \option{RAcen} and \option{Decen} coordinate outputs. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. Missing header keywords are printed out and other header option arguments are used in these cases. See \code{\link{magWCSxy2radec}}.
+Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
 }
   \item{sortcol}{
 Character; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
@@ -86,7 +86,7 @@ Further arguments to be passed to \code{\link{magimage}}.
 
 The interpretation of some of these outputs will depend a lot on the data being analysed, so it is for the user to decide on sensible next steps (e.g. using the outputs to select stars etc). One output of interest might be \option{flux_reflect}. This attempts to correct for missing flux where segments start colliding. This probably returns an upper limit to the flux since in some regions it can even be double counted if the two sources that have colliding segmentation maps are very close together and similar in brightness, so somewhere between \option{flux} and \option{flux_reflect} the truth probably lies. If you want a better estimate of the flux division then you should really be using the profiling routine of \code{ProFit}.
 
-\code{profoundSegimPlot} is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot! If you provide a header or a list containing the iamge and header to \option{header} then it will be plotted with the WCS overlaid using \code{\link{magimageWCS}}, otherwise it will use \code{\link{magimage}}.
+\code{profoundSegimPlot} is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot! If you provide a header or a list containing the iamge and header to \option{header} then it will be plotted with the WCS overlaid using \code{Rwcs_image}, otherwise it will use \code{\link{magimage}}.
 }
 \value{
 A data.frame with columns:

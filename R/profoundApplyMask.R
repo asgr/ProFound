@@ -112,3 +112,65 @@ profoundApplyMask = function(image = NULL, mask='disc',
 profoundMakeMask = function(size=101, shape='disc'){
   return(.makeBrush(size, shape=shape))
 }
+
+profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'){
+  
+  isRfits = inherits(image, c('Rfits_image'))
+
+  if(isRfits){
+    if(requireNamespace("Rfits", quietly = TRUE)){
+      plot(image)
+    }else{
+      stop("The Rfits package is need to process the header. Install from GitHub asgr/Rfits.")
+    }
+  }else{
+    magimage(image)
+  }
+  
+  if(mode == 'draw'){
+    temploc = locator(type='l', col=col)
+    lines(temploc$x[c(length(temploc$x),1)], temploc$y[c(length(temploc$y),1)], col=col)
+    output = data.frame(x=temploc$x, y=temploc$y)
+    
+    if(isRfits){
+      tempWCS = Rwcs::Rwcs_p2s(output, keyvalues=image$keyvalues, header=image$raw, pixcen='R')
+      output$RA = tempWCS[,'RA']
+      output$Dec = tempWCS[,'Dec']
+    }
+    
+  }else if(mode == 'apply'){
+    if(!is.null(poly)){
+      output = poly
+    }else{
+      stop('You must provide poly!')
+    }
+    
+    if(type == 'coord'){
+      temploc = Rwcs::Rwcs_s2p(output$RA, output$Dec, keyvalues=image$keyvalues, header=image$raw, pixcen='R')
+      output = data.frame(x=temploc[,'x'], y=temploc[,'y'], RA=output$RA, Dec=output$Dec)
+    }else if(type == 'pix'){
+      output = data.frame(x = output[,1], y = output[,2])
+    }
+    
+  }
+  
+  image_grid = expand.grid(1:dim(image)[1] - 0.5, 1:dim(image)[2] - 0.5)
+  
+  if(requireNamespace("Rwcs", quietly = TRUE)){
+    in_poly = Rwcs::Rwcs_in_poly(image_grid[,1], image_grid[,2], output$x, output$y)
+    mask = matrix(0L, dim(image)[1], dim(image)[2])
+    mask[in_poly] = 1L
+    magimage(mask, col=c(NA,hsv(alpha=0.2)), add=T, magmap=FALSE)
+    
+    if(isRfits){
+      image = image$imDat[in_poly] = NA
+    }else{
+      image = image[in_poly] = NA
+    }
+    
+  }else{
+    mask = NULL
+  }
+  
+  return(list(mask=mask, image=image, poly=output))
+}

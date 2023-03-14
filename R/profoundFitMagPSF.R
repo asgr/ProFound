@@ -89,22 +89,22 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if((is.null(xcen) & is.null(ycen)) & (is.null(RAcen) | is.null(Deccen))){stop('Need RAcen/Decen pair!')}
   
   if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(header)){
-    #if(requireNamespace("Rwcs", quietly = TRUE)){
-    #  RAdeccoords=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', header=header)
-    #}else{
-      RAdeccoords=magWCSxy2radec(x = xcen, y = ycen, header=header)
-    #}
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      RAdeccoords=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', header=header)
+    }else{
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rwcs")
+    }
     RAcen=RAdeccoords[,'RA']
     Deccen=RAdeccoords[,'Dec']
   }
   
   if((is.null(xcen) & is.null(ycen)) & (!is.null(RAcen) & !is.null(Deccen))){
     if(is.null(header)){stop('Need header if using RAcen and Deccec input')}
-    #if(requireNamespace("Rwcs", quietly = TRUE)){
-    #  xycoords=Rwcs::Rwcs_s2p(RA = RAcen, Dec = Deccen, pixcen = 'R', header=header)
-    #}else{
-      xycoords=magWCSradec2xy(RA = RAcen, Dec = Deccen, header=header)
-    #}
+    if(requireNamespace("Rwcs", quietly = TRUE)){
+      xycoords=Rwcs::Rwcs_s2p(RA = RAcen, Dec = Deccen, pixcen = 'R', header=header)
+    }else{
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rwcs")
+    }
     xcen=xycoords[,'x']
     ycen=xycoords[,'y']
   }
@@ -558,15 +558,15 @@ plot.fitmagpsf=function(x, ...){
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image - model', bty='n', cex=3, pch='')
   }else{
-    magimageWCS(x$image, header=x$header, qdiff=TRUE, ...)
+    plot(x, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image', bty='n', cex=3, pch='')
     
-    magimageWCS(x$finalmodel, header=x$header, qdiff=TRUE, ...)
+    plot(x, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='model', bty='n', cex=3, pch='')
     
-    magimageWCS(x$image - x$finalmodel, header=x$header, qdiff=TRUE, ...)
+    plot(x, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image - model', bty='n', cex=3, pch='')
   }

@@ -16,7 +16,7 @@ A simple image / model / image - model grid.
 Object of class 'fitmagpsf', as returned by \code{\link{profoundFitMagPSF}}.
 }
   \item{\dots}{
-Passed to \code{\link{magimage}} / \code{\link{magimageWCS}}
+Passed to \code{\link{magimage}} / \code{Rwcs_image}
 }
 }
 \details{

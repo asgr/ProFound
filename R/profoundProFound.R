@@ -688,7 +688,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     if(requireNamespace("Rwcs", quietly = TRUE)){
       Rwcs::Rwcs_image(image=image, header=x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     }else{
-      magimageWCS(image, x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     if(!is.null(outline)){
@@ -696,21 +696,14 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     }
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 2 seg
-    # if(requireNamespace("Rwcs", quietly = TRUE)){
-    #   Rwcs::Rwcs_image(image=x$segim, header=x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
-    # }else{
-    #   magimageWCS(x$segim, x$header, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE)
-    # }
     profoundSegimPlot(profound=x)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
-    #abline(v=c(0,dim(x$image)[1]))
-    #abline(h=c(0,dim(x$image)[2]))
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 3 dilate
     if(requireNamespace("Rwcs", quietly = TRUE)){
       Rwcs::Rwcs_image(image=image, header=x$header)
     }else{
-      magimageWCS(image, x$header)
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
@@ -735,7 +728,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     if(requireNamespace("Rwcs", quietly = TRUE)){
       Rwcs::Rwcs_image(image=x$sky-median(x$sky,na.rm=TRUE), header=x$header, qdiff=TRUE)
     }else{
-      magimageWCS(x$sky-median(x$sky,na.rm=TRUE), x$header, qdiff=TRUE)
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
@@ -749,7 +742,7 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     if(requireNamespace("Rwcs", quietly = TRUE)){
       Rwcs::Rwcs_image(image=x$skyRMS, header=x$header)
     }else{
-      magimageWCS(x$skyRMS, x$header)
+      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))

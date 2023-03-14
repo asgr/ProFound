@@ -14,13 +14,13 @@ profoundSegimShare(segim_in = NULL, header_in = NULL, header_out = NULL, pixcut 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{segim_in}{
-Integer matrix; required, the segmentation map we want to remap. If \option{segim_in} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of the list is parsed to \option{segim_in} and the correct header part is passed to \option{header_in}.
+Integer matrix; required, the segmentation map we want to remap. If \option{segim_in} is a list as created by \code{Rfits_read_image} then the image part of the list is parsed to \option{segim_in} and the correct header part is passed to \option{header_in}.
 }
   \item{header_in}{
-Full FITS header in table or vector format. This should be the header WCS that matches \option{segim_in}. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If \option{header_in} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
+Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option). If \option{header_in} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
 }
   \item{header_out}{
-Full FITS header in table or vector format. This is the target WCS projection that \option{segim_in} will be mapped onto. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the astro package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If \option{header_out} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
+Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option). If \option{header_out} is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
 }
   \item{pixcut}{
 Integer scalar; the number of pixels required to identify an object on the new low resolution segmentation map.

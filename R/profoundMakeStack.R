@@ -125,9 +125,6 @@ invisible(list(image=stack, skyRMS=skyRMS, magzero=magzero_out))
 
 profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weights=NULL,
                            increasing=TRUE, probs=c(0.159, 0.5, 0.841), parallel=TRUE){
-  if(!requireNamespace("imager", quietly = TRUE)){
-    stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
-  }
   
   if(na.rm == TRUE){
     weight_list = list()
@@ -148,15 +145,24 @@ profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weight
     }
     
     weight_stack = as.matrix(imager::add(weight_list))
+    rm(weight_list)
   }else{
     weight_stack = NULL
   }
   
   if(is.null(imager_func)){
+    if(!requireNamespace("imager", quietly = TRUE)){
+      stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
+    }
+    
     imager_func = imager::average
   }
   
   if(is.function(imager_func)){
+    
+    if(!requireNamespace("imager", quietly = TRUE)){
+      stop('The imager package is needed for this function to work. Please install it from CRAN', call. = FALSE)
+    }
     
     check = unlist(lapply(image_list, FUN=imager::is.cimg))
     
@@ -189,7 +195,7 @@ profoundCombine = function(image_list=NULL, imager_func=NULL, na.rm=TRUE, weight
     
     if(imager_func == 'quantile' | imager_func == 'quan' ){
       im_dim = dim(image_list[[1]])
-      temp_mat = matrix(unlist(image_list), nrow=length(image_list), byrow = TRUE)
+      temp_mat = matrix(as.numeric(unlist(image_list)), nrow=length(image_list), byrow = TRUE)
       
       if(na.rm){
         image_stack = list()

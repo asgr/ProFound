@@ -32,7 +32,7 @@ Numeric vector; declination centres in degrees.  If provided, must be the same l
 Numeric vector; required, initial PSF mags. This is what will be fitted.
 }
   \item{image}{
-Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{readFITS}, \code{read.fits} of \code{\link{magcutoutWCS}} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
 }
   \item{im_sigma}{
 Numeric matrix; required, the measurement errors per pixel (expressed in terms of sigma).
@@ -74,7 +74,7 @@ Logical; should the sky calulcated by \code{\link{profoundProFound}} be subtract
 Logical; should the full model be used to compute an image deblending function better suited for extended sources? This means fluxes are guaranteed to add up to those available in the \option{image}. The fit PSF can differ, especially if the \option{psf} supplied is not in detail identical to the true \option{image} PSF. In practice we find that using \option{fluxext}=FALSE works better when the sources are not well resolved (assuming the true \option{psf} ~ true PSF), but when sources are marginally extended then \option{fluxext}=TRUE is probably the safer mode to use (hence the name).
 }
   \item{header}{
-Full FITS header in table or vector format. Legal table format headers are provided by the \code{read.fitshdr} function or the \option{hdr} list output of \code{read.fits} in the \code{astro} package; the \option{hdr} output of \code{readFITS} in the \code{FITSio} package or the \option{header} output of \code{magcutoutWCS}. If a header is provided then key words will be taken from here as a priority. Missing header keywords are printed out and other header option arguments are used in these cases.
+Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
 }
   \item{doProFound}{
 Logical; if TRUE then \code{\link{profoundProFound}} will be run with the arguments provided by \dots. This will be used to determine \option{xcen}, \option{ycen} and \option{mag} blindly.
