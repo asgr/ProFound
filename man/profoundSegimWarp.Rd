@@ -36,8 +36,9 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
-GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
+VST_r = Rfits_read_image(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+GALEX_NUV = Rfits_read_image(system.file("extdata", 'GALEX_NUV.fits',
+  package="magicaxis"))
 
 profound_KiDS=profoundProFound(VST_r, sky=0, skycut=1, sigma=2, tolerance=8, plot=TRUE)
 

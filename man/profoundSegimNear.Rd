@@ -43,7 +43,8 @@ Due to the construction of the segmented curve-of-growth in ProFound you may hav
 
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
 profound=profoundProFound(image, skycut=1.5, magzero=30, verbose=TRUE)
 
 #Look for nearby (in this case touching) neighbours

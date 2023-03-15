@@ -377,7 +377,8 @@ Haralick R.M., et al., 1973, IEEE, SMC-3 (6), 610
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
 
 profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 
@@ -398,7 +399,7 @@ magplot(profound$segstats[,c("flux","origfrac")], log='x', grid=TRUE)
 
 ## An example of a large galaxy:
 
-VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+VST_r = Rfits_read_image(system.file("extdata", 'VST_r.fits', package="magicaxis"))
 
 # Running on defaults results in the central galaxy subtracting itself:
 plot(profoundProFound(VST_r))

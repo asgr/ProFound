@@ -138,8 +138,8 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))$imDat
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 segim=profoundMakeSegim(image, plot=TRUE)
 
 #Providing a mask entirely removes regions of the image for segmentation:

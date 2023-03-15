@@ -45,8 +45,8 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimExpand}}
 }
 \examples{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))$imDat
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 magimage(image)
 profoundImBlur(image, plot=TRUE)
 profoundImGrad(image, plot=TRUE)

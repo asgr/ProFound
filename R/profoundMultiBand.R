@@ -208,11 +208,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     message(paste('*** Currently processing single detection band',detectbands,'***'))
     if(is.null(inputlist)){
       if(requireNamespace("Rfits", quietly = TRUE)){
-        detect=Rfits::Rfits_read_image(paste0(dir,detectbands,'.fits'))
-      }else if(requireNamespace("FITSio", quietly = TRUE)){
-        detect=FITSio::readFITS(paste0(dir,detectbands,'.fits'))
+        detect = Rfits_read_image(paste0(dir,detectbands,'.fits'))
       }else{
-        stop('One of Rfits / FITSio is required to read in FITS images. Get from GitHub asgr/Rfits / CRAN.')
+        stop('Rfits is required to read in FITS images. Get from GitHub asgr/Rfits.')
       }
     }else{
       detect=inputlist[[which(multibands==detectbands)]]
@@ -245,9 +243,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       message(paste('*** Currently processing detection band',detectbands[i],'***'))
       
       if(is.null(inputlist)){
-        detect=readFITS(paste0(dir,detectbands[i],'.fits'))
+        detect = Rfits_read_image(paste0(dir,detectbands[i],'.fits'))
       }else{
-        detect=inputlist[[which(multibands==detectbands[i])]]
+        detect = inputlist[[which(multibands==detectbands[i])]]
       }
       
       temp_magzero=magzero[multibands==detectbands[i]]
@@ -352,9 +350,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
       message(paste('*** Currently processing multi band',multibands[i],'***'))
       
       if(is.null(inputlist)){
-        multi=readFITS(paste0(dir,multibands[i],'.fits'))
+        multi = Rfits_read_image(paste0(dir,multibands[i],'.fits'))
       }else{
-        multi=inputlist[[i]]
+        multi = inputlist[[i]]
       }
       
       if(dotot){

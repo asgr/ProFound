@@ -138,14 +138,16 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-GALEX_NUV = readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
-VST_r = readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
-VISTA_K = readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
+GALEX_NUV = Rfits_read_image(system.file("extdata", 'GALEX_NUV.fits',
+  package="magicaxis"))
+VST_r = Rfits_read_image(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+VISTA_K = Rfits_read_image(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 
 # Warp to common WCS:
 
-GALEX_NUV_VST = magwarp(GALEX_NUV, VST_r$hdr)$image
-VISTA_K_VST = magwarp(VISTA_K, VST_r$hdr)$image
+library(ProPane)
+GALEX_NUV_VST = propaneWarp(GALEX_NUV, keyvalues_out=VST_r$keyvalues)
+VISTA_K_VST = propaneWarp(VISTA_K, keyvalues_out=VST_r$keyvalues)
 
 #Good but not perfect:
 

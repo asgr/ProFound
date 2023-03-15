@@ -49,7 +49,8 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
 
 profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 profoundDrawEllipse(profound$segstats$xcen, profound$segstats$ycen,

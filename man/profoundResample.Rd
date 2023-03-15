@@ -46,7 +46,8 @@ Aaron Robotham
 \code{\link{profoundFluxDeblend}}
 }
 \examples{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))$imDat
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 star = image[149 + -25:25, 74 + -25:25]
 magimage(star)
 magimage(profoundResample(star,1,2))

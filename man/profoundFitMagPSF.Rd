@@ -135,8 +135,11 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-s250_im=readFITS(system.file("extdata", 'IRdata/s250_im.fits', package="ProFound"))
-s250_psf=readFITS(system.file("extdata",'IRdata/s250_psf.fits', package="ProFound"))$imDat
+s250_im = Rfits_read_image(system.file("extdata", 'IRdata/s250_im.fits',
+  package="ProFound"))
+s250_psf = Rfits_read_image(system.file("extdata",'IRdata/s250_psf.fits',
+  package="ProFound"))$imDat
+  
 magzero_s250=11.68
 
 pro_s250=profoundProFound(s250_im, pixcut=1, skycut=2, ext=1, redosky=FALSE, iters=1,

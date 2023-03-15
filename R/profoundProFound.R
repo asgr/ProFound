@@ -51,31 +51,39 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   #Split out image and header parts of input:
   
   if(!is.null(image)){
-    if(any(names(image)=='imDat') & is.null(header)){
-      if(verbose){message('Supplied image contains image and header components')}
-      header=image$hdr
-      image=image$imDat
-    }else if(any(names(image)=='imDat') & !is.null(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header')}
-      image=image$imDat
+    if(inherits(image, 'Rfits_image')){
+      header = image$hdr
+      image = image$imDat
+    }else if(inherits(image, 'matrix')){
+      'Do nothing'
+    }else{
+      stop('As of ProFound v1.21.0 only Rfits_image FITS inputs are allowed. Please install from GitHub asgr/Rfits')
     }
-    if(any(names(image)=='dat') & is.null(header)){
-      if(verbose){message('Supplied image contains image and header components')}
-      header=image$hdr[[1]]
-      header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-      image=image$dat[[1]]
-    }else if(any(names(image)=='dat') & !is.null(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header')}
-      image=image$dat[[1]]
-    }
-    if(any(names(image)=='image') & is.null(header)){
-      if(verbose){message('Supplied image contains image and header components')}
-      header=image$header
-      image=image$image
-    }else if(any(names(image)=='image') & !is.null(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header')}
-      image=image$image
-    }
+    # if(any(names(image)=='imDat') & is.null(header)){
+    #   if(verbose){message('Supplied image contains image and header components')}
+    #   header=image$hdr
+    #   image=image$imDat
+    # }else if(any(names(image)=='imDat') & !is.null(header)){
+    #   if(verbose){message('Supplied image contains image and header but using specified header')}
+    #   image=image$imDat
+    # }
+    # if(any(names(image)=='dat') & is.null(header)){
+    #   if(verbose){message('Supplied image contains image and header components')}
+    #   header=image$hdr[[1]]
+    #   header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
+    #   image=image$dat[[1]]
+    # }else if(any(names(image)=='dat') & !is.null(header)){
+    #   if(verbose){message('Supplied image contains image and header but using specified header')}
+    #   image=image$dat[[1]]
+    # }
+    # if(any(names(image)=='image') & is.null(header)){
+    #   if(verbose){message('Supplied image contains image and header components')}
+    #   header=image$header
+    #   image=image$image
+    # }else if(any(names(image)=='image') & !is.null(header)){
+    #   if(verbose){message('Supplied image contains image and header but using specified header')}
+    #   image=image$image
+    # }
   }else{
     stop('Missing image - this is a required input!')
   }

@@ -29,6 +29,7 @@ First of all we load **ProFit** and **ProFound**. We also need to use **Laplaces
 library(ProFound)
 library(ProFit)
 library(LaplacesDemon)
+library(celestial)
 ```
 
 ## Making Simulated Data

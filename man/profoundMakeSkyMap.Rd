@@ -112,8 +112,8 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))$imDat
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 magimage(image)
 skymap = profoundMakeSkyMap(image, box=c(89,89))
 magimage(skymap$sky)

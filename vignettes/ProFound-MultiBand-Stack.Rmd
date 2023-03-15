@@ -1,10 +1,10 @@
 ---
-title: "Multiband Stacking"
+title: "ProFound: Multiband Stacking"
 author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Multiband Stacking}
+  %\VignetteIndexEntry{ProFound: Multiband Stacking}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,6 +20,7 @@ Load some packages.
 ```{r}
 library(ProFound)
 library(Rfits)
+library(Rwcs)
 ```
 
 ## R Markdown

@@ -46,7 +46,9 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
+  
 profound=profoundProFound(image, skycut=1.5, magzero=30, groupstats=TRUE, verbose=TRUE)
 
 merge=profoundCatMerge(profound$segstats, profound$groupstats,

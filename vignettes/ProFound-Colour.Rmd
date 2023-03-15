@@ -27,6 +27,8 @@ First load the libraries we need:
 
 ```{r}
 library(ProFound)
+library(Rfits)
+library(Rwcs)
 ```
 
 ## It's a Colourful Life
@@ -36,17 +38,17 @@ One of the big design considerations when developing **ProFound** was to make co
 First we need some images to do colour photometry on (these are taken from the **ProFound** Robotham et al 2018 paper):
 
 ```{r, eval=evalglobal}
-VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
-VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
-GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
+VISTA_K = Rfits_read_image(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
+VST_r = Rfits_read_image(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+GALEX_NUV = Rfits_read_image(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
 ```
 
 Let's take a look at the images.
 
 ```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
-magimageWCS(VISTA_K)
-magimageWCS(VST_r)
-magimageWCS(GALEX_NUV)
+plot(VISTA_K)
+plot(VST_r)
+plot(GALEX_NUV)
 ```
 
 It is clear they are pretty well world coordinate system (WCS) aligned, but have very different pixel scales. This creates challenges for decent colour photometry, but there are a few ways to tackle it with the tools in **ProFound**.
@@ -74,14 +76,15 @@ Do not worry too much about the differnce in the source finding, the point reall
 One route is to warp the images onto a common WCS scheme and run **ProFound** in either full segment or bright segment mode. Here we will take the VIKING K-band as our target WCS image.
 
 ```{r, eval=evalglobal}
-VST_r_warpK=magwarp(VST_r, header_out=VISTA_K$hdr)
-GALEX_NUV_warpK=magwarp(GALEX_NUV, header_out=VISTA_K$hdr)
+library(ProPane)
+VST_r_warpK = propaneWarp(VST_r, keyvalues_out=VISTA_K$keyvalues)
+GALEX_NUV_warpK = propaneWarp(GALEX_NUV, keyvalues_out=VISTA_K$keyvalues)
 ```
 
 ```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
-magimageWCS(VISTA_K)
-magimageWCS(VST_r_warpK)
-magimageWCS(GALEX_NUV_warpK)
+plot(VISTA_K)
+plot(VST_r_warpK)
+plot(GALEX_NUV_warpK)
 ```
 
 The images are now interpolated onto a common WCS, where their surface brightness is properly maintained (so we do not gain or lose flux). The small differences below are because the original images did not precisely cover the K-band image WCS.

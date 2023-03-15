@@ -92,11 +92,11 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))$imDat
-profoundSkyEstLoc(image, loc=c(20,20), box=c(40,40), plot=TRUE)$val
-profoundSkyEstLoc(image, loc=c(40,20), box=c(40,40), plot=TRUE)$val
-profoundSkyEstLoc(image, loc=c(60,20), box=c(40,40), plot=TRUE)$val
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
+profoundSkyEstLoc(image, loc=c(20,20), box=c(40,40), plot=TRUE)
+profoundSkyEstLoc(image, loc=c(40,20), box=c(40,40), plot=TRUE)
+profoundSkyEstLoc(image, loc=c(60,20), box=c(40,40), plot=TRUE)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

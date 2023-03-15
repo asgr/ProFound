@@ -62,7 +62,7 @@ Aaron Robotham
 \code{\link{profoundMakeSkyGrid}}
 }
 \examples{
-image = readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))$imDat
 temp_fix = profoundSkyScan(image)
 magimage(image)

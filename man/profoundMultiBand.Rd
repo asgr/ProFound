@@ -143,13 +143,14 @@ Aaron Robotham
 \examples{
 \dontrun{
 # Load images
-GALEX_NUV=readFITS(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
-VST_r=readFITS(system.file("extdata", 'VST_r.fits', package="magicaxis"))
-VISTA_K=readFITS(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
+GALEX_NUV = Rfits_read_image(system.file("extdata", 'GALEX_NUV.fits', package="magicaxis"))
+VST_r = Rfits_read_image(system.file("extdata", 'VST_r.fits', package="magicaxis"))
+VISTA_K = Rfits_read_image(system.file("extdata", 'VISTA_K.fits', package="magicaxis"))
 
 # Warp to common WCS:
-GALEX_NUV_VST=magwarp(GALEX_NUV, VST_r$hdr)
-VISTA_K_VST=magwarp(VISTA_K, VST_r$hdr)
+library(ProPane)
+GALEX_NUV_VST = propaneWarp(GALEX_NUV, keyvalues_out=VST_r$keyvalues)
+VISTA_K_VST = propaneWarp(VISTA_K, keyvalues_out=VST_r$keyvalues)
 
 # Run profoundMultiBand on defaults:
 multi=profoundMultiBand(inputlist=list(GALEX_NUV_VST, VST_r, VISTA_K_VST),

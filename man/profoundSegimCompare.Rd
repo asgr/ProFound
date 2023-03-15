@@ -49,8 +49,8 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}
 }
 \examples{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
 
 profound = profoundProFound(image, skycut=1, pixcut=100, plot=TRUE)
 profound2 = profoundProFound(image, skycut=5, plot=TRUE)

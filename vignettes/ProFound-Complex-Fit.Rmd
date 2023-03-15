@@ -28,11 +28,13 @@ First load the libraries we need:
 ```{r, eval=evalglobal}
 library(ProFound)
 library(ProFit)
+library(Rfits)
+library(Rwcs)
 ```
 
 ```{r, eval=evalglobal, fig.width=5, fig.height=5, dpi=40}
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
-profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE, rotstats=TRUE)
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+profound = profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE, boundstats=TRUE, rotstats=TRUE)
 ```
 
 We can identify the large group of central potentially confused sources from the group output from **ProFound**:
@@ -95,14 +97,14 @@ group1_modellist=list(
     mag= group1segstats$mag[1:3]
   ),
   sersic=list(
-    xcen= group1segstats$xmax[4:5],
-    ycen= group1segstats$ymax[4:5],
-    mag= group1segstats$mag[4:5],
-    re= group1segstats$R50[4:5]/0.339,
-    nser= rep(1, 2),
-    ang= group1segstats$ang[4:5],
-    axrat= group1segstats$axrat[4:5],
-    box= rep(0, 2)
+    xcen= group1segstats$xmax[4],
+    ycen= group1segstats$ymax[4],
+    mag= group1segstats$mag[4],
+    re= group1segstats$R50[4]/0.339,
+    nser= 1,
+    ang= group1segstats$ang[4],
+    axrat= group1segstats$axrat[4],
+    box= 0
   )
 )
 
@@ -113,14 +115,14 @@ group1_interval=list(
     mag= rep(list(c(-2,2)),3)
   ),
   sersic=list(
-    xcen= rep(list(c(-1,1)),2),
-    ycen= rep(list(c(-1,1)),2),
-    mag= rep(list(c(-2,2)),2),
-    re= rep(list(c(0.5,2)),2),
-    nser= rep(list(c(0.5,10)),2),
-    ang= rep(list(c(-180,360)),2),
-    axrat= rep(list(c(0.1,1)),2),
-    box= rep(list(c(-1,1)),2)
+    xcen= list(c(-1,1)),
+    ycen= list(c(-1,1)),
+    mag= list(c(-2,2)),
+    re= list(c(0.5,2)),
+    nser= list(c(0.5,10)),
+    ang= list(c(-180,360)),
+    axrat= list(c(0.1,1)),
+    box= list(c(-1,1))
   )
 )
 for(i in 1:3){
@@ -128,7 +130,7 @@ for(i in 1:3){
   group1_interval$pointsource$ycen[[i]]=group1_modellist$pointsource$ycen[i]+group1_interval$pointsource$ycen[[i]]
   group1_interval$pointsource$mag[[i]]=group1_modellist$pointsource$mag[i]+group1_interval$pointsource$mag[[i]]
 }
-for(i in 1:2){
+for(i in 1){
   group1_interval$sersic$xcen[[i]]=group1_modellist$sersic$xcen[i]+group1_interval$sersic$xcen[[i]]
   group1_interval$sersic$ycen[[i]]=group1_modellist$sersic$ycen[i]+group1_interval$sersic$ycen[[i]]
   group1_interval$sersic$mag[[i]]=group1_modellist$sersic$mag[i]+group1_interval$sersic$mag[[i]]
@@ -142,14 +144,14 @@ group1_tofit=list(
     mag= rep(TRUE, 3)
   ),
   sersic=list(
-    xcen= rep(TRUE, 2),
-    ycen= rep(TRUE, 2),
-    mag= rep(TRUE, 2),
-    re= rep(TRUE, 2),
-    nser= rep(TRUE, 2),
-    ang= rep(TRUE, 2),
-    axrat= rep(TRUE, 2),
-    box= rep(FALSE, 2)
+    xcen= TRUE,
+    ycen= TRUE,
+    mag= TRUE,
+    re= TRUE,
+    nser= TRUE,
+    ang= TRUE,
+    axrat= TRUE,
+    box= FALSE
   )
 )
 
@@ -160,14 +162,14 @@ group1_tolog=list(
     mag= rep(FALSE, 3)
   ),
   sersic=list(
-    xcen= rep(FALSE, 2),
-    ycen= rep(FALSE, 2),
-    mag= rep(FALSE, 2),
-    re= rep(TRUE, 2),
-    nser= rep(TRUE, 2),
-    ang= rep(FALSE, 2),
-    axrat= rep(TRUE, 2),
-    box= rep(FALSE, 2)
+    xcen= FALSE,
+    ycen= FALSE,
+    mag= FALSE,
+    re= TRUE,
+    nser= TRUE,
+    ang= FALSE,
+    axrat= TRUE,
+    box= FALSE
   )
 )
 ```
@@ -187,13 +189,13 @@ profitLikeModel(parm=group1_Data$init, Data=group1_Data, makeplots=TRUE, plotchi
 
 Next we will run a simple optimisation scheme (because we do not have all day...)
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE, eval=evalglobal}
 group1_fit=optim(group1_Data$init, profitLikeModel, method='BFGS', Data=group1_Data, control=list(fnscale=-1))
 ```
 
 And check the results!
 
-```{r, fig.width=8, fig.height=5, eval=FALSE, dpi=40}
+```{r, fig.width=8, fig.height=5, eval=evalglobal, dpi=40}
 profitLikeModel(parm=group1_fit$par, Data=group1_Data, makeplots=TRUE, plotchisq=TRUE)
 ```
 

@@ -27,6 +27,8 @@ First load the libraries we need:
 
 ```{r}
 library(ProFound)
+library(Rfits)
+library(Rwcs)
 ```
 
 ```{r, eval=evalglobal}
@@ -118,8 +120,8 @@ In practice we also parse **profoundMakeSkyMap** (and all lower functions) a bas
 We can do a more realistic test by using the sky estimate maps from the test VIKING Z-band data we include with **ProFound**:
 
 ```{r, eval=evalglobal}
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
-profound=profoundProFound(image, skycut=1, magzero=30, plot=TRUE)
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+profound = profoundProFound(image, skycut=1, magzero=30, plot=TRUE)
 ```
 
 From this we get a reasonable sky and sky-RMS map:

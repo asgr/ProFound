@@ -2,7 +2,7 @@ exportPattern("^[[:alpha:]]+")
 
 useDynLib(ProFound, .registration=TRUE)
 
-import("FITSio")
+import("Rfits")
 import("magicaxis")
 import("data.table")
 import("stats")
@@ -13,7 +13,7 @@ import("doParallel")
 
 importFrom("Rcpp", "evalCpp")
 importFrom("utils", "relist", "packageVersion")
-importFrom("celestial", "getpixscale")
+importFrom("celestial", "getpixscale", "coordmatch")
 importFrom("matrixStats", "colQuantiles", "colCounts")
 
 S3method("plot","profound")

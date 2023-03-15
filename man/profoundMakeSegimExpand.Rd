@@ -199,8 +199,8 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
-package="ProFound"))$imDat
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 segim=profoundMakeSegim(image, plot=TRUE, skycut=2)
 profoundMakeSegimExpand(image, segim$segim, plot=TRUE, skycut=1)
 profoundMakeSegimDilate(image, segim$segim, plot=TRUE)

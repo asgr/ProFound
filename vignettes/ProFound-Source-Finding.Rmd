@@ -96,18 +96,20 @@ Load some libraries:
 
 ```{r, eval=evalglobal}
 library(ProFound)
+library(Rfits)
+library(Rwcs)
 ```
 
 First read in some data.
 
 ```{r, eval=evalglobal}
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',package="ProFound"))
 ```
 
 Give it a quick look:
 
 ```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
-magimageWCS(image)
+plot(image)
 ```
 
 A basic example of the lower level **profoundMakeSegim** versus the higher level **profoundProFound**:
@@ -163,9 +165,9 @@ maghist(out_profound$skyRMS, xlab='Sky RMS')
 ```
 
 ```{r, eval=evalglobal, fig.width=6, fig.height=6, dpi=40}
-magimageWCS(image)
-magimageWCS(out_profound$sky, image$hdr)
-magimageWCS(out_profound$skyRMS, image$hdr)
+plot(image)
+Rwcs_image(out_profound$sky, image$keyvalues)
+Rwcs_image(out_profound$skyRMS, image$keyvalues)
 ```
 
 The background mask we used here (the default 100x100 option) looks to be pretty good, with not much correlation between the image and the sky map. However, even with a slightly too small sky grid the photometric outputs should be mostly pretty robust- differing by at worst a couple of counts per pixel. This is much less than the typical sky RMS (roughly 9 throughout).

@@ -62,23 +62,24 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))$imDat
 
-profoundSkyPoly(image$imDat, degree=0, quancut=0.5, plot=TRUE) #under cut
-profoundSkyPoly(image$imDat, degree=0, quancut=0.9, plot=TRUE) #about right
-profoundSkyPoly(image$imDat, degree=0, quancut=0.999, plot=TRUE) #over cut
+profoundSkyPoly(image, degree=0, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image, degree=0, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image, degree=0, quancut=0.999, plot=TRUE) #over cut
 
-profoundSkyPoly(image$imDat, degree=1, quancut=0.5, plot=TRUE) #under cut
-profoundSkyPoly(image$imDat, degree=1, quancut=0.9, plot=TRUE) #about right
-profoundSkyPoly(image$imDat, degree=1, quancut=0.999, plot=TRUE) #over cut
+profoundSkyPoly(image, degree=1, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image, degree=1, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image, degree=1, quancut=0.999, plot=TRUE) #over cut
 
-profoundSkyPoly(image$imDat, degree=2, quancut=0.5, plot=TRUE) #under cut
-profoundSkyPoly(image$imDat, degree=2, quancut=0.9, plot=TRUE) #about right
-profoundSkyPoly(image$imDat, degree=2, quancut=0.999, plot=TRUE) #over cut
+profoundSkyPoly(image, degree=2, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image, degree=2, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image, degree=2, quancut=0.999, plot=TRUE) #over cut
 
-profoundSkyPoly(image$imDat, degree=3, quancut=0.5, plot=TRUE) #under cut
-profoundSkyPoly(image$imDat, degree=3, quancut=0.9, plot=TRUE) #about right
-profoundSkyPoly(image$imDat, degree=3, quancut=0.999, plot=TRUE) #over cut
+profoundSkyPoly(image, degree=3, quancut=0.5, plot=TRUE) #under cut
+profoundSkyPoly(image, degree=3, quancut=0.9, plot=TRUE) #about right
+profoundSkyPoly(image, degree=3, quancut=0.999, plot=TRUE) #over cut
 }
 }
 

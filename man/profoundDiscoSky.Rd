@@ -50,7 +50,7 @@ Aaron Robotham
 }
 \examples{
 \dontrun{
-image = readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))$imDat
 profound = profoundProFound(image) #We want this for the object mask.
 

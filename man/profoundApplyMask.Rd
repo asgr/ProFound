@@ -89,7 +89,7 @@ Aaron Robotham
 \code{\link{profoundEllipseSeg}}
 }
 \examples{
-image = readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 
 magimage(image)
@@ -104,8 +104,6 @@ magimage(profoundApplyMask(image, mask_sq, 100.5, 100.5, xsize=51, rot=90)$image
 mask_circ = profoundEllipseSeg(dim = c(101,101))
 magimage(profoundApplyMask(image, mask_circ, 100.5, 100.5, xsize=51, rot=20)$image)
 
-\dontrun{
-library(Rfits)
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))
 
@@ -115,7 +113,6 @@ poly = data.frame(RA = c(352.2922, 352.2958, 352.2954, 352.2904, 352.2870, 352.2
        )
 
 mask_coord = profoundDrawMask(image, poly=poly, mode='apply', type='coord')
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

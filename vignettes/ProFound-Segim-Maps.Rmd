@@ -28,13 +28,15 @@ First load the libraries we need:
 ```{r, eval=evalglobal}
 library(ProFit)
 library(ProFound)
+library(Rfits)
+library(Rwcs)
 ```
 
 Having a good segmentation map is important for the successful running of ProFit. Luckily ProFit now comes with some utility functions to help you get there. We can start with a simple example:
 
 ```{r, eval=evalglobal, fig.width=5, fig.height=5, dpi=40}
-image = readFITS(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFit"))$imDat
-segim_old = readFITS(system.file("extdata", 'KiDS/G266035segim.fits', package="ProFit"))$imDat
+image = Rfits_read_image(system.file("extdata", 'KiDS/G266035fitim.fits', package="ProFit"))$imDat
+segim_old = Rfits_read_image(system.file("extdata", 'KiDS/G266035segim.fits', package="ProFit"))$imDat
 segim_new = profoundMakeSegim(image, plot=TRUE)
 profoundSegimPlot(image, segim_old)
 ```
@@ -57,8 +59,8 @@ segim_new_expand=profoundProFound(image, plot=TRUE)
 A harder example is galaxy G278109 due to a deeply embedded source in the main galaxy that causes a pretty brutal looking saddle-point deblend:
 
 ```{r, eval=evalglobal, fig.width=5, fig.height=5, dpi=40}
-image = readFITS(system.file("extdata", 'KiDS/G278109fitim.fits', package="ProFit"))$imDat
-segim_old = readFITS(system.file("extdata", 'KiDS/G278109segim.fits', package="ProFit"))$imDat
+image = Rfits_read_image(system.file("extdata", 'KiDS/G278109fitim.fits', package="ProFit"))$imDat
+segim_old = Rfits_read_image(system.file("extdata", 'KiDS/G278109segim.fits', package="ProFit"))$imDat
 segim_new = profoundMakeSegim(image, plot=TRUE)
 profoundSegimPlot(image, segim_old)
 ```

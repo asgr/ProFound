@@ -88,7 +88,7 @@ Aaron Robotham
 \code{\link{profoundProFound}}
 }
 \examples{
-im1 = im2 = im3 =readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+im1 = im2 = im3 = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))$imDat
 
 stack=profoundMakeStack(list(im1, im2, im3),
