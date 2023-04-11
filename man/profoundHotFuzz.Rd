@@ -9,9 +9,9 @@ Hot Fuzz Fitter
 Functions to fit the tenuous outer fuzz of extended sources.
 }
 \usage{
-profoundHotFuzz(profound = NULL, loc = NULL, box = c(200, 200), size = 21, shape = "disc",
-  select = NULL, rough = TRUE, nser = 2, dofit = TRUE, Niters = c(200, 0), fitRe = TRUE,
-  axrat = 'profound', ...)
+profoundHotFuzz(profound = NULL, loc = NULL, box = c(200, 200), region = NULL, size = 21,
+  shape = "disc", select = NULL, rough = TRUE, nser = 1, dofit = TRUE, Niters = c(200, 0),
+  fitRe = TRUE, axrat = 'profound', ...)
   
 profoundPSFFuzz(profound = NULL, loc = NULL, box = c(200,200), size = 21, shape = "disc",
   select = NULL, rough = TRUE, nser = 2, dofit = TRUE, Niters = c(200, 0), ...)
@@ -27,6 +27,9 @@ Numeric vector; two element [x,y] position for cutout region.
   \item{box}{
 Numeric vector; two element dimensions of the box to cut out from image centred on loc (in pixels). 
 }
+\item{region}{
+Boolean matrix; region to use for determining extended fuzzy profiles. If not defined then the dilated outskirts of objects will be defined internally.
+}
   \item{size}{
 Integer scalar; the size (e.g. width/diameter) of the dilation kernel in pixels. Should be an odd number else will be rounded up to the nearest odd number.
 }
@@ -40,7 +43,7 @@ Vector; either logical vector of segstat rows to keep (same length as segstats),
 Logical; should the profile be approximated roughly. Usually setting this to true is fine for the out parts of light profiles.
 }
   \item{nser}{
-Numeric scalar; the Sersic index of the profile to use when fitting. When fitting "Hot-Fuzz" the Magnitude, Re and Index become quite degenerate, so this can usually be left at the default.
+Numeric scalar; the Sersic index of the profile to use when fitting. When fitting "Hot-Fuzz" the Magnitude, Re and Index become quite degenerate, so this can usually be left at the default of 1 (meaning an exponential/power-law outer profile).
 }
   \item{dofit}{
 Logical; should fitting be done (TRUE) or just produce the outputs that can be later fitted (FALSE)?

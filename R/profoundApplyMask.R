@@ -116,20 +116,20 @@ profoundMakeMask = function(size=101, shape='disc'){
 profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'){
   
   isRfits = inherits(image, c('Rfits_image'))
-
-  if(isRfits){
-    if(requireNamespace("Rfits", quietly = TRUE)){
-      dev.new(noRStudioGD = TRUE)
-      plot(image)
-    }else{
-      stop("The Rfits package is need to process the header. Install from GitHub asgr/Rfits.")
-    }
-  }else{
-    dev.new(noRStudioGD = TRUE)
-    magimage(image)
-  }
   
   if(mode == 'draw'){
+    if(isRfits){
+      if(requireNamespace("Rfits", quietly = TRUE)){
+        dev.new(noRStudioGD = TRUE)
+        plot(image)
+      }else{
+        stop("The Rfits package is need to process the header. Install from GitHub asgr/Rfits.")
+      }
+    }else{
+      dev.new(noRStudioGD = TRUE)
+      magimage(image)
+    }
+    
     temploc = locator(type='l', col=col)
     lines(temploc$x[c(length(temploc$x),1)], temploc$y[c(length(temploc$y),1)], col=col)
     output = data.frame(x=temploc$x, y=temploc$y)
@@ -162,12 +162,14 @@ profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'
     in_poly = Rwcs::Rwcs_in_poly(image_grid[,1], image_grid[,2], output$x, output$y)
     mask = matrix(0L, dim(image)[1], dim(image)[2])
     mask[in_poly] = 1L
-    magimage(mask, col=c(NA,hsv(alpha=0.2)), add=T, magmap=FALSE)
+    if(mode == 'draw'){
+      magimage(mask, col=c(NA,hsv(alpha=0.2)), add=T, magmap=FALSE)
+    }
     
     if(isRfits){
-      image = image$imDat[in_poly] = NA
+      image$imDat[in_poly] = NA
     }else{
-      image = image[in_poly] = NA
+      image[in_poly] = NA
     }
     
   }else{

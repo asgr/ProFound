@@ -1,6 +1,6 @@
 profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
-                           size=21, shape="disc", select=NULL,
-                           rough=TRUE, nser=2, dofit=TRUE, Niters=c(200,0), fitRe=TRUE, axrat='profound', ...){
+                           region=NULL, size=21, shape="disc", select=NULL,
+                           rough=TRUE, nser=1, dofit=TRUE, Niters=c(200,0), fitRe=TRUE, axrat='profound', ...){
   
   if(!requireNamespace("ProFit", quietly = TRUE)){
     stop('The ProFit package is needed for smoothing to work. Please install from ICRAR/ProFit', call. = FALSE)
@@ -27,21 +27,28 @@ profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
   segstats = segstats[is.finite(segstats[,'xcen']) & is.finite(segstats[,'ycen']) & is.finite(segstats[,'mag']) & is.finite(segstats[,'R50']) & is.finite(segstats[,'ang']) & is.finite(segstats[,'axrat']),]
   segim[!segim %in% segstats$segID] = 0L
   
-  segim_redo = profoundMakeSegimDilate(segim=segim, size=size, shape=shape)$segim
-  
   if(!is.null(loc)){
     image = magcutout(image, loc=loc, box=box)
     loc.diff = image$loc.diff
     image = image$image
     #segim_orig = magcutout(segim_orig, loc=loc, box=box)$image
     segim = magcutout(segim, loc=loc, box=box)$image
-    segim_redo = magcutout(segim_redo, loc=loc, box=box)$image
     sigma = magcutout(sigma, loc=loc, box=box)$image
     
-    segstats = segstats[segstats$segID %in% segim_redo,]
+    segstats = segstats[segstats$segID %in% segim,]
   }
   
-  region = (segim_redo - segim > 0)
+  if(is.null(region)){
+    segim_redo = profoundMakeSegimDilate(segim=segim, size=size, shape=shape)$segim
+    if(!is.null(loc)){
+      segim_redo = magcutout(segim_redo, loc=loc, box=box)$image
+    }
+    region = (segim_redo - segim > 0) & !is.na(image)
+    image[region != 1L] = NA
+  }else{
+    region[is.na(image)] = FALSE
+    segim_redo = NULL
+  }
   
   Ncomp = dim(segstats)[1]
   
@@ -53,7 +60,7 @@ profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
       re = segstats[,'R50'],
       nser = rep(nser, Ncomp),
       ang = segstats[,'ang'],
-      axrat = ifelse(axrat=='profound',segstats[,'axrat'],axrat)
+      axrat = if(axrat=='profound'){segstats[,'axrat']}else{axrat}
     )
   )
 
@@ -121,7 +128,7 @@ profoundHotFuzz = function(profound=NULL, loc=NULL, box=c(200,200),
   # uppers = uppers[which(unlist(Data$tofit))]
   
   if(fitRe){
-    lowers = c(segstats[,'mag'] - 5, rep(0, Ncomp))
+    lowers = c(segstats[,'mag'] - 5, rep(-1, Ncomp))
     uppers = c(segstats[,'mag'] + 5, rep(log10(maxsize), Ncomp))
   }else{
     lowers = segstats[,'mag'] - 5
