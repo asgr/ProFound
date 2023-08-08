@@ -2,7 +2,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
                           loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, 
                           cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, 
                           continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, poly_merge=FALSE,
-                          segID_max=NULL, legend_extra=NULL, group_limit=TRUE, ...){
+                          segID_max=NULL, legend_extra=NULL, group_limit=TRUE, sparse='auto', ...){
   if(open_window){
     dev.new(noRStudioGD = TRUE)
   }
@@ -79,14 +79,14 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
   
   par(mar=c(0.1,0.1,0.1,0.1))
   if(is.list(image)){
-    magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+    magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, sparse=sparse, ...)
   }else{
-    magimage(image, axes=FALSE, labels=FALSE, ...)
+    magimage(image, axes=FALSE, labels=FALSE, sparse=sparse, ...)
   }
-  profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE)
+  profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE, sparse=sparse)
   
   while(continue){
-    magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=alpha_seg)), add=TRUE)
+    magimage(segim_progress, magmap=FALSE, col=c(NA, hsv(seq(0,2/3,len=max(segim_progress, na.rm=TRUE)), alpha=alpha_seg)), add=TRUE, sparse=sparse)
     if(crosshair){
       points(dim(segim)[1]/2,dim(segim)[2]/2, col='magenta', pch=5, cex=crosscex)
     }
@@ -256,11 +256,11 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       }else{
         par(mar=c(0.1,0.1,0.1,0.1))
         if(is.list(image)){
-          magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+          magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, sparse=sparse, ...)
         }else{
-          magimage(image, axes=FALSE, labels=FALSE, ...)
+          magimage(image, axes=FALSE, labels=FALSE, sparse=sparse, ...)
         }
-        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
+        profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE, sparse=sparse) 
         
         if(quit == FALSE){
           if(!is.null(legend_extra)){
@@ -290,11 +290,11 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
       quit = FALSE
       par(mar=c(0.1,0.1,0.1,0.1))
       if(is.list(image)){
-        magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, ...)
+        magimageRGB(R=image$R, G=image$G, B=image$B, axes=FALSE, labels=FALSE, sparse=sparse, ...)
       }else{
-        magimage(image, axes=FALSE, labels=FALSE, ...)
+        magimage(image, axes=FALSE, labels=FALSE, sparse=sparse, ...)
       }
-      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE) 
+      profoundSegimPlot(image=image, segim=segim, mask=mask, sky=sky, axes=FALSE, labels=FALSE, add=TRUE, sparse=sparse) 
     }
   }
   

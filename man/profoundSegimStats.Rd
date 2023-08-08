@@ -16,7 +16,8 @@ profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS =
   cor_err_func = NULL, app_diam = 1)
   
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS=NULL,
-  header = NULL, col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE, ...)
+  header = NULL, col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE,
+  sparse = 'auto', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -76,6 +77,9 @@ Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometr
 }
   \item{add}{
 Logical; should just the segment contours be added to the current image? This allows for complex colouring of different segments to be achieved by adding various overlays.  
+}
+  \item{sparse}{
+Determines whether the image pixels are sparse sampled to speed up plotting. If set to 2 it will only determine every 2nd pixel, and if 3 every 3rd etc. The default 'auto' means it will scale to produce a maximum number of 1,000 pixels on any side (on most monitors this is a fairly useful maximum, and ensures quick displaying of even very large images).  
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.

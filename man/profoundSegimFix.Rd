@@ -12,7 +12,8 @@ profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound =
   loc = NULL, box = 400, segID_merge = list(), col = 'magenta', pch = 4, cex = 2,
   crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
   continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE,
-  poly_merge = FALSE, segID_max = NULL, legend_extra = NULL, group_limit = TRUE, ...)
+  poly_merge = FALSE, segID_max = NULL, legend_extra = NULL, group_limit = TRUE,
+  sprase = 'auto', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -81,6 +82,9 @@ Character vector; extra legend writing that will be added to the top-right of th
 }
   \item{group_limit}{
 Logical; should segment linking be limited to contiguous groups. Usually this should be TRUE since you do not really want discontinuous segment photometry, and indeed many measurement do not make sense in this regime.  
+}
+  \item{sparse}{
+Determines whether the image pixels are sparse sampled to speed up plotting. If set to 2 it will only determine every 2nd pixel, and if 3 every 3rd etc. The default 'auto' means it will scale to produce a maximum number of 1,000 pixels on any side (on most monitors this is a fairly useful maximum, and ensures quick displaying of even very large images).  
 }
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.
