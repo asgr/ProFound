@@ -49,6 +49,7 @@ Aaron Robotham
 \code{\link{profoundMakeSegim}}
 }
 \examples{
+\dontrun{
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))
 
@@ -65,6 +66,7 @@ magplot(profound$segstats[testcomp$tab_match$rowID_1,'mag'],
  profound2$segstats[testcomp$tab_match$rowID_2,'mag'],
  xlab='mag (ProFound 1)', ylab='mag (ProFound 2)')
 abline(0,1)
+}
 }
 
 \concept{ segim }

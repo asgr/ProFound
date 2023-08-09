@@ -2,7 +2,7 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
                           loc=NULL, box=400, segID_merge=list(), col='magenta', pch=4, 
                           cex=2, crosshair=FALSE, crosscex=5, alpha_seg=0.3, happy_default=TRUE, 
                           continue_default=TRUE, open_window=TRUE, allow_seg_modify=FALSE, poly_merge=FALSE,
-                          segID_max=NULL, legend_extra=NULL, group_limit=TRUE, sparse='auto', ...){
+                          segID_max=NULL, legend_extra=NULL, group_limit=TRUE, sparse=1L, ...){
   if(open_window){
     dev.new(noRStudioGD = TRUE)
   }
@@ -53,6 +53,10 @@ profoundSegimFix=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, profound=
     }else{
       sky = NULL
     }
+  }
+  
+  if(allow_seg_modify | poly_merge){
+    sparse = 1L
   }
   
   if(group_limit){
@@ -414,9 +418,11 @@ profoundInPoly = function(x, y, poly_x, poly_y){
 }
   
 .inpoly_pix = function(poly_x,poly_y){
-  xseq=floor(min(poly_x)):ceiling(max(poly_x)) - 0.5
-  yseq=floor(min(poly_y)):ceiling(max(poly_y)) - 0.5
-  tempgrid=as.matrix(expand.grid(xseq, yseq))
+  #xseq = floor(min(poly_x)):ceiling(max(poly_x)) - 0.5
+  #yseq = floor(min(poly_y)):ceiling(max(poly_y)) - 0.5
+  xseq = seq(floor(min(poly_x)) - 0.5, ceiling(max(poly_x)) - 0.5, by=1)
+  yseq = seq(floor(min(poly_y)) - 0.5, ceiling(max(poly_y)) - 0.5, by=1)
+  tempgrid = as.matrix(expand.grid(xseq, yseq))
   #switched to short version of this function. Seems to work better...
   return(invisible(ceiling(tempgrid[.point_in_polygon_cpp_short(tempgrid[,1], tempgrid[,2], poly_x, poly_y),])))
 }

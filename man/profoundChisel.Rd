@@ -67,9 +67,11 @@ Aaron Robotham
 \code{\link{profoundMakeSkyGrid}}
 }
 \examples{
+\dontrun{
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))$imDat
 magimage(profoundChisel(image)$objects)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

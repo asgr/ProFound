@@ -13,7 +13,7 @@ profoundSegimFix(image = NULL, segim = NULL, mask = NULL, sky = NULL, profound =
   crosshair = FALSE, crosscex = 5, alpha_seg = 0.3, happy_default = TRUE,
   continue_default = TRUE, open_window = TRUE, allow_seg_modify = FALSE,
   poly_merge = FALSE, segID_max = NULL, legend_extra = NULL, group_limit = TRUE,
-  sprase = 'auto', ...)
+  sparse = 1L, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -72,7 +72,7 @@ Logical; should a new Quartz or X11 window be opened. When looping through diffe
 Logical; should users be allowed to add and delete segments. Since this behaviour will modify the input \option{segim} it is not always desirable. To be safe, it is off (FALSE) by default. See Details.
 }
   \item{poly_merge}{
-Logical; allow groups of segments to be merged by drawing a polygon around them. To enter this mode \option{allow_seg_modify}=FALSE must be set. See Details.
+Logical; allow groups of segments to be merged by drawing a polygon around them. To enter this mode \option{allow_seg_modify} = FALSE must be set. See Details.
 }
   \item{segID_max}{
 Integer; the maximum segment ID to assume for the input \option{segim} when adding or replacing segments (so only relevant if \option{allow_seg_modify}=TRUE), where the default segID for a new segment becomes \option{segID_max} + 1. Providing this speeds things up since it can be slow to compute for very large images (tenths of second for 10k x 10k). If set to 'auto' then it will check the input \option{segim}, if left at the default NULL it will check the available segim when it is creating a new segment. Since this will be on a segmentation image subset when specifying a box, this might mean the segID is not unique on the larger input \option{segim}, but it will be unique on the cut down one being processed internally, and the ones returned (\option{segim} and \option{segim_start}).
@@ -84,7 +84,7 @@ Character vector; extra legend writing that will be added to the top-right of th
 Logical; should segment linking be limited to contiguous groups. Usually this should be TRUE since you do not really want discontinuous segment photometry, and indeed many measurement do not make sense in this regime.  
 }
   \item{sparse}{
-Determines whether the image pixels are sparse sampled to speed up plotting. If set to 2 it will only determine every 2nd pixel, and if 3 every 3rd etc. The default 'auto' means it will scale to produce a maximum number of 1,000 pixels on any side (on most monitors this is a fairly useful maximum, and ensures quick displaying of even very large images).  
+Determines whether the image pixels are sparse sampled to speed up plotting. If set to 2 it will only determine every 2nd pixel, and if 3 every 3rd etc. If 'auto' it means it will scale to produce a maximum number of 1,000 pixels on any side (on most monitors this is a fairly useful maximum, and ensures quick displaying of even very large images). If \option{allow_seg_modify} or \option{poly_merge} is TRUE then \option{sparse} will be automatically set to 1L (otherwise it is hard to identify pixels clearly).
 }
   \item{\dots}{
 Additional arguments to be passed to \code{\link{magimage}} or \code{\link{magimageRGB}} as appropriate.
