@@ -22,7 +22,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   
   dots=list(...)
   
-  dotsignoredetect=c('iters', 'sky', 'skyRMS', 'plot', 'stats', 'haralickstats', 'groupby', 'pixelcov', 'box')
+  dotsignoredetect=c('iters', 'plot', 'stats', 'haralickstats', 'groupby', 'pixelcov', 'box')
   dotsignoremulti=c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'size', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats', 'groupby', 'box', 'groupstats', 'objects', 'redosky')
   
   if(length(dots)>0){

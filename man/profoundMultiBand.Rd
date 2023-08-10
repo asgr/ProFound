@@ -113,7 +113,7 @@ In the simplest sense this script runs \code{\link{profoundProFound}} on each de
 
 Re the \dots passing, these are the arguments NOT sent through to the detect and multi band phases respectively (this is either because we are setting them elsewhere, or they will cause bad interactions with how \code{profoundMultiBand} works):
 
-dotsignoredetect = c('iters', 'sky', 'skyRMS', 'plot', 'stats', 'haralickstats', 'groupby', 'pixelcov', 'box')
+dotsignoredetect = c('iters', 'plot', 'stats', 'haralickstats', 'groupby', 'pixelcov', 'box')
 
 dotsignoremulti = c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'size', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats', 'groupby', 'box', 'groupstats', 'objects', 'redosky')
 }
