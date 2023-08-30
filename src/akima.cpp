@@ -270,7 +270,7 @@ static void interpolate_akima_adacs(NumericVector x, NumericVector y,
 
 //' Interpolates a grid of equally spaced values
 //'
-//' @param x X coordiantes of pixels in grid
+//' @param x X coordinates of pixels in grid
 //' @param y Y coordinates of pixels in grid
 //' @param grid Input matrix with values to be interpolated
 //' @param output Output matrix. It starts at the origin on both dimensions, and

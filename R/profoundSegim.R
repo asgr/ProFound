@@ -675,14 +675,16 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
                             decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, 
                             cor_err_func=NULL, app_diam=1){
   
-  if(missing(pixscale) & !is.null(header)){
-    pixscale=getpixscale(header)
+  if(missing(pixscale)){
+    if(!is.null(header)){
+      pixscale = celestial::getpixscale(header)
+    }
   }
   
-  Napp=ceiling(pi*(app_diam/2/pixscale)^2)
+  Napp = ceiling(pi * (app_diam / 2 / pixscale) ^ 2)
   
   if(!is.null(sky)){
-    hassky=any(is.finite(sky))
+    hassky = any(is.finite(sky))
     if(hassky & length(sky)==1){
       sky=rep(sky,length(image))
     }
@@ -695,7 +697,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   if(!is.null(skyRMS)){
     hasskyRMS=any(is.finite(skyRMS))
     if(hasskyRMS & length(skyRMS)==1){
-      skyRMS=rep(skyRMS,length(image))
+      skyRMS = rep(skyRMS, length(image))
     }
   }else{
     hasskyRMS=FALSE
@@ -707,8 +709,8 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     mask[is.na(image)]=1L
   }else{
     if(anyNA(image)){
-      mask=matrix(0L,dim(image)[1],dim(image)[2])
-      mask[is.na(image)]=1L
+      mask = matrix(0L, dim(image)[1], dim(image)[2])
+      mask[is.na(image)] = 1L
     }
   }
   
@@ -719,8 +721,8 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     #segim[mask!=0]=NA
   }
   
-  xlen=dim(image)[1]
-  ylen=dim(image)[2]
+  xlen = dim(image)[1]
+  ylen = dim(image)[2]
   #segvec=which(tabulate(segim)>0)
   #segvec=segvec[segvec>0]
   
@@ -730,20 +732,44 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   yloc = rep(1:ylen, each = xlen)[segsel]
   
   if(hassky & hasskyRMS){
-    tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), sky=as.numeric(sky[segsel]), skyRMS=as.numeric(skyRMS[segsel]))
+    tempDT = data.table(
+      segID = as.integer(segim[segsel]),
+      x = xloc,
+      y = yloc,
+      flux = as.numeric(image[segsel]),
+      sky = as.numeric(sky[segsel]),
+      skyRMS = as.numeric(skyRMS[segsel])
+    )
     rm(sky)
     rm(skyRMS)
   }
   if(hassky & hasskyRMS==FALSE){
-    tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), sky=as.numeric(sky[segsel]))
+    tempDT = data.table(
+      segID = as.integer(segim[segsel]),
+      x = xloc,
+      y = yloc,
+      flux = as.numeric(image[segsel]),
+      sky = as.numeric(sky[segsel])
+    )
     rm(sky)
   }
   if(hassky==FALSE & hasskyRMS){
-    tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]), skyRMS=as.numeric(skyRMS[segsel]))
+    tempDT = data.table(
+      segID = as.integer(segim[segsel]),
+      x = xloc,
+      y = yloc,
+      flux = as.numeric(image[segsel]),
+      skyRMS = as.numeric(skyRMS[segsel])
+    )
     rm(skyRMS)
   }
   if(hassky==FALSE & hasskyRMS==FALSE){
-    tempDT=data.table(segID=as.integer(segim[segsel]), x=xloc, y=yloc, flux=as.numeric(image[segsel]))
+    tempDT = data.table(
+      segID = as.integer(segim[segsel]),
+      x = xloc,
+      y = yloc,
+      flux = as.numeric(image[segsel])
+    )
   }
   
   setkey(tempDT, segID, flux)
@@ -757,10 +783,11 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
-  fluxout=tempDT[,.fluxcalc(flux,Napp=Napp), by=segID]
-  fluxout$flux_app[which(fluxout$flux_app>fluxout$flux)]=fluxout$flux[which(fluxout$flux_app>fluxout$flux)]
-  mag=profoundFlux2Mag(flux=fluxout$flux, magzero=magzero)
-  mag_app=profoundFlux2Mag(flux=fluxout$flux_app, magzero=magzero)
+  fluxout = tempDT[, .fluxcalc(flux, Napp = Napp), by = segID]
+  fluxout$flux_app[which(fluxout$flux_app > fluxout$flux)] = fluxout$flux[which(fluxout$flux_app >
+                                                                                  fluxout$flux)]
+  mag = profoundFlux2Mag(flux = fluxout$flux, magzero = magzero)
+  mag_app = profoundFlux2Mag(flux = fluxout$flux_app, magzero = magzero)
   
   if(any(fluxout$flux==0, na.rm=TRUE)){
     fluxout$N50seg[fluxout$flux==0]=fluxout$N100seg[fluxout$flux==0]
@@ -776,14 +803,15 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   }
   
   if(hasskyRMS){
-    flux_err_skyRMS=tempDT[,sqrt(sum(skyRMS^2, na.rm=TRUE)), by=segID]$V1
-    pchi=pchisq(tempDT[,sum((flux/skyRMS)^2, na.rm=TRUE), by=segID]$V1, df=fluxout$N100seg, log.p=TRUE)
-    signif=qnorm(pchi, log.p=TRUE)
-    FPlim=qnorm(1-fluxout$N100seg/(xlen*ylen))
+    flux_err_skyRMS = tempDT[, sqrt(sum(skyRMS ^ 2, na.rm = TRUE)), by = segID]$V1
+    pchi = pchisq(tempDT[, sum((flux / skyRMS) ^ 2, na.rm = TRUE), by =
+                           segID]$V1, df = fluxout$N100seg, log.p = TRUE)
+    signif = qnorm(pchi, log.p = TRUE)
+    FPlim = qnorm(1 - fluxout$N100seg / (xlen * ylen))
   }else{
-    flux_err_skyRMS=0
-    signif=NA
-    FPlim=NA
+    flux_err_skyRMS = 0
+    signif = NA
+    FPlim = NA
   }
   
   if(!is.null(gain)){
@@ -800,18 +828,19 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     flux_err_cor=0
   }
   
-  flux_err_sky[!is.finite(flux_err_sky)]=0
-  flux_err_skyRMS[!is.finite(flux_err_skyRMS)]=0
-  flux_err_shot[!is.finite(flux_err_shot)]=0
-  flux_err_cor[!is.finite(flux_err_cor)]=0
+  flux_err_sky[!is.finite(flux_err_sky)] = 0
+  flux_err_skyRMS[!is.finite(flux_err_skyRMS)] = 0
+  flux_err_shot[!is.finite(flux_err_shot)] = 0
+  flux_err_cor[!is.finite(flux_err_cor)] = 0
   
-  flux_err=sqrt(flux_err_sky^2+flux_err_skyRMS^2+flux_err_shot^2+flux_err_cor^2)
-  mag_err=(2.5/log(10))*abs(flux_err/fluxout$flux)
+  flux_err = sqrt(flux_err_sky ^ 2 + flux_err_skyRMS ^ 2 + flux_err_shot ^
+                    2 + flux_err_cor ^ 2)
+  mag_err = (2.5 / log(10)) * abs(flux_err / fluxout$flux)
   
-  if(hassky){
-    sky_mean=tempDT[,mean(sky, na.rm=TRUE), by=segID]$V1
+  if(hassky) {
+    sky_mean = tempDT[, mean(sky, na.rm = TRUE), by = segID]$V1
   }else{
-    sky_mean=0
+    sky_mean = 0
   }
   
   if(hasskyRMS){
@@ -820,11 +849,11 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     skyRMS_mean=0
   }
   
-  xcen=tempDT[,.meanwt(x-0.5, flux),by=segID]$V1
-  ycen=tempDT[,.meanwt(y-0.5, flux),by=segID]$V1
-  xsd=tempDT[,sqrt(.varwt(x-0.5,flux)),by=segID]$V1
-  ysd=tempDT[,sqrt(.varwt(y-0.5,flux)),by=segID]$V1
-  covxy=tempDT[,.covarwt(x-0.5,y-0.5,flux),by=segID]$V1
+  xcen = tempDT[, .meanwt(x - 0.5, flux), by = segID]$V1
+  ycen = tempDT[, .meanwt(y - 0.5, flux), by = segID]$V1
+  xsd = tempDT[, sqrt(.varwt(x - 0.5, flux)), by = segID]$V1
+  ysd = tempDT[, sqrt(.varwt(y - 0.5, flux)), by = segID]$V1
+  covxy = tempDT[, .covarwt(x - 0.5, y - 0.5, flux), by = segID]$V1
   
   xmax=xcen
   ymax=ycen
@@ -846,24 +875,36 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     mag_reflect=NA
   }
   
-  corxy=covxy/(xsd*ysd)
-  rad=.cov2eigval(xsd, ysd, covxy)
-  rad$hi=sqrt(abs(rad$hi)+0.08333333) #Added variance of uniform in quadrature (prevents zeros)
-  rad$lo=sqrt(abs(rad$lo)+0.08333333) #Added variance of uniform in quadrature (prevents zeros)
-  axrat=rad$lo/rad$hi
-  eigvec=.cov2eigvec(xsd, ysd, covxy)
-  ang=.eigvec2ang(eigvec)
+  corxy = covxy / (xsd * ysd)
+  rad = .cov2eigval(xsd, ysd, covxy)
+  rad$hi = sqrt(abs(rad$hi) + 0.08333333) #Added variance of uniform in quadrature (prevents zeros)
+  rad$lo = sqrt(abs(rad$lo) + 0.08333333) #Added variance of uniform in quadrature (prevents zeros)
+  axrat = rad$lo / rad$hi
+  eigvec = .cov2eigvec(xsd, ysd, covxy)
+  ang = .eigvec2ang(eigvec)
   
-  R50seg=sqrt(fluxout$N50seg/(axrat*pi))*pixscale
-  R90seg=sqrt(fluxout$N90seg/(axrat*pi))*pixscale
-  R100seg=sqrt(fluxout$N100seg/(axrat*pi))*pixscale
+  R50seg = sqrt(fluxout$N50seg / (axrat * pi)) * pixscale
+  R90seg = sqrt(fluxout$N90seg / (axrat * pi)) * pixscale
+  R100seg = sqrt(fluxout$N100seg / (axrat * pi)) * pixscale
   
-  con=R50seg/R90seg
-  con[R90seg==0]=NA
+  con = R50seg / R90seg
+  con[R90seg == 0] = NA
   
-  SB_N50=profoundFlux2SB(flux=fluxout$flux*0.5/fluxout$N50seg, magzero=magzero, pixscale=pixscale)
-  SB_N90=profoundFlux2SB(flux=fluxout$flux*0.9/fluxout$N90seg, magzero=magzero, pixscale=pixscale)
-  SB_N100=profoundFlux2SB(flux=fluxout$flux/fluxout$N100seg, magzero=magzero, pixscale=pixscale)
+  SB_N50 = profoundFlux2SB(
+    flux = fluxout$flux * 0.5 / fluxout$N50seg,
+    magzero = magzero,
+    pixscale = pixscale
+  )
+  SB_N90 = profoundFlux2SB(
+    flux = fluxout$flux * 0.9 / fluxout$N90seg,
+    magzero = magzero,
+    pixscale = pixscale
+  )
+  SB_N100 = profoundFlux2SB(
+    flux = fluxout$flux / fluxout$N100seg,
+    magzero = magzero,
+    pixscale = pixscale
+  )
   
   if(!is.null(header)){
     if(requireNamespace("Rwcs", quietly = TRUE)){
@@ -871,8 +912,8 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     }else{
       stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
     }
-    RAcen=coord[,1]
-    Deccen=coord[,2]
+    RAcen = coord[, 1]
+    Deccen = coord[, 2]
     if(requireNamespace("Rwcs", quietly = TRUE)){
       coord=Rwcs::Rwcs_p2s(x = xmax, y = ymax, pixcen = 'R', header=header)
     }else{
@@ -987,7 +1028,65 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     edge_excess[bad]=NA
   }
   
-  segstats=data.table(segID=segID, uniqueID=uniqueID, xcen=xcen, ycen=ycen, xmax=xmax, ymax=ymax, RAcen=RAcen, Deccen=Deccen, RAmax=RAmax, Decmax=Decmax, sep=sep, flux=fluxout$flux, mag=mag, flux_app=fluxout$flux_app, mag_app=mag_app, cenfrac=fluxout$cenfrac, N50=fluxout$N50seg, N90=fluxout$N90seg, N100=fluxout$N100seg, R50=R50seg, R90=R90seg, R100=R100seg, SB_N50=SB_N50, SB_N90=SB_N90, SB_N100=SB_N100, xsd=xsd, ysd=ysd, covxy=covxy, corxy=corxy, con=con, asymm=asymm, flux_reflect=flux_reflect, mag_reflect=mag_reflect, semimaj=rad$hi, semimin=rad$lo, axrat=axrat, ang=ang, signif=signif, FPlim=FPlim, flux_err=flux_err, mag_err=mag_err, flux_err_sky=flux_err_sky, flux_err_skyRMS=flux_err_skyRMS, flux_err_shot=flux_err_shot, flux_err_cor=flux_err_cor, cor_seg=cor_seg, sky_mean=sky_mean, sky_sum=sky_mean*fluxout$N100seg, skyRMS_mean=skyRMS_mean, Nedge=Nedge, Nsky=Nsky, Nobject=Nobject, Nborder=Nborder, Nmask=Nmask, edge_frac=edge_frac, edge_excess=edge_excess, flag_border=flag_border)
+  segstats = data.table(
+    segID = segID,
+    uniqueID = uniqueID,
+    xcen = xcen,
+    ycen = ycen,
+    xmax = xmax,
+    ymax = ymax,
+    RAcen = RAcen,
+    Deccen = Deccen,
+    RAmax = RAmax,
+    Decmax = Decmax,
+    sep = sep,
+    flux = fluxout$flux,
+    mag = mag,
+    flux_app = fluxout$flux_app,
+    mag_app = mag_app,
+    cenfrac = fluxout$cenfrac,
+    N50 = fluxout$N50seg,
+    N90 = fluxout$N90seg,
+    N100 = fluxout$N100seg,
+    R50 = R50seg,
+    R90 = R90seg,
+    R100 = R100seg,
+    SB_N50 = SB_N50,
+    SB_N90 = SB_N90,
+    SB_N100 = SB_N100,
+    xsd = xsd,
+    ysd = ysd,
+    covxy = covxy,
+    corxy = corxy,
+    con = con,
+    asymm = asymm,
+    flux_reflect = flux_reflect,
+    mag_reflect = mag_reflect,
+    semimaj = rad$hi,
+    semimin = rad$lo,
+    axrat = axrat,
+    ang = ang,
+    signif = signif,
+    FPlim = FPlim,
+    flux_err = flux_err,
+    mag_err = mag_err,
+    flux_err_sky = flux_err_sky,
+    flux_err_skyRMS = flux_err_skyRMS,
+    flux_err_shot = flux_err_shot,
+    flux_err_cor = flux_err_cor,
+    cor_seg = cor_seg,
+    sky_mean = sky_mean,
+    sky_sum = sky_mean * fluxout$N100seg,
+    skyRMS_mean = skyRMS_mean,
+    Nedge = Nedge,
+    Nsky = Nsky,
+    Nobject = Nobject,
+    Nborder = Nborder,
+    Nmask = Nmask,
+    edge_frac = edge_frac,
+    edge_excess = edge_excess,
+    flag_border = flag_border
+  )
   invisible(as.data.frame(segstats[order(segstats[[sortcol]], decreasing=decreasing),]))
 }
 
@@ -1023,20 +1122,22 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=N
         image=image$imDat
       }else if(any(names(image)=='imDat') & !is.null(header)){
         image=image$imDat
+      }else{
+        stop('As of ProFound v1.21.0 only Rfits_image FITS inputs are allowed. Please install from GitHub asgr/Rfits')
       }
-      if(any(names(image)=='dat') & is.null(header)){
-        header=image$hdr[[1]]
-        header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-        image=image$dat[[1]]
-      }else if(any(names(image)=='dat') & !is.null(header)){
-        image=image$dat[[1]]
-      }
-      if(any(names(image)=='image') & is.null(header)){
-        header=image$header
-        image=image$image
-      }else if(any(names(image)=='image') & !is.null(header)){
-        image=image$image
-      }
+      # if(any(names(image)=='dat') & is.null(header)){
+      #   header=image$hdr[[1]]
+      #   header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
+      #   image=image$dat[[1]]
+      # }else if(any(names(image)=='dat') & !is.null(header)){
+      #   image=image$dat[[1]]
+      # }
+      # if(any(names(image)=='image') & is.null(header)){
+      #   header=image$header
+      #   image=image$image
+      # }else if(any(names(image)=='image') & !is.null(header)){
+      #   image=image$image
+      # }
     }
     
     if(!is.null(sky)){
@@ -1197,28 +1298,44 @@ profoundSegimWarp=function(segim_in=NULL, ...){
 }
 
 profoundSegimShare=function(segim_in=NULL, header_in=NULL, header_out=NULL, pixcut=1, weights=NULL){
-  segID_in=sort(unique(as.integer(segim_in[segim_in>0])))
-  segim_warp=profoundSegimWarp(segim_in=segim_in, header_in=header_in, header_out=header_out)
-  segim_warp_tab=tabulate(segim_warp)
-  segID_warp=which(segim_warp_tab>=pixcut)
-  segim_warp[!segim_warp %in% segID_warp]=0
-  segim_unwarp=profoundSegimWarp(segim_in=segim_warp, header_in=header_out, header_out=header_in)
-  segim_out=NULL
-  segimDT=data.table(segim_in=as.integer(segim_in), segim_out=as.integer(segim_unwarp))
-  segimDT=segimDT[segim_in>0,]
-  segim_groups=segimDT[,list(segim_out=list(tabulate(segim_out))),keyby=segim_in]
-  sharemat=matrix(0,max(segim_warp),dim(segim_groups)[1])
-  for(i in 1:(dim(sharemat)[2])){sharemat[1:length(unlist(segim_groups$segim_out[i])),i]=unlist(segim_groups$segim_out[i])}
-  sharemat=sharemat/rowSums(sharemat)
-  sharemat=sharemat[is.finite(sharemat[,1]),,drop=FALSE]
-  colnames(sharemat)=segID_in
-  rownames(sharemat)=segID_warp
-  if(! is.null(weights)){
-    t(t(sharemat)*weights)
-    sharemat=sharemat/rowSums(sharemat)
+  segID_in = sort(unique(as.integer(segim_in[segim_in > 0])))
+  segim_warp = profoundSegimWarp(segim_in = segim_in,
+                                 header_in = header_in,
+                                 header_out = header_out)
+  segim_warp_tab = tabulate(segim_warp)
+  segID_warp = which(segim_warp_tab >= pixcut)
+  segim_warp[!segim_warp %in% segID_warp] = 0
+  segim_unwarp = profoundSegimWarp(segim_in = segim_warp,
+                                   header_in = header_out,
+                                   header_out = header_in)
+  segim_out = NULL
+  segimDT = data.table(segim_in = as.integer(segim_in),
+                       segim_out = as.integer(segim_unwarp))
+  segimDT = segimDT[segim_in > 0, ]
+  segim_groups = segimDT[, list(segim_out = list(tabulate(segim_out))), keyby =
+                           segim_in]
+  sharemat = matrix(0, max(segim_warp), dim(segim_groups)[1])
+  for (i in 1:(dim(sharemat)[2])) {
+    sharemat[1:length(unlist(segim_groups$segim_out[i])), i] = unlist(segim_groups$segim_out[i])
   }
-  shareseg=diag(sharemat[segID_warp %in% segID_in,segID_in %in% segID_warp])
-  invisible(list(segID_in=segID_in, segID_warp=segID_warp, segim_warp=segim_warp, sharemat=sharemat, shareseg=shareseg))
+  sharemat = sharemat / rowSums(sharemat)
+  sharemat = sharemat[is.finite(sharemat[, 1]), , drop = FALSE]
+  colnames(sharemat) = segID_in
+  rownames(sharemat) = segID_warp
+  if (!is.null(weights)) {
+    t(t(sharemat) * weights)
+    sharemat = sharemat / rowSums(sharemat)
+  }
+  shareseg = diag(sharemat[segID_warp %in% segID_in, segID_in %in% segID_warp])
+  invisible(
+    list(
+      segID_in = segID_in,
+      segID_warp = segID_warp,
+      segim_warp = segim_warp,
+      sharemat = sharemat,
+      shareseg = shareseg
+    )
+  )
 }
 
 profoundShareFlux=function(segstats=NULL, sharemat=NULL, weights=NULL){
