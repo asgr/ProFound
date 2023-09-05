@@ -7,7 +7,7 @@
 #' @param y Y coordinates of pixels in grid
 #' @param grid Input matrix with values to be interpolated
 #' @param output Output matrix. It starts at the origin on both dimensions, and
-#'   its interpolated values are calculated on the center of each cell
+#'   its interpolated values are calculated on the centre of each cell
 .interpolateAkimaGrid <- function(x, y, grid, output) {
     invisible(.Call(`_ProFound_interpolateAkimaGrid`, x, y, grid, output))
 }

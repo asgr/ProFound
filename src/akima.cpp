@@ -274,7 +274,7 @@ static void interpolate_akima_adacs(NumericVector x, NumericVector y,
 //' @param y Y coordinates of pixels in grid
 //' @param grid Input matrix with values to be interpolated
 //' @param output Output matrix. It starts at the origin on both dimensions, and
-//'   its interpolated values are calculated on the center of each cell
+//'   its interpolated values are calculated on the centre of each cell
 // [[Rcpp::export(".interpolateAkimaGrid")]]
 void interpolateAkimaGrid(NumericVector x, NumericVector y,
                           NumericMatrix grid, NumericMatrix output)

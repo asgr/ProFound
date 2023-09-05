@@ -1117,27 +1117,17 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=N
       if(is.null(header)){header=profound$header}
     }
     if(!is.null(image)){
-      if(any(names(image)=='imDat') & is.null(header)){
-        header=image$hdr
-        image=image$imDat
-      }else if(any(names(image)=='imDat') & !is.null(header)){
-        image=image$imDat
+      if(inherits(image, 'Rfit_image')){
+        header = image$hdr
+        image = image$imDat
+      }else if(inherits(image, 'matrix')){
+        'Do nothing'
       }else{
         stop('As of ProFound v1.21.0 only Rfits_image FITS inputs are allowed. Please install from GitHub asgr/Rfits')
       }
-      # if(any(names(image)=='dat') & is.null(header)){
-      #   header=image$hdr[[1]]
-      #   header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-      #   image=image$dat[[1]]
-      # }else if(any(names(image)=='dat') & !is.null(header)){
-      #   image=image$dat[[1]]
-      # }
-      # if(any(names(image)=='image') & is.null(header)){
-      #   header=image$header
-      #   image=image$image
-      # }else if(any(names(image)=='image') & !is.null(header)){
-      #   image=image$image
-      # }
+    }
+    if(is.null(image)){
+      stop('image component is missing!')
     }
     
     if(!is.null(sky)){
