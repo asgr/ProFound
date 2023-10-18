@@ -1,6 +1,29 @@
 profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1,
-                                  lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4), fft=TRUE,
-                                  plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
+                                  profound=NULL, lag=c(1:9,1:9*10,1:9*100,1:9*1e3,1:9*1e4),
+                                  fft=TRUE, plot=FALSE, ylim=c(-1,1), log='x', grid=TRUE, ...){
+  
+  if(!is.null(image)){
+    if(inherits(image, 'profound')){
+      if(is.null(objects)){objects=image$objects_redo}
+      if(is.null(mask)){mask=image$mask}
+      if(missing(sky)){sky=image$sky}
+      if(missing(skyRMS)){skyRMS=image$skyRMS}
+      image=image$image
+      if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    }
+  }
+  
+  if(!is.null(profound)){
+    if(!inherits(profound, 'profound')){
+      stop('Class of profound input must be of type \'profound\'')
+    }
+    if(is.null(image)){image=profound$image}
+    if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    if(is.null(objects)){objects=profound$objects_redo}
+    if(is.null(mask)){mask=profound$mask}
+    if(missing(sky)){sky=profound$sky}
+    if(missing(skyRMS)){skyRMS=profound$skyRMS}
+  }
   
   xlen=dim(image)[1]
   ylen=dim(image)[2]
@@ -95,7 +118,7 @@ profoundPixelCorrelation=function(image=NULL, objects=NULL, mask=NULL, sky=0, sk
   invisible(list(cortab=output_cortab, fft=output_FFT, image_sky=image, cor_err_func=cor_err_func))
 }
 
-profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, skyscale=100, profound=NULL){
+profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=1, profound=NULL, skyscale=100){
   if(!is.null(image)){
     if(inherits(image, 'profound')){
       if(is.null(objects)){objects=image$objects_redo}
@@ -106,6 +129,7 @@ profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=
       if(is.null(image)){stop('Need image in profound object to be non-Null')}
     }
   }
+  
   if(!is.null(profound)){
     if(!inherits(profound, 'profound')){
       stop('Class of profound input must be of type \'profound\'')
@@ -163,10 +187,23 @@ profoundSkySplitFFT=function(image=NULL, objects=NULL, mask=NULL, sky=0, skyRMS=
 }
 
 profoundCovMat = function(image, objects=NULL, mask=NULL, profound=NULL, xsel=NULL, ysel=NULL){
+  if(!is.null(image)){
+    if(inherits(image, 'profound')){
+      if(is.null(objects)){objects=image$objects_redo}
+      if(is.null(mask)){mask=image$mask}
+      image=image$image
+      if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    }
+  }
+  
   if(!is.null(profound)){
-    image = median(profound$skyRMS, na.rm=TRUE)*(profound$image - profound$sky) / profound$skyRMS
-    objects = profound$objects_redo
-    mask = profound$mask
+    if(!inherits(profound, 'profound')){
+      stop('Class of profound input must be of type \'profound\'')
+    }
+    if(is.null(image)){image=profound$image}
+    if(is.null(image)){stop('Need image in profound object to be non-Null')}
+    if(is.null(objects)){objects=profound$objects_redo}
+    if(is.null(mask)){mask=profound$mask}
   }
   
   if(!is.null(objects)){

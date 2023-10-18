@@ -11,19 +11,19 @@ Returns the x and y dimension pixel-to-pixel correlation (often called covarianc
 }
 \usage{
 profoundPixelCorrelation(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
-  lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE, plot = FALSE,
-  ylim=c(-1,1), log='x', grid=TRUE, ...)
+  profound = NULL, lag = c(1:9, 1:9 * 10, 1:9 * 100, 1:9 * 1000, 1:9 * 10000), fft = TRUE,
+  plot = FALSE, ylim = c(-1,1), log = 'x', grid = TRUE, ...)
   
 profoundCovMat(image, objects = NULL, mask = NULL, profound = NULL, xsel = NULL,
   ysel = NULL)
 
 profoundSkySplitFFT(image = NULL, objects = NULL, mask = NULL, sky = 0, skyRMS = 1,
-  skyscale = 100, profound = NULL)
+  profound = NULL, skyscale = 100)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Numeric matrix; required, the image we want to analyse. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. Note, image NAs are treated as masked pixels. As an added convenience, you can assign the \option{profound} input directly to the \option{image} input.
 }
   \item{objects}{
 Boolean matrix; optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as image.
@@ -36,6 +36,9 @@ Numeric; the absolute sky level. Can be a scalar or a matrix matching the dimens
 }
   \item{skyRMS}{
 Numeric; the RMS of the sky. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
+}
+  \item{profound}{
+List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples). As an added convenience, you can assign the profound input directly to the \option{image} input.
 }
   \item{lag}{
 Interger verctor; the pixel lags to measure pixel-to-pixel correlation over the x and y dimensions.
@@ -57,9 +60,6 @@ Logical; indicates whether a background grid should be drawn onto the plotting a
 }
   \item{skyscale}{
 Numeric scalar; required, the pixel scale that the FFT should split the provided \option{image_sky} at. This should be chosen so as to separate out true sky modes and possible sources still in the sky. Too small and real sources will be put into the \option{sky_lo} image returned, so larger is usually safer.
-}
-  \item{profound}{
-List; object of class 'profound'. If this is provided then missing input arguments are taking directly from this structure (see Examples). As an added convenience, you can assign the profound object directly to the \option{image} input.
 }
   \item{xsel}{
 Integer vector; the x dimension subset of the input \option{image} to process. Much above 1,000 x 1,000 pixels the computation of covariance becomes very slow (10s of seconds). Generally sub-sampling a representative 1,000 x 1,000 is a pragmatic solution.
