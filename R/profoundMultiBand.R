@@ -288,8 +288,12 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     # Stack!!!
     # We first stack the image then the sky.
     
-    detect_image_stack=profoundMakeStack(image_list=detect_image, sky_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1], masking=masking)
-    detect_sky_stack=profoundMakeStack(image_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1])
+    if(!requireNamespace("ProPane", quietly = TRUE)){
+      stop("The ProPane package is needed for this function to work. Please install it from GitHub asgr/ProPane", call. = FALSE)
+    }
+    
+    detect_image_stack = ProPane::propaneStackFlatInVar(image_list=detect_image, sky_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1], masking=masking)
+    detect_sky_stack = ProPane::propaneStackFlatInVar(image_list=detect_sky, skyRMS_list=detect_skyRMS, magzero_in=detect_magzero, magzero_out=detect_magzero[1])
     
     # Delete and clean up
     

@@ -1280,53 +1280,53 @@ profoundSegimMerge=function(image=NULL, segim_base=NULL, segim_add=NULL, mask=NU
   invisible(segim_merge)
 }
 
-profoundSegimWarp=function(segim_in=NULL, ...){
-  if(!requireNamespace("Rwcs", quietly = TRUE)){
-    stop('The Rwcs package is needed for this function to work. Please install it from GitHub asgr/Rwcs', call. = FALSE)
-  }
-  invisible(Rwcs::Rwcs_warp(image_in=segim_in, direction='backward', interpolation='nearest', doscale=FALSE, ...)$imDat)
-}
+# profoundSegimWarp=function(segim_in=NULL, ...){
+#   if(!requireNamespace("Rwcs", quietly = TRUE)){
+#     stop('The Rwcs package is needed for this function to work. Please install it from GitHub asgr/Rwcs', call. = FALSE)
+#   }
+#   invisible(Rwcs::Rwcs_warp(image_in=segim_in, direction='backward', interpolation='nearest', doscale=FALSE, ...)$imDat)
+# }
 
-profoundSegimShare=function(segim_in=NULL, header_in=NULL, header_out=NULL, pixcut=1, weights=NULL){
-  segID_in = sort(unique(as.integer(segim_in[segim_in > 0])))
-  segim_warp = profoundSegimWarp(segim_in = segim_in,
-                                 header_in = header_in,
-                                 header_out = header_out)
-  segim_warp_tab = tabulate(segim_warp)
-  segID_warp = which(segim_warp_tab >= pixcut)
-  segim_warp[!segim_warp %in% segID_warp] = 0
-  segim_unwarp = profoundSegimWarp(segim_in = segim_warp,
-                                   header_in = header_out,
-                                   header_out = header_in)
-  segim_out = NULL
-  segimDT = data.table(segim_in = as.integer(segim_in),
-                       segim_out = as.integer(segim_unwarp))
-  segimDT = segimDT[segim_in > 0, ]
-  segim_groups = segimDT[, list(segim_out = list(tabulate(segim_out))), keyby =
-                           segim_in]
-  sharemat = matrix(0, max(segim_warp), dim(segim_groups)[1])
-  for (i in 1:(dim(sharemat)[2])) {
-    sharemat[1:length(unlist(segim_groups$segim_out[i])), i] = unlist(segim_groups$segim_out[i])
-  }
-  sharemat = sharemat / rowSums(sharemat)
-  sharemat = sharemat[is.finite(sharemat[, 1]), , drop = FALSE]
-  colnames(sharemat) = segID_in
-  rownames(sharemat) = segID_warp
-  if (!is.null(weights)) {
-    t(t(sharemat) * weights)
-    sharemat = sharemat / rowSums(sharemat)
-  }
-  shareseg = diag(sharemat[segID_warp %in% segID_in, segID_in %in% segID_warp])
-  invisible(
-    list(
-      segID_in = segID_in,
-      segID_warp = segID_warp,
-      segim_warp = segim_warp,
-      sharemat = sharemat,
-      shareseg = shareseg
-    )
-  )
-}
+# profoundSegimShare=function(segim_in=NULL, header_in=NULL, header_out=NULL, pixcut=1, weights=NULL){
+#   segID_in = sort(unique(as.integer(segim_in[segim_in > 0])))
+#   segim_warp = profoundSegimWarp(segim_in = segim_in,
+#                                  header_in = header_in,
+#                                  header_out = header_out)
+#   segim_warp_tab = tabulate(segim_warp)
+#   segID_warp = which(segim_warp_tab >= pixcut)
+#   segim_warp[!segim_warp %in% segID_warp] = 0
+#   segim_unwarp = profoundSegimWarp(segim_in = segim_warp,
+#                                    header_in = header_out,
+#                                    header_out = header_in)
+#   segim_out = NULL
+#   segimDT = data.table(segim_in = as.integer(segim_in),
+#                        segim_out = as.integer(segim_unwarp))
+#   segimDT = segimDT[segim_in > 0, ]
+#   segim_groups = segimDT[, list(segim_out = list(tabulate(segim_out))), keyby =
+#                            segim_in]
+#   sharemat = matrix(0, max(segim_warp), dim(segim_groups)[1])
+#   for (i in 1:(dim(sharemat)[2])) {
+#     sharemat[1:length(unlist(segim_groups$segim_out[i])), i] = unlist(segim_groups$segim_out[i])
+#   }
+#   sharemat = sharemat / rowSums(sharemat)
+#   sharemat = sharemat[is.finite(sharemat[, 1]), , drop = FALSE]
+#   colnames(sharemat) = segID_in
+#   rownames(sharemat) = segID_warp
+#   if (!is.null(weights)) {
+#     t(t(sharemat) * weights)
+#     sharemat = sharemat / rowSums(sharemat)
+#   }
+#   shareseg = diag(sharemat[segID_warp %in% segID_in, segID_in %in% segID_warp])
+#   invisible(
+#     list(
+#       segID_in = segID_in,
+#       segID_warp = segID_warp,
+#       segim_warp = segim_warp,
+#       sharemat = sharemat,
+#       shareseg = shareseg
+#     )
+#   )
+# }
 
 profoundShareFlux=function(segstats=NULL, sharemat=NULL, weights=NULL){
   if(dim(segstats)[1] != dim(sharemat)[1]){
