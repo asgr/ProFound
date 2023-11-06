@@ -1091,7 +1091,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
 }
 
 profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, header=NULL,
-                           col=rainbow(max(segim), end=2/3), profound=NULL, add=FALSE, sparse='auto', ...){
+                           col=rainbow(max(segim), end=2/3), profound=NULL, add=FALSE, sparse='auto', useRaster=TRUE, ...){
   if(add==FALSE){
     if(!is.null(image)){
       if(inherits(image, 'profound')){
@@ -1117,7 +1117,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=N
       if(is.null(header)){header=profound$header}
     }
     if(!is.null(image)){
-      if(inherits(image, 'Rfit_image')){
+      if(inherits(image, 'Rfits_image')){
         header = image$hdr
         image = image$imDat
       }else if(inherits(image, 'matrix')){
@@ -1152,7 +1152,7 @@ profoundSegimPlot=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=N
   
   segim = profoundSegimEdge(segim)
   
-  magimage(segim, col=c(NA, col), add=TRUE, magmap=FALSE, sparse=sparse)
+  magimage(segim, col=c(NA, col), add=TRUE, magmap=FALSE, sparse=sparse, useRaster=useRaster)
   
   if(!is.null(mask)){
     magimage(mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1), sparse=sparse)

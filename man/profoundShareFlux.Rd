@@ -5,7 +5,7 @@
 Redistribute Fluxes
 }
 \description{
-Redistributes fluxes from a lower resolution segmentation map using the \option{sharemat} provided by \code{\link{profoundSegimShare}}.
+Redistributes fluxes from a lower resolution segmentation map using the \option{sharemat} provided by \code{propaneSegimShare}.
 }
 \usage{
 profoundShareFlux(segstats = NULL, sharemat = NULL, weights = NULL)
@@ -13,10 +13,10 @@ profoundShareFlux(segstats = NULL, sharemat = NULL, weights = NULL)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{segstats}{
-Data.frame, the \code{\link{profoundProFound}} \option{segstats} output that has been created using the segmentation output by \code{\link{profoundSegimShare}}.
+Data.frame, the \code{\link{profoundProFound}} \option{segstats} output that has been created using the segmentation output by \code{propaneSegimShare}.
 }
   \item{sharemat}{
-Numeric matrix, the \option{sharemat} output that has been created by \code{\link{profoundSegimShare}}.
+Numeric matrix, the \option{sharemat} output that has been created by \code{propaneSegimShare}.
 }
   \item{weights}{
 Numeric vector; additional weights to modify fluxes by. If provided must be the same length as dim(sharemat)[2] (i.e. the original list of segment properties, not the input \option{segstats}).
@@ -32,7 +32,7 @@ Data.frame with minimal columns. Many properties cannot be redistributed, so we 
 Aaron Robotham
 }
 \seealso{
-\code{\link{profoundSegimShare}}, \code{\link{profoundSegimWarp}}, \code{\link{profoundProFound}}
+\code{\link{profoundProFound}}
 }
 \examples{
 #None yet

@@ -17,7 +17,7 @@ profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS =
   
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS=NULL,
   header = NULL, col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE,
-  sparse = 'auto', ...)
+  sparse = 'auto', useRaster = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -80,6 +80,9 @@ Logical; should just the segment contours be added to the current image? This al
 }
   \item{sparse}{
 Determines whether the image pixels are sparse sampled to speed up plotting. If set to 2 it will only determine every 2nd pixel, and if 3 every 3rd etc. If 'auto' it means it will scale to produce a maximum number of 1,000 pixels on any side (on most monitors this is a fairly useful maximum, and ensures quick displaying of even very large images).  
+}
+  \item{useRaster}{
+If TRUE a bitmap raster is used to plot the segmentation map segments instead of polygons. Setting to TRUE is faster, but it can looks fuzzy (so in that case, set to FALSE).
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}.
