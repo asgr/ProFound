@@ -113,7 +113,7 @@ profoundMakeMask = function(size=101, shape='disc'){
   return(.makeBrush(size, shape=shape))
 }
 
-profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'){
+profoundDrawMask = function(image, poly=NULL, invert_mask = FALSE, mode='draw', type='pix', poly.col='red', ...){
   
   isRfits = inherits(image, c('Rfits_image'))
   
@@ -121,17 +121,17 @@ profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'
     if(isRfits){
       if(requireNamespace("Rfits", quietly = TRUE)){
         dev.new(noRStudioGD = TRUE)
-        plot(image)
+        plot(image, ...)
       }else{
         stop("The Rfits package is need to process the header. Install from GitHub asgr/Rfits.")
       }
     }else{
       dev.new(noRStudioGD = TRUE)
-      magimage(image)
+      magimage(image, ...)
     }
     
-    temploc = locator(type='l', col=col)
-    lines(temploc$x[c(length(temploc$x),1)], temploc$y[c(length(temploc$y),1)], col=col)
+    temploc = locator(type='l', col=poly.col)
+    lines(temploc$x[c(length(temploc$x),1)], temploc$y[c(length(temploc$y),1)], col=poly.col)
     output = data.frame(x=temploc$x, y=temploc$y)
     
     if(isRfits){
@@ -161,7 +161,13 @@ profoundDrawMask = function(image, poly=NULL, mode='draw', type='pix', col='red'
   if(requireNamespace("Rwcs", quietly = TRUE)){
     in_poly = Rwcs::Rwcs_in_poly(image_grid[,1], image_grid[,2], output$x, output$y)
     mask = matrix(0L, dim(image)[1], dim(image)[2])
+    
+    if(invert_mask){
+      in_poly = (in_poly == FALSE)
+    }
+    
     mask[in_poly] = 1L
+    
     if(mode == 'draw'){
       magimage(mask, col=c(NA,hsv(alpha=0.2)), add=T, magmap=FALSE)
     }

@@ -5,7 +5,7 @@
 Create Elliptical Segment
 }
 \description{
-Creates of a logic matrix for an elliptical segment. This can be useful to allow the extraction of elliptical apertures on a target image (you can just sum the multiplication of the two).
+Creates a logic matrix for an elliptical segment. This can be useful to allow the extraction of elliptical apertures on a target image (you can just sum the multiplication of the two).
 }
 \usage{
 profoundEllipseSeg(dim = c(101, 101), image = NULL, xcen = dim[1]/2, ycen = dim[2]/2,

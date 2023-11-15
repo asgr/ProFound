@@ -15,7 +15,8 @@ profoundApplyMask(image = NULL, mask = 'disc', xcen = xsize/2, ycen = ysize/2,
   
 profoundMakeMask(size = 101, shape = 'disc')
 
-profoundDrawMask(image, poly = NULL, mode = 'draw', type = 'pix', col = 'red')
+profoundDrawMask(image, poly = NULL, invert_mask = FALSE, mode = 'draw', type = 'pix',
+  poly.col = 'red', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,14 +56,20 @@ Character scalar; the shape of the dilation kernel. Options are 'box', 'disc', '
   \item{poly}{
 Data.frame; contains minimally named x/y or RA/Dec polynomial mask vertices (and possibly both). Note pixel centres are half integer, e.g. the centre of the bottom-left pixel is [0.5,0.5].
 }
+  \item{invert_mask}{
+Logical; if \option{invert_mask} is FALSE then pixels inside the polygon are masked (e.g. to remove bright stars etc), if TRUE then pixels outside the polygon are masked (e.g. you only want to consider pixels belonging to a galaxy or cluster region etc).
+}
   \item{mode}{
 Character scalar; how to compute the mask. Options are 'draw', where users can then click on the image to define the mask region, or 'apply' where the user supplied \option{poly} will be used to mask pixels.  
 }
   \item{type}{
 Character scalar; the coordinates to use. Options are 'pix' where the named x/y columns in \option{poly} are used to define the mask (ignoring RA/Dec even if present) or 'coord' where the named RA/Dec columns in \option{poly} are used to define the mask (ignoring x/y even if present). Note pixel centres are half integer, e.g. the centre of the bottom-left pixel is [0.5,0.5]. If \option{type} = 'coord' then the input \option{image} must be type Rfits_image (i.e. have a valid WCS).
 }
-  \item{col}{
-Colour of the overlaid lines positions defining the mask region.
+  \item{poly.col}{
+Colour of the overlaid polygon defining the mask region.
+}
+  \item{\dots}{
+Additional arguments to pass on to the image plotting routine.
 }
 }
 \details{
