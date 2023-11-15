@@ -13,12 +13,12 @@ A high level utility to achieve decent quality image segmentation based on the e
 profoundMakeSegimExpand(image = NULL, segim = NULL, mask = NULL, objects = NULL,
   skycut = 1, SBlim = NULL, magzero = 0, gain = NULL, pixscale = 1, sigma = 1,
   smooth = TRUE, expandsigma = 5, expand = "all", sky = NULL, skyRMS = NULL,
-  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  keyvalues = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
   boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
   
 profoundMakeSegimDilate(image = NULL, segim = NULL, mask = NULL, size = 9, shape = "disc",
   expand = "all", magzero = 0, gain = NULL, pixscale = 1, sky = 0, skyRMS = 0,
-  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  keyvalues = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
   boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
   
 profoundDilate(segim = NULL, size = 3, shape = 'disc', expand = "all", iters = 1)
@@ -79,8 +79,8 @@ User provided estimate of the absolute sky level. Can be a scalar or a matrix ma
   \item{skyRMS}{
 User provided estimate of the RMS of the sky. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
-  \item{header}{
-Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
+  \item{keyvalues}{
+List; header values to be used for the WCS.
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since big image can take a long time to run, you might want to monitor progress.  
@@ -129,7 +129,7 @@ A list containing:
   \item{sky}{The estimated sky level of the \option{image}. \code{profoundMakeSegimExpand} only).}
   \item{skyRMS}{The estimated sky RMS of the \option{image}. \code{profoundMakeSegimExpand} only).}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
-  \item{header}{The header provided, if missing this is NULL.}
+  \item{keyvalues}{The keyvalues provided, if missing this is NULL.}
   \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL. \code{profoundMakeSegimExpand} only.}
   \item{call}{The original function call.}
   
@@ -141,10 +141,10 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{ycen}{Flux weighted y centre}
   \item{xmax}{x position of maximum flux}
   \item{ymax}{y position of maximum flux}
-  \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{header} is provided)}
-  \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{header} is provided)}
-  \item{RAmax}{Right Ascension of maximum flux (only present if a \option{header} is provided)}
-  \item{Decmax}{Declination of maximum flux (only present if a \option{header} is provided)}
+  \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{keyvalues} is provided)}
+  \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{keyvalues} is provided)}
+  \item{RAmax}{Right Ascension of maximum flux (only present if a \option{keyvalues} is provided)}
+  \item{Decmax}{Declination of maximum flux (only present if a \option{keyvalues} is provided)}
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
   \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
   \item{mag}{Total flux converted to mag using \option{magzero}}

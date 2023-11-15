@@ -11,7 +11,7 @@ A mid level utility to achieve decent quality image segmentation. It uses a mixt
 profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut = 3,
   tolerance = 4, ext = 2, reltol = 0, cliptol = Inf, sigma = 1, smooth = TRUE,
   SBlim = NULL, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
-  header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
+  keyvalues = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
   boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE,
   watershed = 'ProFound', ...)
 }
@@ -68,8 +68,8 @@ User provided estimate of the absolute sky level. If this is not provided then i
   \item{skyRMS}{
 User provided estimate of the RMS of the sky. If this is not provided then it will be computed internally using \code{\link{profoundSkyEst}}. Can be a scalar (value uniformly applied to full \option{sigma} map) or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
-  \item{header}{
-Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
+  \item{keyvalues}{
+List; header values to be used for the WCS.
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since big image can take a long time to run, you might want to monitor progress.  
@@ -121,7 +121,7 @@ A list containing:
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
   \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
-  \item{header}{The header provided, if missing this is NULL.}
+  \item{keyvalues}{The keyvalues provided, if missing this is NULL.}
   \item{call}{The original function call.}
   
 If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is called and the \option{segstats} part of the returned list will contain a data.frame else NULL (see \code{\link{profoundSegimStats}}).

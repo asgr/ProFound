@@ -6,7 +6,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                           skygrid_type = 'new', type='bicubic', skytype='median', skyRMStype='quanlo', roughpedestal=FALSE,
                           sigmasel=1, skypixmin=prod(box)/2, boxadd=box/2, boxiters=0, conviters=100, iterskyloc=FALSE,
                           deblend=FALSE, df=3, radtrunc=2, iterative=FALSE, doChiSq=FALSE, doclip=TRUE,
-                          shiftloc = FALSE, paddim = TRUE, header=NULL, verbose=FALSE,
+                          shiftloc = FALSE, paddim = TRUE, keyvalues=NULL, verbose=FALSE,
                           plot=FALSE, stats=TRUE, rotstats=FALSE, boundstats=FALSE,
                           nearstats=boundstats, groupstats=boundstats, group=NULL,
                           groupby='segim_orig', offset=1, haralickstats=FALSE, sortcol="segID",
@@ -48,44 +48,29 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     stop('fluxtype must be Jansky / Microjansky / Raw!')
   }
   
-  #Split out image and header parts of input:
+  #Split out image and keyvalues parts of input:
   
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
-      header = image$hdr
+      keyvalues = image$keyvalues
       image = image$imDat
     }else if(inherits(image, 'matrix')){
       'Do nothing'
     }else{
       stop('As of ProFound v1.21.0 only Rfits_image FITS inputs are allowed. Please install from GitHub asgr/Rfits')
     }
-    # if(any(names(image)=='imDat') & is.null(header)){
-    #   if(verbose){message('Supplied image contains image and header components')}
-    #   header=image$hdr
-    #   image=image$imDat
-    # }else if(any(names(image)=='imDat') & !is.null(header)){
-    #   if(verbose){message('Supplied image contains image and header but using specified header')}
-    #   image=image$imDat
-    # }
-    # if(any(names(image)=='dat') & is.null(header)){
-    #   if(verbose){message('Supplied image contains image and header components')}
-    #   header=image$hdr[[1]]
-    #   header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-    #   image=image$dat[[1]]
-    # }else if(any(names(image)=='dat') & !is.null(header)){
-    #   if(verbose){message('Supplied image contains image and header but using specified header')}
-    #   image=image$dat[[1]]
-    # }
-    # if(any(names(image)=='image') & is.null(header)){
-    #   if(verbose){message('Supplied image contains image and header components')}
-    #   header=image$header
-    #   image=image$image
-    # }else if(any(names(image)=='image') & !is.null(header)){
-    #   if(verbose){message('Supplied image contains image and header but using specified header')}
-    #   image=image$image
-    # }
   }else{
     stop('Missing image - this is a required input!')
+  }
+  
+  if(!is.null(keyvalues)){
+    if(!inherits(keyvalues, 'Rfits_keylist')){
+      if(is.list(keyvalues)){
+        class(keyvalues) = 'Rfits_keylist'
+      }else{
+        stop('keyvalues is the wrong format- should be a list!')
+      }
+    }
   }
   
   if(box[1] > ceiling(dim(image)[1]/3)){
@@ -142,9 +127,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
   
   #Get the pixel scale, if possible and not provided:
   
-  if(missing(pixscale) & !is.null(header)){
-    pixscale = getpixscale(header)
-    if(verbose){message(paste('Extracted pixel scale from header provided:',signif(pixscale,4),'asec/pixel'))}
+  if(missing(pixscale) & !is.null(keyvalues)){
+    pixscale = pixscale(keyvalues)
+    if(verbose){message(paste('Extracted pixel scale from keyvalues provided:',signif(pixscale,4),'asec/pixel'))}
   }else{
     if(verbose){message(paste('Using suggested pixel scale:',signif(pixscale,4),'asec/pixel'))}
   }
@@ -428,7 +413,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(verbose){message(paste(' - rotstats =', rotstats))}
       if(verbose){message(paste(' - boundstats =', boundstats))}
       segstats = profoundSegimStats(image=image, segim=segim, mask=mask, sky=sky, skyRMS=skyRMS, 
-                                  magzero=magzero, gain=gain, pixscale=pixscale, header=header, 
+                                  magzero=magzero, gain=gain, pixscale=pixscale, keyvalues=keyvalues, 
                                   sortcol=sortcol, decreasing=decreasing, rotstats=rotstats, 
                                   boundstats=boundstats, offset=offset, cor_err_func=cor_err_func, 
                                   app_diam=app_diam)
@@ -473,7 +458,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       if(stats & !is.null(image) & !is.null(group)){
         groupstats = profoundSegimStats(image=image, segim=group$groupim, mask=mask, 
                                       sky=sky, skyRMS=skyRMS, magzero=magzero, gain=gain, 
-                                      pixscale=pixscale, header=header, sortcol=sortcol, 
+                                      pixscale=pixscale, keyvalues=keyvalues, sortcol=sortcol, 
                                       decreasing=decreasing, rotstats=rotstats, boundstats=boundstats, 
                                       offset=offset, cor_err_func=cor_err_func, app_diam=app_diam)
         colnames(groupstats)[1] = 'groupID'
@@ -524,9 +509,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(plot){
       if(verbose){message(paste('Plotting segments -',round(proc.time()[3]-timestart,3),'sec'))}
       if(any(is.finite(sky))){
-        profoundSegimPlot(image=image-sky, segim=segim, mask=mask, header=header, ...)
+        profoundSegimPlot(image=image-sky, segim=segim, mask=mask, keyvalues=keyvalues, ...)
       }else{
-        profoundSegimPlot(image=image, segim=segim, mask=mask, header=header, ...)
+        profoundSegimPlot(image=image, segim=segim, mask=mask, keyvalues=keyvalues, ...)
       }
     }else{
       if(verbose){message("Skipping segmentation plot - plot = FALSE")}
@@ -543,7 +528,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       SBlim = profoundFlux2SB(flux=skyRMS*skycut, magzero=magzero, pixscale=pixscale)
     }
     
-    if(is.null(header)){header = NULL}
+    if(is.null(keyvalues)){keyvalues = NULL}
     if(keepim==FALSE){image = NULL; mask = NULL}
     if(is.null(mask)){mask = NULL}
     if(!is.null(badpix)){image[badpix] = NA}
@@ -586,12 +571,12 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     output = list(segim=segim, segim_orig=segim_orig, objects=objects, objects_redo=objects_redo, 
                 sky=sky, skyRMS=skyRMS, image=image, mask=mask, segstats=segstats, 
                 Nseg=dim(segstats)[1], near=near, group=group, groupstats=groupstats, 
-                haralick=haralick, header=header, SBlim=SBlim, magzero=magzero, dim=dim(segim), 
+                haralick=haralick, keyvalues=keyvalues, SBlim=SBlim, magzero=magzero, dim=dim(segim), 
                 pixscale=pixscale, imarea=imarea, skyLL=skyLL, skyChiSq=skyChiSq, skyChiSqMap=skyChiSqMap,
                 gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, ProFound.version=packageVersion('ProFound'), 
                 R.version=R.version)
   }else{
-    if(is.null(header)){header = NULL}
+    if(is.null(keyvalues)){keyvalues = NULL}
     if(keepim==FALSE){image = NULL; mask = NULL}
     if(is.null(mask)){mask = NULL}
     if(!is.null(badpix)){image[badpix] = NA}
@@ -599,7 +584,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(verbose){message(paste('ProFound is finished! -',round(proc.time()[3]-timestart,3),'sec'))}
     output = list(segim=NULL, segim_orig=NULL, objects=NULL, objects_redo=NULL, sky=sky, 
                 skyRMS=skyRMS, image=image, mask=mask, segstats=NULL, Nseg=0, near=NULL, 
-                group=NULL, groupstats=NULL, haralick=NULL, header=header, SBlim=NULL,  
+                group=NULL, groupstats=NULL, haralick=NULL, keyvalues=keyvalues, SBlim=NULL,  
                 magzero=magzero, dim=dim(segim), pixscale=pixscale, imarea=imarea, skyLL=NULL, skyChiSq=NULL,
                 skyChiSqMap=NULL, gain=gain, call=call, date=date(), time=proc.time()[3]-timestart, 
                 ProFound.version=packageVersion('ProFound'), R.version=R.version)
@@ -690,13 +675,13 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
   
   layout(matrix(1:9, 3, byrow=TRUE))
   
-  if(!is.null(x$header)){
+  if(!is.null(x$keyvalues)){
   
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 1 image
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      Rwcs::Rwcs_image(image=image, header=x$header, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
+      Rwcs::Rwcs_image(image=image, keyvalues=x$keyvalues, stretchscale=stretchscale, locut=-maximg, hicut=maximg, range=c(-1,1), type='num', zlim=c(-1,1), col=cmap)
     }else{
-      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
+      stop("The Rwcs package is need to process the keyvalues. Install from GitHub asgr/Rfits.")
     }
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     if(!is.null(outline)){
@@ -709,9 +694,9 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 3 dilate
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      Rwcs::Rwcs_image(image=image, header=x$header)
+      Rwcs::Rwcs_image(image=image, keyvalues=x$keyvalues)
     }else{
-      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
+      stop("The Rwcs package is need to process the keyvalues. Install from GitHub asgr/Rfits.")
     }
     magimage(segdiff, col=c(NA, rainbow(max(x$segim,na.rm=TRUE), end=2/3)), magmap=FALSE, add=TRUE)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
@@ -734,9 +719,9 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 5 sky
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      Rwcs::Rwcs_image(image=x$sky-median(x$sky,na.rm=TRUE), header=x$header, qdiff=TRUE)
+      Rwcs::Rwcs_image(image=x$sky-median(x$sky,na.rm=TRUE), keyvalues=x$keyvalues, qdiff=TRUE)
     }else{
-      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
+      stop("The Rwcs package is need to process the keyvalues. Install from GitHub asgr/Rfits.")
     }
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))
@@ -748,9 +733,9 @@ plot.profound=function(x, logR50=TRUE, dmag=0.5, hist='sky', ...){
     
     par(mar=c(3.5,3.5,0.5,0.5)) #plot 6 skyRMS
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      Rwcs::Rwcs_image(image=x$skyRMS, header=x$header)
+      Rwcs::Rwcs_image(image=x$skyRMS, keyvalues=x$keyvalues)
     }else{
-      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rfits.")
+      stop("The Rwcs package is need to process the keyvalues. Install from GitHub asgr/Rfits.")
     }
     if(!is.null(x$mask)){
       magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))

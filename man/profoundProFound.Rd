@@ -18,7 +18,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   roughpedestal = FALSE, sigmasel = 1, skypixmin = prod(box)/2, boxadd = box/2,
   boxiters = 0, conviters = 100, iterskyloc = FALSE, deblend = FALSE, df = 3,
   radtrunc = 2, iterative = FALSE, doChiSq = FALSE, doclip = TRUE, shiftloc = FALSE,
-  paddim = TRUE, header = NULL, verbose = FALSE, plot = FALSE, stats = TRUE,
+  paddim = TRUE, keyvalues = NULL, verbose = FALSE, plot = FALSE, stats = TRUE,
   rotstats = FALSE, boundstats = FALSE, nearstats = boundstats, groupstats = boundstats,
   group = NULL, groupby = 'segim_orig', offset = 1, haralickstats = FALSE,
   sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE,
@@ -29,7 +29,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image}  then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image}  then the image part of these lists is passed to \option{image} and the correct keyvalues part is passed to \option{keyvalues}. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
 Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
@@ -172,8 +172,8 @@ Logical; should the cutout centre for the sky shift from \option{loc} of the des
 	\item{paddim}{
 Logical; should the cutout be padded with image data until it meets the desired \option{box} size (if \option{shiftloc} is true) or padded with NAs for data outside the image boundary otherwise? (See \code{\link{magcutout}} for details).
 }
-  \item{header}{
-Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
+  \item{keyvalues}{
+List; header values to be used for the WCS.
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since a big \option{image} can take a long time to run, you might want to monitor progress.  
@@ -285,7 +285,7 @@ An object list of class 'profound' containing:
   \item{near}{If \option{nearstats}=TRUE then contains the output of \code{\link{profoundSegimNear}}.}
   \item{group}{If \option{groupstats}=TRUE then contains the output of \code{\link{profoundSegimGroup}}.}
   \item{groupstats}{If \option{groupstats}=TRUE and \option{stats}=TRUE then contains the output of \code{\link{profoundSegimStats}} run using the final \option{group$groupim} (see below), otherwise NULL.}
-  \item{header}{The header provided, if missing this is NULL.}
+  \item{keyvalues}{The keyvalues provided, if missing this is NULL.}
   \item{SBlim}{The surface brightness limit of detected objects. Requires at least \option{magzero} to be provided and \option{skycut}>0, else NULL.}
   \item{magzero}{The assumed magnitude zero point. This is relevant to various outputs returned by the segmentation statistics.}
   \item{dim}{The dimensions of the processed image.}
@@ -309,10 +309,10 @@ If \option{stats}=TRUE then the function \code{\link{profoundSegimStats}} is cal
   \item{ycen}{Flux weighted y centre}
   \item{xmax}{x position of maximum flux}
   \item{ymax}{y position of maximum flux}
-  \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{header} is provided)}
-  \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{header} is provided)}
-  \item{RAmax}{Right Ascension of maximum flux (only present if a \option{header} is provided)}
-  \item{Decmax}{Declination of maximum flux (only present if a \option{header} is provided)}
+  \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{keyvalues} is provided)}
+  \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{keyvalues} is provided)}
+  \item{RAmax}{Right Ascension of maximum flux (only present if a \option{keyvalues} is provided)}
+  \item{Decmax}{Declination of maximum flux (only present if a \option{keyvalues} is provided)}
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
   \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs or Jansky}
   \item{mag}{Total flux converted to mag using \option{magzero}}

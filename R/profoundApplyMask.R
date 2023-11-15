@@ -123,7 +123,7 @@ profoundDrawMask = function(image, poly=NULL, invert_mask = FALSE, mode='draw', 
         dev.new(noRStudioGD = TRUE)
         plot(image, ...)
       }else{
-        stop("The Rfits package is need to process the header. Install from GitHub asgr/Rfits.")
+        stop("The Rfits package is need to process the keyvalues. Install from GitHub asgr/Rfits.")
       }
     }else{
       dev.new(noRStudioGD = TRUE)
@@ -135,7 +135,7 @@ profoundDrawMask = function(image, poly=NULL, invert_mask = FALSE, mode='draw', 
     output = data.frame(x=temploc$x, y=temploc$y)
     
     if(isRfits){
-      tempWCS = Rwcs::Rwcs_p2s(output, keyvalues=image$keyvalues, header=image$raw, pixcen='R')
+      tempWCS = Rwcs::Rwcs_p2s(output, keyvalues=image$keyvalues, pixcen='R')
       output$RA = tempWCS[,'RA']
       output$Dec = tempWCS[,'Dec']
     }
@@ -148,7 +148,7 @@ profoundDrawMask = function(image, poly=NULL, invert_mask = FALSE, mode='draw', 
     }
     
     if(type == 'coord'){
-      temploc = Rwcs::Rwcs_s2p(output$RA, output$Dec, keyvalues=image$keyvalues, header=image$raw, pixcen='R')
+      temploc = Rwcs::Rwcs_s2p(output$RA, output$Dec, keyvalues=image$keyvalues, pixcen='R')
       output = data.frame(x=temploc[,'x'], y=temploc[,'y'], RA=output$RA, Dec=output$Dec)
     }else if(type == 'pix'){
       output = data.frame(x = output[,1], y = output[,2])

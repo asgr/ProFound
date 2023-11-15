@@ -11,12 +11,12 @@ Basic summary statistics for image segments, e.g. aperture parameters, fluxes an
 }
 \usage{
 profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS = NULL,
-  magzero = 0, gain = NULL, pixscale = 1, header = NULL, sortcol = "segID",
+  magzero = 0, gain = NULL, pixscale = 1, keyvalues = NULL, sortcol = "segID",
   decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1,
   cor_err_func = NULL, app_diam = 1)
   
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS=NULL,
-  header = NULL, col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE,
+  keyvalues = NULL, col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE,
   sparse = 'auto', useRaster = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -45,8 +45,8 @@ Numeric scalar; the gain (in photo-electrons per ADU). This is only used to comp
   \item{pixscale}{
 Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
 }
-  \item{header}{
-Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
+  \item{keyvalues}{
+List; header values to be used for the WCS.
 }
   \item{sortcol}{
 Character; name of the output column that the returned segmentation statistics data.frame should be sorted by (the default is segID, i.e. segment order). See below for column names and contents.
@@ -93,7 +93,7 @@ Further arguments to be passed to \code{\link{magimage}}.
 
 The interpretation of some of these outputs will depend a lot on the data being analysed, so it is for the user to decide on sensible next steps (e.g. using the outputs to select stars etc). One output of interest might be \option{flux_reflect}. This attempts to correct for missing flux where segments start colliding. This probably returns an upper limit to the flux since in some regions it can even be double counted if the two sources that have colliding segmentation maps are very close together and similar in brightness, so somewhere between \option{flux} and \option{flux_reflect} the truth probably lies. If you want a better estimate of the flux division then you should really be using the profiling routine of \code{ProFit}.
 
-\code{profoundSegimPlot} is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot! If you provide a header or a list containing the iamge and header to \option{header} then it will be plotted with the WCS overlaid using \code{Rwcs_image}, otherwise it will use \code{\link{magimage}}.
+\code{profoundSegimPlot} is useful when you only have a small number of sources (roughly a few hundred). With more than this it can start to take a long time to make the plot! If you provide keyvalues or an Rfits_image (to \option{image}) then it will be plotted with the WCS overlaid using \code{Rwcs_image}, otherwise it will use \code{\link{magimage}}.
 }
 \value{
 A data.frame with columns:
@@ -104,10 +104,10 @@ A data.frame with columns:
   \item{ycen}{Flux weighted y centre}
   \item{xmax}{x position of maximum flux}
   \item{ymax}{y position of maximum flux}
-  \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{header} is provided)}
-  \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{header} is provided)}
-  \item{RAmax}{Right Ascension of maximum flux (only present if a \option{header} is provided)}
-  \item{Decmax}{Declination of maximum flux (only present if a \option{header} is provided)}
+  \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{keyvalues} is provided)}
+  \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{keyvalues} is provided)}
+  \item{RAmax}{Right Ascension of maximum flux (only present if a \option{keyvalues} is provided)}
+  \item{Decmax}{Declination of maximum flux (only present if a \option{keyvalues} is provided)}
   \item{sep}{Radial offset between the cen and max definition of the centre (units of \option{pixscale}, so if \option{pixscale} represents the standard asec/pix this will be asec)}
   \item{flux}{Total flux (calculated using \option{image}-\option{sky}) in ADUs}
   \item{mag}{Total flux converted to mag using \option{magzero}}
@@ -168,7 +168,7 @@ Aaron Robotham
 \dontrun{
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))
-profound=profoundProFound(image, magzero=30, rotstats=TRUE)
+profound = profoundProFound(image, magzero=30, rotstats=TRUE)
 
 print(profound$segstats)
 
@@ -176,9 +176,8 @@ print(profound$segstats)
 #rotated through 180 degrees. The reflected value of 18.4 is closer to the full profile
 #solution (~18.35) than the non-reflected flux (18.45).
 
-profound$segim[35:55, 80:100]=max(profound$segim)+1
-print(profoundSegimStats(image$imDat, segim=profound$segim, sky=profound$sky,
-header=image$hdr))
+profound$segim[35:55, 80:100] = max(profound$segim)+1
+print(profoundSegimStats(image, segim=profound$segim, sky=profound$sky))
 profoundSegimPlot(image, profound$segim)
 }
 }
