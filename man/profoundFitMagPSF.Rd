@@ -11,7 +11,7 @@ Fits PSF mags to an image with known source positions. This is the best deblend 
 profoundFitMagPSF(xcen = NULL, ycen = NULL, RAcen = NULL, Deccen = NULL, mag = NULL,
   image = NULL, im_sigma = NULL, mask = NULL, psf = NULL, fit_iters = 5, magdiff = 1,
   modxy = FALSE, sigthresh = 0, itersub = TRUE, magzero = 0, modelout = TRUE,
-  fluxtype = 'Raw', psf_redosky = FALSE, fluxext = FALSE, header = NULL,
+  fluxtype = 'Raw', psf_redosky = FALSE, fluxext = FALSE, keyvalues = NULL,
   doProFound = FALSE, findextra = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -32,7 +32,7 @@ Numeric vector; declination centres in degrees.  If provided, must be the same l
 Numeric vector; required, initial PSF mags. This is what will be fitted.
 }
   \item{image}{
-Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image} then the image part of these lists is passed to \option{image} and the correct header part is passed to \option{header}. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image} then the image part of these lists is passed to \option{image} and the correct keyvalues part is passed to \option{keyvalues}. Note, image NAs are treated as masked pixels.
 }
   \item{im_sigma}{
 Numeric matrix; required, the measurement errors per pixel (expressed in terms of sigma).
@@ -73,8 +73,8 @@ Logical; should the sky calulcated by \code{\link{profoundProFound}} be subtract
   \item{fluxext}{
 Logical; should the full model be used to compute an image deblending function better suited for extended sources? This means fluxes are guaranteed to add up to those available in the \option{image}. The fit PSF can differ, especially if the \option{psf} supplied is not in detail identical to the true \option{image} PSF. In practice we find that using \option{fluxext}=FALSE works better when the sources are not well resolved (assuming the true \option{psf} ~ true PSF), but when sources are marginally extended then \option{fluxext}=TRUE is probably the safer mode to use (hence the name).
 }
-  \item{header}{
-Full FITS header in vector format. The \option{hdr} output of \code{Rfits_read_image} (older options are deprecated, and longer term will add keyvalues option).
+  \item{keyvalues}{
+List; header values to be used for the WCS.
 }
   \item{doProFound}{
 Logical; if TRUE then \code{\link{profoundProFound}} will be run with the arguments provided by \dots. This will be used to determine \option{xcen}, \option{ycen} and \option{mag} blindly.
@@ -101,7 +101,7 @@ Object of class "fitmagpsf", a list containing:
 \item{origLL}{Numeric scalar; the original data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{finalLL}{Numeric scalar; the final data-model log-likelihood. Only relevant if \option{modelout}=TRUE, else NA.}
 \item{image}{Numeric matric; the image directly used for fitting. This might have an additional sky component removed (if \option{doProFound}=TRUE) and NAs for masked regions.}
-\item{header}{The header provided, if missing this is NULL.}
+\item{keyvalues}{The keyvalues provided, if missing this is NULL.}
 \item{psfstats_extra}{Data.frame; xtra photometric properties if \option{findextra}=TRUE, otherwise NULL (see below).}
 \item{profound}{List; an object of class profound as output by the \code{\link{profoundProFound}} function. This contains the output for the ProFound part of the analysis if \option{doProFound}=TRUE or \option{findextra}=TRUE.}
 \item{mask}{The input or computed \option{mask} matrix, else NULL.}

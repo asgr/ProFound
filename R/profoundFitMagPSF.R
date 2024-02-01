@@ -2,7 +2,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
                            image=NULL, im_sigma=NULL, mask=NULL, psf=NULL, fit_iters=5, 
                            magdiff=1, modxy=FALSE, sigthresh=0, itersub=TRUE, magzero=0, 
                            modelout=TRUE, fluxtype='Raw', psf_redosky=FALSE, fluxext=FALSE, 
-                           header=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
+                           keyvalues=NULL, doProFound=FALSE, findextra=FALSE, verbose=FALSE, ...){
   
   timestart=proc.time()[3]
   
@@ -15,33 +15,16 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     hasProFit=TRUE
   }
   
-  #Split out image and header parts of input:
+  #Split out image and keyvalues parts of input:
   
   if(!is.null(image)){
-    if(any(names(image)=='imDat') & is.null(header)){
-      if(verbose){message('Supplied image contains image and header components')}
-      header=image$hdr
-      image=image$imDat
-    }else if(any(names(image)=='imDat') & !is.null(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header')}
-      image=image$imDat
-    }
-    if(any(names(image)=='dat') & is.null(header)){
-      if(verbose){message('Supplied image contains image and header components')}
-      header=image$hdr[[1]]
-      header=data.frame(key=header[,1],value=header[,2], stringsAsFactors = FALSE)
-      image=image$dat[[1]]
-    }else if(any(names(image)=='dat') & !is.null(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header')}
-      image=image$dat[[1]]
-    }
-    if(any(names(image)=='image') & is.null(header)){
-      if(verbose){message('Supplied image contains image and header components')}
-      header=image$header
-      image=image$image
-    }else if(any(names(image)=='image') & !is.null(header)){
-      if(verbose){message('Supplied image contains image and header but using specified header')}
-      image=image$image
+    if(inherits(image, 'Rfits_image')){
+      keyvalues = image$keyvalues
+      image = image$imDat
+    }else if(inherits(image, 'matrix')){
+      'Do nothing'
+    }else{
+      stop('As of ProFound v1.21.0 only Rfits_image FITS inputs are allowed. Please install from GitHub asgr/Rfits')
     }
   }else{
     stop('Missing image - this is a required input!')
@@ -88,22 +71,22 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if((!is.null(xcen) & is.null(ycen))){stop('Need xcen/ycen pair!')}
   if((is.null(xcen) & is.null(ycen)) & (is.null(RAcen) | is.null(Deccen))){stop('Need RAcen/Decen pair!')}
   
-  if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(header)){
+  if((!is.null(xcen) & !is.null(ycen)) & (is.null(RAcen) & is.null(Deccen)) & !is.null(keyvalues)){
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      RAdeccoords=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', header=header)
+      RAdeccoords=Rwcs::Rwcs_p2s(x = xcen, y = ycen, pixcen = 'R', keyvalues=keyvalues)
     }else{
-      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rwcs")
+      stop("The Rwcs package is need to process the keyvalues. Install from GitHub asgr/Rwcs")
     }
     RAcen=RAdeccoords[,'RA']
     Deccen=RAdeccoords[,'Dec']
   }
   
   if((is.null(xcen) & is.null(ycen)) & (!is.null(RAcen) & !is.null(Deccen))){
-    if(is.null(header)){stop('Need header if using RAcen and Deccec input')}
+    if(is.null(keyvalues)){stop('Need keyvalues if using RAcen and Deccec input')}
     if(requireNamespace("Rwcs", quietly = TRUE)){
-      xycoords=Rwcs::Rwcs_s2p(RA = RAcen, Dec = Deccen, pixcen = 'R', header=header)
+      xycoords=Rwcs::Rwcs_s2p(RA = RAcen, Dec = Deccen, pixcen = 'R', keyvalues=keyvalues)
     }else{
-      stop("The Rwcs package is need to process the header. Install from GitHub asgr/Rwcs")
+      stop("The Rwcs package is need to process the keyvalues. Install from GitHub asgr/Rwcs")
     }
     xcen=xycoords[,'x']
     ycen=xycoords[,'y']
@@ -112,11 +95,11 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   if(doProFound){
     if(verbose){message('Running initial ProFound')}
     if(psf_redosky){
-      protemp=profoundProFound(image, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+      protemp=profoundProFound(image, mask=mask, magzero=magzero, keyvalues=keyvalues, verbose=FALSE, ...)
       if(verbose){message('- subtracting ProFound sky model from input image')}
       image=image-protemp$sky
     }else{
-      protemp=profoundProFound(image, mask=mask, sky=0, magzero=magzero, header=header, verbose=FALSE, ...)
+      protemp=profoundProFound(image, mask=mask, sky=0, magzero=magzero, keyvalues=keyvalues, verbose=FALSE, ...)
     }
     if(is.null(xcen) & is.null(ycen) & is.null(mag)){
       if(verbose){message('- using ProFound xcen / ycen / mag for source properties')}
@@ -447,10 +430,10 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
     if(verbose){message('Finding extra sources with ProFound')}
     if(psf_redosky){
       image_orig=image_orig+protemp$sky
-      protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, header=header, verbose=FALSE, ...)
+      protemp=profoundProFound(image_orig-fullmodel, mask=mask, magzero=magzero, keyvalues=keyvalues, verbose=FALSE, ...)
       image_orig=image_orig-protemp$sky
     }else{
-      protemp=profoundProFound(image_orig-fullmodel, mask=mask, sky=0, magzero=magzero, header=header, verbose=FALSE, ...)
+      protemp=profoundProFound(image_orig-fullmodel, mask=mask, sky=0, magzero=magzero, keyvalues=keyvalues, verbose=FALSE, ...)
     }
     if(!is.null(protemp$segstats)){
       addxcen = protemp$segstats$xcen
@@ -470,7 +453,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
                                 im_sigma=im_sigma, mask=mask, psf=psf, fit_iters=fit_iters,
                                 magdiff=magdiff, modxy=modxy, sigthresh=sigthresh,
                                 itersub=itersub, magzero=magzero, modelout=modelout,
-                                fluxtype='Raw', header=header, doProFound=FALSE,
+                                fluxtype='Raw', keyvalues=keyvalues, doProFound=FALSE,
                                 findextra=FALSE, fluxext=fluxext, verbose=verbose)
       
         seltarget=1:Nmodels
@@ -530,7 +513,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   row.names(psfstats)=NULL
   
   output=list(psfstats=psfstats, origLL=origLL, finalLL=finalLL, origmodel=origmodel, 
-              finalmodel=fullmodel, image=image_orig, header=header, psfstats_extra=psfstats_extra, 
+              finalmodel=fullmodel, image=image_orig, keyvalues=keyvalues, psfstats_extra=psfstats_extra, 
               profound=protemp, mask=mask, call=call, date=date(), time=proc.time()[3]-timestart, 
               ProFound.version=packageVersion('ProFound'), R.version=R.version)
   class(output)='fitmagpsf'
@@ -545,7 +528,7 @@ plot.fitmagpsf=function(x, ...){
   }
   
   layout(rbind(1:3))
-  if(is.null(x$header)){
+  if(is.null(x$keyvalues)){
     magimage(x$image, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image', bty='n', cex=3, pch='')
@@ -558,15 +541,15 @@ plot.fitmagpsf=function(x, ...){
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image - model', bty='n', cex=3, pch='')
   }else{
-    plot(x, qdiff=TRUE, ...)
+    Rwcs::Rwcs_image(x$image, keyvalues=x$keyvalues, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image', bty='n', cex=3, pch='')
     
-    plot(x, qdiff=TRUE, ...)
+    Rwcs::Rwcs_image(x$finalmodel, keyvalues=x$keyvalues, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='model', bty='n', cex=3, pch='')
     
-    plot(x, qdiff=TRUE, ...)
+    Rwcs::Rwcs_image(x$image - x$finalmodel, keyvalues=x$keyvalues, qdiff=TRUE, ...)
     if(!is.null(x$mask)){magimage(x$mask!=0, col=c(NA,hsv(alpha=0.2)), add=TRUE, magmap=FALSE, zlim=c(0,1))}
     legend('topleft', legend='image - model', bty='n', cex=3, pch='')
   }
