@@ -23,7 +23,7 @@ Numeric matrix; required, the image we want to analyse.
 Boolean matrix (1,0); optional, object mask where 1 is object and 0 is sky. If provided, this matrix *must* be the same dimensions as \option{image}. If provided then this is used to initially mask pixels for determining the correct \option{sky}.
 }
   \item{degree}{
-Integer scalar; the polynomial degree to model the sky with. \option{degree} = 1 is a linear plane, 2 is quadratic, 3 cubic, 4 quartic and 5 quintic etc.
+Integer scalar; the polynomial degree to model the sky with. \option{degree} = 0 is a pedestal sky, 1 is a linear plane, 2 is quadratic, 3 cubic, 4 quartic and 5 quintic etc. As a convenience setting \option{degree} = -1 sets the sky to be 0 throughout (perhaps useful for checking diagnostics).
 }
   \item{quancut}{
 Numeric scalar; optional, the level at which to mask out brighter pixels for analysis. This might be useful if \option{objects} has not already been computed.

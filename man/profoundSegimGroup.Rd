@@ -17,15 +17,7 @@ Integer matrix; required, the segmentation map.
 }
 }
 \details{
-To use this function you will need to have EBImage installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package. You can have a go at installing it by running:
-
-> source("http://bioconductor.org/biocLite.R")
-
-> biocLite("EBImage")
-
-Linux users might also need to install some non-standard graphics libraries (depending on your install). If you do not have them already, you should look to install **jpeg** and **tiff** libraries (these are apparently technically not entirely free, hence not coming by default on some strictly open source Linux variants).
-
-\code{profoundSegimGroup} uses the \code{bwlabel} function from EBImage.
+\code{profoundSegimGroup} uses the \code{label} function from imager, so to use this function you will need to have imager installed. Since this can be a bit cumbersome on some platforms (given its dependencies) this is only listed as a suggested package.
 }
 \value{
 A list containting the following structures:
