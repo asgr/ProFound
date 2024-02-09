@@ -54,6 +54,9 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if(inherits(image, 'Rfits_image')){
       keyvalues = image$keyvalues
       image = image$imDat
+    }else if(inherits(image, 'Rfits_pointer')){
+      keyvalues = image$keyvalues
+      image = image[,]$imDat
     }else if(inherits(image, 'matrix')){
       'Do nothing'
     }else{
