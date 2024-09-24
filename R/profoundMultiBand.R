@@ -44,20 +44,20 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     presentbands=multibands
   }
   
-  if(detectbands[1]=='get'){
-    detectbands=presentbands
+  if(isTRUE(detectbands[1]=='get')){
+    detectbands = presentbands
+  }else if(isTRUE(detectbands[1]=='all')){
+    detectbands = multibands
   }
-  if(detectbands[1]=='all'){
-    detectbands=multibands
-  }
+  
   detectbands=detectbands[detectbands %in% presentbands]
   
-  if(multibands[1]=='get'){
-    multibands=presentbands
+  if(isTRUE(multibands[1]=='get')){
+    multibands = presentbands
   }
   
-  if(bandappend[1]=='get'){
-    bandappend=presentbands
+  if(isTRUE(bandappend[1]=='get')){
+    bandappend = presentbands
   }
   
   if(length(iters_tot)==1){
@@ -176,7 +176,10 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     }
   }
   
-  message(paste('*** Will use',paste(detectbands,collapse='+'),'for source detection ***'))
+  if(!is.null(detectbands)){
+    message(paste('*** Will use',paste(detectbands,collapse='+'),'for source detection ***'))
+  }
+  
   if(!is.null(segim)){
     message('*** Will use provided segim for detection statistics ***')
   }
@@ -201,7 +204,9 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     }
   }
   
-  if(length(detectbands)==1){
+  if(is.null(detectbands)){
+    pro_detect = NULL
+  }else if(length(detectbands)==1){
     
     # If only one band is specified for detection then we skip the stacking part
     
@@ -215,14 +220,14 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     }else{
       detect=inputlist[[which(multibands==detectbands)]]
     }
-    temp_magzero=magzero[multibands==detectbands]
-    temp_box=box[multibands==detectbands]
-    temp_grid=grid[multibands==detectbands]
-    temp_boxadd=boxadd[multibands==detectbands]
+    temp_magzero = magzero[multibands==detectbands]
+    temp_box = box[multibands==detectbands]
+    temp_grid = grid[multibands==detectbands]
+    temp_boxadd = boxadd[multibands==detectbands]
     
     # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=quote(detect), segim=quote(segim), mask=quote(mask), iters=iters_det, magzero=temp_magzero, box=temp_box, grid=temp_grid, boxadd=temp_boxadd, deblend=FALSE, groupstats=(groupstats | dogrp), pixelcov=FALSE, group_by=groupby_det), dotsdetect))
+    pro_detect = do.call("profoundProFound", c(list(image=quote(detect), segim=quote(segim), mask=quote(mask), iters=iters_det, magzero=temp_magzero, box=temp_box, grid=temp_grid, boxadd=temp_boxadd, deblend=FALSE, groupstats=(groupstats | dogrp), pixelcov=FALSE, group_by=groupby_det), dotsdetect))
     
   }else{
   
@@ -248,37 +253,37 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         detect = inputlist[[which(multibands==detectbands[i])]]
       }
       
-      temp_magzero=magzero[multibands==detectbands[i]]
-      temp_box=box[multibands==detectbands[i]]
-      temp_grid=grid[multibands==detectbands[i]]
-      temp_boxadd=boxadd[multibands==detectbands[i]]
+      temp_magzero = magzero[multibands==detectbands[i]]
+      temp_box = box[multibands==detectbands[i]]
+      temp_grid = grid[multibands==detectbands[i]]
+      temp_boxadd = boxadd[multibands==detectbands[i]]
       
       # Run ProFound on current detection band with input parameters
       
       # pro_detect=profoundProFound(image=detect, segim=segim, mask=mask, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma, smooth=smooth, iters=iters_det, magzero=temp_magzero, verbose=verbose, ...)
       
-      pro_detect=do.call("profoundProFound", c(list(image=quote(detect), segim=quote(segim), mask=quote(mask), iters=iters_det, magzero=temp_magzero, box=temp_box, grid=temp_grid, boxadd=temp_boxadd, deblend=FALSE, groupstats=FALSE, pixelcov=FALSE), dotsdetect))
+      pro_detect = do.call("profoundProFound", c(list(image=quote(detect), segim=quote(segim), mask=quote(mask), iters=iters_det, magzero=temp_magzero, box=temp_box, grid=temp_grid, boxadd=temp_boxadd, deblend=FALSE, groupstats=FALSE, pixelcov=FALSE), dotsdetect))
       
       # mask things per band
       
       if(!is.null(pro_detect$mask)){
-        pro_detect$image[pro_detect$mask==1]=NA
+        pro_detect$image[pro_detect$mask==1] = NA
       }
       
       # Append to lists for stacking
       
-      detect_image=c(detect_image,list(pro_detect$image))
-      detect_sky=c(detect_sky,list(pro_detect$sky))
-      detect_skyRMS=c(detect_skyRMS,list(pro_detect$skyRMS))
-      detect_magzero=c(detect_magzero, temp_magzero)
-      detect_box=c(detect_box, temp_box)
-      detect_grid=c(detect_grid, temp_grid)
-      detect_boxadd=c(detect_boxadd, temp_boxadd)
+      detect_image = c(detect_image,list(pro_detect$image))
+      detect_sky = c(detect_sky,list(pro_detect$sky))
+      detect_skyRMS = c(detect_skyRMS,list(pro_detect$skyRMS))
+      detect_magzero = c(detect_magzero, temp_magzero)
+      detect_box = c(detect_box, temp_box)
+      detect_grid = c(detect_grid, temp_grid)
+      detect_boxadd = c(detect_boxadd, temp_boxadd)
     }
     
     # Grab the current keyvalues
     
-    keyvalues=pro_detect$keyvalues
+    keyvalues = pro_detect$keyvalues
     
     # Delete and clean up
     
@@ -307,7 +312,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
     
     #pro_detect=profoundProFound(image=detect_image_stack$image+detect_sky_stack$image, segim=segim, mask=NULL, keyvalues=keyvalues, skycut=skycut, pixcut=pixcut, tolerance=tolerance, ext=ext, sigma=sigma,  smooth=smooth, iters=iters_det, magzero=detect_magzero[1], sky=detect_sky_stack$image, skyRMS=detect_image_stack$skyRMS, redosky=FALSE, verbose=verbose, boundstats=boundstats, groupstats=(groupstats | dogrp), groupby=groupby_det, haralickstats=haralickstats, ...)
     
-    pro_detect=do.call("profoundProFound", c(list(image=quote(detect_image_stack$image+detect_sky_stack$image), segim=quote(segim), mask=NULL, keyvalues=keyvalues, iters=iters_det, magzero=detect_magzero[1], sky=quote(detect_sky_stack$image), skyRMS=quote(detect_image_stack$skyRMS), box=max(detect_box), grid=min(detect_grid), boxadd=max(detect_boxadd), deblend=FALSE, groupstats=(groupstats | dogrp), groupby=groupby_det, pixelcov=FALSE), dotsdetect))
+    pro_detect = do.call("profoundProFound", c(list(image=quote(detect_image_stack$image+detect_sky_stack$image), segim=quote(segim), mask=NULL, keyvalues=keyvalues, iters=iters_det, magzero=detect_magzero[1], sky=quote(detect_sky_stack$image), skyRMS=quote(detect_image_stack$skyRMS), box=max(detect_box), grid=min(detect_grid), boxadd=max(detect_boxadd), deblend=FALSE, groupstats=(groupstats | dogrp), groupby=groupby_det, pixelcov=FALSE), dotsdetect))
     
     # Reset image pixels to NA if masked.
     
@@ -328,23 +333,25 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
   #pro_detect$call=NULL
   
   # Create base total and colour photometry catalogues
-
-  cat_tot=NULL
-  cat_col=NULL
-  cat_grp=NULL
   
   if(dotot | docol | dogrp){
     
-    if(dotot){
-      cat_tot=data.frame(segID=pro_detect$segstats$segID)
-    }
-    
-    if(docol){
-      cat_col=data.frame(segID=pro_detect$segstats$segID)
-    }
-    
-    if(dogrp){
-      cat_grp=data.frame(groupID=pro_detect$group$groupsegID$groupID)
+    if(!is.null(pro_detect)){
+      if(dotot){
+        cat_tot = data.frame(segID=pro_detect$segstats$segID)
+      }
+      
+      if(docol){
+        cat_col = data.frame(segID=pro_detect$segstats$segID)
+      }
+      
+      if(dogrp){
+        cat_grp = data.frame(groupID=pro_detect$group$groupsegID$groupID)
+      }
+    }else{
+      cat_tot = {}
+      cat_col = {}
+      cat_grp = {}
     }
     
     for(i in 1:length(multibands)){
@@ -367,7 +374,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         
         # pro_multi_tot=profoundProFound(image=multi, segim=pro_detect$segim, mask=mask, magzero=magzero[i], gain=gain[i], groupstats=FALSE, iters=iters_tot[i], size=sizes_tot[i], deblend=deblend, redosegim=FALSE, roughpedestal=FALSE, ...)
         
-        pro_multi_tot=do.call("profoundProFound", c(list(image=quote(multi), segim=quote(pro_detect$segim), mask=quote(mask), magzero=magzero[i], gain=gain[i], box=box[i], grid=grid[i], boxadd=boxadd[i], groupstats=FALSE, iters=iters_tot[i], size=sizes_tot[i], deblend=deblend, groupby=groupby_mul, redosegim=FALSE, roughpedestal=FALSE, app_diam=app_diam[i]), dotsmulti))
+        pro_multi_tot = do.call("profoundProFound", c(list(image=quote(multi), segim=quote(pro_detect$segim), mask=quote(mask), magzero=magzero[i], gain=gain[i], box=box[i], grid=grid[i], boxadd=boxadd[i], groupstats=FALSE, iters=iters_tot[i], size=sizes_tot[i], deblend=deblend, groupby=groupby_mul, redosegim=FALSE, roughpedestal=FALSE, app_diam=app_diam[i]), dotsmulti))
         
         # Append column names and concatenate cat_tot together
         
@@ -375,7 +382,7 @@ profoundMultiBand=function(inputlist=NULL, dir='', segim=NULL, mask=NULL, detect
         cat_tot=cbind(cat_tot, pro_multi_tot$segstats)
         
         if(keepsegims){
-          segimlist=c(segimlist, list(pro_multi_tot$segim))
+          segimlist = c(segimlist, list(pro_multi_tot$segim))
         }
         
       }
