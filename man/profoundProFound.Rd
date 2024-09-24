@@ -24,7 +24,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE,
   watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
   fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
-  app_diam = 1, Ndeblendlim = Inf, static_photom = FALSE, rem_mask = FALSE, ...)
+  app_diam = NA, Ndeblendlim = Inf, static_photom = FALSE, rem_mask = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -65,7 +65,7 @@ Numeric scalar; standard deviation of the blur used when \option{smooth}=TRUE. P
 Logical; should smoothing be done on the target \option{image}? Passed to \code{\link{profoundMakeSegim}}. If present, this will use the \code{imblur} function from the \code{imager} package. Otherwise it will use the \code{gblur} function from the \code{EBImage} package with a warning. These functions are very similar in output, but not strictly identical.
 }
   \item{SBlim}{
-Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very large (e.g. Inf) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. If a matrix is provided, this matrix *must* be the same dimensions as \option{image}. Passed to \code{\link{profoundMakeSegim}}. If set to 'get' then the output \option{SBlim} is calculated from the \option{skyRMS} and \option{magzero} automatically.
+Numeric scalar; the mag/asec^2 surface brightness threshold to apply. This is always used in conjunction with \option{skycut}, so set \option{skycut} to be very small (e.g. 0) if you want a pure surface brightness threshold for the segmentation. \option{magzero} and \option{pixscale} must also be present for this to be used. If a matrix is provided, this matrix *must* be the same dimensions as \option{image}. Passed to \code{\link{profoundMakeSegim}}. If set to 'get' then the output \option{SBlim} is calculated from the \option{skyRMS} and \option{magzero} automatically.
 }
   \item{SBdilate}{
 Numeric scalar; how many surface brightness mags beyond the sky RMS to push the dilation process. The extra dilation logic is that if the new mean surface brightness in the dilated annulus is above the sky surface brightness + \option{SBdilate} and we are adding more than \option{SBN100} pixels then we will continue to dilate. This works well to capture extra flux in very large extended structures, where the fractional flux might not be changing much, but where we can safely keep dilating. Sensible values are between 1-2 (i.e. with 100 pixels we might be able to reliably push 1-2 mags fainter than the nominal sky surface brightness). Default is 2.
@@ -245,7 +245,7 @@ Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extende
 Character scaler; specifies whether fluxes will be output in Jansky / MicroJansky ('Jansky' / 'microjansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use Jansky / MicroJansky if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
 }
   \item{app_diam}{
-Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
+Numeric scalar; the diameter in arc seconds to use for circular aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}. The default of NA means this is ignored (and \option{flux_app} / \option{mag_app} will be NA).
 }
   \item{Ndeblendlim}{
 Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.

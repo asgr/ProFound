@@ -13,7 +13,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                           decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound',
                           pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum',
                           convtype = 'brute', convmode = 'extended', fluxtype='Raw',
-                          app_diam=1, Ndeblendlim=Inf, static_photom = FALSE, rem_mask=FALSE, ...){
+                          app_diam=NA, Ndeblendlim=Inf, static_photom = FALSE, rem_mask=FALSE, ...){
 
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]

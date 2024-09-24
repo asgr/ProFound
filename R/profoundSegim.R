@@ -85,7 +85,7 @@
   invisible(which(outer(tab1[,1], tab2[,1], "==") & outer(tab1[,2], tab2[,2], "=="), arr.ind=TRUE))
 }
 
-.fluxcalc=function(flux, Napp=0){
+.fluxcalc=function(flux, Napp=NA){
   
   if(anyNA(flux)){
     good=which(!is.na(flux))
@@ -95,14 +95,14 @@
     N100seg=length(flux)
   }
   
-  if(Napp>0){
-    Nsel=N100seg:(N100seg-Napp+1)
-    Nsel=Nsel[Nsel>0]
+  if(!is.na(Napp)){
+    Nsel = N100seg:(N100seg - Napp + 1)
+    Nsel = Nsel[Nsel>0]
   }else{
-    Nsel=0
+    Nsel = 0
   }
   
-  if(N100seg>0){
+  if(N100seg > 0){
     
     sumflux=sum(flux[good])
     
@@ -171,6 +171,28 @@
   }else{
     return(list(flux=as.numeric(0),N100=as.integer(0)))
   }
+}
+
+.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NULL, ycen=NULL, rad_app=NULL, centype='max'){
+  if(is.null(xcen)){
+    if(centype == 'wt'){
+      xcen = .meanwt(x, flux)
+    }else if(centype == 'max'){
+      xcen = x[which.max(flux)]
+    }
+  }
+  
+  if(is.null(ycen)){
+    if(centype == 'wt'){
+      ycen = .meanwt(y, flux)
+    }else if(centype == 'max'){
+      ycen = y[which.max(flux)]
+    }
+  }
+  
+  rad2 = (x - xcen)^2 + (y - ycen)^2
+    
+  return(invisible(sum(flux[rad2 < rad_app^2], na.rm=TRUE)))
 }
 
 profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, 
@@ -673,7 +695,7 @@ profoundMakeSegimPropagate=function(image=NULL, segim=NULL, objects=NULL, mask=N
 profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=NULL, 
                             magzero=0, gain=NULL, pixscale=1, keyvalues=NULL, sortcol='segID', 
                             decreasing=FALSE, rotstats=FALSE, boundstats=FALSE, offset=1, 
-                            cor_err_func=NULL, app_diam=1){
+                            cor_err_func=NULL, app_diam=NA){
   
   if(missing(pixscale)){
     if(!is.null(keyvalues)){
@@ -681,7 +703,15 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     }
   }
   
-  Napp = ceiling(pi * (app_diam / 2 / pixscale) ^ 2)
+  if(!is.na(app_diam)){
+    Rapp = (app_diam / 2 / pixscale)
+    Napp = ceiling(pi * Rapp^2)
+    Sapp = Napp/(pi * Rapp^2) #to correct for discreteness issues
+  }else{
+    Napp = NA
+    Rapp = NA
+    Sapp = NA
+  }
   
   if(!is.null(sky)){
     hassky = any(is.finite(sky))
@@ -783,9 +813,15 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
-  fluxout = tempDT[, .fluxcalc(flux, Napp = Napp), by = segID]
-  fluxout$flux_app[which(fluxout$flux_app > fluxout$flux)] = fluxout$flux[which(fluxout$flux_app >
-                                                                                  fluxout$flux)]
+  fluxout = tempDT[, .fluxcalc(flux, Napp = NA), by = segID]
+  #old very rough fibre mag stuff is being ignored (hence the NA above and commented out line below)
+  #fluxout$flux_app[which(fluxout$flux_app > fluxout$flux)] = fluxout$flux[which(fluxout$flux_app > fluxout$flux)]
+  
+  if(!is.na(Rapp)){
+    #newer more accurate fibre mag calculation
+    fluxout$flux_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp), by=segID]$V1*Sapp
+  }
+  
   mag = profoundFlux2Mag(flux = fluxout$flux, magzero = magzero)
   mag_app = profoundFlux2Mag(flux = fluxout$flux_app, magzero = magzero)
   

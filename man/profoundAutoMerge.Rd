@@ -16,7 +16,7 @@ profoundAutoMerge(segim, segstats, spur_lim = 0.004, col_lim = NULL, Ncut = 1)
 Integer matrix; required, the segmentation map. This should usually be the \option{segim_orig} (un-dilated) segmentation map, because that usually behaves better with this function. Dilated segmentation maps can also be proved though.
 }
   \item{segstats}{
-Data.frame; the \option{segstats} output of ProFound. If you want to use the \option{col_lim} option, you need to add a non-standard column representing your magnitude colour of choice. A useful colour is usually optical minus NIR, e.g. (r - Z).
+Data.frame; the \option{segstats} output of ProFound. If you want to use the \option{col_lim} option, you need to add a non-standard column representing your magnitude colour of choice (this must be named 'col'). A useful colour is usually optical minus NIR, e.g. (r - Z).
 }
   \item{spur_lim}{
 Numeric scalar; the threshold in segstats$cenfrac / (1 + segstats$sep) below which when selecting segments as potential merging candidates. The default works well for optical and NIR images, but will require some tuning if the seeing is very far from 1 arc-second.

@@ -13,7 +13,7 @@ Basic summary statistics for image segments, e.g. aperture parameters, fluxes an
 profoundSegimStats(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS = NULL,
   magzero = 0, gain = NULL, pixscale = 1, keyvalues = NULL, sortcol = "segID",
   decreasing = FALSE, rotstats = FALSE, boundstats = FALSE, offset = 1,
-  cor_err_func = NULL, app_diam = 1)
+  cor_err_func = NULL, app_diam = NA)
   
 profoundSegimPlot(image = NULL, segim = NULL, mask = NULL, sky = NULL, skyRMS=NULL,
   keyvalues = NULL, col = rainbow(max(segim), end=2/3), profound = NULL, add = FALSE,
@@ -73,7 +73,7 @@ List; object of class 'profound'. If this is provided then missing input argumen
 Function; the error function between \option{N100} (the number of pixels in the segment) and the relative flux error. Most likely the \option{cor_err_func} output of \code{\link{profoundPixelCorrelation}}.
 }
   \item{app_diam}{
-Numeric scalar; the diameter in arc seconds to use for pseudo aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The psuedo aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}.
+Numeric scalar; the diameter in arc seconds to use for circular aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}. The default of NA means this is ignored (and \option{flux_app} / \option{mag_app} will be NA).
 }
   \item{add}{
 Logical; should just the segment contours be added to the current image? This allows for complex colouring of different segments to be achieved by adding various overlays.  
