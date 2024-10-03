@@ -122,18 +122,18 @@ dotsignoremulti = c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', '
 
 If users provide one or both of \option{segim} and/or \option{segim_orig} then these will be used for total and/or colour photometry respectively. How this interacts with the presence of a non NULL detection image is complicated, so read the below:
 
-If you are providing a detection image (i.e. band) and are providing a \option{segim_orig} but no \option{segim} then the segments can be dilated based on the target detection image, and both total and colour photometry can be extracted in multiband mode. If providing a \option{segim} but no \option{segim_orig} then only total photometry can be extracted in multiband mode and \option{iters_det} will be forced to 0 (\option{docol} will be set to FALSE). If providing a \option{segim} and a \option{segim_orig} then the \option{segim_orig} will be used on the detection image and dilated as per \option{iters_det} for the detection segstats, but regardless of this dilation the user provided \option{segim} will be used for total photometry in multiband mode.
+If you are providing a detection image (i.e. band) and are providing a \option{segim_orig} but no \option{segim} then the segments can be dilated based on the target detection image, and both total and colour photometry can be extracted in multiband mode. If providing a \option{segim} but no \option{segim_orig} then only total photometry can be extracted in multiband mode (\option{docol} will be set to FALSE and \option{iters_det} will be forced to 0). If providing a \option{segim} and a \option{segim_orig} then the \option{segim_orig} will be used on the detection image and dilated as per \option{iters_det} for the detection segstats, but regardless of this dilation the user provided \option{segim} will be used for total photometry in multiband mode.
 
 If you are not providing a detection image (i.e. band) and are providing a \option{segim_orig} but no \option{segim} then only colour photometry can be extracted in multiband mode (\option{dotot} will be set to FALSE). If providing a \option{segim} but no \option{segim_orig} then only total photometry can be extracted in multiband mode  (\option{docol} will be set to FALSE). If providing a \option{segim} and a \option{segim_orig} then both total and colour photometry can be extracted in multiband mode.
 }
 \value{
 An object list of class 'profoundmulti' containing:
 
-\item{pro_detect}{The full output of \code{\link{profoundProFound}} for the detection image (of class 'profound').}
+\item{pro_detect}{The full output of \code{\link{profoundProFound}} for the detection image (of class 'profound'). NULL if no detection bands are specified.}
 \item{cat_tot}{If \option{dotot}=TRUE, the dilated total photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$segim}.}
 \item{cat_col}{If \option{docol}=TRUE, the non-dilated colour photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$segim_orig}.}
 \item{cat_grp}{If \option{dogrp}=TRUE, the group segment photometry for the target bands. Effectively the output of \code{\link{profoundSegimStats} run on pro_detect$group$groupim}.}
-\item{segimlist}{If \option{keepsegims}=TRUE then this object contains a list of per band total segmentation maps. This is useful since they can be slightly different per band.}
+\item{segimlist}{If \option{keepsegims} = TRUE then this object contains a list of per band total segmentation maps (\option{segim}) and/or colour segmentation maps (\option{segim_orig}). This is useful since \option{segim} can be slightly different per band if \option{iters_tot} > 0.}
 \item{detectbands}{Character vector; the names of the detection bands used.}
 \item{multibands}{Character vector; the names of the target multi band photometry images used.}
 \item{call}{The original function call.}
