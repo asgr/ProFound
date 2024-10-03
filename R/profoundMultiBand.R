@@ -472,11 +472,11 @@ profoundMultiBand = function(inputlist=NULL, dir='', segim=NULL, segim_orig=NULL
       
       if(keepsegims){
         if(dotot & docol){
-          segimlist = c(segimlist, list(list(segim=segim, segim_orig=segim_orig)))
+          segimlist = c(segimlist, list(list(segim=pro_multi_tot$segim, segim_orig=segim_orig)))
         }
         
         if(dotot & !docol){
-          segimlist = c(segimlist, list(list(segim=segim)))
+          segimlist = c(segimlist, list(list(segim=pro_multi_tot$segim)))
         }
         
         if(!dotot & docol){
