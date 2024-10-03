@@ -8,7 +8,7 @@ Multi Band ProFound Photometry
 Run multiband \code{ProFound} photometry either with loaded data, or images on a local disk.
 }
 \usage{
-profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, mask = NULL,
+profoundMultiBand(inputlist = NULL, dir = "", segim = NULL, segim_orig=NULL, mask = NULL,
   detectbands = "r", multibands = c("u", "g", "r", "i", "z"), iters_det = 6,
   iters_tot = 0, sizes_tot = 5, magzero = 0, gain = NULL, box = 100, grid = box,
   boxadd = box/2, app_diam = 1, bandappend = multibands, totappend = "t", colappend = "c",
@@ -25,13 +25,16 @@ A list of already loaded images. Can be of the type loaded in from FITS files by
 If \option{inputlist} is left as NULL then \code{profoundMultiBand} will instead try to load in FITS images from the directory specified by \option{dir}. The images in the directory must have names like \option{multibands}[i].fits etc (so with the defaults names like u.fits and g.fits would be okay). Since \option{multibands} effectively specifies the file names much more complicated naming can be used and passed in, but it is also used by default for naming the catalogue column outputs, so shorter names/references are likely to be preferable there (i.e. mag_ut is simpler than mag_KiDS_VST_ut etc). This can be over-ridden by using \option{bandappend}.
 }
   \item{segim}{
-Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as the detection image/s if supplied. If this option is used then \code{profoundMultiBand} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim} and dilate this according to the \option{iters_det} argument (so set this to 0 if you want the \option{segim} to be used as is).
+Integer matrix; a specified segmentation map of the image to use for total photometry (if you do not want to use the one generated automatically by \code{\link{profoundProFound}}). This matrix *must* be the same dimensions as the detection image/s if supplied. See Details.
+}
+  \item{segim_orig}{
+Integer matrix; a specified original (pre dilation) segmentation map of the image to use for colour photometry (if you do not want to use the one generated automatically by \code{\link{profoundProFound}}). This matrix *must* be the same dimensions as the detection image/s if supplied. See Details.
 }
   \item{mask}{
 Boolean matrix or integer scalar; optional, parts of the image to mask out (i.e. ignore). If a matrix is provided, this matrix *must* be the same dimensions as \option{image} where 1 means mask out and 0 means use for analysis. if a scalar is provided it indicates the exact \option{image} values that should be treated as masked (e.g. by setting masked pixels to 0 or -999). The latter achieves the same effect as setting masked \option{image} pixels to NA, but allows for the fact not all programs can produce \code{R} legal NA values. Not that for detection masking is an OR operator, so if a pixel is masked on any input \option{image} it will be masked in the detection \option{image}. This is the more conservative way to treat the issue of multiband masking.
 }
   \item{detectbands}{
-Character vector; the names of the detection bands that will be stacked using \code{propaneStackFlatInVar} and then analysed with the provided settings with \code{\link{profoundProFound}} to make a reference segmentation map for further multi band photometry. These bands must be present in \option{multibands}. Can be a scalar (i.e. a single band is used). If set to 'get' then it will use all legal FITS files in the target directory. If set to 'all' then it will use all \option{multibands} inputs.
+Character vector; the names of the detection bands that will be stacked using \code{propaneStackFlatInVar} and then analysed with the provided settings with \code{\link{profoundProFound}} to make a reference segmentation map for further multi band photometry. These bands must be present in \option{multibands}. Can be a scalar (i.e. a single band is used). If set to 'get' then it will use all legal FITS files in the target directory. If set to 'all' then it will use all \option{multibands} inputs. If NULL, then users must provide one or both of \option{segim} and/or \option{segim_orig}. See Details.
 }
   \item{multibands}{
 Character vector; the names of the target multi band photometry images. If set to 'get' then it will use all legal FITS files in the target directory. If using the \option{inputlist} parameter the length of the list must be the same length as \option{multibands}. \option{magzero} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. If specified, \option{gain} must either be length 1 (in which this value is used for all bands), or the same length and order as \option{multibands}. If specified, \option{catappend} must either the same length and order as \option{multibands}.
@@ -97,7 +100,7 @@ Character scalar; How should the grouped segmentation map be formed that will be
 Character scalar; How should the grouped segmentation map be formed that will be used to produce the multi-band deblending for \option{cat_tot} and \option{cat_col} outputs? Options are either via 'segim' or 'segim_orig'. 'segim' will create more groups, 'segim_orig' will have less.
 }
   \item{keepsegims}{
-Logical; if TRUE then \code{profoundMultiBand} will return a list of per band segmentation maps in \option{segimlist}. This is useful since they can be slightly different per band.
+Logical; if TRUE then \code{profoundMultiBand} will return a list of per band segmentation maps in \option{segimlist}. This is useful since they can be slightly different per band. Each list entry will correspond to the relevant band number, and will then contain a sublist containing the segim (if dotot = TRUE) and/or the segim_orig (if docol = TRUE). I.e. keepsegims[[1]]$segim would be the \option{segim} of the first band, and keepsegims[[3]]$segim_orig would be the \option{segim_orig} of the 3rd band etc.
 }
   \item{masking}{
 Character scalar; what to do with masked pixels (NAs in the \option{image}). If 'or'/'|'/'||' a pixel is masked if *any* of the images being stacked have a masked pixel (NA in the \option{image_list}) at that location, if 'and'/'&'/'&&' then a pixel is masked if *all* of the images being stacked have a masked pixel at that location.
@@ -116,6 +119,12 @@ Re the \dots passing, these are the arguments NOT sent through to the detect and
 dotsignoredetect = c('iters', 'plot', 'stats', 'haralickstats', 'groupby', 'pixelcov', 'box')
 
 dotsignoremulti = c('skycut', 'pixcut', 'tolerance', 'ext', 'sigma', 'smooth', 'iters', 'size', 'sky', 'skyRMS', 'plot', 'stats', 'redosegim', 'roughpedestal', 'haralickstats', 'groupby', 'box', 'groupstats', 'objects', 'redosky')
+
+If users provide one or both of \option{segim} and/or \option{segim_orig} then these will be used for total and/or colour photometry respectively. How this interacts with the presence of a non NULL detection image is complicated, so read the below:
+
+If you are providing a detection image (i.e. band) and are providing a \option{segim_orig} but no \option{segim} then the segments can be dilated based on the target detection image, and both total and colour photometry can be extracted in multiband mode. If providing a \option{segim} but no \option{segim_orig} then only total photometry can be extracted in multiband mode and \option{iters_det} will be forced to 0 (\option{docol} will be set to FALSE). If providing a \option{segim} and a \option{segim_orig} then the \option{segim_orig} will be used on the detection image and dilated as per \option{iters_det} for the detection segstats, but regardless of this dilation the user provided \option{segim} will be used for total photometry in multiband mode.
+
+If you are not providing a detection image (i.e. band) and are providing a \option{segim_orig} but no \option{segim} then only colour photometry can be extracted in multiband mode (\option{dotot} will be set to FALSE). If providing a \option{segim} but no \option{segim_orig} then only total photometry can be extracted in multiband mode  (\option{docol} will be set to FALSE). If providing a \option{segim} and a \option{segim_orig} then both total and colour photometry can be extracted in multiband mode.
 }
 \value{
 An object list of class 'profoundmulti' containing:

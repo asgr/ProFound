@@ -76,11 +76,6 @@ profoundProFound(matrix(rnorm(1e6),1e3))
 
 The output is then a reference of the false positive rate, since we have not injected any sources into the images. The fact we find 7,012 false detections mean we expect 7 false positives per 1e6 pixels (the size in pixels of the input matrix). To compare against any target data we need to adjust the magnitudes by the sky RMS magnitude level, i.e. add on profoundFlux2Mag(skyRMS, 0) (if the zero point is 0 for our target data). See Examples for a comparison to our included VIKING data.
 }
-\source{
-FPtest={}
-
-for(i in 1:1000){FPtest=rbind(FPtest,profoundProFound(matrix(rnorm(1e6),1e3))$segstats)}
-}
 \examples{
 \dontrun{
 image=readFITS(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package="ProFound"))
