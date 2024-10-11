@@ -21,7 +21,7 @@ jobs:
           - {os: windows-latest, r: 'release'}
           - {os: macOS-latest, r: 'release'}
           - {os: macOS-latest, r: 'devel'}
-          - {os: ubuntu-16.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/xenial/latest"}
+          - {os: ubuntu-24.04, r: 'release', rspm: "https://packagemanager.posit.com/cran/__linux__/noble/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -29,9 +29,9 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@master
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
 
