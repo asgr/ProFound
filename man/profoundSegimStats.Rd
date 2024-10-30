@@ -100,10 +100,10 @@ A data.frame with columns:
 
   \item{segID}{Segmentation ID, which can be matched against values in \option{segim}}
   \item{uniqueID}{Unique ID, which is fairly static and based on the xmax and ymax position}
-  \item{xcen}{Flux weighted x centre}
-  \item{ycen}{Flux weighted y centre}
-  \item{xmax}{x position of maximum flux}
-  \item{ymax}{y position of maximum flux}
+  \item{xcen}{Flux weighted x centre (R coord, were pixel centres are half-integer)}
+  \item{ycen}{Flux weighted y centre (R coord, were pixel centres are half-integer)}
+  \item{xmax}{x position of maximum flux (R coord, were pixel centres are half-integer)}
+  \item{ymax}{y position of maximum flux (R coord, were pixel centres are half-integer)}
   \item{RAcen}{Flux weighted degrees Right Ascension centre (only present if a \option{keyvalues} is provided)}
   \item{Deccen}{Flux weighted degrees Declination centre (only present if a \option{keyvalues} is provided)}
   \item{RAmax}{Right Ascension of maximum flux (only present if a \option{keyvalues} is provided)}

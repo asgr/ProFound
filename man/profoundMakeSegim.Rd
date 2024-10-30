@@ -120,7 +120,7 @@ A list containing:
   \item{objects}{Logical matrix; the object map matched pixel by pixel to \option{image}. 1 means there is an object at this pixel, 0 means it is a sky pixel. Can be used as a mask in various other functions that require objects to be masked out.}
   \item{sky}{The estimated sky level of the \option{image}.}
   \item{skyRMS}{The estimated sky RMS of the \option{image}.}
-  \item{segstats}{If \option{stats}=TRUE this is a data.frame (see below), otherwise NULL.}
+  \item{segstats}{If \option{stats}=TRUE this is a data.frame (see \code{\link{profoundSegimStats}}), otherwise NULL.}
   \item{keyvalues}{The keyvalues provided, if missing this is NULL.}
   \item{call}{The original function call.}
   
