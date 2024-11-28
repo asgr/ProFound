@@ -364,6 +364,8 @@ profoundMultiBand = function(inputlist=NULL, dir='', segim=NULL, segim_orig=NULL
       # For reference we run ProFound with the stacked sky added back in, passing it the stacked sky too.
       # Mask is NULL since any masked pixels will already be NA in the image.
       
+      dotsdetect = dotsdetect[!names(dotsdetect) %in% c('mask', 'iters', 'magzero', 'sky', 'skyRMS', 'box', 'grid', 'boxadd', 'deblend', 'pixelcov')]
+      
       pro_detect = do.call("profoundProFound", c(list(image=quote(detect_image_stack$image + detect_sky_stack$image), segim=quote(segim), mask=NULL, keyvalues=keyvalues, iters=iters_det, magzero=detect_magzero[1], sky=quote(detect_sky_stack$image), skyRMS=quote(detect_image_stack$skyRMS), box=max(detect_box), grid=min(detect_grid), boxadd=max(detect_boxadd), deblend=FALSE, groupstats=(groupstats | dogrp), groupby=groupby_det, pixelcov=FALSE), dotsdetect))
       
       # Reset image pixels to NA if masked.
