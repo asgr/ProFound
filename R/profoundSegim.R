@@ -826,8 +826,8 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   mag_app = profoundFlux2Mag(flux = fluxout$flux_app, magzero = magzero)
   
   if(any(fluxout$flux==0, na.rm=TRUE)){
-    fluxout$N50seg[fluxout$flux==0]=fluxout$N100seg[fluxout$flux==0]
-    fluxout$N90seg[fluxout$flux==0]=fluxout$N100seg[fluxout$flux==0]
+    fluxout$N50seg[which(fluxout$flux==0)]=fluxout$N100seg[which(fluxout$flux==0)]
+    fluxout$N90seg[which(fluxout$flux==0)]=fluxout$N100seg[which(fluxout$flux==0)]
   }
   
   if(hassky){
