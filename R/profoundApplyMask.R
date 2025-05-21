@@ -184,3 +184,12 @@ profoundDrawMask = function(image, poly=NULL, invert_mask = FALSE, mode='draw', 
   
   return(list(mask=mask, image=image, poly=output))
 }
+
+profoundCoverMask = function(segim, mask){
+  temp_DT = data.table(segID=as.integer(segim), mask=as.integer(mask))
+  
+  orig_N = mask_N = frac = NULL
+  cover = temp_DT[,list(orig_N = .N, mask_N = sum(mask <= 0L)),by=segim]
+  cover[,frac:= mask_N/orig_N]
+  return(as.data.frame(cover))
+}

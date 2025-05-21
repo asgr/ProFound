@@ -2,12 +2,13 @@
 \alias{profoundApplyMask}
 \alias{profoundMakeMask}
 \alias{profoundDrawMask}
+\alias{profoundCoverMask}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Apply a Mask to an Image
 }
 \description{
-Allows the application of a scale-able and rotate-able mask to an image.
+Various mask related functions. profoundApplyMask allows the application of a scale-able and rotate-able mask to an image.
 }
 \usage{
 profoundApplyMask(image = NULL, mask = 'disc', xcen = xsize/2, ycen = ysize/2,
@@ -17,6 +18,8 @@ profoundMakeMask(size = 101, shape = 'disc')
 
 profoundDrawMask(image, poly = NULL, invert_mask = FALSE, mode = 'draw', type = 'pix',
   poly.col = 'red', ...)
+  
+profoundCoverMask(segim, mask)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,6 +28,9 @@ Numeric matrix or Rfits_image; the image we want to apply the \option{mask} to. 
 }
   \item{mask}{
 Numeric matrix or scalar character; the input mask. If a matrix input, any values above 0 will be considered pixels that we wisk to mask. Note for centreing to make sense the provided mask should nearly always be odd dimensions (since even dimensions will have ambiguous application solutions at pixel centres). If character then an internal mask maker is called as per \code{profoundMakeMask}, where the \option{size} argument is the maximum of \option{xsize} or \option{ysize}, and the character scalar of \option{mask} is passed into the \option{shape} argument. The default therfore creates a circular mask of diameter 101.
+}
+  \item{segim}{
+Integer matrix; required, the segmentation map of the \option{image}. This matrix *must* be the same dimensions as \option{mask}.
 }
   \item{xcen}{
 Numeric scalar/vector; the x position to centre the mask at (i.e. it will be centred on dim(mask)[1]/2). If a vector then multiple masks will be applied to the image.
@@ -73,9 +79,17 @@ Additional arguments to pass on to the image plotting routine.
 }
 }
 \details{
+\code{profoundApplyMask} applies a masking brush to multiple locations in an image. A typical use case would be we have a masking brush for a star and we want to scale and apply this to different regions. Details:
+
 The masked values in the target output \option{image} are simply set to NA.
 
 When using vector arguments to apply multiple masks, \option{xcen} is used to define the number to apply. Other scalar valued inputs are repeated to match the length of \option{xcen}. In general you minimally need to provide \option{xcen} and \option{ycen} vectors, since positions to mask will usually be distributed around the target \option{image}.
+
+\code{profoundMakeMask} creates a simple masking brush.
+
+\code{profoundDrawMask} allows us to directly draw or check a polygon based (vector) mask.
+
+\code{profoundCoverMask} calculates what fraction of segment pixels are covered by a given mask.
 }
 \value{
 For \code{profoundApplyMask} a list containing:
@@ -83,11 +97,22 @@ For \code{profoundApplyMask} a list containing:
 \item{mask}{The final complex mask. Each masked region has a unique integer ID (the position within the \option{xcen} vector), where lower valued regions take precendence in overlap regions.}
 \item{image}{Same as the input \option{image} (if provided), except pixels flagged as masked based on the provided information are set to NA.}
 
+For \code{profoundMakeMask} a matrix of the minimal masking brush that can be used as an input to \code{profoundApplyMask}.
+
 For \code{profoundDrawMask} a list containing:
 
 \item{mask}{The final boolean mask based on the drawn or provided (via \option{poly}) mask polygon.}
 \item{image}{Same as the input \option{image} (if provided), except pixels flagged as masked based on the provided information are set to NA.}
 \item{poly}{Data.frame of mask vertices x/y and possibly RA/Dec (if appropriate).}
+
+For profoundCoverMask a data.frame containing:
+
+\item{segID}{The segID}
+\item{orig_N}{The number of segment pixels before masking.}
+\item{mask_N}{The number of segment pixels after masking.}
+\item{frac}{The unmasked fraction, i.e. mask_N/orig_N.}
+
+This is ordered by segID, where segID = 0 refers to sky pixels (where it might be of some interest to see what fraction of those are masked too).
 }
 \author{
 Aaron Robotham
