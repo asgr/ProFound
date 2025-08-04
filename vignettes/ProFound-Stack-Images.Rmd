@@ -1,5 +1,5 @@
 ---
-title: "ProFound: Stacking Images"
+title: "ProPane: Simple Stacking Images (old ProFound example)"
 author: "Aaron Robotham"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -71,7 +71,7 @@ model_test=list(
 model_test$sersic$mag[model_test$sersic$mag<15]=runif(length(which(model_test$sersic$mag<15)),15,22)
 model_test$pointsource$mag[model_test$pointsource$mag<15]=runif(length(which(model_test$pointsource$mag<15)),15,22)
 
-im_test<-profitMakeModel(modellist=model_test, psf=ExamplePSF, dim=c(1000,1000), magzero = 30)$z
+im_test = profitMakeModel(modellist=model_test, psf=ExamplePSF, dim=c(1000,1000), magzero = 30)$z
 ```
 
 Now we can add noise in a realistic manner. Image-1 is the nominal depth of a single Z-band VIKING image, whereas the others are each one quarter the depth (which gives the variance, hence a factor of two in standard-deviation) so the four of them should achieve the same depth when stacked.
@@ -102,7 +102,8 @@ pro_test2d=profoundProFound(im_test2d, skycut=1)
 We can now stack the images based on the sky and sky-RMS:
 
 ```{r, eval=evalglobal}
-stack=profoundMakeStack(image_list = list(im_test1, im_test2a, im_test2b, im_test2c, im_test2d), sky_list = list(pro_test1$sky, pro_test2a$sky, pro_test2b$sky, pro_test2c$sky, pro_test2d$sky), skyRMS_list = list(pro_test1$skyRMS, pro_test2a$skyRMS, pro_test2b$skyRMS, pro_test2c$skyRMS, pro_test2d$skyRMS), magzero_in=c(30,30,30,30,30), magzero_out=30)
+library(ProPane)
+stack=propaneStackFlatInVar(image_list = list(im_test1, im_test2a, im_test2b, im_test2c, im_test2d), sky_list = list(pro_test1$sky, pro_test2a$sky, pro_test2b$sky, pro_test2c$sky, pro_test2d$sky), skyRMS_list = list(pro_test1$skyRMS, pro_test2a$skyRMS, pro_test2b$skyRMS, pro_test2c$skyRMS, pro_test2d$skyRMS), magzero_in=c(30,30,30,30,30), magzero_out=30)
 ```
 
 Finally we can re-run **ProFound** to check the depth achieved. If the input standard-deviation of image-1 is 10, and each of the other 4 images is 20, then the final achieved sky-RMS should be $\frac{1}{\sqrt{\frac{1}{10^2}+\frac{1}{20^2}+\frac{1}{20^2}+\frac{1}{20^2}+\frac{1}{20^2}}}=\frac{1}{\sqrt{\frac{4}{20^2}+\frac{1}{10^2}}}=\frac{1}{\sqrt{\frac{8}{400}}} \sim 7.07$.

@@ -90,7 +90,11 @@ magimage(pro_Y$image); magimage(mask_Y, magmap=F, col=c(NA,hsv(alpha=0.3)),add=T
 Now we can do some stacking. We try rZ, riZ and riZY variants.
 
 ```{r}
-stack_rZ = profoundMakeStack(image_list = list(pro_r$image, pro_Z$image), 
+library(ProPane)
+```
+
+```{r}
+stack_rZ = propaneStackFlatInVar(image_list = list(pro_r$image, pro_Z$image), 
                          sky_list = list(pro_r$sky, pro_Z$sky), 
                          skyRMS_list = list(pro_r$skyRMS, pro_Z$skyRMS),
                          mask_list = list(mask_r, mask_Z),
@@ -99,7 +103,7 @@ stack_rZ = profoundMakeStack(image_list = list(pro_r$image, pro_Z$image),
 ```
 
 ```{r}
-stack_riZ = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$image), 
+stack_riZ = propaneStackFlatInVar(image_list = list(pro_r$image, pro_i$image, pro_Z$image), 
                          sky_list = list(pro_r$sky, pro_i$sky, pro_Z$sky), 
                          skyRMS_list = list(pro_r$skyRMS, pro_i$skyRMS, pro_Z$skyRMS),
                          mask_list = list(mask_r, mask_i, mask_Z),
@@ -108,7 +112,7 @@ stack_riZ = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$
 ```
 
 ```{r}
-stack_riZY = profoundMakeStack(image_list = list(pro_r$image, pro_i$image, pro_Z$image, pro_Y$image), 
+stack_riZY = propaneStackFlatInVar(image_list = list(pro_r$image, pro_i$image, pro_Z$image, pro_Y$image), 
                          sky_list = list(pro_r$sky, pro_i$sky, pro_Z$sky, pro_Y$sky), 
                          skyRMS_list = list(pro_r$skyRMS, pro_i$skyRMS, pro_Z$skyRMS, pro_Y$skyRMS),
                          mask_list = list(mask_r, mask_i, mask_Z, mask_Y),

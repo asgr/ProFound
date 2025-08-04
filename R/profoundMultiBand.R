@@ -402,17 +402,25 @@ profoundMultiBand = function(inputlist=NULL, dir='', segim=NULL, segim_orig=NULL
   if(dotot | docol | dogrp){
     
     if(has_detect){
+      
       if(dotot){
         cat_tot = data.frame(segID=pro_detect$segstats$segID)
+      }else{
+        cat_tot = NULL
       }
       
       if(docol){
         cat_col = data.frame(segID=pro_detect$segstats$segID)
+      }else{
+        cat_col = NULL
       }
       
       if(dogrp){
         cat_grp = data.frame(groupID=pro_detect$group$groupsegID$groupID)
+      }else{
+        cat_grp = NULL
       }
+      
     }else{
       cat_tot = NULL
       cat_col = NULL
