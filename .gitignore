@@ -39,3 +39,6 @@ vignettes/rsconnect
 # Rcp stuff
 src/*.so
 src/*.o
+
+# .DS_Store stuff
+.DS*

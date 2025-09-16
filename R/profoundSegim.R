@@ -153,7 +153,7 @@
   mode(cenfrac)='numeric'
   mode(cenfrac)='numeric'
   
-  invisible(list(flux=sumflux, flux_app=sumflux_app, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
+  return(list(flux=sumflux, flux_app=sumflux_app, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
 .fluxcalcmin=function(flux){
@@ -191,8 +191,10 @@
   }
   
   rad2 = (x - xcen)^2 + (y - ycen)^2
-    
-  return(invisible(sum(flux[rad2 < rad_app^2], na.rm=TRUE)))
+  sel = which(rad2 < rad_app^2)
+  rad_out = max(rad2[sel])
+  sel_out = which(rad2 == rad_out)
+  return(list(flux_app=sum(flux[sel], na.rm=TRUE), flux_min = mean(flux[sel_out]), N=length(sel)))
 }
 
 profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, 
@@ -706,11 +708,11 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   if(!is.na(app_diam)){
     Rapp = (app_diam / 2 / pixscale)
     Napp = ceiling(pi * Rapp^2)
-    Sapp = Napp/(pi * Rapp^2) #to correct for discreteness issues
+    Aapp = (pi * Rapp^2)
   }else{
     Napp = NA
     Rapp = NA
-    Sapp = NA
+    Aapp = NA
   }
   
   if(!is.null(sky)){
@@ -819,7 +821,9 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   if(!is.na(Rapp)){
     #newer more accurate fibre mag calculation
-    fluxout$flux_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp), by=segID]$V1*Sapp
+    temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp), by=segID]
+    #Here we correct by the lowest value pixel in the outer aperture
+    fluxout$flux_app = temp_app$flux_app - (temp_app$N - Aapp)*temp_app$flux_min
   }
   
   mag = profoundFlux2Mag(flux = fluxout$flux, magzero = magzero)
