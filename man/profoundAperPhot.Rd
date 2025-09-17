@@ -9,7 +9,7 @@ Allows you to extract one or many aperture fluxes from a target image.
 }
 \usage{
 profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, tar = NULL,
-  pixscale = 1, magzero = 0, correction = TRUE, verbose = FALSE)
+  pixscale = 1, magzero = 0, correction = TRUE, centype='max', verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,6 +33,9 @@ Numeric scalar; the magnitude zero point. What this implies depends on the magni
 }
   \item{correction}{
 Logical; should discreteness and fractional coverage corrections be applied to the aperture flux (changing the output \option{flux_app_X} and \option{mag_app_X} columns). Unless you really know what you are doing, this should be left on TRUE (and in this case do not apply additional corrections). See Details.
+}
+  \item{centype}{
+Character scalar; type of automatic centre to use per segment. Either 'max' (the location of the peak pixel flux in the segment), or 'mean' (the weighted flux centre). 'max' will always be exactly in the centre of the peak flux pixel, whereas 'mean' can be any fractional pixel position. This can impact the aperture photometry in subtle ways. 
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user?

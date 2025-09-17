@@ -1,7 +1,7 @@
 .fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA,
                         rad_app=NULL, centype='max'){
   if(is.na(xcen)){
-    if(centype == 'wt'){
+    if(centype == 'wt' | centype == 'mean'){
       xcen = .meanwt(x, flux)
     }else if(centype == 'max'){
       xcen = x[which.max(flux)]
@@ -9,7 +9,7 @@
   }
   
   if(is.na(ycen)){
-    if(centype == 'wt'){
+    if(centype == 'wt' | centype == 'mean'){
       ycen = .meanwt(y, flux)
     }else if(centype == 'max'){
       ycen = y[which.max(flux)]
@@ -29,7 +29,8 @@
 }
 
 profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, tar=NULL,
-                           pixscale=1, magzero=0, correction=TRUE, verbose=FALSE){
+                           pixscale=1, magzero=0, correction=TRUE, centype='max',
+                           verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
       keyvalues = image$keyvalues
@@ -125,7 +126,8 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, tar=NULL,
   }else{
     output = foreach(j = seq_along(Rapp), .combine='cbind')%do%{
       #newer more accurate fibre mag calculation
-      temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp[j]), by=segID]
+      temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp[j],
+                                       centype=centype), by=segID]
       #Here we correct by the lowest value pixel in the outer aperture
       if(correction){
         temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
