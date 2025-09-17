@@ -37,13 +37,13 @@ User provided estimate of the absolute sky level. Can be a scalar or a matrix ma
 User provided estimate of the RMS of the sky. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel).
 }
   \item{magzero}{
-Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
+Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega).
 }
   \item{gain}{
 Numeric scalar; the gain (in photo-electrons per ADU). This is only used to compute object shot-noise component of the flux error (else this is set to 0).
 }
   \item{pixscale}{
-Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
+Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). Note if this is not set then an attempt is made to determine the \option{pixelscale} from the detected WCS information. If provided along with \option{pixscale} then the surface brightness output will represent mag/asec^2.
 }
   \item{keyvalues}{
 List; header values to be used for the WCS.

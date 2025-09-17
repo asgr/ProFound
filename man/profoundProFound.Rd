@@ -86,13 +86,13 @@ Integer scalar; the maximum number of curve of growth dilations that should be m
 Numeric scalar; After the curve of growth dilations, \option{threshold} is the relative change of the converging property (see \option{converge}) that flags convergence. If consecutive iterations have a relative difference within this ratio then the dilation is stopped, and this iteration is used to define the segmentation of the object. The effect of this is that different objects will be dilated for a different number of iterations. Usually fainter sources require more. Note from v1.4: covergence has to be monotonically decreasing as dilation occurs, i.e. the flux can grow from x1.4 to x1.1 (next iteration), but not x1.4 to x2. Dilations with increasing growth rate are ignored.
 }
   \item{magzero}{
-  Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega). If provided along with \option{pixscale} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
+Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega).
 }
   \item{gain}{
 Numeric scalar; the gain (in photo-electrons per ADU). This is only used to compute object shot-noise component of the flux error (else this is set to 0).
 }
   \item{pixscale}{
-  Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). If set to 1 (default), then the output is in terms of pixels, otherwise it is in arcseconds. If provided along with \option{magzero} then the flux and surface brightness outputs will represent magnitudes and mag/asec^2.
+Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). Note if this is not set then an attempt is made to determine the \option{pixelscale} from the detected WCS information. If provided along with \option{magzero} then the surface brightness output will represent mag/asec^2.
 }
   \item{sky}{
 User provided estimate of the absolute sky level. If this is not provided then it will be computed internally using \code{\link{profoundMakeSkyGrid}}. Can be a scalar or a matrix matching the dimensions of \option{image} (allows values to vary per pixel). This will be subtracted off the \option{image} internally, so only provide this if the sky does need to be subtracted!
@@ -245,7 +245,7 @@ Character scalar, only relevent when \option{deblendtype}='psf'. Either 'extende
 Character scaler; specifies whether fluxes will be output in Jansky / MicroJansky ('Jansky' / 'microjansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use Jansky / MicroJansky if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
 }
   \item{app_diam}{
-Numeric scalar; the diameter in arc seconds to use for circular aperture photometry. This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}. The default of NA means this is ignored (and \option{flux_app} / \option{mag_app} will be NA).
+Numeric scalar; the diameter in arc seconds to use for circular aperture photometry (hence 'app'). This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} in \option{segstats}. The default of NA means this is ignored (and \option{flux_app} / \option{mag_app} will be NA).
 }
   \item{Ndeblendlim}{
 Integer scalar; the limit for the number of pixels to consider in a deblending complex (Ngroup [number of segments in the group] x Npix [number of pixels in the group]). You might want to set this to a value similar to allowable machine memory (1e8 - 1e9 often) just to avoid extreme cases (e.g. large stars with lots of pixels and lots of segments). Only relevant if \option{deblend}=TRUE, see \code{\link{profoundFluxDeblend}}.

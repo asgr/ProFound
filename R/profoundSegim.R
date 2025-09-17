@@ -173,30 +173,6 @@
   }
 }
 
-.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NULL, ycen=NULL, rad_app=NULL, centype='max'){
-  if(is.null(xcen)){
-    if(centype == 'wt'){
-      xcen = .meanwt(x, flux)
-    }else if(centype == 'max'){
-      xcen = x[which.max(flux)]
-    }
-  }
-  
-  if(is.null(ycen)){
-    if(centype == 'wt'){
-      ycen = .meanwt(y, flux)
-    }else if(centype == 'max'){
-      ycen = y[which.max(flux)]
-    }
-  }
-  
-  rad2 = (x - xcen)^2 + (y - ycen)^2
-  sel = which(rad2 < rad_app^2)
-  rad_out = max(rad2[sel])
-  sel_out = which(rad2 == rad_out)
-  return(list(flux_app=sum(flux[sel], na.rm=TRUE), flux_min = mean(flux[sel_out]), N=length(sel)))
-}
-
 profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut=3, 
                            tolerance=4, ext=2, reltol=0, cliptol=Inf, sigma=1, smooth=TRUE, 
                            SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, 
@@ -758,7 +734,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   #segvec=which(tabulate(segim)>0)
   #segvec=segvec[segvec>0]
   
-  segsel=which(segim>0)
+  segsel = which(segim>0)
   
   xloc = rep(1:xlen, times = ylen)[segsel]
   yloc = rep(1:ylen, each = xlen)[segsel]
