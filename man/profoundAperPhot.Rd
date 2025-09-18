@@ -8,7 +8,7 @@ Aperture Fluxes
 Allows you to extract one or many aperture fluxes from a target image.
 }
 \usage{
-profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, tar = NULL,
+profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL, tar = NULL,
   pixscale = 1, magzero = 0, correction = TRUE, centype='max', verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -21,6 +21,9 @@ Integer matrix; a specified segmentation map of the image. This is required.
 }
   \item{app_diam}{
 Numeric vector; the diameter in arc seconds to use for circular aperture photometry (hence 'app'). This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} appended by the vector number.
+}
+  \item{keyvalues}{
+List; header values to be used for the WCS. This can be useful if you have split up your matrix image data (passing that to \option{image}) but still have standalone \option{keyvalues} available to use. Note if \option{keyvalues} are found attached to the \option{image}
 }
   \item{tar}{
 Data.frame; allows you to target only specific \option{segID} and optionally provide the target \option{xcen} and \option{ycen} to use (otherwise these are determined automatically based on the brightest pixel in each segment). Note if providing positions both \option{xcen} and \option{ycen} must be provided for all segIDs (nothing should be set to NA). See Examples.

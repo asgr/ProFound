@@ -16,7 +16,10 @@
     }
   }
   
-  rad2 = (x - xcen)^2 + (y - ycen)^2
+  if(xcen != 0 & ycen != 0){
+    rad2 = (x - xcen)^2 + (y - ycen)^2
+  }
+  
   sel = which(rad2 < rad_app^2)
   rad_out = max(rad2[sel])
   sel_out = which(rad2 == rad_out)
@@ -28,7 +31,7 @@
   return(list(flux_app=flux_app, flux_min=flux_min, N=length(sel)))
 }
 
-profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, tar=NULL,
+profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, tar=NULL,
                            pixscale=1, magzero=0, correction=TRUE, centype='max',
                            verbose=FALSE){
   if(!is.null(image)){
@@ -83,10 +86,12 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, tar=NULL,
     segsel = which(segsel, arr.ind = TRUE)
     
     if(!is.null(tar$xcen)){
+      # + 0.5 since arr.ind is offset compared to our normal image definition
       tar[,'xcen'] = tar[,'xcen'] + 0.5
     }
     
     if(!is.null(tar$ycen)){
+      # + 0.5 since arr.ind is offset compared to our normal image definition
       tar[,'ycen'] = tar[,'ycen'] + 0.5
     }
   }
@@ -143,15 +148,6 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, tar=NULL,
   }
   
   colnames(output) = paste(colnames(output), rep(1:length(Rapp), each=5), sep='_')
-  
-  #output_flux = as.data.frame(output)
-  #colnames(output_flux) = paste('flux_app', 1:dim(output_flux)[2], sep='_')
-  
-  #output_mag = foreach(i = 1:dim(output_flux)[2])%do%{
-  #  profoundFlux2Mag(flux = output_flux[,i], magzero = magzero)
-  #}
-  #output_mag = as.data.frame(output_mag)
-  #colnames(output_mag) = paste('mag_app', 1:dim(output_mag)[2], sep='_')
   
   output = cbind(segID=segID_out, output)
   

@@ -29,7 +29,7 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{image}{
-Numeric matrix; required, the image we want to analyse. If \option{image} is a list as created by \code{Rfits_read_image}  then the image part of these lists is passed to \option{image} and the correct keyvalues part is passed to \option{keyvalues}. Note, image NAs are treated as masked pixels.
+Numeric matrix; required, the image we want to analyse. If \option{image} is a class Rfits_image or Rfits_pointer list as created by \code{Rfits_read_image}  then the image part of these lists is passed to \option{image} and the correct keyvalues part is passed to \option{keyvalues}. Note, image NAs are treated as masked pixels.
 }
   \item{segim}{
 Integer matrix; a specified segmentation map of the image. This matrix *must* be the same dimensions as \option{image} if supplied. If this option is used then \code{profoundProFound} will not compute its initial segmentation map using \code{\link{profoundMakeSegim}}, which is then dilated. Instead it will use the one passed through \option{segim}.
@@ -173,7 +173,7 @@ Logical; should the cutout centre for the sky shift from \option{loc} of the des
 Logical; should the cutout be padded with image data until it meets the desired \option{box} size (if \option{shiftloc} is true) or padded with NAs for data outside the image boundary otherwise? (See \code{\link{magcutout}} for details).
 }
   \item{keyvalues}{
-List; header values to be used for the WCS.
+List; header values to be used for the WCS. This can be useful if you have split up your matrix image data (passing that to \option{image}) but still have standalone \option{keyvalues} available to use. Note if \option{keyvalues} are found attached to the \option{image}
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user? Since a big \option{image} can take a long time to run, you might want to monitor progress.  
