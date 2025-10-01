@@ -80,16 +80,28 @@ new_app = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
 magplot(profound$segstats$mag_app, profound$segstats$mag_app -new_app$mag_app_2,
   ylim=c(-0.1,0.1), xlab='Pro mag_app', ylab='Pro - Aper (mag_app)')
 
-tar = data.frame(segID=1:5)
+tar2 = data.frame(segID=1:5)
 new_app2 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
-  app_diam=1:3, magzero=30, tar=tar)
+  app_diam=1:3, magzero=30, tar=tar2)
 new_app2
   
-#we can also target specific regions (but these then need to overlap with the segID):
+#we can also target specific regions (but these then need to overlap with the segID).
+#here we use xcen and ycen, which is different the default centype (max):
 
-tar2 = profound$segstats[1:8, c("segID", "xcen", "ycen")]
+tar3 = profound$segstats[1:8, c("segID", "xcen", "ycen")]
 new_app3 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
-                            app_diam=1:3, magzero=30, tar=tar2)
+                            app_diam=1:3, magzero=30, tar=tar3)
 new_app3
+
+#here we use xmax and ymax, which is the same as the default centype (max):
+
+tar4 = profound$segstats[1:8, c("segID", "xmax", "ymax")]
+new_app4 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
+                            app_diam=1:3, magzero=30, tar=tar4)
+new_app4
+
+#Different positions do make some difference:
+magplot(new_app3$mag_app_2, new_app3$mag_app_2 - new_app4$mag_app_2,
+  ylim=c(-0.1,0.1), xlab='Pro mag_app', ylab='Cen - Max (mag_app)')
 }
 \concept{ aperture }

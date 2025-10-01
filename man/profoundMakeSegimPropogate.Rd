@@ -38,7 +38,7 @@ Further arguments to be passed to \code{\link{magimage}}. Only relevant is \opti
 }
 }
 \details{
-This function propgates out the identified segments into the rest of the \option{image}, only region identified in the \option{mask} will not be assigned to a segment. To assign pixels a mixture of the Euclidian distance and the local gradient is used (as described below). The purpose of this routine is to identify all pixels in the image with their most likely segment (whether nominally object or sky pixel). The true sky pixels identified as belonging to a segment should also provide the best possible local estimate of the sky level.
+This function propagates out the identified segments into the rest of the \option{image}, only region identified in the \option{mask} will not be assigned to a segment. To assign pixels a mixture of the Euclidian distance and the local gradient is used (as described below). The purpose of this routine is to identify all pixels in the image with their most likely segment (whether nominally object or sky pixel). The true sky pixels identified as belonging to a segment should also provide the best possible local estimate of the sky level.
 
 For internal completeness, the below description is taken almost verbatim from the EBImage propagate function.
 

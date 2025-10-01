@@ -16,9 +16,7 @@
     }
   }
   
-  if(xcen != 0 & ycen != 0){
-    rad2 = (x - xcen)^2 + (y - ycen)^2
-  }
+  rad2 = (x - xcen)^2 + (y - ycen)^2
   
   sel = which(rad2 < rad_app^2)
   rad_out = max(rad2[sel])
