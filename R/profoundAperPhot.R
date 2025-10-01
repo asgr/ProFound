@@ -22,9 +22,14 @@
   rad_out = max(rad2[sel])
   sel_out = which(rad2 == rad_out)
   
-  flux_app=sum(flux[sel], na.rm=TRUE)
-  flux_min = mean(flux[sel_out])
-  flux_min[flux_min < 0] = 0 #don't want to penalise when in the sky noise
+  flux_app = sum(flux[sel], na.rm=TRUE)
+  flux_min = mean(flux[sel_out], na.rm=TRUE)
+  
+  if(is.na(flux_min)){
+    flux_min = 0 #don't want to penalise when masked
+  }else if(flux_min < 0){
+    flux_min = 0 #don't want to penalise when in the sky noise 
+  }
   
   return(list(flux_app=flux_app, flux_min=flux_min, N=length(sel)))
 }
