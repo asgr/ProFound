@@ -5,6 +5,8 @@
       xcen = .meanwt(x, flux)
     }else if(centype == 'max'){
       xcen = x[which.max(flux)]
+    }else{
+      stop('centype must be max or mean!')
     }
   }
   
@@ -13,6 +15,8 @@
       ycen = .meanwt(y, flux)
     }else if(centype == 'max'){
       ycen = y[which.max(flux)]
+    }else{
+      stop('centype must be max or mean!')
     }
   }
   
