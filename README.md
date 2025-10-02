@@ -44,6 +44,28 @@ Now you have the development version of **R** installed (hopefully) I would also
 
 If you wish to use the command line version of **R** on Mac (why?!) then you might need to separately install **XQuartz** and set the DISPLAY system variable via something like export DISPLAY=:0 (this is not an issue for most people however).
 
+### Build Tools
+
+Some of **ProFound** requires compiling, so here is what you might need depending on your platform.
+
+#### Linux Users
+
+You know what you are doing. You do you!
+
+#### Mac Users
+
+You should not need to install separate compilers with any **R** after v4.0.0, but in case you are stuck on a museum version you can follow the extra instructions here:
+
+[https://mac.r-project.org/tools/](https://mac.r-project.org/tools/)
+
+#### Windows Users
+
+Windows users might need to go through a couple of additional steps depending on how their system is set up, but most likely you will need to at least install *Rtools* for later parts of this course, which are available at [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/) and follow the instructions about how to link these into your system path. You will know it is working because the following will not be empty:
+
+```R
+Sys.which("make")
+```
+
 ### Getting ProFound
 
 Source installation from GitHub should be easy:
@@ -85,9 +107,9 @@ R CMD install ProFound_X.Y.Z.tar.gz
 
 where X, Y and Z should be set as appropriate for the version downloaded (check the name of the file basically).
 
-If none of the above works then you should consider burning your computer in sacrifice to the IO Gods. Then buy a newer better computer, and try all the above steps again.
+If none of the above works then you should consider burning your computer in sacrifice to the IO Gods. Then buy a newer *better* computer, and try all the above steps again.
 
-Failing all of the above, please email me for help.
+Failing all of the above, please email me for help (or perhaps raise an Issue here, if it really does not seem like a local issue).
 
 #### Package Dependencies
 
