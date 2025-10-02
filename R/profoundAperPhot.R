@@ -25,8 +25,8 @@
   flux_app = sum(flux[sel], na.rm=TRUE)
   flux_min = mean(flux[sel_out], na.rm=TRUE)
   
-  if(is.na(flux_min)){
-    flux_min = 0 #don't want to penalise when masked
+  if(!isTRUE(is.finite(flux_min))){ #this catches NA, NaN, NULL, Inf events
+    flux_min = 0 #don't want to penalise when masked or other weird events
   }else if(flux_min < 0){
     flux_min = 0 #don't want to penalise when in the sky noise 
   }
