@@ -1,4 +1,4 @@
-.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='max'){
+.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='mean'){
   if(is.na(xcen)){
     if(centype == 'wt' | centype == 'mean'){
       xcen = .meanwt(x, flux)
@@ -42,7 +42,7 @@
 }
 
 profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, tar=NULL,
-                           pixscale=1, magzero=0, correction=TRUE, centype='max', fluxtype='Raw',
+                           pixscale=1, magzero=0, correction=TRUE, centype='mean', fluxtype='Raw',
                            verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
@@ -184,4 +184,81 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
   output = cbind(segID=segID_tar, xcen=tar$xcen - 0.5, ycen=tar$ycen - 0.5, output)
   if(verbose){message('Done!')}
   return(output)
+}
+
+profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalues=NULL,
+                             pixscale=1, magzero=0, correction=TRUE, centype='mean',
+                             fluxtype='Raw', verbose=FALSE){
+  if(!is.null(image)){
+    if(inherits(image, 'Rfits_image')){
+      keyvalues = image$keyvalues
+      image = image$imDat
+    }else if(inherits(image, 'Rfits_pointer')){
+      keyvalues = image$keyvalues
+      image = image[,]$imDat
+    }else if(inherits(image, 'matrix')){
+      'Do nothing'
+    }else{
+      stop('As of ProFound v1.21.0 only Rfits_image FITS inputs are allowed. Please install from GitHub asgr/Rfits')
+    }
+  }else{
+    stop('Missing image - this is a required input!')
+  }
+  
+  if(!is.null(keyvalues)){
+    if(!inherits(keyvalues, 'Rfits_keylist')){
+      if(is.list(keyvalues)){
+        class(keyvalues) = 'Rfits_keylist'
+      }else{
+        stop('keyvalues is the wrong format- should be a list!')
+      }
+    }
+  }
+  
+  if(missing(pixscale) & !is.null(keyvalues)){
+    pixscale = pixscale(keyvalues)
+    if(verbose){message(paste('Extracted pixel scale from keyvalues provided:',signif(pixscale,4),'asec/pixel'))}
+  }else{
+    if(verbose){message(paste('Using suggested pixel scale:',signif(pixscale,4),'asec/pixel'))}
+  }
+  
+  if(is.null(segim)){
+    stop('Need segim!')
+  }
+  
+  fluxtype = tolower(fluxtype)
+  
+  if(fluxtype=='raw' | fluxtype=='adu' | fluxtype=='adus'){
+    if(verbose){message('Using raw flux units')}
+    fluxscale=1
+  }else if (fluxtype=='jansky'){
+    if(verbose){message('Using Jansky flux units (WARNING: magzero must take system to AB)')}
+    fluxscale=10^(-0.4*(magzero - 8.9))
+  }else if (fluxtype=='microjansky'){
+    if(verbose){message('Using Micro-Jansky flux units (WARNING: magzero must take system to AB)')}
+    fluxscale=10^(-0.4*(magzero - 23.9))
+  }else{
+    stop('fluxtype must be Jansky / Microjansky / Raw!')
+  }
+  
+  temp_arr = which(segim == 0L, arr.ind=TRUE)
+  temp_sel = sample(dim(temp_arr)[1], Nran)
+  
+  segim_ran = matrix(0L, dim(image)[1], dim(image)[2])
+  
+  segim_ran[temp_arr[temp_sel,]] = 1:Nran
+  
+  size = ceiling(max(app_diam)/pixscale) + 1L
+  if(size %% 2 == 0){
+    size = size + 1L
+  }
+  
+  segim_ran = profoundDilate(segim_ran, size = size)
+  segim_ran[segim > 0L] = 0L
+  
+  output = profoundAperPhot(image=image, segim=segim_ran, app_diam=app_diam, keyvalues=keyvalues,
+    pixscale=pixscale, magzero=magzero, correction=correction, centype=centype,
+    fluxtype=fluxtype, verbose=verbose)
+  
+  return(list(AperPhot = output, segim_ran=segim_ran))
 }

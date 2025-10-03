@@ -1,5 +1,6 @@
-\name{profoundAperPhot}
+\name{profoundAper}
 \alias{profoundAperPhot}
+\alias{profoundAperRan}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Aperture Fluxes
@@ -8,9 +9,13 @@ Aperture Fluxes
 Allows you to extract one or many aperture fluxes from a target image.
 }
 \usage{
-profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL, tar = NULL,
-  pixscale = 1, magzero = 0, correction = TRUE, centype='max', fluxtype = 'Raw',
-  verbose = FALSE)
+profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL,
+  tar = NULL, pixscale = 1, magzero = 0, correction = TRUE, centype = 'mean',
+  fluxtype = 'Raw', verbose = FALSE)
+  
+profoundAperRan(image = NULL, segim = NULL, app_diam = 1, Nran = 100,
+  keyvalues = NULL, pixscale = 1, magzero = 0, correction = TRUE,
+  centype = 'mean', fluxtype = 'Raw', verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +27,9 @@ Integer matrix; a specified segmentation map of the image. This is required.
 }
   \item{app_diam}{
 Numeric vector; the diameter in arc seconds to use for circular aperture photometry (hence 'app'). This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} appended by the vector number.
+}
+  \item{Nran}{
+Integer scalar; the number of random apertures to place in the sky (where \option{segim} is 0).  
 }
   \item{keyvalues}{
 List; header values to be used for the WCS. This can be useful if you have split up your matrix image data (passing that to \option{image}) but still have standalone \option{keyvalues} available to use. Note if \option{keyvalues} are found attached to the \option{image}
@@ -49,21 +57,31 @@ Logical; should verbose output be displayed to the user?
 }
 }
 \details{
-This reproduces the output of the \code{\link{profoundProFound}} \option{app_diam} aperture magnitude, but the advantage is being able to specify multiple \option{app_diam} and also target only certain segID and specify the precise xcen and ycen you wish to use.
+\code{profoundAperPhot} reproduces the output of the \code{\link{profoundProFound}} \option{app_diam} aperture magnitude, but the advantage is being able to specify multiple \option{app_diam} and also target only certain segID and specify the precise xcen and ycen you wish to use.
 
 Note by default \option{flux_app_X} and \option{mag_app_X} are already corrected by the fractional coverage \option{frac_app_X}. This is done by assessing how many pixels over or under the desired area the pixelated aperture is, and then using the mean of the outer aperture pixel flux to adjust \option{flux_out} (either increasing the raw flux if \option{frac_app_X} < 1, or decreasing the raw flux if \option{frac_app_X} > 1). For this reason users should not attempt their own additional correction when \option{correction} = TRUE.
+
+\code{profoundAperRan} places random apertures on the sky where \option{segim} is 0. Any non-zero pixels in \option{segim} are forced to be zero in the created \option{segim_ran}. It then returns the output of \code{profoundAperPhot} at these aperture positions, passing all the additional matching argument on. This can be used to asses pragmatic aperture errors based on the \option{image}, accounting for sky variability, skyRMS, undetected background sources, and covariance in pixel flux.
 }
 \value{
-Data.frame containing:
+\code{profoundAperPhot} returns data.frame containing:
 
 \item{segID}{Segmentation ID}
+\item{xcen}{The aperture x position}
+\item{ycen}{The aperture y position}
 \item{flux_app_X}{The raw flux (flux_app_1 etc)} 
 \item{mag_app_X}{The magnitude (mag_app_1 etc)}
+\item{SB_app_X}{The surface brightness in mag/asec^2 units (SB_app_1 etc)}
 \item{N_app_X}{The number of pixels falling in the aperture (N_app_1 etc)}
 \item{frac_app_X}{The area of \option{N_app_X} divided by target aperture area (N_app_1 etc)}
 \item{flux_min}{The mean pixel flux of the outer most (usually faintest) pixels in the aperture}
 
 Note the '_X' refers to the aperture by position in the input \option{app_diam} vector.
+
+\code{profoundAperRan} returns a list containing:
+
+\item{AperPhot}{The output of \code{profoundAperPhot} run on the random apertures.}
+\item{segim_ran}{The random apertures used, placed on the segmentation map.}
 }
 \author{
 Aaron Robotham
