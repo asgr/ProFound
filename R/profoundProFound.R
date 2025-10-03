@@ -40,10 +40,10 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     fluxscale=1
   }else if (fluxtype=='jansky'){
     if(verbose){message('Using Jansky flux units (WARNING: magzero must take system to AB)')}
-    fluxscale=10^(-0.4*(magzero-8.9))
+    fluxscale=10^(-0.4*(magzero - 8.9))
   }else if (fluxtype=='microjansky'){
     if(verbose){message('Using Micro-Jansky flux units (WARNING: magzero must take system to AB)')}
-    fluxscale=10^(-0.4*(magzero-23.9))
+    fluxscale=10^(-0.4*(magzero - 23.9))
   }else{
     stop('fluxtype must be Jansky / Microjansky / Raw!')
   }

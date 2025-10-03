@@ -9,7 +9,8 @@ Allows you to extract one or many aperture fluxes from a target image.
 }
 \usage{
 profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL, tar = NULL,
-  pixscale = 1, magzero = 0, correction = TRUE, centype='max', verbose = FALSE)
+  pixscale = 1, magzero = 0, correction = TRUE, centype='max', fluxtype = 'Raw',
+  verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,6 +40,9 @@ Logical; should discreteness and fractional coverage corrections be applied to t
 }
   \item{centype}{
 Character scalar; type of automatic centre to use per segment. Either 'max' (the location of the peak pixel flux in the segment), or 'mean' (the weighted flux centre). 'max' will always be exactly in the centre of the peak flux pixel, whereas 'mean' can be any fractional pixel position. This can impact the aperture photometry in subtle ways. 
+}
+  \item{fluxtype}{
+Character scaler; specifies whether fluxes will be output in Jansky / MicroJansky ('Jansky' / 'microjansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use Jansky / MicroJansky if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user?
@@ -74,7 +78,7 @@ image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 profound=profoundProFound(image, magzero=30, app_diam=2)
 
 new_app = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
-  app_diam=1:3, magzero=30)
+  app_diam=1:3, magzero=30, verbose=TRUE)
 
 #These should look the same
 magplot(profound$segstats$mag_app, profound$segstats$mag_app -new_app$mag_app_2,
@@ -82,7 +86,7 @@ magplot(profound$segstats$mag_app, profound$segstats$mag_app -new_app$mag_app_2,
 
 tar2 = data.frame(segID=1:5)
 new_app2 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
-  app_diam=1:3, magzero=30, tar=tar2)
+  app_diam=1:3, magzero=30, tar=tar2, verbose=TRUE)
 new_app2
   
 #we can also target specific regions (but these then need to overlap with the segID).
@@ -90,14 +94,14 @@ new_app2
 
 tar3 = profound$segstats[1:8, c("segID", "xcen", "ycen")]
 new_app3 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
-                            app_diam=1:3, magzero=30, tar=tar3)
+                            app_diam=1:3, magzero=30, tar=tar3, verbose=TRUE)
 new_app3
 
 #here we use xmax and ymax, which is the same as the default centype (max):
 
 tar4 = profound$segstats[1:8, c("segID", "xmax", "ymax")]
 new_app4 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
-                            app_diam=1:3, magzero=30, tar=tar4)
+                            app_diam=1:3, magzero=30, tar=tar4, verbose=TRUE)
 new_app4
 
 #Different positions do make some difference:

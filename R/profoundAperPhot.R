@@ -1,5 +1,4 @@
-.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA,
-                        rad_app=NULL, centype='max'){
+.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='max'){
   if(is.na(xcen)){
     if(centype == 'wt' | centype == 'mean'){
       xcen = .meanwt(x, flux)
@@ -20,7 +19,11 @@
     }
   }
   
-  rad2 = (x - xcen)^2 + (y - ycen)^2
+  if(xcen == 0 & ycen == 0){
+    rad2 = x^2 + y^2
+  }else{
+    rad2 = (x - xcen)^2 + (y - ycen)^2 
+  }
   
   sel = which(rad2 < rad_app^2)
   rad_out = max(rad2[sel])
@@ -39,7 +42,7 @@
 }
 
 profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, tar=NULL,
-                           pixscale=1, magzero=0, correction=TRUE, centype='max',
+                           pixscale=1, magzero=0, correction=TRUE, centype='max', fluxtype='Raw',
                            verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
@@ -78,12 +81,27 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
     stop('Need segim!')
   }
   
+  fluxtype = tolower(fluxtype)
+  
+  if(fluxtype=='raw' | fluxtype=='adu' | fluxtype=='adus'){
+    if(verbose){message('Using raw flux units')}
+    fluxscale=1
+  }else if (fluxtype=='jansky'){
+    if(verbose){message('Using Jansky flux units (WARNING: magzero must take system to AB)')}
+    fluxscale=10^(-0.4*(magzero - 8.9))
+  }else if (fluxtype=='microjansky'){
+    if(verbose){message('Using Micro-Jansky flux units (WARNING: magzero must take system to AB)')}
+    fluxscale=10^(-0.4*(magzero - 23.9))
+  }else{
+    stop('fluxtype must be Jansky / Microjansky / Raw!')
+  }
+  
   segID = x = y = flux = j = NULL
   
   Rapp = (app_diam / 2 / pixscale)
   Aapp = (pi * Rapp^2)
   
-  if(is.null(tar)){
+  if(is.null(tar$segID)){
     segsel = which(segim > 0, arr.ind = TRUE)
   }else{
     tar = as.data.frame(tar)
@@ -103,60 +121,67 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
     }
   }
   
+  segID_all = as.integer(segim[segsel])
+  
   tempDT = data.table(
-    segID = as.integer(segim[segsel]),
+    segID = segID_all,
     x = as.numeric(segsel[,1]),
     y = as.numeric(segsel[,2]),
     flux = as.numeric(image[segsel]),
     key = 'segID'
   )
   
-  segID_out = unique(tempDT$segID)
+  segID_tar = unique(tempDT$segID)
   
-  if(!is.null(tar$xcen) & !is.null(tar$ycen)){
-    for(i in 1:dim(tar)[1]){
-      if(!is.na(tar[i,'xcen']) & !is.na(tar[i,'ycen'])){
-        tempDT[segID == tar[i,'segID'], x := x - tar[i,'xcen']]
-        tempDT[segID == tar[i,'segID'], y := y - tar[i,'ycen']]
-      }
+  if(is.null(tar$xcen) | is.null(tar$ycen)){
+    if(centype == 'wt' | centype == 'mean'){
+      if(verbose){message('Computing mean flux weighted aperture position')}
+      xcen = tempDT[, .meanwt(x, flux), by=segID]$V1 #already has +0.5 pix offset
+      ycen = tempDT[, .meanwt(y, flux), by=segID]$V1 #already has +0.5 pix offset
+    }else if(centype == 'max'){
+      if(verbose){message('Computing max flux aperture position')}
+      xcen = tempDT[,x[which.max(flux)], by=segID]$V1 #already has +0.5 pix offset
+      ycen = tempDT[,y[which.max(flux)], by=segID]$V1 #already has +0.5 pix offset
     }
     
-    output = foreach(j = seq_along(Rapp), .combine='cbind')%do%{
-      #newer more accurate fibre mag calculation
-      temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j]), by=segID]
-      if(correction){
-        temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
-      }
-      mag_app = profoundFlux2Mag(flux = temp_app$flux_app, magzero = magzero)
-      return(data.frame(flux_app = temp_app$flux_app,
-                        mag_app = mag_app,
-                        N_app = temp_app$N,
-                        frac_app = temp_app$N/Aapp[j],
-                        flux_min = temp_app$flux_min)
-      )
-    }
+    tar = data.frame(segID=segID_tar, xcen=xcen, ycen=ycen)
   }else{
-    output = foreach(j = seq_along(Rapp), .combine='cbind')%do%{
-      #newer more accurate fibre mag calculation
-      temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp[j],
-                                       centype=centype), by=segID]
-      #Here we correct by the lowest value pixel in the outer aperture
-      if(correction){
-        temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
-      }
-      mag_app = profoundFlux2Mag(flux = temp_app$flux_app, magzero = magzero)
-      return(data.frame(flux_app = temp_app$flux_app,
-                        mag_app = mag_app,
-                        N_app = temp_app$N,
-                        frac_app = temp_app$N/Aapp[j],
-                        flux_min = temp_app$flux_min)
-             )
-    }
+    if(verbose){message('User provided tar table of fibre positions')}
   }
   
-  colnames(output) = paste(colnames(output), rep(1:length(Rapp), each=5), sep='_')
+  # for(i in 1:dim(tar)[1]){
+  #   tempDT[segID == tar[i,'segID'], x := x - tar[i,'xcen']]
+  #   tempDT[segID == tar[i,'segID'], y := y - tar[i,'ycen']]
+  # }
   
-  output = cbind(segID=segID_out, output)
+  match_segID = match(tempDT$segID, tar$segID)
+  tempDT[, x:= x - tar[match_segID, 'xcen']]
+  tempDT[, y:= y - tar[match_segID, 'ycen']]
   
+  if(verbose){message('Computing fibre photometry...')}
+  
+  output = foreach(j = seq_along(Rapp), .combine='cbind')%do%{
+    #newer more accurate fibre mag calculation
+    if(verbose){message('  Aperture: ', app_diam[j], ' / asec')}
+    temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j]), by=segID]
+    
+    if(correction){
+      temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
+    }
+    
+    mag_app = profoundFlux2Mag(flux = temp_app$flux_app, magzero = magzero)
+    return(data.frame(flux_app = temp_app$flux_app*fluxscale,
+                      mag_app = mag_app,
+                      SB_app = mag_app + 2.5*log10(Aapp[j]) + 5*log10(pixscale),
+                      N_app = temp_app$N,
+                      frac_app = temp_app$N/Aapp[j],
+                      flux_min = temp_app$flux_min*fluxscale)
+    )
+  }
+  
+  colnames(output) = paste(colnames(output), rep(1:length(Rapp), each=6), sep='_')
+  
+  output = cbind(segID=segID_tar, xcen=tar$xcen - 0.5, ycen=tar$ycen - 0.5, output)
+  if(verbose){message('Done!')}
   return(output)
 }
