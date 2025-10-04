@@ -162,7 +162,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
   
   output = foreach(j = seq_along(Rapp), .combine='cbind')%do%{
     #newer more accurate fibre mag calculation
-    if(verbose){message('  Aperture: ', app_diam[j], ' / asec')}
+    if(verbose){message('  Aperture: ', app_diam[j], ' [asec]')}
     temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j]), by=segID]
     
     if(correction){
@@ -260,5 +260,11 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalu
     pixscale=pixscale, magzero=magzero, correction=correction, centype=centype,
     fluxtype=fluxtype, verbose=verbose)
   
-  return(list(AperPhot = output, segim_ran=segim_ran))
+  i = NULL
+  
+  errors = foreach(i = 1:length(app_diam), .combine='c')%do%{
+    as.numeric(diff(quantile(output[,paste0('flux_app_',i)],c(0.16,0.84)))/2)
+  }
+  
+  return(list(AperPhot=output, errors=errors, segim_ran=segim_ran))
 }

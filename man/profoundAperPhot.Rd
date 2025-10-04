@@ -80,7 +80,8 @@ Note the '_X' refers to the aperture by position in the input \option{app_diam} 
 
 \code{profoundAperRan} returns a list containing:
 
-\item{AperPhot}{The output of \code{profoundAperPhot} run on the random apertures.}
+\item{AperPhot}{The full output of \code{profoundAperPhot} run on the random apertures (in case you want to compute different error statistics compared to \option{errors}.}
+\item{errors}{The 16-84 quantile based error in aperture fluxes, in units of \option{fluxtype}. The same length and order as \option{app_diam}.}
 \item{segim_ran}{The random apertures used, placed on the segmentation map.}
 }
 \author{
@@ -125,5 +126,17 @@ new_app4
 #Different positions do make some difference:
 magplot(new_app3$mag_app_2, new_app3$mag_app_2 - new_app4$mag_app_2,
   ylim=c(-0.1,0.1), xlab='Pro mag_app', ylab='Cen - Max (mag_app)')
+  
+# Aperture errors:
+new_error = profoundAperRan(image=image - profound$sky, segim=profound$segim,
+  app_diam=1:3, magzero=30, verbose=TRUE)
+new_error$errors
+
+magplot(profound$segstats$mag, new_app$flux_app_1, log='y', ylim=c(10,2e6),
+  xlab='mag', ylab='flux_app')
+magerr(profound$segstats$mag, new_app$flux_app_1, ylo=new_error$errors[1])
+
+#mag errors will be given by:
+maghist((2.5/log(10))*new_error$errors[1]/new_app$flux_app_1, xlab='Error [mag]')
 }
 \concept{ aperture }
