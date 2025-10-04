@@ -61,7 +61,7 @@ Logical; should verbose output be displayed to the user?
 
 Note by default \option{flux_app_X} and \option{mag_app_X} are already corrected by the fractional coverage \option{frac_app_X}. This is done by assessing how many pixels over or under the desired area the pixelated aperture is, and then using the mean of the outer aperture pixel flux to adjust \option{flux_out} (either increasing the raw flux if \option{frac_app_X} < 1, or decreasing the raw flux if \option{frac_app_X} > 1). For this reason users should not attempt their own additional correction when \option{correction} = TRUE.
 
-\code{profoundAperRan} places random apertures on the sky where \option{segim} is 0. Any non-zero pixels in \option{segim} are forced to be zero in the created \option{segim_ran}. It then returns the output of \code{profoundAperPhot} at these aperture positions, passing all the additional matching argument on. This can be used to asses pragmatic aperture errors based on the \option{image}, accounting for sky variability, skyRMS, undetected background sources, and covariance in pixel flux.
+\code{profoundAperRan} places random apertures on the sky where \option{segim} is 0. Any non-zero pixels in \option{segim} are forced to be zero in the created \option{segim_ran}. It then returns the output of \code{profoundAperPhot} at these aperture positions, passing all the additional matching argument on. This can be used to asses pragmatic aperture errors based on the \option{image}, accounting for sky variability, skyRMS, undetected background sources, and covariance in pixel flux. The computed \option{errors} uses only full apertures (so no pixels lost to neighbour coverage). Depending on your use case, you might want to only consider using apertures with partial coverage.
 }
 \value{
 \code{profoundAperPhot} returns data.frame containing:
@@ -137,6 +137,7 @@ magplot(profound$segstats$mag, new_app$flux_app_1, log='y', ylim=c(10,2e6),
 magerr(profound$segstats$mag, new_app$flux_app_1, ylo=new_error$errors[1])
 
 #mag errors will be given by:
-maghist((2.5/log(10))*new_error$errors[1]/new_app$flux_app_1, xlab='Error [mag]')
+maghist((2.5/log(10))*new_error$errors[1]/new_app$flux_app_1,
+  xlab='Error [mag]')
 }
 \concept{ aperture }

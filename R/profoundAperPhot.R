@@ -187,8 +187,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
 }
 
 profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalues=NULL,
-                             pixscale=1, magzero=0, correction=TRUE, centype='mean',
-                             fluxtype='Raw', verbose=FALSE){
+                          pixscale=1, magzero=0, correction=TRUE, fluxtype='Raw', verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
       keyvalues = image$keyvalues
@@ -246,7 +245,10 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalu
   
   segim_ran = matrix(0L, dim(image)[1], dim(image)[2])
   
-  segim_ran[temp_arr[temp_sel,]] = 1:Nran
+  tar = data.frame(segID = 1:Nran, temp_arr[temp_sel,] - 0.5)
+  colnames(tar)[2:3] = c('xcen', 'ycen')
+  
+  segim_ran[temp_arr[temp_sel,]] = tar$segID
   
   size = ceiling(max(app_diam)/pixscale) + 1L
   if(size %% 2 == 0){
@@ -257,13 +259,15 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalu
   segim_ran[segim > 0L] = 0L
   
   output = profoundAperPhot(image=image, segim=segim_ran, app_diam=app_diam, keyvalues=keyvalues,
-    pixscale=pixscale, magzero=magzero, correction=correction, centype=centype,
-    fluxtype=fluxtype, verbose=verbose)
+                            tar=tar, pixscale=pixscale, magzero=magzero, correction=correction, 
+                            fluxtype=fluxtype, verbose=verbose)
   
   i = NULL
   
   errors = foreach(i = 1:length(app_diam), .combine='c')%do%{
-    as.numeric(diff(quantile(output[,paste0('flux_app_',i)],c(0.16,0.84)))/2)
+    Nmax = max(output[,paste0('N_app_',i)], na.rm=TRUE)
+    sel = which(output[,paste0('N_app_',i)] == Nmax)
+    as.numeric(diff(quantile(output[sel,paste0('flux_app_',i)],c(0.16,0.84)))/2)
   }
   
   return(list(AperPhot=output, errors=errors, segim_ran=segim_ran))
