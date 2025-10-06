@@ -9,13 +9,12 @@ Aperture Fluxes
 Allows you to extract one or many aperture fluxes from a target image.
 }
 \usage{
-profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL,
-  tar = NULL, pixscale = 1, magzero = 0, correction = TRUE, centype = 'mean',
-  fluxtype = 'Raw', verbose = FALSE)
+profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL, tar = NULL,
+  pixscale = 1, magzero = 0, correction = TRUE, centype = 'mean', fluxtype = 'Raw',
+  verbose = FALSE)
   
-profoundAperRan(image = NULL, segim = NULL, app_diam = 1, Nran = 100,
-  keyvalues = NULL, pixscale = 1, magzero = 0, correction = TRUE,
-  centype = 'mean', fluxtype = 'Raw', verbose = FALSE)
+profoundAperRan(image = NULL, segim = NULL, app_diam = 1, Nran = 100, keyvalues = NULL,
+  pixscale = 1, magzero = 0, correction = TRUE, fluxtype = 'Raw', verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
