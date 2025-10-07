@@ -223,7 +223,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
   tempDT[, y:= y - tar[match_segID, 'ycen']]
   tempDT[, rad2:= x^2 + y^2]
   
-  setkey(tempDT, segID, rad2)
+  #setkey(tempDT, segID, rad2)
   
   if(verbose){message('Computing fibre photometry...')}
   
