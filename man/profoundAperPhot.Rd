@@ -99,23 +99,28 @@ new_app = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
   app_diam=1:3, magzero=30, verbose=TRUE)
 
 #These should look the same
+
 magplot(profound$segstats$mag_app, profound$segstats$mag_app -new_app$mag_app_2,
   ylim=c(-0.1,0.1), xlab='Pro mag_app', ylab='Pro - Aper (mag_app)')
+
+#We can just target certain segments:
 
 tar2 = data.frame(segID=1:5)
 new_app2 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
   app_diam=1:3, magzero=30, tar=tar2, verbose=TRUE)
 new_app2
+
+#This should be 0:
+sum(new_app[1:5,] - new_app2)
   
-#we can also target specific regions (but these then need to overlap with the segID).
-#here we use xcen and ycen, which is different the default centype (max):
+#We can also target specific regions (but these then need to overlap with the segID).
 
 tar3 = profound$segstats[1:8, c("segID", "xcen", "ycen")]
 new_app3 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
                             app_diam=1:3, magzero=30, tar=tar3, verbose=TRUE)
 new_app3
 
-#here we use xmax and ymax, which is the same as the default centype (max):
+#Here we use xmax and ymax:
 
 tar4 = profound$segstats[1:8, c("segID", "xmax", "ymax")]
 colnames(tar4)[2:3] = c("xcen", "ycen") #need to set the names
@@ -126,7 +131,24 @@ new_app4
 #Different positions do make some difference:
 magplot(new_app3$mag_app_2, new_app3$mag_app_2 - new_app4$mag_app_2,
   ylim=c(-0.1,0.1), xlab='Pro mag_app', ylab='Cen - Max (mag_app)')
-  
+
+#We can also just provide coordinates, but there have to be on unique segments:
+
+tar5 = profound$segstats[1:8, c("xcen", "ycen")]
+new_app5 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
+                            app_diam=1:3, magzero=30, tar=tar5, verbose=TRUE)
+new_app5
+
+#This should be 0:
+sum(new_app3 - new_app5)
+
+\dontrun{
+#This will fail with a warning since some fibres are on the sky:
+tar6 = profound$segstats[1:8, c("xcen", "ycen")] + 10
+new_app6 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
+                            app_diam=1:3, magzero=30, tar=tar6, verbose=TRUE)
+}
+
 # Aperture errors:
 new_error = profoundAperRan(image=image - profound$sky, segim=profound$segim,
   app_diam=1:3, magzero=30, verbose=TRUE)
