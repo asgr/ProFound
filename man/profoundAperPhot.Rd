@@ -118,6 +118,7 @@ new_app3
 #here we use xmax and ymax, which is the same as the default centype (max):
 
 tar4 = profound$segstats[1:8, c("segID", "xmax", "ymax")]
+colnames(tar4)[2:3] = c("xcen", "ycen") #need to set the names
 new_app4 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
                             app_diam=1:3, magzero=30, tar=tar4, verbose=TRUE)
 new_app4
