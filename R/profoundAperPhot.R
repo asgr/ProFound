@@ -336,7 +336,7 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalu
   errors = foreach(i = 1:length(app_diam), .combine='c')%do%{
     Nmax = max(output[,paste0('N_app_',i)], na.rm=TRUE)
     sel = which(output[,paste0('N_app_',i)] == Nmax)
-    as.numeric(diff(quantile(output[sel,paste0('flux_app_',i)],c(0.16,0.84)))/2)
+    as.numeric(diff(quantile(output[sel,paste0('flux_app_',i)],c(0.16,0.84), na.rm=TRUE))/2)
   }
   
   return(list(AperPhot=output, errors=errors, segim_ran=segim_ran))
