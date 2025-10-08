@@ -67,7 +67,7 @@
   return(list(flux_app=flux_app, flux_min=flux_min, N=Nsel))
 }
 
-profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, tar=NULL,
+profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyvalues=NULL, tar=NULL,
                            pixscale=1, magzero=0, correction=TRUE, centype='mean', fluxtype='Raw',
                            verbose=FALSE){
   if(!is.null(image)){
@@ -105,6 +105,10 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
   
   if(is.null(segim)){
     stop('Need segim!')
+  }
+  
+  if(!is.null(mask)){
+    image[mask > 0] = NA #means we will ignore the masked bits when doing the LL
   }
   
   fluxtype = tolower(fluxtype)
@@ -167,26 +171,6 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
     dim(segsel) = dim(segim)
     segsel = which(segsel, arr.ind = TRUE)
   }
-  
-  # if(is.null(tar$segID)){
-  #   segsel = which(segim > 0, arr.ind = TRUE)
-  # }else{
-  #   tar = as.data.frame(tar)
-  #   
-  #   segsel = segim %in% tar$segID
-  #   dim(segsel) = dim(segim)
-  #   segsel = which(segsel, arr.ind = TRUE)
-  #   
-  #   if(!is.null(tar$xcen)){
-  #     # + 0.5 since arr.ind is offset compared to our normal image definition
-  #     tar[,'xcen'] = tar[,'xcen'] + 0.5
-  #   }
-  #   
-  #   if(!is.null(tar$ycen)){
-  #     # + 0.5 since arr.ind is offset compared to our normal image definition
-  #     tar[,'ycen'] = tar[,'ycen'] + 0.5
-  #   }
-  # }
   
   segID_all = as.integer(segim[segsel])
   
@@ -255,7 +239,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, keyvalues=NULL, 
   return(output)
 }
 
-profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalues=NULL,
+profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, Nran=100, keyvalues=NULL,
                           pixscale=1, magzero=0, correction=TRUE, fluxtype='Raw', verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
@@ -294,6 +278,10 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalu
     stop('Need segim!')
   }
   
+  if(!is.null(mask)){
+    image[mask > 0] = NA #means we will ignore the masked bits when doing the LL
+  }
+  
   fluxtype = tolower(fluxtype)
   
   if(fluxtype=='raw' | fluxtype=='adu' | fluxtype=='adus'){
@@ -309,7 +297,7 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, Nran=100, keyvalu
     stop('fluxtype must be Jansky / Microjansky / Raw!')
   }
   
-  temp_arr = which(segim == 0L, arr.ind=TRUE)
+  temp_arr = which(segim == 0L & !is.na(image), arr.ind=TRUE)
   temp_sel = sample(dim(temp_arr)[1], Nran)
   
   segim_ran = matrix(0L, dim(image)[1], dim(image)[2])

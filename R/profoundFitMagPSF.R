@@ -116,7 +116,7 @@ profoundFitMagPSF=function(xcen=NULL, ycen=NULL, RAcen=NULL, Deccen=NULL, mag=NU
   }
   
   if(!is.null(mask)){
-    image[mask!=0]=NA #means we will ignore the masked bits when doing the LL
+    image[mask > 0] = NA #means we will ignore the masked bits when doing the LL
   }
   
   goodlocs=ceiling(xcen)>=1 & ceiling(xcen)<= dim(image)[1] & ceiling(ycen)>=1 & ceiling(ycen)<= dim(image)[2]

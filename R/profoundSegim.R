@@ -210,7 +210,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   
   image_orig = image
   if(!is.null(mask)){
-    image[mask>0] = NA
+    image[mask > 0] = NA
   }
   
   if(hassky==FALSE){

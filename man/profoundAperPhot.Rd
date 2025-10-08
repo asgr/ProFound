@@ -9,12 +9,13 @@ Aperture Fluxes
 Allows you to extract one or many aperture fluxes from a target image.
 }
 \usage{
-profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, keyvalues = NULL, tar = NULL,
-  pixscale = 1, magzero = 0, correction = TRUE, centype = 'mean', fluxtype = 'Raw',
-  verbose = FALSE)
+profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, mask = NULL, keyvalues = NULL,
+  tar = NULL, pixscale = 1, magzero = 0, correction = TRUE, centype = 'mean',
+  fluxtype = 'Raw', verbose = FALSE)
   
-profoundAperRan(image = NULL, segim = NULL, app_diam = 1, Nran = 100, keyvalues = NULL,
-  pixscale = 1, magzero = 0, correction = TRUE, fluxtype = 'Raw', verbose = FALSE)
+profoundAperRan(image = NULL, segim = NULL, app_diam = 1, mask = NULL, Nran = 100,
+  keyvalues = NULL, pixscale = 1, magzero = 0, correction = TRUE, fluxtype = 'Raw',
+  verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +27,9 @@ Integer matrix; a specified segmentation map of the image. This is required.
 }
   \item{app_diam}{
 Numeric vector; the diameter in arc seconds to use for circular aperture photometry (hence 'app'). This will use the appropriate pixel scale to convert the aperture into image units. The circular aperture photometry is output to columns \option{flux_app} and \option{mag_app} appended by the vector number.
+}
+  \item{mask}{
+Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}. This can be combined with NA pixels already in \option{image} (so final effective mask is the superset of both).
 }
   \item{Nran}{
 Integer scalar; the number of random apertures to place in the sky (where \option{segim} is 0).  

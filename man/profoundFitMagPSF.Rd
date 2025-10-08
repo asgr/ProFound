@@ -38,7 +38,7 @@ Numeric matrix; required, the image we want to analyse. If \option{image} is a l
 Numeric matrix; required, the measurement errors per pixel (expressed in terms of sigma).
 }
   \item{mask}{
-Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}.
+Boolean matrix; optional, parts of the image to mask out (i.e. ignore), where 1 means mask out and 0 means use for analysis. If provided, this matrix *must* be the same dimensions as \option{image}. This can be combined with NA pixels already in \option{image} (so final effective mask is the superset of both).
 }
   \item{psf}{
 Numeric matrix; required, an empirical point spread function (PSF) image matrix that \code{ProFit} will use to convolve the model.
