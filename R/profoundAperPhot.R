@@ -36,7 +36,7 @@
     sel_out = which(rad2 == rad_out)
     
     flux_app = sum(flux, na.rm=TRUE)
-    flux_min = mean(flux, na.rm=TRUE)
+    flux_min = mean(flux[sel_out], na.rm=TRUE)
   }else{
     sel = which(rad2 <= rad_app^2)
     Nsel = length(sel)
@@ -128,8 +128,8 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
   
   segID = x = y = flux = j = rad2 = NULL
   
-  Rapp = (app_diam / 2 / pixscale)
-  Aapp = (pi * Rapp^2)
+  Rapp = (app_diam / 2 / pixscale) #in pixels
+  Aapp = (pi * Rapp^2) #in pixels
   
   
   if(is.null(tar)){
@@ -216,7 +216,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
     if(verbose){message('  Aperture: ', app_diam[j], ' [asec]')}
     # the top one can completely remove segments in some weird edge cases, and doesn't appear to be faster. Use the second!
     #temp_app = tempDT[rad2 <= Rapp[j]^2, .fluxcalcapp(x=x, y=y, rad2=rad2, flux=flux, xcen=0, ycen=0, rad_app=NA), by=segID]
-    temp_app = tempDT[, .fluxcalcapp(x=x, y=y, rad2=rad2, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j]), by=segID]
+    temp_app = tempDT[, .fluxcalcapp(rad2=rad2, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j]), by=segID]
     
     if(correction){
       temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
