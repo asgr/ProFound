@@ -31,6 +31,8 @@
   }
   
   if(is.na(rad_app)){
+    #left here for a different mode I tested for applying rad2 selection outside of this function.
+    #that wasn't any faster, so probably remove this if case in the future
     Nsel = length(rad2)
     rad_out = max(rad2)
     sel_out = which(rad2 == rad_out)
