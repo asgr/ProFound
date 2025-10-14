@@ -11,11 +11,11 @@ Allows you to extract one or many aperture fluxes from a target image.
 \usage{
 profoundAperPhot(image = NULL, segim = NULL, app_diam = 1, mask = NULL, keyvalues = NULL,
   tar = NULL, pixscale = 1, magzero = 0, correction = TRUE, centype = 'mean',
-  fluxtype = 'Raw', verbose = FALSE)
+  fluxtype = 'Raw', depth = 4, verbose = FALSE)
   
 profoundAperRan(image = NULL, segim = NULL, app_diam = 1, mask = NULL, Nran = 100,
   keyvalues = NULL, pixscale = 1, magzero = 0, correction = TRUE, fluxtype = 'Raw',
-  verbose = FALSE)
+  depth = 4, verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -47,13 +47,16 @@ Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). No
 Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega).
 }
   \item{correction}{
-Logical; should discreteness and fractional coverage corrections be applied to the aperture flux (changing the output \option{flux_app_X} and \option{mag_app_X} columns). Unless you really know what you are doing, this should be left on TRUE (and in this case do not apply additional corrections). See Details.
+Logical; should fractional coverage corrections be applied to the aperture flux (changing the output \option{flux_app_X} and \option{mag_app_X} columns). Unless you really know what you are doing, this should be left on TRUE (and in this case do not apply additional corrections). See Details.
 }
   \item{centype}{
 Character scalar; type of automatic centre to use per segment. Either 'max' (the location of the peak pixel flux in the segment), or 'mean' (the weighted flux centre). 'max' will always be exactly in the centre of the peak flux pixel, whereas 'mean' can be any fractional pixel position. This can impact the aperture photometry in subtle ways. 
 }
   \item{fluxtype}{
-Character scaler; specifies whether fluxes will be output in Jansky / MicroJansky ('Jansky' / 'microjansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use Jansky / MicroJansky if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+Character scalar; specifies whether fluxes will be output in Jansky / MicroJansky ('Jansky' / 'microjansky'), or in raw/unscaled image ADUs ('Raw' / 'ADU' / 'ADUs', the default). You can only use Jansky / MicroJansky if the specified \option{magzero} gets the data into the AB system, else the fluxes will not be Jansky.
+}
+ \item{depth}{
+Integer scalar; the recursion depth. Higher numbers are more accurate, where you probably do not want to set it below 3. Above 5 will suffer notable slow-down. 4 is usually about the performance versus accuracy sweet spot. Because of other overheads in the functions, you will barely see any speed improvement reducing from 3 to 0 \option{depth}.
 }
   \item{verbose}{
 Logical; should verbose output be displayed to the user?
@@ -75,9 +78,8 @@ Note by default \option{flux_app_X} and \option{mag_app_X} are already corrected
 \item{flux_app_X}{The raw flux (flux_app_1 etc)} 
 \item{mag_app_X}{The magnitude (mag_app_1 etc)}
 \item{SB_app_X}{The surface brightness in mag/asec^2 units (SB_app_1 etc)}
-\item{N_app_X}{The number of pixels falling in the aperture (N_app_1 etc)}
+\item{N_app_X}{The fractional number of pixels falling in the aperture (N_app_1 etc)}
 \item{frac_app_X}{The area of \option{N_app_X} divided by target aperture area (N_app_1 etc)}
-\item{flux_min}{The mean pixel flux of the outer most (usually faintest) pixels in the aperture}
 
 Note the '_X' refers to the aperture by position in the input \option{app_diam} vector.
 

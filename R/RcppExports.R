@@ -16,6 +16,10 @@
     invisible(.Call(`_ProFound_interpolateLinearGrid`, xseq, yseq, tempmat_sky, output))
 }
 
+profoundAperCover <- function(x, y, cx, cy, radius, depth = 4L) {
+    .Call(`_ProFound_profoundAperCover`, x, y, cx, cy, radius, depth)
+}
+
 .dilate_cpp <- function(segim, kern, expand = 0L) {
     .Call(`_ProFound_dilate_cpp`, segim, kern, expand)
 }

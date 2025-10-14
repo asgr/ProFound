@@ -1,64 +1,71 @@
-.fluxcalcapp = function(x=NULL, y=NULL, rad2=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='mean'){
-  if(is.null(rad2)){
-    if(is.na(xcen)){
-      if(centype == 'wt' | centype == 'mean'){
-        xcen = .meanwt(x, flux)
-      }else if(centype == 'max'){
-        xcen = x[which.max(flux)]
-      }else{
-        stop('centype must be max or mean!')
-      }
-    }
-    
-    if(is.na(ycen)){
-      if(centype == 'wt' | centype == 'mean'){
-        ycen = .meanwt(y, flux)
-      }else if(centype == 'max'){
-        ycen = y[which.max(flux)]
-      }else{
-        stop('centype must be max or mean!')
-      }
-    }
-    
-    if(xcen == 0 & ycen == 0){
-      rad2 = x^2 + y^2
+.fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='mean', depth=4){
+  if(is.na(xcen)){
+    if(centype == 'wt' | centype == 'mean'){
+      xcen = .meanwt(x, flux)
+    }else if(centype == 'max'){
+      xcen = x[which.max(flux)]
     }else{
-      rad2 = (x - xcen)^2 + (y - ycen)^2 
+      stop('centype must be max or mean!')
     }
-  }else{
-    xcen = 0
-    ycen = 0
   }
   
-  if(is.na(rad_app)){
-    #left here for a different mode I tested for applying rad2 selection outside of this function.
-    #that wasn't any faster, so probably remove this if case in the future
-    Nsel = length(rad2)
-    rad_out = max(rad2)
-    sel_out = which(rad2 == rad_out)
-    
-    flux_app = sum(flux, na.rm=TRUE)
-    flux_min = mean(flux[sel_out], na.rm=TRUE)
-  }else{
-    sel = which(rad2 <= rad_app^2)
-    Nsel = length(sel)
-    
-    if(length(Nsel) == 0){
-      flux_app = NA_real_
-      flux_min = 0
+  if(is.na(ycen)){
+    if(centype == 'wt' | centype == 'mean'){
+      ycen = .meanwt(y, flux)
+    }else if(centype == 'max'){
+      ycen = y[which.max(flux)]
     }else{
-      if(all(is.na(flux[sel]))){
-        flux_app = NA_real_
-        flux_min = 0
-      }else{
-        rad_out = max(rad2[sel])
-        sel_out = which(rad2 == rad_out)
-        
-        flux_app = sum(flux[sel], na.rm=TRUE)
-        flux_min = mean(flux[sel_out], na.rm=TRUE)
-      }
+      stop('centype must be max or mean!')
     }
   }
+  
+  # if(xcen == 0 & ycen == 0){
+  #   rad2 = x^2 + y^2
+  # }else{
+  #   rad2 = (x - xcen)^2 + (y - ycen)^2 
+  # }
+  
+  # if(is.na(rad_app)){
+  #   #left here for a different mode I tested for applying rad2 selection outside of this function.
+  #   #that wasn't any faster, so probably remove this if case in the future
+  #   Nsel = length(rad2)
+  #   rad_out = max(rad2)
+  #   sel_out = which(rad2 == rad_out)
+  #   
+  #   flux_app = sum(flux, na.rm=TRUE)
+  #   #flux_min = mean(flux[sel_out], na.rm=TRUE)
+  # }else{
+  #   sel = which(rad2 <= rad_app^2)
+  #   Nsel = length(sel)
+  #   
+  #   if(length(Nsel) == 0){
+  #     flux_app = NA_real_
+  #     #flux_min = 0
+  #   }else{
+  #     if(all(is.na(flux[sel]))){
+  #       flux_app = NA_real_
+  #       #flux_min = 0
+  #     }else{
+  #       rad_out = max(rad2[sel])
+  #       sel_out = which(rad2 == rad_out)
+  #       
+  #       flux_app = sum(flux[sel], na.rm=TRUE)
+  #       #flux_min = mean(flux[sel_out], na.rm=TRUE)
+  #     }
+  #   }
+  # }
+  
+  aper_frac = profoundAperCover(x, y, xcen, ycen, rad_app, depth=depth)
+  flux_app = sum(flux * aper_frac, na.rm=TRUE)
+  N_app = sum((!is.na(aper_frac))*aper_frac, na.rm=TRUE)
+  
+  suppressWarnings({
+    if(depth > 0){
+      flux_min = min(flux[aper_frac > 0 & aper_frac < 1 & flux > 0], na.rm=TRUE)
+    }else{
+      flux_min = min(flux[aper_frac > 0 & aper_frac <= 1 & flux > 0], na.rm=TRUE)
+    }
+  })
   
   if(!isTRUE(is.finite(flux_min))){ #this catches NA, NaN, NULL, Inf events
     flux_min = 0 #don't want to penalise when masked or other weird events
@@ -66,12 +73,12 @@
     flux_min = 0 #don't want to penalise when in the sky noise 
   }
   
-  return(list(flux_app=flux_app, flux_min=flux_min, N=Nsel))
+  return(list(flux_app=flux_app, N_app=N_app, flux_min=flux_min))
 }
 
 profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyvalues=NULL, tar=NULL,
-                           pixscale=1, magzero=0, correction=TRUE, centype='mean', fluxtype='Raw',
-                           verbose=FALSE){
+                           pixscale=1, magzero=0, correction=TRUE, centype='mean',
+                           fluxtype='Raw', depth=4, verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
       keyvalues = image$keyvalues
@@ -128,7 +135,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
     stop('fluxtype must be Jansky / Microjansky / Raw!')
   }
   
-  segID = x = y = flux = j = rad2 = NULL
+  segID = x = y = flux = j = NULL
   
   Rapp = (app_diam / 2 / pixscale) #in pixels
   Aapp = (pi * Rapp^2) #in pixels
@@ -207,7 +214,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
   match_segID = match(tempDT$segID, tar$segID)
   tempDT[, x:= x - tar[match_segID, 'xcen']]
   tempDT[, y:= y - tar[match_segID, 'ycen']]
-  tempDT[, rad2:= x^2 + y^2]
+  #tempDT[, rad2:= x^2 + y^2]
   
   #setkey(tempDT, segID, rad2)
   
@@ -218,7 +225,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
     if(verbose){message('  Aperture: ', app_diam[j], ' [asec]')}
     # the top one can completely remove segments in some weird edge cases, and doesn't appear to be faster. Use the second!
     #temp_app = tempDT[rad2 <= Rapp[j]^2, .fluxcalcapp(x=x, y=y, rad2=rad2, flux=flux, xcen=0, ycen=0, rad_app=NA), by=segID]
-    temp_app = tempDT[, .fluxcalcapp(rad2=rad2, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j]), by=segID]
+    temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j], depth=depth), by=segID]
     
     if(correction){
       temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
@@ -228,9 +235,10 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
     return(data.frame(flux_app = temp_app$flux_app*fluxscale,
                       mag_app = mag_app,
                       SB_app = mag_app + 2.5*log10(Aapp[j]) + 5*log10(pixscale),
-                      N_app = temp_app$N,
-                      frac_app = temp_app$N/Aapp[j],
-                      flux_min = temp_app$flux_min*fluxscale)
+                      N_app = temp_app$N_app,
+                      frac_app = temp_app$N_app/Aapp[j],
+                      flux_min = temp_app$flux_min*fluxscale
+                      )
     )
   }
   
@@ -242,7 +250,8 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
 }
 
 profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, Nran=100, keyvalues=NULL,
-                          pixscale=1, magzero=0, correction=TRUE, fluxtype='Raw', verbose=FALSE){
+                          pixscale=1, magzero=0, correction=TRUE, fluxtype='Raw', depth=4,
+                          verbose=FALSE){
   if(!is.null(image)){
     if(inherits(image, 'Rfits_image')){
       keyvalues = image$keyvalues
@@ -318,8 +327,8 @@ profoundAperRan = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, Nran=1
   segim_ran[segim > 0L] = 0L
   
   output = profoundAperPhot(image=image, segim=segim_ran, app_diam=app_diam, keyvalues=keyvalues,
-                            tar=tar, pixscale=pixscale, magzero=magzero, correction=correction, 
-                            fluxtype=fluxtype, verbose=verbose)
+                            tar=tar, pixscale=pixscale, magzero=magzero, correction=correction,
+                            fluxtype=fluxtype, depth=depth, verbose=verbose)
   
   i = NULL
   

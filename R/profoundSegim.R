@@ -95,26 +95,26 @@
     N100seg=length(flux)
   }
   
-  if(!is.na(Napp)){
-    Nsel = N100seg:(N100seg - Napp + 1)
-    Nsel = Nsel[Nsel>0]
-  }else{
-    Nsel = 0
-  }
+  # if(!is.na(Napp)){
+  #   Nsel = N100seg:(N100seg - Napp + 1)
+  #   Nsel = Nsel[Nsel>0]
+  # }else{
+  #   Nsel = 0
+  # }
   
   if(N100seg > 0){
     
     sumflux=sum(flux[good])
     
-    if(length(Nsel)>0){
-      if(Nsel[1]>0){
-        sumflux_app=sum(flux[good][Nsel])
-      }else{
-        sumflux_app=0
-      }
-    }else{
-      sumflux_app=0
-    }
+    # if(length(Nsel)>0){
+    #   if(Nsel[1]>0){
+    #     sumflux_app=sum(flux[good][Nsel])
+    #   }else{
+    #     sumflux_app=0
+    #   }
+    # }else{
+    #   sumflux_app=0
+    # }
     
     temp=cumsum(flux[good])/sumflux
     
@@ -139,7 +139,7 @@
     
   }else{
     sumflux=NA
-    sumflux_app=NA
+    #sumflux_app=NA
     N100seg=length(flux)
     N50seg=N100seg*0.5
     N90seg=N100seg*0.9
@@ -147,13 +147,13 @@
   }
   
   mode(sumflux)='numeric'
-  mode(sumflux_app)='numeric'
+  #mode(sumflux_app)='numeric'
   mode(N50seg)='numeric'
   mode(N90seg)='numeric'
   mode(cenfrac)='numeric'
   mode(cenfrac)='numeric'
   
-  return(list(flux=sumflux, flux_app=sumflux_app, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
+  return(list(flux=sumflux, N50seg=N50seg, N90seg=N90seg, N100seg=N100seg, cenfrac=cenfrac))
 }
 
 .fluxcalcmin=function(flux){
@@ -791,7 +791,7 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
   
   x=NULL; y=NULL; flux=NULL; sky=NULL; skyRMS=NULL
   
-  fluxout = tempDT[, .fluxcalc(flux, Napp = NA), by = segID]
+  fluxout = tempDT[, .fluxcalc(flux), by = segID]
   #old very rough fibre mag stuff is being ignored (hence the NA above and commented out line below)
   #fluxout$flux_app[which(fluxout$flux_app > fluxout$flux)] = fluxout$flux[which(fluxout$flux_app > fluxout$flux)]
   
@@ -799,7 +799,9 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     #newer more accurate fibre mag calculation
     temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp), by=segID]
     #Here we correct by the lowest value pixel in the outer aperture
+    #no need now
     fluxout$flux_app = temp_app$flux_app - (temp_app$N - Aapp)*temp_app$flux_min
+    fluxout$flux_app = temp_app$flux_app
   }
   
   mag = profoundFlux2Mag(flux = fluxout$flux, magzero = magzero)
