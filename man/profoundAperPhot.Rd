@@ -47,7 +47,7 @@ Numeric scalar; the pixel scale, where pixscale=asec/pix (e.g. 0.4 for SDSS). No
 Numeric scalar; the magnitude zero point. What this implies depends on the magnitude system being used (e.g. AB or Vega).
 }
   \item{correction}{
-Logical; should fractional coverage corrections be applied to the aperture flux (changing the output \option{flux_app_X} and \option{mag_app_X} columns). Unless you really know what you are doing, this should be left on TRUE (and in this case do not apply additional corrections). See Details.
+Logical; should fractional coverage corrections be applied to the aperture flux (changing the output \option{flux_app_X} and \option{mag_app_X} columns)? The correction is applied using \option{N_app} by comparing it to the pixel area of the aperture, with the missing of excess pixels assumed to have the value of \option{flux_min}. This correction will not work well if the missing pixels are not at the edge of the aperture (i.e. if the aperture was cut in two down the centre). See Details.
 }
   \item{centype}{
 Character scalar; type of automatic centre to use per segment. Either 'max' (the location of the peak pixel flux in the segment), or 'mean' (the weighted flux centre). 'max' will always be exactly in the centre of the peak flux pixel, whereas 'mean' can be any fractional pixel position. This can impact the aperture photometry in subtle ways. 
@@ -80,6 +80,7 @@ Note by default \option{flux_app_X} and \option{mag_app_X} are already corrected
 \item{SB_app_X}{The surface brightness in mag/asec^2 units (SB_app_1 etc)}
 \item{N_app_X}{The fractional number of pixels falling in the aperture (N_app_1 etc)}
 \item{frac_app_X}{The area of \option{N_app_X} divided by target aperture area (N_app_1 etc)}
+\item{flux_min}{The mean pixel flux of the outer most (usually faintest) pixels in the aperture}
 
 Note the '_X' refers to the aperture by position in the input \option{app_diam} vector.
 

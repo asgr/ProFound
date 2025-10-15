@@ -57,21 +57,37 @@
   
   aper_frac = profoundAperCover(x, y, xcen, ycen, rad_app, depth=depth)
   flux_app = sum(flux * aper_frac, na.rm=TRUE)
-  N_app = sum((!is.na(aper_frac))*aper_frac, na.rm=TRUE)
+  N_app = sum((!is.na(flux))*aper_frac, na.rm=TRUE)
   
   suppressWarnings({
     if(depth > 0){
-      flux_min = min(flux[aper_frac > 0 & aper_frac < 1 & flux > 0], na.rm=TRUE)
+      sel = which(aper_frac > 0 & aper_frac < 1)
+      if(length(sel) > 0){
+        wts = 1 - 2*abs(aper_frac[sel] - 0.5) #values nearer to 0.5 are more reflective of the outermost flux
+        flux_min = sum(flux[sel]*wts, na.rm=TRUE)/sum(wts)
+      }else{
+        flux_min = 0
+      }
+      #flux_min = min(flux[aper_frac > 0 & aper_frac < 1 & flux > 0], na.rm=TRUE)
     }else{
-      flux_min = min(flux[aper_frac > 0 & aper_frac <= 1 & flux > 0], na.rm=TRUE)
+      rad = sqrt((x - xcen)^2 + (y - ycen)^2)
+      wts = 1 - 1.414214*abs(rad - rad_app) #sqrt(2) rather than 2 so we can reach extreme corner of an outer pixel
+      sel = which(wts >= 0 & wts <= 1)
+      if(length(sel) > 0){
+        flux_min = sum(flux[sel]*wts[sel], na.rm=TRUE)/sum(wts[sel])
+      }else{
+        flux_min = 0
+      }
+      #flux_min = min(flux[aper_frac > 0 & aper_frac <= 1 & flux > 0], na.rm=TRUE)
     }
   })
   
   if(!isTRUE(is.finite(flux_min))){ #this catches NA, NaN, NULL, Inf events
     flux_min = 0 #don't want to penalise when masked or other weird events
-  }else if(flux_min < 0){
-    flux_min = 0 #don't want to penalise when in the sky noise 
   }
+  # }else if(flux_min < 0){
+  #   flux_min = 0 #don't want to penalise when in the sky noise 
+  # }
   
   return(list(flux_app=flux_app, N_app=N_app, flux_min=flux_min))
 }
@@ -228,7 +244,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
     temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, xcen=0, ycen=0, rad_app=Rapp[j], depth=depth), by=segID]
     
     if(correction){
-      temp_app$flux_app = temp_app$flux_app - (temp_app$N - Aapp[j])*temp_app$flux_min
+      temp_app$flux_app = temp_app$flux_app - (temp_app$N_app - Aapp[j])*temp_app$flux_min
     }
     
     mag_app = profoundFlux2Mag(flux = temp_app$flux_app, magzero = magzero)
