@@ -24,6 +24,10 @@ profoundAperCover <- function(x, y, cx, cy, radius, depth = 4L) {
     .Call(`_ProFound_dilate_cpp`, segim, kern, expand)
 }
 
+profoundEllipCover <- function(x, y, cx, cy, semi_maj, axrat, ang, depth = 4L) {
+    .Call(`_ProFound_profoundEllipCover`, x, y, cx, cy, semi_maj, axrat, ang, depth)
+}
+
 .point_in_polygon_cpp_short <- function(testx, testy, vertx, verty) {
     .Call(`_ProFound_pnpoly`, testx, testy, vertx, verty)
 }

@@ -65,6 +65,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// profoundEllipCover
+NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, double cy, double semi_maj, double axrat, double ang, int depth);
+RcppExport SEXP _ProFound_profoundEllipCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP semi_majSEXP, SEXP axratSEXP, SEXP angSEXP, SEXP depthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type cx(cxSEXP);
+    Rcpp::traits::input_parameter< double >::type cy(cySEXP);
+    Rcpp::traits::input_parameter< double >::type semi_maj(semi_majSEXP);
+    Rcpp::traits::input_parameter< double >::type axrat(axratSEXP);
+    Rcpp::traits::input_parameter< double >::type ang(angSEXP);
+    Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
+    rcpp_result_gen = Rcpp::wrap(profoundEllipCover(x, y, cx, cy, semi_maj, axrat, ang, depth));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pnpoly
 LogicalVector pnpoly(NumericVector testx, NumericVector testy, NumericVector vertx, NumericVector verty);
 RcppExport SEXP _ProFound_pnpoly(SEXP testxSEXP, SEXP testySEXP, SEXP vertxSEXP, SEXP vertySEXP) {
@@ -191,6 +209,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_interpolateLinearGrid", (DL_FUNC) &_ProFound_interpolateLinearGrid, 4},
     {"_ProFound_profoundAperCover", (DL_FUNC) &_ProFound_profoundAperCover, 6},
     {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 3},
+    {"_ProFound_profoundEllipCover", (DL_FUNC) &_ProFound_profoundEllipCover, 8},
     {"_ProFound_pnpoly", (DL_FUNC) &_ProFound_pnpoly, 4},
     {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 18},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},

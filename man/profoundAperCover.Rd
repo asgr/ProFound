@@ -1,5 +1,6 @@
-\name{profoundAperCover}
+\name{profoundCover}
 \alias{profoundAperCover}
+\alias{profoundEllipCover}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Fraction of Pixel in Aperture
@@ -9,6 +10,8 @@ Calculates the fraction of pixels inside an aperture using recursive descent.
 }
 \usage{
 profoundAperCover(x, y, cx, cy, radius, depth = 4L)
+
+profoundEllipCover(x, y, cx, cy, semi_maj, axrat, ang, depth = 4L) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +30,15 @@ Numeric scalar; the y centre of the aperture (in pixels).
   \item{radius}{
 Numeric scalar; the radius of the aperture (in pixels).
 }
+  \item{semi_maj}{
+Numeric scalar; the semi-major axis of the ellipse (in pixels).
+}
+  \item{axrat}{
+Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1).
+}
+  \item{ang}{
+Numeric scalar; orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical). 
+}
   \item{depth}{
 Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accuracy and speed (see Examples).
 }
@@ -35,7 +47,7 @@ Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accur
 Re the recursion \option{depth}, higher numbers are more accurate, where you probably do not want to set it below 3. Above 5 will suffer notable slow-down. 4 is usually about the performance versus accuracy sweet spot.
 }
 \value{
-Numeric vector the same length as \option{x} and \option{y}, which is what fraction of the pixel lies under the desired aperture.
+Numeric vector the same length as \option{x} and \option{y}, which is what fraction of the pixel lies under the desired aperture / ellipse.
 }
 \author{
 Aaron Robotham
@@ -81,6 +93,16 @@ for(i in 1:dim(ap_grid)[1]){
 magimage(matrix(test,101,101), magmap=F)
 maghist(test)
 }
+
+#Some ellipse examples:
+
+output = matrix(profoundEllipCover(temp[,1], temp[,2], 5, 5, 4.5, 0.5, 30, depth=4),
+  10, 10)
+magimage(output)
+
+output = matrix(profoundEllipCover(temp[,1], temp[,2], 4.2, 5.1, 2.5, 0.8, 110, depth=4),
+  10, 10)
+magimage(output)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
