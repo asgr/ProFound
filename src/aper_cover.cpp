@@ -21,7 +21,7 @@ double pixelCoverage(double x, double y, double cx, double cy, double deltax_2, 
     return 0.0;
   }
   
-  double quarter = 0.25 / (1 << (depth - 1));
+  double quarter = 0.25 / pow(2, depth - 1);
   double coverage = 0.0;
   
   double deltax1_2 = (x - quarter - cx) * (x - quarter - cx);
@@ -42,7 +42,13 @@ NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, dou
   NumericVector result(n);
   
   double radius_2 = radius * radius;
-  double radius_min_2 = (radius - 0.7071068) * (radius - 0.7071068);
+  
+  double radius_min_2 = -1;
+  
+  if(radius > 0.7071068){
+    radius_min_2 = (radius - 0.7071068) * (radius - 0.7071068);
+  }
+  
   double radius_max_2 = (radius + 0.7071068) * (radius + 0.7071068);
   
   for (int i = 0; i < n; ++i) {
