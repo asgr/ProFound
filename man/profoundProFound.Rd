@@ -376,12 +376,12 @@ Haralick R.M., et al., 1973, IEEE, SMC-3 (6), 610
 \code{\link{profoundMakeSegim}}, \code{\link{profoundMakeSegimDilate}}, \code{\link{profoundMakeSegimExpand}}, \code{\link{profoundMakeSegimPropagate}}, \code{\link{profoundSegimStats}}, \code{\link{profoundSegimPlot}}, \code{\link{profoundMultiBand}}
 }
 \examples{
-\dontrun{
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))
 
-profound=profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
+profound = profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 
+\dontrun{
 # You can check to see if the final objects mask is aggressive enough. Notice the halos
 # surrounding bright sources when just using the objects mask.
 

@@ -799,9 +799,11 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     #newer more accurate fibre mag calculation
     temp_app = tempDT[, .fluxcalcapp(x=x, y=y, flux=flux, rad_app=Rapp), by=segID]
     #Here we correct by the lowest value pixel in the outer aperture
+    #fluxout$flux_app = temp_app$flux_app - (temp_app$N - Aapp)*temp_app$flux_min
     #no need now
-    fluxout$flux_app = temp_app$flux_app - (temp_app$N - Aapp)*temp_app$flux_min
     fluxout$flux_app = temp_app$flux_app
+  }else{
+    fluxout$flux_app = NA
   }
   
   mag = profoundFlux2Mag(flux = fluxout$flux, magzero = magzero)
