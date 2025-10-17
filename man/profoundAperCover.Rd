@@ -16,16 +16,16 @@ profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-Numeric vector; the pixel x centre positions (where pixel centres are half integer in \code{ProFound}).
+Numeric vector; the pixel x centre positions (in pixels, where pixel centres are half integer in \code{ProFound}).
 }
   \item{y}{
-Numeric vector; the pixel y centre positions (where pixel centres are half integer in \code{ProFound}).
+Numeric vector; the pixel y centre positions (in pixels, where pixel centres are half integer in \code{ProFound}).
 }
   \item{cx}{
-Numeric scalar; the x centre of the aperture (in pixels).
+Numeric scalar; the x centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}).
 }
   \item{cy}{
-Numeric scalar; the y centre of the aperture (in pixels).
+Numeric scalar; the y centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}).
 }
   \item{rad}{
 Numeric scalar; the radius or semi-major axis of the aperture / ellipse (in pixels).

@@ -53,7 +53,7 @@ Aaron Robotham
 }
 \examples{
 magimage(profoundEllipseSeg())
-magimage(profoundEllipseSeg(dim=c(200,200), axrat=0.5, ang=30, rad=30))
+magimage(profoundEllipseSeg(rad=30, ang=30, axrat=0.5, dim=c(200,200)))
 }
 
 \concept{ ~ellipse }

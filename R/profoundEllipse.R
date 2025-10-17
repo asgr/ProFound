@@ -60,12 +60,12 @@ profoundEllipseSeg = function(xcen=dim[1]/2, ycen=dim[2]/2, rad=dim[1]/2,
     }
   }else{
     if(axrat == 1){
-      output = matrix(profoundAperCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, depth=0)*segID, dim[1], dim[2])
+      segim = matrix(profoundAperCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, depth=0)*segID, dim[1], dim[2])
     }else{
-      output = matrix(profoundEllipCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, ang=ang, axrat=axrat, depth=0)*segID, dim[1], dim[2])
+      segim = matrix(profoundEllipCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, ang=ang, axrat=axrat, depth=0)*segID, dim[1], dim[2])
     }
   }
-  return(output)
+  return(segim)
 }
 
 profoundGetEllipse=function(x, y, z, xcen=NULL, ycen=NULL, scale=sqrt(2), pixscale=1, dobox=FALSE, plot=FALSE, ...){
