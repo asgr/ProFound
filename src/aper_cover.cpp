@@ -38,19 +38,19 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
 }
 
 // [[Rcpp::export]]
-NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, double cy, double radius, int depth = 4) {
+NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, double cy, double rad, int depth = 4) {
   int n = x.size();
   NumericVector result(n);
   
-  double radius_2 = radius * radius;
+  double radius_2 = rad * rad;
   
   double radius_min_2 = -1;
   
-  if(radius > 0.7071068){
-    radius_min_2 = (radius - 0.7071068) * (radius - 0.7071068);
+  if(rad > 0.7071068){
+    radius_min_2 = (rad - 0.7071068) * (rad - 0.7071068);
   }
   
-  double radius_max_2 = (radius + 0.7071068) * (radius + 0.7071068);
+  double radius_max_2 = (rad + 0.7071068) * (rad + 0.7071068);
   
   for (int i = 0; i < n; ++i) {
     double delta_x = x[i] - cx;

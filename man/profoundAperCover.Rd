@@ -9,9 +9,9 @@ Fraction of Pixel in Aperture
 Calculates the fraction of pixels inside an aperture using recursive descent.
 }
 \usage{
-profoundAperCover(x, y, cx, cy, radius, depth = 4L)
+profoundAperCover(x, y, cx, cy, rad, depth = 4L)
 
-profoundEllipCover(x, y, cx, cy, semi_maj, axrat, ang, depth = 4L) 
+profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,17 +27,14 @@ Numeric scalar; the x centre of the aperture (in pixels).
   \item{cy}{
 Numeric scalar; the y centre of the aperture (in pixels).
 }
-  \item{radius}{
-Numeric scalar; the radius of the aperture (in pixels).
-}
-  \item{semi_maj}{
-Numeric scalar; the semi-major axis of the ellipse (in pixels).
-}
-  \item{axrat}{
-Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1).
+  \item{rad}{
+Numeric scalar; the radius or semi-major axis of the aperture / ellipse (in pixels).
 }
   \item{ang}{
 Numeric scalar; orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical). 
+}
+  \item{axrat}{
+Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1).
 }
   \item{depth}{
 Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accuracy and speed (see Examples).
@@ -54,7 +51,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profoundAperPhot}}
+\code{\link{profoundAperPhot}}, \code{\link{profoundEllipseSeg}}
 }
 \examples{
 library(magicaxis)

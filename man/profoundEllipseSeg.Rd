@@ -5,20 +5,14 @@
 Create Elliptical Segment
 }
 \description{
-Creates a logic matrix for an elliptical segment. This can be useful to allow the extraction of elliptical apertures on a target image (you can just sum the multiplication of the two).
+Creates or adds an elliptical segment. This can be useful to allow the extraction of elliptical apertures on a target image (you can just sum the multiplication of the two).
 }
 \usage{
-profoundEllipseSeg(dim = c(101, 101), image = NULL, xcen = dim[1]/2, ycen = dim[2]/2,
-  rad = dim[1]/2, ang = 0, axrat = 1, box = 0)
+profoundEllipseSeg(xcen = dim[1]/2, ycen = dim[2]/2, rad = dim[1]/2, ang = 0, axrat = 1,
+  segID = 1L, dim = c(101,101), segim = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{dim}{
-Integer vector; the dimension of the logic matrix to return.
-}
-  \item{image}{
-Numeric matrix; if provided this will be used to compute the \option{dim}.
-}
   \item{xcen}{
 Numeric scalar; the x centre of the segment aperture ellipse.
 }
@@ -34,12 +28,18 @@ Numeric scalar; major axis angle for the segment aperture ellipse in degrees. Wh
   \item{axrat}{
 Numeric scalar; axial ratio of the segment aperture ellipse defined as minor-axis/major-axis, i.e. 1 is a circle and 0 is a line.
 }
-  \item{box}{
-Numeric scalar; the boxiness of the segment aperture ellipse, defined such that r[mod]=(x^(2+box)+y^(2+box))^(1/(2+box)). When box=0 the segment will be a normal ellipse, but modifications between -1<box<1 will produce visually boxy distortions. Negative values have a pin-cushion effect, whereas positive values have a barrel effect (the major and minor axes staying fixed in all cases).
+  \item{segID}{
+Integer scalar; the segID value to use for pixels lying inside the ellipse.  
+}
+  \item{dim}{
+Integer vector; the dimension of the integer matrix to return (only used if \option{segim} is NULL).
+}
+  \item{segim}{
+Integer matrix; if provided the elliptical segment will be added to the \option{segim}.
 }
 }
 \value{
-Logical matrix, with the dimensions of \option{dim}, or the target \option{image} if supplied.
+Integer matrix, with the dimensions of \option{dim}, or the target \option{image} if supplied.
 }
 \references{
 Robotham et al, 2017, MNRAS, 466, 1513 (ProFit paper)
@@ -49,7 +49,7 @@ Aaron Robotham
 }
 
 \seealso{
-\code{\link{profoundDrawEllipse}}
+\code{\link{profoundDrawEllipse}}, \code{\link{profoundEllipCover}}
 }
 \examples{
 magimage(profoundEllipseSeg())

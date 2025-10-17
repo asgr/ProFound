@@ -19,42 +19,6 @@
     }
   }
   
-  # if(xcen == 0 & ycen == 0){
-  #   rad2 = x^2 + y^2
-  # }else{
-  #   rad2 = (x - xcen)^2 + (y - ycen)^2 
-  # }
-  
-  # if(is.na(rad_app)){
-  #   #left here for a different mode I tested for applying rad2 selection outside of this function.
-  #   #that wasn't any faster, so probably remove this if case in the future
-  #   Nsel = length(rad2)
-  #   rad_out = max(rad2)
-  #   sel_out = which(rad2 == rad_out)
-  #   
-  #   flux_app = sum(flux, na.rm=TRUE)
-  #   #flux_min = mean(flux[sel_out], na.rm=TRUE)
-  # }else{
-  #   sel = which(rad2 <= rad_app^2)
-  #   Nsel = length(sel)
-  #   
-  #   if(length(Nsel) == 0){
-  #     flux_app = NA_real_
-  #     #flux_min = 0
-  #   }else{
-  #     if(all(is.na(flux[sel]))){
-  #       flux_app = NA_real_
-  #       #flux_min = 0
-  #     }else{
-  #       rad_out = max(rad2[sel])
-  #       sel_out = which(rad2 == rad_out)
-  #       
-  #       flux_app = sum(flux[sel], na.rm=TRUE)
-  #       #flux_min = mean(flux[sel_out], na.rm=TRUE)
-  #     }
-  #   }
-  # }
-  
   aper_frac = profoundAperCover(x, y, xcen, ycen, rad_app, depth=depth)
   flux_app = sum(flux * aper_frac, na.rm=TRUE)
   N_app = sum((!is.na(flux))*aper_frac, na.rm=TRUE)
@@ -68,7 +32,6 @@
       }else{
         flux_min = 0
       }
-      #flux_min = min(flux[aper_frac > 0 & aper_frac < 1 & flux > 0], na.rm=TRUE)
     }else{
       rad = sqrt((x - xcen)^2 + (y - ycen)^2)
       wts = 1 - 1.414214*abs(rad - rad_app) #sqrt(2) rather than 2 so we can reach extreme corner of an outer pixel
@@ -78,16 +41,12 @@
       }else{
         flux_min = 0
       }
-      #flux_min = min(flux[aper_frac > 0 & aper_frac <= 1 & flux > 0], na.rm=TRUE)
     }
   })
   
   if(!isTRUE(is.finite(flux_min))){ #this catches NA, NaN, NULL, Inf events
     flux_min = 0 #don't want to penalise when masked or other weird events
   }
-  # }else if(flux_min < 0){
-  #   flux_min = 0 #don't want to penalise when in the sky noise 
-  # }
   
   return(list(flux_app=flux_app, N_app=N_app, flux_min=flux_min))
 }

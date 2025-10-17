@@ -30,27 +30,41 @@
   invisible(output)
 }
 
-profoundEllipseSeg = function(dim=c(101,101), image=NULL, xcen=dim[1]/2, ycen=dim[2]/2, rad=dim[1]/2,
-                              ang=0, axrat=1, box=0){
-  if(!is.null(image)){
-    dim = dim(image)
+profoundEllipseSeg = function(xcen=dim[1]/2, ycen=dim[2]/2, rad=dim[1]/2,
+                              ang=0, axrat=1, segID=1L, dim=c(101,101), segim=NULL){
+  if(!is.null(segim)){
+    dim = dim(segim)
   }
   
   grid = expand.grid(1:dim[1] - 0.5, 1:dim[2] - 0.5)
   
-  radtemp = sqrt((grid[,1] - xcen)^2+(grid[,2] - ycen)^2)
-  angrad = -ang*pi/180
-  angmod = atan2((grid[,1] - xcen), (grid[,2] - ycen)) - angrad
-  xmod = radtemp*sin(angmod)
-  ymod = radtemp*cos(angmod)
-  xmod = xmod/axrat
-  if(box==0){
-    radmod = sqrt(xmod^2 + ymod^2)
+  # radtemp = sqrt((grid[,1] - xcen)^2+(grid[,2] - ycen)^2)
+  # angrad = -ang*pi/180
+  # angmod = atan2((grid[,1] - xcen), (grid[,2] - ycen)) - angrad
+  # xmod = radtemp*sin(angmod)
+  # ymod = radtemp*cos(angmod)
+  # xmod = xmod/axrat
+  # if(box==0){
+  #   radmod = sqrt(xmod^2 + ymod^2)
+  # }else{
+  #   radmod = (abs(xmod)^(2+box) + abs(ymod)^(2+box))^(1/(2+box))
+  # }
+  # output = matrix(0L, dim[1], dim[2])
+  # output[] = radmod < rad
+
+  if(!is.null(segim)){
+    if(axrat == 1){
+      segim = segim + profoundAperCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, depth=0)*segID
+    }else{
+      segim = segim + profoundEllipCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, ang=ang, axrat=axrat, depth=0)*segID
+    }
   }else{
-    radmod = (abs(xmod)^(2+box) + abs(ymod)^(2+box))^(1/(2+box))
+    if(axrat == 1){
+      output = matrix(profoundAperCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, depth=0)*segID, dim[1], dim[2])
+    }else{
+      output = matrix(profoundEllipCover(grid[,1], grid[,2], cx=xcen, cy=ycen, rad=rad, ang=ang, axrat=axrat, depth=0)*segID, dim[1], dim[2])
+    }
   }
-  output = matrix(0L, dim[1], dim[2])
-  output[] = radmod < rad
   return(output)
 }
 

@@ -37,8 +37,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundAperCover
-NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, double cy, double radius, int depth);
-RcppExport SEXP _ProFound_profoundAperCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radiusSEXP, SEXP depthSEXP) {
+NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, double cy, double rad, int depth);
+RcppExport SEXP _ProFound_profoundAperCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP depthSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,9 +46,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< double >::type cx(cxSEXP);
     Rcpp::traits::input_parameter< double >::type cy(cySEXP);
-    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
+    Rcpp::traits::input_parameter< double >::type rad(radSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundAperCover(x, y, cx, cy, radius, depth));
+    rcpp_result_gen = Rcpp::wrap(profoundAperCover(x, y, cx, cy, rad, depth));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -66,8 +66,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundEllipCover
-NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, double cy, double semi_maj, double axrat, double ang, int depth);
-RcppExport SEXP _ProFound_profoundEllipCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP semi_majSEXP, SEXP axratSEXP, SEXP angSEXP, SEXP depthSEXP) {
+NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, double cy, double rad, double ang, double axrat, int depth);
+RcppExport SEXP _ProFound_profoundEllipCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP depthSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -75,11 +75,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< double >::type cx(cxSEXP);
     Rcpp::traits::input_parameter< double >::type cy(cySEXP);
-    Rcpp::traits::input_parameter< double >::type semi_maj(semi_majSEXP);
-    Rcpp::traits::input_parameter< double >::type axrat(axratSEXP);
+    Rcpp::traits::input_parameter< double >::type rad(radSEXP);
     Rcpp::traits::input_parameter< double >::type ang(angSEXP);
+    Rcpp::traits::input_parameter< double >::type axrat(axratSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundEllipCover(x, y, cx, cy, semi_maj, axrat, ang, depth));
+    rcpp_result_gen = Rcpp::wrap(profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth));
     return rcpp_result_gen;
 END_RCPP
 }
