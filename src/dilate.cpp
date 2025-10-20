@@ -1,8 +1,12 @@
 #include <Rcpp.h>
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
+
 using namespace Rcpp;
 
 // [[Rcpp::export(".dilate_cpp")]]
-IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector expand=0){
+IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector expand=0, int nthreads = 1){
   
   int srow = segim.nrow();
   int scol = segim.ncol();
@@ -30,6 +34,10 @@ IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector 
     }
   }
   
+#ifdef _OPENMP
+  // Parallelize the main loop
+#pragma omp parallel for schedule(static) num_threads(nthreads)
+#endif
   for (int i = 0; i < srow; i++) {
     for (int j = 0; j < scol; j++) {
       if(segim(i,j) > 0){

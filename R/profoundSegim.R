@@ -178,7 +178,7 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
                            SBlim=NULL, magzero=0, gain=NULL, pixscale=1, sky=NULL, 
                            skyRMS=NULL, keyvalues=NULL, verbose=FALSE, plot=FALSE, stats=TRUE, 
                            rotstats=FALSE, boundstats=FALSE, offset=1, sortcol = "segID", 
-                           decreasing = FALSE, watershed = 'ProFound', ...){
+                           decreasing = FALSE, watershed = 'ProFound', nthreads=1, ...){
   
   call=match.call()
   if(verbose){message(' - Running MakeSegim:')}
@@ -256,7 +256,8 @@ profoundMakeSegim=function(image=NULL, mask=NULL, objects=NULL, skycut=1, pixcut
   if(any(image>0)){
     if(watershed=='ProFound'){
       segim = water_cpp(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
-                      reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
+                      reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut,
+                      nthreads=nthreads, verbose=verbose)
     }else if(watershed=='ProFound-old'){
       segim = water_cpp_old(image=image, nx=dim(image)[1], ny=dim(image)[2], abstol=tolerance, 
                           reltol=reltol, cliptol=cliptol, ext=ext, skycut=skycut, pixcut=pixcut, verbose=verbose)
@@ -514,7 +515,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
                                  expand='all', magzero=0, gain=NULL, pixscale=1, sky=0, 
                                  skyRMS=0, keyvalues=NULL, verbose=FALSE, plot=FALSE, 
                                  stats=TRUE, rotstats=FALSE, boundstats=FALSE, offset=1, 
-                                 sortcol = "segID", decreasing = FALSE, ...){
+                                 sortcol = "segID", decreasing = FALSE, nthreads=1, ...){
   
   if(verbose){message(' - Running MakeSegimDilate:')}
   timestart = proc.time()[3]
@@ -579,7 +580,7 @@ profoundMakeSegimDilate=function(image=NULL, segim=NULL, mask=NULL, size=9, shap
     }else{
       segim_new[!(segim_new %in% expand)] = 0L
     }
-    segim_new = .dilate_cpp(segim_new, kern)
+    segim_new = .dilate_cpp(segim_new, kern, nthreads=nthreads)
     replace = which(segim!=0) #put back non-dilated segments
     segim_new[replace] = segim[replace] #put back non-dilated segments
     rm(replace)
@@ -1426,7 +1427,7 @@ profoundSegimExtend=function(image=NULL, segim=NULL, mask=segim, ...){
   return(as.data.frame(output))
 }
 
-profoundDilate = function(segim=NULL, size=3, shape='disc', expand='all', iters=1){
+profoundDilate = function(segim=NULL, size=3, shape='disc', expand='all', iters=1, nthreads=1){
   kern = .makeBrush(size, shape=shape)
   if(expand[1] == 'all'){
     expand = 0
@@ -1440,7 +1441,7 @@ profoundDilate = function(segim=NULL, size=3, shape='disc', expand='all', iters=
   }
   
   for(i in 1:iters){
-    segim = .dilate_cpp(segim=segim, kern=kern, expand=expand)
+    segim = .dilate_cpp(segim=segim, kern=kern, expand=expand, nthreads=nthreads)
   }
   
   if(!is.null(NAmask)){

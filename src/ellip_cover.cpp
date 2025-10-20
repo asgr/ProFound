@@ -1,4 +1,8 @@
 #include <Rcpp.h>
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
+
 using namespace Rcpp;
 
 // Function to check if a point is inside an ellipse
@@ -37,7 +41,7 @@ double pixelCoverEllip(double delta_x, double delta_y, double semi_maj, double s
 
 // [[Rcpp::export]]
 NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, double cy,
-                                 double rad, double ang, double axrat, int depth = 4) {
+                                 double rad, double ang, double axrat, int depth = 4, int nthreads = 1) {
   int n = x.size();
   NumericVector result(n);
   
@@ -46,11 +50,26 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
   double cos_ang = std::cos(-ang);
   double sin_ang = std::sin(-ang);
   double semi_min = rad * axrat;
+  const double rad_plus = rad + 0.7071068;
   
+  #ifdef _OPENMP
+    // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
+  #pragma omp parallel for schedule(dynamic, 10) if(n > 100) num_threads(nthreads)
+  #endif
   for (int i = 0; i < n; ++i) {
-    double delta_x = x[i] - cx;
-    double delta_y = y[i] - cy;
-    result[i] = pixelCoverEllip(delta_x, delta_y, rad, semi_min, cos_ang, sin_ang, depth);
+    // Make loop-local copies to avoid data races
+    const double delta_x = x[i] - cx;
+    if (std::abs(delta_x) < rad_plus) {
+      const double delta_y = y[i] - cy;
+      if (std::abs(delta_y) < rad_plus) {
+        const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
+        result[i] = pixelCoverEllip(delta_x, delta_y, rad, semi_min, cos_ang, sin_ang, depth);
+      } else {
+        result[i] = 0.0;
+      }
+    } else {
+      result[i] = 0.0;
+    }
   }
   
   return result;

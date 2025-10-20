@@ -24,13 +24,16 @@
 
 #include <Rcpp.h>
 #include "water.h"
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 
 // [[Rcpp::export]]
 Rcpp::IntegerMatrix water_cpp(
     Rcpp::NumericVector image = 0, const int nx = 1, const int ny = 1,
     const double abstol = 1, const double reltol = 0, const double cliptol = 1000000,
     const int ext = 1, const double skycut = 0, const int pixcut = 1,
-    const bool verbose = false, const int Ncheck = 1000000)
+    const bool verbose = false, const int Ncheck = 1000000, int nthreads = 1)
 {
     // Use Rcpp for checking interruptions
     auto interrupt_checker = [Ncheck, verbose](const std::size_t i, const std::size_t total) {
@@ -56,6 +59,10 @@ Rcpp::IntegerMatrix water_cpp(
     // (since profound::watershed uses 0 and -1 respectively)
     Rcpp::IntegerMatrix segments(nx, ny);
     profound::watershed(&(image[0]), &(segments[0]), nx, ny, ext, abstol, reltol, cliptol, skycut, pixcut, interrupt_checker);
+    #ifdef _OPENMP
+        // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
+    #pragma omp parallel for schedule(dynamic, 10) if(segments.size() > 100) num_threads(nthreads)
+    #endif
     for (R_xlen_t i = 0; i != segments.size(); i++) {
         segments[i]++;
     }

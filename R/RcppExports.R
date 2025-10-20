@@ -16,28 +16,28 @@
     invisible(.Call(`_ProFound_interpolateLinearGrid`, xseq, yseq, tempmat_sky, output))
 }
 
-profoundAperCover <- function(x, y, cx, cy, rad, depth = 4L) {
-    .Call(`_ProFound_profoundAperCover`, x, y, cx, cy, rad, depth)
+profoundAperCover <- function(x, y, cx, cy, rad, depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundAperCover`, x, y, cx, cy, rad, depth, nthreads)
 }
 
-.dilate_cpp <- function(segim, kern, expand = 0L) {
-    .Call(`_ProFound_dilate_cpp`, segim, kern, expand)
+.dilate_cpp <- function(segim, kern, expand = 0L, nthreads = 1L) {
+    .Call(`_ProFound_dilate_cpp`, segim, kern, expand, nthreads)
 }
 
-profoundEllipCover <- function(x, y, cx, cy, rad, ang, axrat, depth = 4L) {
-    .Call(`_ProFound_profoundEllipCover`, x, y, cx, cy, rad, ang, axrat, depth)
+profoundEllipCover <- function(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundEllipCover`, x, y, cx, cy, rad, ang, axrat, depth, nthreads)
 }
 
 .point_in_polygon_cpp_short <- function(testx, testy, vertx, verty) {
     .Call(`_ProFound_pnpoly`, testx, testy, vertx, verty)
 }
 
-.Cadacs_MakeSkyGrid <- function(image, sky, skyRMS, objects = NULL, mask = NULL, box1 = 100L, box2 = 100L, grid1 = 100L, grid2 = 100L, boxadd1 = 50L, boxadd2 = 50L, type = 2L, skypixmin = 5000L, boxiters = 0L, doclip = 1L, skytype = 1L, skyRMStype = 2L, sigmasel = 1) {
-    invisible(.Call(`_ProFound_Cadacs_MakeSkyGrid`, image, sky, skyRMS, objects, mask, box1, box2, grid1, grid2, boxadd1, boxadd2, type, skypixmin, boxiters, doclip, skytype, skyRMStype, sigmasel))
+.Cadacs_MakeSkyGrid <- function(image, sky, skyRMS, objects = NULL, mask = NULL, box1 = 100L, box2 = 100L, grid1 = 100L, grid2 = 100L, boxadd1 = 50L, boxadd2 = 50L, type = 2L, skypixmin = 5000L, boxiters = 0L, doclip = 1L, skytype = 1L, skyRMStype = 2L, sigmasel = 1, nthreads = 1L) {
+    invisible(.Call(`_ProFound_Cadacs_MakeSkyGrid`, image, sky, skyRMS, objects, mask, box1, box2, grid1, grid2, boxadd1, boxadd2, type, skypixmin, boxiters, doclip, skytype, skyRMStype, sigmasel, nthreads))
 }
 
-water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1000000, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L) {
-    .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck)
+water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1000000, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L, nthreads = 1L) {
+    .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck, nthreads)
 }
 
 .addmat_cpp <- function(base, add, xlim, ylim) {

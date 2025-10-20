@@ -13,7 +13,7 @@ profoundMakeSegim(image = NULL, mask = NULL, objects = NULL, skycut = 1, pixcut 
   SBlim = NULL, magzero = 0, gain = NULL, pixscale = 1, sky = NULL, skyRMS = NULL,
   keyvalues = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
   boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE,
-  watershed = 'ProFound', ...)
+  watershed = 'ProFound', nthreads = 1, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -97,6 +97,9 @@ Logical; if FALSE (default) the segmentation statistics data.frame will be sorte
 }
   \item{watershed}{
 Character; the funciton to use to achieve the watershed deblend. Allowed options are 'EBImage' for EBImage::watershed, and 'ProFound' for the new \code{Rcpp} implementation included with the \code{ProFound} package.
+}
+  \item{nthreads}{
+Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

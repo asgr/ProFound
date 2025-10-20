@@ -1,5 +1,8 @@
 #include <Rcpp.h>
 #include "akima.h"
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
 
 #define adacs_BOTH 1
 #define adacs_LO 2
@@ -606,7 +609,7 @@ void Cadacs_MakeSkyGrid(
     const int type = 2, const int skypixmin = 5000,
     const int boxiters = 0, const int doclip = 1,
     const int skytype = 1, const int skyRMStype = 2,
-    const double sigmasel = 1)
+    const double sigmasel = 1, int nthreads = 1)
 {
   // box MUST NOT be larger than the input image
   double box[2] = {(double)box1, (double)box2};
@@ -659,6 +662,10 @@ void Cadacs_MakeSkyGrid(
 
   bool hasNaNs=false;
   x_tile_centre=grid[0]/2;
+  // #ifdef _OPENMP
+  //   // Parallelize the main loop
+  // #pragma omp parallel for schedule(static) num_threads(nthreads)
+  // #endif
   for (int i=1; i<tile_nrows-1; i++) {
     x_tile_centre = xseq[i];
     for (int j=1; j<tile_ncols-1; j++) {

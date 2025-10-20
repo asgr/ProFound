@@ -19,9 +19,11 @@ profoundMakeSegimExpand(image = NULL, segim = NULL, mask = NULL, objects = NULL,
 profoundMakeSegimDilate(image = NULL, segim = NULL, mask = NULL, size = 9, shape = "disc",
   expand = "all", magzero = 0, gain = NULL, pixscale = 1, sky = 0, skyRMS = 0,
   keyvalues = NULL, verbose = FALSE, plot = FALSE, stats = TRUE, rotstats = FALSE,
-  boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, ...)
+  boundstats = FALSE, offset = 1, sortcol = "segID", decreasing = FALSE, nthreads = 1,
+  ...)
   
-profoundDilate(segim = NULL, size = 3, shape = 'disc', expand = "all", iters = 1)
+profoundDilate(segim = NULL, size = 3, shape = 'disc', expand = "all", iters = 1,
+  nthreads = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -106,6 +108,9 @@ Character; name of the output column that the returned segmentation statistics d
   \item{decreasing}{
 Logical; if FALSE (default) the segmentation statistics data.frame will be sorted in increasing order, if TRUE the data.frame will be sorted in decreasing order.
 }
+  \item{nthreads}{
+Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.
+}
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.
 }
@@ -163,6 +168,9 @@ profoundMakeSegimDilate(image, segim$segim, plot=TRUE, size = 21)
 #to a low value like 1/0:
 profoundMakeSegim(image, plot=TRUE, skycut = 1)
 profoundMakeSegim(image, plot=TRUE, skycut = 0)
+
+#Just the dilation
+magimage(profoundDilate(segim$segim, size=11))
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

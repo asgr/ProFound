@@ -37,8 +37,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundAperCover
-NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, double cy, double rad, int depth);
-RcppExport SEXP _ProFound_profoundAperCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP depthSEXP) {
+NumericVector profoundAperCover(NumericVector x, NumericVector y, double cx, double cy, double rad, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundAperCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -48,26 +48,28 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type cy(cySEXP);
     Rcpp::traits::input_parameter< double >::type rad(radSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundAperCover(x, y, cx, cy, rad, depth));
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(profoundAperCover(x, y, cx, cy, rad, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // dilate_cpp
-IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector expand);
-RcppExport SEXP _ProFound_dilate_cpp(SEXP segimSEXP, SEXP kernSEXP, SEXP expandSEXP) {
+IntegerMatrix dilate_cpp(IntegerMatrix segim, IntegerMatrix kern, IntegerVector expand, int nthreads);
+RcppExport SEXP _ProFound_dilate_cpp(SEXP segimSEXP, SEXP kernSEXP, SEXP expandSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< IntegerMatrix >::type segim(segimSEXP);
     Rcpp::traits::input_parameter< IntegerMatrix >::type kern(kernSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type expand(expandSEXP);
-    rcpp_result_gen = Rcpp::wrap(dilate_cpp(segim, kern, expand));
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(dilate_cpp(segim, kern, expand, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // profoundEllipCover
-NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, double cy, double rad, double ang, double axrat, int depth);
-RcppExport SEXP _ProFound_profoundEllipCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP depthSEXP) {
+NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, double cy, double rad, double ang, double axrat, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundEllipCover(SEXP xSEXP, SEXP ySEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -79,7 +81,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type ang(angSEXP);
     Rcpp::traits::input_parameter< double >::type axrat(axratSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth));
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -98,8 +101,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // Cadacs_MakeSkyGrid
-void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image, Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS, Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask, const int box1, const int box2, const int grid1, const int grid2, const int boxadd1, const int boxadd2, const int type, const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel);
-RcppExport SEXP _ProFound_Cadacs_MakeSkyGrid(SEXP imageSEXP, SEXP skySEXP, SEXP skyRMSSEXP, SEXP objectsSEXP, SEXP maskSEXP, SEXP box1SEXP, SEXP box2SEXP, SEXP grid1SEXP, SEXP grid2SEXP, SEXP boxadd1SEXP, SEXP boxadd2SEXP, SEXP typeSEXP, SEXP skypixminSEXP, SEXP boxitersSEXP, SEXP doclipSEXP, SEXP skytypeSEXP, SEXP skyRMStypeSEXP, SEXP sigmaselSEXP) {
+void Cadacs_MakeSkyGrid(Rcpp::NumericMatrix image, Rcpp::NumericMatrix sky, Rcpp::NumericMatrix skyRMS, Rcpp::Nullable<Rcpp::IntegerMatrix> objects, Rcpp::Nullable<Rcpp::IntegerMatrix> mask, const int box1, const int box2, const int grid1, const int grid2, const int boxadd1, const int boxadd2, const int type, const int skypixmin, const int boxiters, const int doclip, const int skytype, const int skyRMStype, const double sigmasel, int nthreads);
+RcppExport SEXP _ProFound_Cadacs_MakeSkyGrid(SEXP imageSEXP, SEXP skySEXP, SEXP skyRMSSEXP, SEXP objectsSEXP, SEXP maskSEXP, SEXP box1SEXP, SEXP box2SEXP, SEXP grid1SEXP, SEXP grid2SEXP, SEXP boxadd1SEXP, SEXP boxadd2SEXP, SEXP typeSEXP, SEXP skypixminSEXP, SEXP boxitersSEXP, SEXP doclipSEXP, SEXP skytypeSEXP, SEXP skyRMStypeSEXP, SEXP sigmaselSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type image(imageSEXP);
@@ -120,13 +123,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type skytype(skytypeSEXP);
     Rcpp::traits::input_parameter< const int >::type skyRMStype(skyRMStypeSEXP);
     Rcpp::traits::input_parameter< const double >::type sigmasel(sigmaselSEXP);
-    Cadacs_MakeSkyGrid(image, sky, skyRMS, objects, mask, box1, box2, grid1, grid2, boxadd1, boxadd2, type, skypixmin, boxiters, doclip, skytype, skyRMStype, sigmasel);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    Cadacs_MakeSkyGrid(image, sky, skyRMS, objects, mask, box1, box2, grid1, grid2, boxadd1, boxadd2, type, skypixmin, boxiters, doclip, skytype, skyRMStype, sigmasel, nthreads);
     return R_NilValue;
 END_RCPP
 }
 // water_cpp
-Rcpp::IntegerMatrix water_cpp(Rcpp::NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck);
-RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP) {
+Rcpp::IntegerMatrix water_cpp(Rcpp::NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck, int nthreads);
+RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -141,7 +145,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type pixcut(pixcutSEXP);
     Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< const int >::type Ncheck(NcheckSEXP);
-    rcpp_result_gen = Rcpp::wrap(water_cpp(image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck));
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(water_cpp(image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -207,12 +212,12 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_interpolateAkimaGrid", (DL_FUNC) &_ProFound_interpolateAkimaGrid, 4},
     {"_ProFound_interpolateLinearGrid", (DL_FUNC) &_ProFound_interpolateLinearGrid, 4},
-    {"_ProFound_profoundAperCover", (DL_FUNC) &_ProFound_profoundAperCover, 6},
-    {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 3},
-    {"_ProFound_profoundEllipCover", (DL_FUNC) &_ProFound_profoundEllipCover, 8},
+    {"_ProFound_profoundAperCover", (DL_FUNC) &_ProFound_profoundAperCover, 7},
+    {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 4},
+    {"_ProFound_profoundEllipCover", (DL_FUNC) &_ProFound_profoundEllipCover, 9},
     {"_ProFound_pnpoly", (DL_FUNC) &_ProFound_pnpoly, 4},
-    {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 18},
-    {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 11},
+    {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 19},
+    {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 12},
     {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},
     {"_ProFound_order_cpp", (DL_FUNC) &_ProFound_order_cpp, 1},
     {"_ProFound_tabulate_cpp", (DL_FUNC) &_ProFound_tabulate_cpp, 2},

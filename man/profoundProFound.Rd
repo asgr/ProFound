@@ -24,7 +24,8 @@ profoundProFound(image = NULL, segim = NULL, objects = NULL, mask = NULL,  skycu
   sortcol = "segID", decreasing = FALSE, lowmemory = FALSE, keepim = TRUE,
   watershed = 'ProFound', pixelcov = FALSE, deblendtype = 'fit', psf = NULL,
   fluxweight = 'sum', convtype = 'brute', convmode = 'extended', fluxtype = 'Raw',
-  app_diam = NA, Ndeblendlim = Inf, static_photom = FALSE, rem_mask = FALSE, ...)
+  app_diam = NA, Ndeblendlim = Inf, static_photom = FALSE, rem_mask = FALSE, nthreads = 1,
+  ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -255,6 +256,9 @@ Logical; if TRUE and a segmentation map has been provided to \option{segim}, thi
 }
   \item{rem_mask}{
 Logical; should masked regions be set to NA in \option{sky} and \option{skyRMS} maps. Whether this makes sense or not probably depends on the nature of the mask. If they are pixels within the \option{image} then you might well want values to be interpolated across these regions (so set \option{rem_mask} = FALSE), but if they represent regions outside the bounds of the \option{image} you would probably prefer these to be set to NA, since the "sky" does not mean much here (so set \option{rem_mask} = TRUE). Of course if you leave it set to FALSE then you can make edits to the \option{sky} and \option{skyRMS} after \code{profoundProFound} is run to suit more complicated use cases (e.g. a mixture of both scenarios above).
+}
+  \item{nthreads}{
+Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.
 }
   \item{\dots}{
 Further arguments to be passed to \code{\link{magimage}}. Only relevant is \option{plot}=TRUE.

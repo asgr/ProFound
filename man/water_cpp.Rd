@@ -10,7 +10,7 @@ This is a standalone implementation of a watershed deblend, with some astronomy 
 }
 \usage{
 water_cpp(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06, ext = 1L,
-  skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
+  skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L, nthreads = 1)
   
 water_cpp_old(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1e+06,
   ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L)
@@ -44,11 +44,14 @@ Numeric scalar; background value at or under which pixels are not considered any
   \item{pixcut}{
 Integer scalar; the minimum number of pixels allowed in a segment. Below this number segments are set to 0, i.e. the background. This means they are not considered real objects in \code{\link{profoundProFound}}.
 }
-  \item{verbose}{
-Logical; should verbose output be displayed to the user? Since big image can take a long time to run, you might want to monitor progress.  
-}
   \item{Ncheck}{
 Integer scalar; the pixel scanning interval to check for interupts and for printing out the verbose state.  
+}
+  \item{nthreads}{
+Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.
+}
+  \item{verbose}{
+Logical; should verbose output be displayed to the user? Since big image can take a long time to run, you might want to monitor progress.  
 }
 }
 \details{

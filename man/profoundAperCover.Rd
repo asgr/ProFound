@@ -9,9 +9,9 @@ Fraction of Pixel in Aperture
 Calculates the fraction of pixels inside an aperture using recursive descent.
 }
 \usage{
-profoundAperCover(x, y, cx, cy, rad, depth = 4L)
+profoundAperCover(x, y, cx, cy, rad, depth = 4L, nthreads = 1L)
 
-profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L) 
+profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,6 +38,9 @@ Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded be
 }
   \item{depth}{
 Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accuracy and speed (see Examples).
+}
+  \item{nthreads}{
+Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.
 }
 }
 \details{

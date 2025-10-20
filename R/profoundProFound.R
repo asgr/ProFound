@@ -13,7 +13,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                           decreasing=FALSE, lowmemory=FALSE, keepim=TRUE, watershed='ProFound',
                           pixelcov=FALSE, deblendtype='fit', psf=NULL, fluxweight='sum',
                           convtype = 'brute', convmode = 'extended', fluxtype='Raw',
-                          app_diam=NA, Ndeblendlim=Inf, static_photom = FALSE, rem_mask=FALSE, ...){
+                          app_diam=NA, Ndeblendlim=Inf, static_photom = FALSE, rem_mask=FALSE, nthreads=1, ...){
 
   if(verbose){message('Running ProFound:')}
   timestart=proc.time()[3]
@@ -199,7 +199,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
                             ext=ext, reltol=reltol, cliptol=cliptol, sigma=sigma, 
                             smooth=smooth, pixcut=pixcut, skycut=skycut, SBlim=SBlim,  
                             sky=sky, skyRMS=skyRMS, magzero=magzero, pixscale=pixscale, 
-                            verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE)
+                            verbose=verbose, watershed=watershed, plot=FALSE, stats=FALSE, nthreads=nthreads)
     objects = segim$objects
     segim = segim$segim
   }else{
@@ -211,7 +211,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     if((hassky==FALSE | hasskyRMS==FALSE)){
       if(redosky){
         if(verbose){message(paste('Doing initial aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
-        objects_redo=profoundMakeSegimDilate(segim=objects, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+        #objects_redo=profoundMakeSegimDilate(segim=objects, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+        objects_redo = profoundDilate(segim=objects, size=redoskysize, shape=shape, nthreads=nthreads)
       }else{
         objects_redo=objects
       }
@@ -288,8 +289,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         if(verbose){message('Doing dilations:')}
         for(i in 1:(iters)){
           if(verbose){message(paste('Iteration',i,'of',iters,'-',round(proc.time()[3]-timestart,3),'sec'))}
-          segim_new = profoundDilate(segim=segim, size=size, shape=shape, expand=expand_segID, iters=1)
-          #segim_new = profoundMakeSegimDilate(segim=segim, expand=expand_segID, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim #dilate
+          segim_new = profoundDilate(segim=segim, size=size, shape=shape, expand=expand_segID, iters=1, nthreads=nthreads)
           segstats_new = .profoundFluxCalcMin(image=image_sky, segim=segim_new, mask=mask) #run on image with dilated segments
           N100diff = (segstats_new$N100 - segstats$N100)
           SBnew = (segstats_new$flux - segstats$flux) / N100diff #calculate the surface brightness of the new grown anulus only
@@ -314,7 +314,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       origfrac = origfrac / segstats$flux
       
       if(iterskyloc){
-        segim_skyloc = profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        #segim_skyloc = profoundMakeSegimDilate(segim=segim, size=size, shape=shape, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$segim
+        segim_skyloc = profoundDilate(segim=segim, size=size, shape=shape, nthreads=nthreads)
         segstats_sky = .profoundFluxCalcMin(image=image, segim=segim_skyloc-segim, mask=mask)
         #segstats$flux = segstats$flux + (skystats * segstats$N100) #add back the local sky component
         skyseg_temp = segstats_sky$flux / segstats_sky$N100
@@ -336,7 +337,11 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       skyseg_mean = NA
     }
     
-    objects_redo = profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+    #objects_redo = profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
+    objects_redo = profoundDilate(segim=objects, size=redoskysize, shape=shape, nthreads=nthreads)
+    if(!is.null(mask)){
+      objects_redo[mask!=0] = 0
+    }
     
     if(redosky){
       if(redoskysize %% 2 == 0){redoskysize=redoskysize+1}
