@@ -96,11 +96,11 @@ maghist(test)
 
 #Some ellipse examples:
 
-output = matrix(profoundEllipCover(temp[,1], temp[,2], 5, 5, 4.5, 0.5, 30, depth=4),
+output = matrix(profoundEllipCover(temp[,1], temp[,2], 5, 5, 4.5, 30, 0.5, depth=4),
   10, 10)
 magimage(output)
 
-output = matrix(profoundEllipCover(temp[,1], temp[,2], 4.2, 5.1, 2.5, 0.8, 110, depth=4),
+output = matrix(profoundEllipCover(temp[,1], temp[,2], 4.2, 5.1, 2.5, 110, 0.8, depth=4),
   10, 10)
 magimage(output)
 }
