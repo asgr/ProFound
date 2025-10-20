@@ -8,8 +8,12 @@ using namespace Rcpp;
 // Function to check if a point is inside an ellipse
 bool isInsideEllip(double delta_x, double delta_y, double semi_maj, double semi_min, double cos_ang, double sin_ang) {
   // Rotate the point by the negative of the ellipse's rotation angle
-  double mod_x = (delta_x * sin_ang + delta_y * cos_ang) / semi_min;
-  double mod_y = (delta_x * cos_ang - delta_y * sin_ang) / semi_maj;
+  //double mod_x = (delta_x * sin_ang - delta_y * cos_ang) / semi_min;
+  //double mod_y = (delta_x * cos_ang + delta_y * sin_ang) / semi_maj;
+  
+  double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / semi_min;
+  double mod_y = (-delta_x * sin_ang + delta_y * cos_ang) / semi_maj;
+  
   
   // Check if the point is inside the ellipse
   double ellipse_eq = (mod_x * mod_x) + (mod_y * mod_y);
@@ -47,8 +51,8 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
   
   ang = ang*3.141593/180;
   
-  double cos_ang = std::cos(-ang);
-  double sin_ang = std::sin(-ang);
+  double cos_ang = std::cos(ang);
+  double sin_ang = std::sin(ang);
   double semi_min = rad * axrat;
   const double rad_plus = rad + 0.7071068;
   
