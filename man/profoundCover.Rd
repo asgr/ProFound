@@ -1,19 +1,20 @@
 \name{profoundCover}
 \alias{profoundAperCover}
 \alias{profoundEllipCover}
+\alias{profoundPolyCover}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Fraction of Pixel in Aperture
+Fraction of Pixels in Shapes
 }
 \description{
-Calculates the fraction of pixels inside an aperture using recursive descent.
+Calculates the fraction of pixels inside an aperture, ellipse or polygon using recursive descent in Rcpp.
 }
 \usage{
 profoundAperCover(x, y, cx, cy, rad, depth = 4L, nthreads = 1L)
 
 profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L)
 
-profoundPolyCover(x, y, vertx, verty, depth = 4L, nthreads = 1L)
+profoundPolyCover(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -53,14 +54,18 @@ Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFoun
 }
 \details{
 Re the recursion \option{depth}, higher numbers are more accurate, where you probably do not want to set it below 3. Above 5 will suffer notable slow-down. 4 is usually about the performance versus accuracy sweet spot.
+
+These functions are written in performant Rcpp, and can be built against OpenMP where available (setting \option{nthreads} higher than 1 if appropriate).
 }
 \value{
 Numeric vector the same length as \option{x} and \option{y}, which is what fraction of the pixel lies under the desired aperture / ellipse.
 }
+\references{
+\code{profoundPolyCover} uses code provided on \url{https://wrfranklin.org/Research/Short_Notes/pnpoly.html} by W. Randolph Franklin.
+}
 \author{
 Aaron Robotham
 }
-
 \seealso{
 \code{\link{profoundAperPhot}}, \code{\link{profoundEllipseSeg}}
 }

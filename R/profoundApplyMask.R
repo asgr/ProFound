@@ -159,7 +159,7 @@ profoundDrawMask = function(image, poly=NULL, invert_mask = FALSE, mode='draw', 
   image_grid = expand.grid(1:dim(image)[1] - 0.5, 1:dim(image)[2] - 0.5)
   
   if(requireNamespace("Rwcs", quietly = TRUE)){
-    in_poly = Rwcs::Rwcs_in_poly(image_grid[,1], image_grid[,2], output$x, output$y)
+    in_poly = profoundPolyCover(image_grid[,1], image_grid[,2], output$x, output$y, depth=0) == 1
     mask = matrix(0L, dim(image)[1], dim(image)[2])
     
     if(invert_mask){

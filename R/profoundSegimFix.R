@@ -393,29 +393,29 @@ profoundZapSegID = function(segID, segID_merge){
   return(invisible(segID_merge))
 }
 
-profoundInPoly = function(x, y, poly_x, poly_y){
-  scale = min(diff(range(poly_x)), diff(range(poly_y)))
-  if (is.matrix(x) || is.data.frame(x)) {
-    if (ncol(x) == 1) {
-      x = x[, 1]
-    }
-    else if (ncol(x) == 2) {
-      y = x[, 2]
-      x = x[, 1]
-    }
-  }
-  if (is.matrix(poly_x) || is.data.frame(poly_x)) {
-    if (ncol(poly_x) == 1) {
-      poly_x = poly_x[, 1]
-    }
-    else if (ncol(poly_x) == 2) {
-      poly_y = poly_y[, 2]
-      poly_x = poly_x[, 1]
-    }
-  }
-  
-  return(.point_in_polygon_cpp_short(x, y, poly_x, poly_y))
-}
+# profoundInPoly = function(x, y, poly_x, poly_y){
+#   scale = min(diff(range(poly_x)), diff(range(poly_y)))
+#   if (is.matrix(x) || is.data.frame(x)) {
+#     if (ncol(x) == 1) {
+#       x = x[, 1]
+#     }
+#     else if (ncol(x) == 2) {
+#       y = x[, 2]
+#       x = x[, 1]
+#     }
+#   }
+#   if (is.matrix(poly_x) || is.data.frame(poly_x)) {
+#     if (ncol(poly_x) == 1) {
+#       poly_x = poly_x[, 1]
+#     }
+#     else if (ncol(poly_x) == 2) {
+#       poly_y = poly_y[, 2]
+#       poly_x = poly_x[, 1]
+#     }
+#   }
+#   
+#   return(profoundPolyCover(x, y, poly_x, poly_y, depth=0))
+# }
   
 .inpoly_pix = function(poly_x,poly_y){
   #xseq = floor(min(poly_x)):ceiling(max(poly_x)) - 0.5
@@ -424,5 +424,5 @@ profoundInPoly = function(x, y, poly_x, poly_y){
   yseq = seq(floor(min(poly_y)) - 0.5, ceiling(max(poly_y)) - 0.5, by=1)
   tempgrid = as.matrix(expand.grid(xseq, yseq))
   #switched to short version of this function. Seems to work better...
-  return(invisible(ceiling(tempgrid[.point_in_polygon_cpp_short(tempgrid[,1], tempgrid[,2], poly_x, poly_y),])))
+  return(invisible(ceiling(tempgrid[profoundPolyCover(tempgrid[,1], tempgrid[,2], poly_x, poly_y, depth=0) == 1,])))
 }
