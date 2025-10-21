@@ -28,12 +28,8 @@ profoundEllipCover <- function(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthrea
     .Call(`_ProFound_profoundEllipCover`, x, y, cx, cy, rad, ang, axrat, depth, nthreads)
 }
 
-.point_in_polygon_cpp_short <- function(testx, testy, vertx, verty) {
-    .Call(`_ProFound_in_poly`, testx, testy, vertx, verty)
-}
-
-profoundPolyCover <- function(x, y, vertx, verty, depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundPolyCover`, x, y, vertx, verty, depth, nthreads)
+profoundPolyCover <- function(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundPolyCover`, x, y, poly_x, poly_y, depth, nthreads)
 }
 
 .Cadacs_MakeSkyGrid <- function(image, sky, skyRMS, objects = NULL, mask = NULL, box1 = 100L, box2 = 100L, grid1 = 100L, grid2 = 100L, boxadd1 = 50L, boxadd2 = 50L, type = 2L, skypixmin = 5000L, boxiters = 0L, doclip = 1L, skytype = 1L, skyRMStype = 2L, sigmasel = 1, nthreads = 1L) {

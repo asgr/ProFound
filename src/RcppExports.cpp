@@ -86,33 +86,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// in_poly
-double in_poly(double testx, double testy, NumericVector vertx, NumericVector verty);
-RcppExport SEXP _ProFound_in_poly(SEXP testxSEXP, SEXP testySEXP, SEXP vertxSEXP, SEXP vertySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type testx(testxSEXP);
-    Rcpp::traits::input_parameter< double >::type testy(testySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vertx(vertxSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type verty(vertySEXP);
-    rcpp_result_gen = Rcpp::wrap(in_poly(testx, testy, vertx, verty));
-    return rcpp_result_gen;
-END_RCPP
-}
 // profoundPolyCover
-NumericVector profoundPolyCover(NumericVector x, NumericVector y, NumericVector vertx, NumericVector verty, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundPolyCover(SEXP xSEXP, SEXP ySEXP, SEXP vertxSEXP, SEXP vertySEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericVector profoundPolyCover(NumericVector x, NumericVector y, NumericVector poly_x, NumericVector poly_y, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundPolyCover(SEXP xSEXP, SEXP ySEXP, SEXP poly_xSEXP, SEXP poly_ySEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vertx(vertxSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type verty(vertySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type poly_x(poly_xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type poly_y(poly_ySEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundPolyCover(x, y, vertx, verty, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundPolyCover(x, y, poly_x, poly_y, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -231,7 +217,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_profoundAperCover", (DL_FUNC) &_ProFound_profoundAperCover, 7},
     {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 4},
     {"_ProFound_profoundEllipCover", (DL_FUNC) &_ProFound_profoundEllipCover, 9},
-    {"_ProFound_in_poly", (DL_FUNC) &_ProFound_in_poly, 4},
     {"_ProFound_profoundPolyCover", (DL_FUNC) &_ProFound_profoundPolyCover, 6},
     {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 19},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 12},

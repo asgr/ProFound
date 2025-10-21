@@ -11,7 +11,9 @@ Calculates the fraction of pixels inside an aperture using recursive descent.
 \usage{
 profoundAperCover(x, y, cx, cy, rad, depth = 4L, nthreads = 1L)
 
-profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L) 
+profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L)
+
+profoundPolyCover(x, y, vertx, verty, depth = 4L, nthreads = 1L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,6 +37,12 @@ Numeric scalar; orientation of the semi-major axis in degrees. This has the conv
 }
   \item{axrat}{
 Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1).
+}
+  \item{poly_x}{
+Numeric vector; x vertices of polygon. This need not be closing (so 4 points define square, not 5).  
+}
+  \item{poly_y}{
+Numeric vector; y vertices of polygon. This need not be closing (so 4 points define square, not 5).  
 }
   \item{depth}{
 Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accuracy and speed (see Examples).

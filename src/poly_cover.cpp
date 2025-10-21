@@ -6,8 +6,7 @@
 
 using namespace Rcpp;
 
-// [[Rcpp::export(".point_in_polygon_cpp_short")]]
-double in_poly(double testx, double testy, NumericVector poly_x, NumericVector poly_y)
+static double in_poly_internal(double testx, double testy, const NumericVector &poly_x, const NumericVector &poly_y)
 {
   int i, j;
   double temp = 0.0;
@@ -21,10 +20,16 @@ double in_poly(double testx, double testy, NumericVector poly_x, NumericVector p
   return temp;
 }
 
+double in_poly(double testx, double testy, NumericVector poly_x, NumericVector poly_y)
+{
+  return in_poly_internal(testx, testy, poly_x, poly_y);
+}
+
 // Recursive function to determine fractional pixel coverage
-double pixelCoverPoly(double x, double y, NumericVector poly_x, NumericVector poly_y, int depth) {
+
+double pixelCoverPoly(double x, double y, const NumericVector &poly_x, const NumericVector &poly_y, int depth) {
   if (depth == 0) {
-    return in_poly(x, y, poly_x, poly_y);
+    return in_poly_internal(x, y, poly_x, poly_y);
   }
   
   double quarter = 0.25 / (1 << (depth - 1)); // (1 << (depth - 1)) is equivalent to pow(2, depth - 1), but faster
