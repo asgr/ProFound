@@ -19,9 +19,9 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, r: 'release'}
-          - {os: macOS-latest, r: 'release'}
-          - {os: macOS-latest, r: 'devel'}
-          - {os: ubuntu-16.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/xenial/latest"}
+          - {os: macos-latest, r: 'release'}
+          - {os: macos-latest, r: 'devel'}
+          - {os: ubuntu-latest, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -29,13 +29,13 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@master
+      - uses: r-lib/actions/setup-r@v4
         with:
           r-version: ${{ matrix.config.r }}
 
-      - uses: r-lib/actions/setup-pandoc@master
+      - uses: r-lib/actions/setup-pandoc@v4
 
       - name: Query dependencies
         run: |
@@ -47,15 +47,11 @@ jobs:
       - name: Install XQuartz
         if: runner.os == 'macOS'
         run: |
-          wget https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.11.dmg
-          sudo hdiutil attach XQuartz-2.7.11.dmg
-          sudo installer -package /Volumes/XQuartz-2.7.11/XQuartz.pkg -target /
-          sudo hdiutil detach /Volumes/XQuartz-2.7.11
-          rm XQuartz-2.7.11.dmg
-          
+          brew install --cask xquartz
+
       - name: Cache R packages
         if: runner.os != 'Windows'
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
@@ -69,8 +65,8 @@ jobs:
           Rscript -e "remotes::install_github('r-hub/sysreqs')"
           sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
           sudo -s eval "$sysreqs"
-          sudo apt install xvfb
-          echo "{XVFB_RUN}={xvfb-run}" >> $GITHUB_ENV
+          sudo apt-get install -y xvfb
+          echo "XVFB_RUN=xvfb-run" >> $GITHUB_ENV
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
@@ -86,7 +82,8 @@ jobs:
 
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          runner.os }}-r${{ matrix.config.r }}-results
           path: check
+          
