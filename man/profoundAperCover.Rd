@@ -99,10 +99,21 @@ maghist(test)
 output = matrix(profoundEllipCover(temp[,1], temp[,2], 5, 5, 4.5, 30, 0.5, depth=4),
   10, 10)
 magimage(output)
+draw.ellipse(5, 5, 4.5, 4.5*0.5, 30+90, border='red') # +90 because different ang def
 
 output = matrix(profoundEllipCover(temp[,1], temp[,2], 4.2, 5.1, 2.5, 110, 0.8, depth=4),
   10, 10)
 magimage(output)
+draw.ellipse(4.2, 5.1, 2.5, 2.5*0.8, 110+90, border='red') # +90 because different ang def
+
+#poly example:
+
+poly_x = c(0.958, 3.296, 1.583, 5.940, 8.969, 9.886, 5.701, 3.575, 2.964)
+poly_y = c(1.482, 4.677, 8.059, 4.977, 9.149, 2.647, 0.016, 2.798, 2.535)
+
+output = matrix(profoundPolyCover(temp[,1], temp[,2], poly_x, poly_y, depth=4),10,10)
+magimage(output)
+polygon(temp,border='red')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

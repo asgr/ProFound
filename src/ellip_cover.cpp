@@ -6,7 +6,7 @@
 using namespace Rcpp;
 
 // Function to check if a point is inside an ellipse
-bool isInsideEllip(double delta_x, double delta_y, double semi_maj, double semi_min, double cos_ang, double sin_ang) {
+double in_ellip(double delta_x, double delta_y, double semi_maj, double semi_min, double cos_ang, double sin_ang) {
   // Rotate the point by the negative of the ellipse's rotation angle
   //double mod_x = (delta_x * sin_ang - delta_y * cos_ang) / semi_min;
   //double mod_y = (delta_x * cos_ang + delta_y * sin_ang) / semi_maj;
@@ -16,15 +16,14 @@ bool isInsideEllip(double delta_x, double delta_y, double semi_maj, double semi_
   
   
   // Check if the point is inside the ellipse
-  double ellipse_eq = (mod_x * mod_x) + (mod_y * mod_y);
-  return ellipse_eq <= 1.0;
+  return (mod_x * mod_x) + (mod_y * mod_y) <= 1.0 ? 1.0 : 0.0;
 }
 
 // Recursive function to determine fractional pixel coverage
 double pixelCoverEllip(double delta_x, double delta_y, double semi_maj, double semi_min,
                       double cos_ang, double sin_ang, int depth) {
   if (depth == 0) {
-    return isInsideEllip(delta_x, delta_y, semi_maj, semi_min, cos_ang, sin_ang) ? 1.0 : 0.0;
+    return in_ellip(delta_x, delta_y, semi_maj, semi_min, cos_ang, sin_ang);
   }
   
   double quarter = 0.25 / (1 << (depth - 1)); // (1 << (depth - 1)) is equivalent to pow(2, depth - 1), but faster
