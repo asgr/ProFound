@@ -80,10 +80,11 @@ jobs:
           $XVFB_RUN Rscript -e "rcmdcheck::rcmdcheck(args = c('--no-manual', '--as-cran'), error_on = 'error', check_dir = 'check')"
         shell: bash
 
-      - name: Upload check results
+      
+- name: Upload check results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          runner.os }}-r${{ matrix.config.r }}-results
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
           
