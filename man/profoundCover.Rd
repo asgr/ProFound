@@ -2,6 +2,11 @@
 \alias{profoundAperCover}
 \alias{profoundEllipCover}
 \alias{profoundPolyCover}
+\alias{profoundAperFlux}
+\alias{profoundEllipFlux}
+\alias{profoundPolyFlux}
+\alias{profoundSegimFlux}
+\alias{profoundBoxFlux}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Fraction of Pixels in Shapes
@@ -15,6 +20,16 @@ profoundAperCover(x, y, cx, cy, rad, depth = 4L, nthreads = 1L)
 profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L)
 
 profoundPolyCover(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L)
+
+profoundAperFlux(image, cx, cy, rad, depth = 4L, nthreads = 1L)
+
+profoundEllipFlux(image, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L)
+
+profoundPolyFlux(image, poly_x, poly_y, depth = 4L, nthreads = 1L)
+
+profoundSegimFlux(image, segim, nthreads = 1L)
+
+profoundBoxFlux(image, cx, cy, size, nthreads = 1L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +39,12 @@ Numeric vector; the pixel x centre positions (in pixels, where pixel centres are
   \item{y}{
 Numeric vector; the pixel y centre positions (in pixels, where pixel centres are half integer in \code{ProFound}).
 }
+  \item{image}{
+Numeric matrix; the image we want to compute flux on.
+}
+  \item{segim}{
+Integer matrix; required, the segmentation map of the \option{image}. This matrix *must* be the same dimensions as \option{mask}.
+}
   \item{cx}{
 Numeric scalar; the x centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}).
 }
@@ -32,6 +53,9 @@ Numeric scalar; the y centre of the aperture (in pixels, where pixel centres are
 }
   \item{rad}{
 Numeric scalar; the radius or semi-major axis of the aperture / ellipse (in pixels).
+}
+  \item{size}{
+Numeric scalar; the box length (in pixels).
 }
   \item{ang}{
 Numeric scalar; orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical). 
@@ -58,7 +82,11 @@ Re the recursion \option{depth}, higher numbers are more accurate, where you pro
 These functions are written in performant Rcpp, and can be built against OpenMP where available (setting \option{nthreads} higher than 1 if appropriate).
 }
 \value{
-Numeric vector the same length as \option{x} and \option{y}, which is what fraction of the pixel lies under the desired aperture / ellipse.
+For the Cover functions: Numeric vector the same length as \option{x} and \option{y}, which is what fraction of the pixel lies under the desired aperture / ellipse.
+
+For the Flux functions: Numeric scalar, the computed image flux within the region requested. This uses the "cover" fractional pixel weights when \option{depth} is larger than 0.
+
+\code{profoundSegimFlux} is special case, wehre the output is a vector the same length as the maximum segID on \option{segim}, where each value corresponds to the summed flux of that segment by index, i.e. output[1] is the total flux in segment 1, and output[N] is the total flux in segment N etc. Some might be 0 in cases where that segID is not present at all in the \option{segim}.
 }
 \references{
 \code{profoundPolyCover} uses code provided on \url{https://wrfranklin.org/Research/Short_Notes/pnpoly.html} by W. Randolph Franklin.

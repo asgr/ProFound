@@ -1,5 +1,4 @@
 #include <Rcpp.h>
-#include <vector>
 #ifdef _OPENMP
   #include <omp.h>
 #endif
@@ -82,4 +81,41 @@ NumericVector profoundPolyCover(NumericVector x,
   }
   
   return result;
+}
+
+// [[Rcpp::export]]
+double profoundPolyFlux(NumericMatrix image,
+                        NumericVector poly_x,
+                        NumericVector poly_y,
+                        int depth = 4,
+                        int nthreads = 1) {
+  int nrow = image.nrow();
+  int ncol = image.ncol();
+  
+  // This is different to above because the R coord system is [0.5,0.5] for the first pixel, versus [0,0] in Rcpp
+  double poly_x_min = min(poly_x) - 1;
+  double poly_x_max = max(poly_x);
+  double poly_y_min = min(poly_y) - 1;
+  double poly_y_max = max(poly_y);
+  
+  int start_row = std::max(0.0, floor(poly_x_min));
+  int end_row = std::min(nrow - 1.0, ceil(poly_x_max));
+  int start_col = std::max(0.0, floor(poly_y_min));
+  int end_col = std::min(ncol - 1.0, ceil(poly_y_max));
+  
+  double sum = 0.0;
+  
+  #ifdef _OPENMP
+    // Parallelize the main loop
+  #pragma omp parallel for schedule(static) num_threads(nthreads)
+  #endif
+  for (int i = start_row; i <= end_row; ++i) {
+    for (int j = start_col; j <= end_col; ++j) {
+      if(!NumericMatrix::is_na(image(i, j))){
+        sum += image(i, j)*pixelCoverPoly(i + 0.5, j + 0.5, poly_x, poly_y, depth);
+      }
+    }
+  }
+  
+  return sum;
 }

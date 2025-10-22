@@ -48,12 +48,12 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
   int n = x.size();
   NumericVector result(n);
   
-  ang = ang*3.141593/180;
-  
-  double cos_ang = std::cos(ang);
-  double sin_ang = std::sin(ang);
   double semi_min = rad * axrat;
   const double rad_plus = rad + 0.7071068;
+  
+  ang = ang*3.141593/180;
+  double cos_ang = std::cos(ang);
+  double sin_ang = std::sin(ang);
   
   #ifdef _OPENMP
     // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
@@ -75,4 +75,53 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
   }
   
   return result;
+}
+
+// [[Rcpp::export]]
+double profoundEllipFlux(NumericMatrix image,
+                         double cx, double cy,
+                         double rad, double ang, double axrat,
+                         int depth = 4,
+                         int nthreads = 1) {
+  int nrow = image.nrow();
+  int ncol = image.ncol();
+  
+  cx -= 0.5;
+  cy -= 0.5;
+  
+  double semi_min = rad * axrat;
+  const double rad_plus = rad + 0.7071068;
+  
+  ang = ang*3.141593/180;
+  double cos_ang = std::cos(ang);
+  double sin_ang = std::sin(ang);
+  
+  int start_row = std::max(0.0, floor(cx - rad_plus));
+  int end_row = std::min(nrow - 1.0, ceil(cx + rad_plus));
+  int start_col = std::max(0.0, floor(cy - rad_plus));
+  int end_col = std::min(ncol - 1.0, ceil(cy + rad_plus));
+  
+  double sum = 0.0;
+  
+  #ifdef _OPENMP
+    // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
+  #pragma omp parallel for schedule(dynamic, 10) num_threads(nthreads)
+  #endif
+  for (int i = start_row; i <= end_row; ++i) {
+    for (int j = start_col; j <= end_col; ++j) {
+      if(!NumericMatrix::is_na(image(i, j))){
+        const double delta_x = i - cx;
+        if (std::abs(delta_x) < rad_plus) {
+          const double delta_y = j - cy;
+          if (std::abs(delta_y) < rad_plus) {
+            if(!NumericMatrix::is_na(image(i, j))){
+              sum += image(i, j)*pixelCoverEllip(delta_x, delta_y, rad, semi_min, cos_ang, sin_ang, depth);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return sum;
 }

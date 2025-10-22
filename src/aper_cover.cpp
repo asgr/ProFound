@@ -86,3 +86,57 @@ NumericVector profoundAperCover(NumericVector x,
   
   return result;
 }
+
+// [[Rcpp::export]]
+double profoundAperFlux(NumericMatrix image,
+                        double cx,
+                        double cy,
+                        double rad,
+                        int depth = 4,
+                        int nthreads = 1) {
+  int nrow = image.nrow();
+  int ncol = image.ncol();
+  
+  cx -= 0.5;
+  cy -= 0.5;
+  
+  const double rad_2 = rad * rad;
+  const double rad_min = rad - 0.7071068;   // sqrt(0.5)
+  const double rad_plus = rad + 0.7071068;
+  double rad_min_2 = -1.0;
+  if (rad_min > 0.0) {
+    rad_min_2 = rad_min * rad_min;
+  }
+  const double rad_max_2 = rad_plus * rad_plus;
+  
+  int start_row = std::max(0.0, floor(cx - rad_plus));
+  int end_row = std::min(nrow - 1.0, ceil(cx + rad_plus));
+  int start_col = std::max(0.0, floor(cy - rad_plus));
+  int end_col = std::min(ncol - 1.0, ceil(cy + rad_plus));
+  
+  double sum = 0.0;
+  
+  #ifdef _OPENMP
+    // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
+  #pragma omp parallel for schedule(dynamic, 10) num_threads(nthreads)
+  #endif
+  for (int i = start_row; i <= end_row; ++i) {
+    for (int j = start_col; j <= end_col; ++j) {
+      if(!NumericMatrix::is_na(image(i, j))){
+        const double delta_x = i - cx;
+        if (std::abs(delta_x) < rad_plus) {
+          const double delta_y = j - cy;
+          if (std::abs(delta_y) < rad_plus) {
+            const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
+            if(!NumericMatrix::is_na(image(i, j))){
+              sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2,
+                                         rad_2, rad_min_2, rad_max_2, depth);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return sum;
+}
