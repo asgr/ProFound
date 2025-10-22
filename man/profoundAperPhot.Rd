@@ -97,10 +97,11 @@ Aaron Robotham
 \code{\link{profoundProFound}}
 }
 \examples{
+\dontrun{
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
   package="ProFound"))
 
-profound=profoundProFound(image, magzero=30, app_diam=2)
+profound = profoundProFound(image, magzero=30, app_diam=2)
 
 new_app = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
   app_diam=1:3, magzero=30, verbose=TRUE)
@@ -149,7 +150,6 @@ new_app5
 #This should be 0:
 sum(new_app3 - new_app5)
 
-\dontrun{
 #This will fail with a warning since some fibres are on the sky:
 tar6 = profound$segstats[1:8, c("xcen", "ycen")] + 10
 new_app6 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
