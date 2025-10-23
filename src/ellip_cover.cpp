@@ -114,9 +114,7 @@ double profoundEllipFlux(NumericMatrix image,
         if (std::abs(delta_x) < rad_plus) {
           const double delta_y = j - cy;
           if (std::abs(delta_y) < rad_plus) {
-            if(!NumericMatrix::is_na(image(i, j))){
               sum += image(i, j)*pixelCoverEllip(delta_x, delta_y, rad, semi_min, cos_ang, sin_ang, depth);
-            }
           }
         }
       }

@@ -54,15 +54,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundAperFlux
-double profoundAperFlux(NumericMatrix image, double cx, double cy, double rad, int depth, int nthreads);
+NumericVector profoundAperFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, int depth, int nthreads);
 RcppExport SEXP _ProFound_profoundAperFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type image(imageSEXP);
-    Rcpp::traits::input_parameter< double >::type cx(cxSEXP);
-    Rcpp::traits::input_parameter< double >::type cy(cySEXP);
-    Rcpp::traits::input_parameter< double >::type rad(radSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type cx(cxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type cy(cySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rad(radSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(profoundAperFlux(image, cx, cy, rad, depth, nthreads));
