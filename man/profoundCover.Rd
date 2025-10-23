@@ -6,7 +6,8 @@
 \alias{profoundEllipFlux}
 \alias{profoundPolyFlux}
 \alias{profoundSegimFlux}
-\alias{profoundBoxFlux}
+\alias{profoundAperWeight}
+\alias{profoundEllipWeight}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Fraction of Pixels in Shapes
@@ -16,20 +17,18 @@ Calculates the fraction of pixels inside an aperture, ellipse or polygon using r
 }
 \usage{
 profoundAperCover(x, y, cx, cy, rad, depth = 4L, nthreads = 1L)
-
-profoundEllipCover(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L)
-
+profoundEllipCover(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 4L, nthreads = 1L)
 profoundPolyCover(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L)
 
-profoundAperFlux(image, cx, cy, rad, depth = 4L, nthreads = 1L)
-
-profoundEllipFlux(image, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L)
-
+profoundAperFlux(image, cx, cy, rad, deblend = FALSE, depth = 4L, nthreads = 1L)
+profoundEllipFlux(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
+  deblend = FALSE, depth = 4L, nthreads = 1L)
 profoundPolyFlux(image, poly_x, poly_y, depth = 4L, nthreads = 1L)
-
 profoundSegimFlux(image, segim, nthreads = 1L)
 
-profoundBoxFlux(image, cx, cy, size, nthreads = 1L)
+profoundAperWeight(image, cx, cy, rad, depth = 4, nthreads = 1)
+profoundEllipWeight(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
+  depth = 4, nthreads = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -46,28 +45,28 @@ Numeric matrix; the image we want to compute flux on.
 Integer matrix; required, the segmentation map of the \option{image}. This matrix *must* be the same dimensions as \option{mask}.
 }
   \item{cx}{
-Numeric scalar; the x centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}).
+Numeric scalar/vector; the x centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}). Scalar for 'Cover' functions and vector for 'Flux' and 'Weight' functions.
 }
   \item{cy}{
-Numeric scalar; the y centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}).
+Numeric scalar/vector; the y centre of the aperture (in pixels, where pixel centres are half integer in \code{ProFound}). Scalar for 'Cover' functions and vector for 'Flux' and 'Weight' functions (must be same length as \option{cx}).
 }
   \item{rad}{
-Numeric scalar; the radius or semi-major axis of the aperture / ellipse (in pixels).
-}
-  \item{size}{
-Numeric scalar; the box length (in pixels).
+Numeric scalar/vector; the radius or semi-major axis of the aperture / ellipse (in pixels). Scalar for 'Cover' functions and vector for 'Flux' and 'Weight' functions (in these cases, if length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}).
 }
   \item{ang}{
-Numeric scalar; orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical). 
+Numeric scalar; orientation of the semi-major axis in degrees. This has the convention that 0= | (vertical), 45= \, 90= - (horizontal), 135= /, 180= | (vertical). Scalar for 'Cover' functions and vector for 'Flux' and 'Weight' functions (in these cases, if length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}).
 }
   \item{axrat}{
-Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1).
+Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1). Scalar for 'Cover' functions and vector for 'Flux' and 'Weight' functions (in these cases, if length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}).
 }
   \item{poly_x}{
-Numeric vector; x vertices of polygon. This need not be closing (so 4 points define square, not 5).  
+Numeric vector; x vertices of polygon. This need not be closing, so 4 points define square not 5.
 }
   \item{poly_y}{
-Numeric vector; y vertices of polygon. This need not be closing (so 4 points define square, not 5).  
+Numeric vector; y vertices of polygon (must be same length as \option{poly_x}). This need not be closing, so 4 points define square, not 5.  
+}
+  \item{deblend}{
+Logical; should an internal weight map (made via the associated Weight functions) be used to normalise the flux across competing apertures/ellipses. This allows for basic deblending of flux.  
 }
   \item{depth}{
 Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accuracy and speed (see Examples).
@@ -86,7 +85,9 @@ For the Cover functions: Numeric vector the same length as \option{x} and \optio
 
 For the Flux functions: Numeric scalar, the computed image flux within the region requested. This uses the "cover" fractional pixel weights when \option{depth} is larger than 0.
 
-\code{profoundSegimFlux} is special case, wehre the output is a vector the same length as the maximum segID on \option{segim}, where each value corresponds to the summed flux of that segment by index, i.e. output[1] is the total flux in segment 1, and output[N] is the total flux in segment N etc. Some might be 0 in cases where that segID is not present at all in the \option{segim}.
+\code{profoundSegimFlux} is a special case, wehre the output is a vector the same length as the maximum segID on \option{segim}, where each value corresponds to the summed flux of that segment by index, i.e. output[1] is the total flux in segment 1, and output[N] is the total flux in segment N etc. Some might be 0 in cases where that segID is not present at all in the \option{segim}.
+
+For the Weight functions. Numeric matrix; the total number of contributing apertures/ellipses. This can be non-integer when \option{depth} is above 0. Where valued 1 all of a pixels flux belongs to a single aperture, and value 2 it would be shared between two (50\% each) etc. This is mostly used as an optional input the Flux functions (which can take \option{weight} as in input).
 }
 \references{
 \code{profoundPolyCover} uses code provided on \url{https://wrfranklin.org/Research/Short_Notes/pnpoly.html} by W. Randolph Franklin.

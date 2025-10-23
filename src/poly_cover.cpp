@@ -92,6 +92,10 @@ double profoundPolyFlux(NumericMatrix image,
   int nrow = image.nrow();
   int ncol = image.ncol();
   
+  if(poly_x.size() != poly_y.size()){
+    stop("Length of poly_x not equal to poly_y!");
+  }
+  
   // This is different to above because the R coord system is [0.5,0.5] for the first pixel, versus [0,0] in Rcpp
   double poly_x_min = min(poly_x) - 1;
   double poly_x_max = max(poly_x);

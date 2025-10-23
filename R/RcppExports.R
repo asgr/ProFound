@@ -20,20 +20,28 @@ profoundAperCover <- function(x, y, cx, cy, rad, depth = 4L, nthreads = 1L) {
     .Call(`_ProFound_profoundAperCover`, x, y, cx, cy, rad, depth, nthreads)
 }
 
-profoundAperFlux <- function(image, cx, cy, rad, depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundAperFlux`, image, cx, cy, rad, depth, nthreads)
+profoundAperWeight <- function(image, cx, cy, rad, depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundAperWeight`, image, cx, cy, rad, depth, nthreads)
+}
+
+profoundAperFlux <- function(image, cx, cy, rad, deblend = FALSE, depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundAperFlux`, image, cx, cy, rad, deblend, depth, nthreads)
 }
 
 .dilate_cpp <- function(segim, kern, expand = 0L, nthreads = 1L) {
     .Call(`_ProFound_dilate_cpp`, segim, kern, expand, nthreads)
 }
 
-profoundEllipCover <- function(x, y, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L) {
+profoundEllipCover <- function(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 4L, nthreads = 1L) {
     .Call(`_ProFound_profoundEllipCover`, x, y, cx, cy, rad, ang, axrat, depth, nthreads)
 }
 
-profoundEllipFlux <- function(image, cx, cy, rad, ang, axrat, depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundEllipFlux`, image, cx, cy, rad, ang, axrat, depth, nthreads)
+profoundEllipWeight <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundEllipWeight`, image, cx, cy, rad, ang, axrat, depth, nthreads)
+}
+
+profoundEllipFlux <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), deblend = FALSE, depth = 4L, nthreads = 1L) {
+    .Call(`_ProFound_profoundEllipFlux`, image, cx, cy, rad, ang, axrat, deblend, depth, nthreads)
 }
 
 profoundPolyCover <- function(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L) {
@@ -50,10 +58,6 @@ profoundPolyFlux <- function(image, poly_x, poly_y, depth = 4L, nthreads = 1L) {
 
 profoundSegimFlux <- function(image, segim, nthreads = 1L) {
     .Call(`_ProFound_profoundSegimFlux`, image, segim, nthreads)
-}
-
-profoundBoxFlux <- function(image, cx, cy, size, nthreads = 1L) {
-    .Call(`_ProFound_profoundBoxFlux`, image, cx, cy, size, nthreads)
 }
 
 water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1000000, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L, nthreads = 1L) {

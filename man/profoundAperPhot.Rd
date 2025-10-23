@@ -154,7 +154,6 @@ sum(new_app3 - new_app5)
 tar6 = profound$segstats[1:8, c("xcen", "ycen")] + 10
 new_app6 = profoundAperPhot(image=image - profound$sky, segim=profound$segim,
                             app_diam=1:3, magzero=30, tar=tar6, verbose=TRUE)
-}
 
 # Aperture errors:
 new_error = profoundAperRan(image=image - profound$sky, segim=profound$segim,
@@ -168,5 +167,6 @@ magerr(profound$segstats$mag, new_app$flux_app_1, ylo=new_error$errors[1])
 #mag errors will be given by:
 maghist((2.5/log(10))*new_error$errors[1]/new_app$flux_app_1,
   xlab='Error [mag]')
+}
 }
 \concept{ aperture }

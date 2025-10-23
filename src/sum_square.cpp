@@ -5,7 +5,6 @@
 
 using namespace Rcpp;
 
-// [[Rcpp::export]]
 double profoundBoxFlux(NumericMatrix image, double cx, double cy, double size, int nthreads = 1) {
   int nrow = image.nrow();
   int ncol = image.ncol();
