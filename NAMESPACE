@@ -1,4 +1,6 @@
 exportPattern("^[[:alpha:]]+")
+export("%fin%")
+export("%nin%")
 
 useDynLib(ProFound, .registration=TRUE)
 

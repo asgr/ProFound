@@ -151,9 +151,10 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
       stop('Not all fibre positions fall on a unique segment!')
     }
     
-    segsel = segim %in% tar$segID
-    dim(segsel) = dim(segim)
-    segsel = which(segsel, arr.ind = TRUE)
+    # segsel = segim %fin% tar$segID
+    # dim(segsel) = dim(segim)
+    # segsel = which(segsel, arr.ind = TRUE)
+    segsel = this_in_that(segim, tar$segID, type='which', arr.ind=TRUE)
   }
   
   segID_all = as.integer(segim[segsel])

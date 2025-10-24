@@ -228,6 +228,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// vec_this_in_vec_that
+LogicalVector vec_this_in_vec_that(IntegerVector vec_this, IntegerVector vec_that, bool invert, int nthreads);
+RcppExport SEXP _ProFound_vec_this_in_vec_that(SEXP vec_thisSEXP, SEXP vec_thatSEXP, SEXP invertSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type vec_this(vec_thisSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type vec_that(vec_thatSEXP);
+    Rcpp::traits::input_parameter< bool >::type invert(invertSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(vec_this_in_vec_that(vec_this, vec_that, invert, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mat_this_in_vec_that
+LogicalMatrix mat_this_in_vec_that(IntegerMatrix mat_this, IntegerVector vec_that, bool invert, int nthreads);
+RcppExport SEXP _ProFound_mat_this_in_vec_that(SEXP mat_thisSEXP, SEXP vec_thatSEXP, SEXP invertSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type mat_this(mat_thisSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type vec_that(vec_thatSEXP);
+    Rcpp::traits::input_parameter< bool >::type invert(invertSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(mat_this_in_vec_that(mat_this, vec_that, invert, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // water_cpp
 Rcpp::IntegerMatrix water_cpp(Rcpp::NumericVector image, const int nx, const int ny, const double abstol, const double reltol, const double cliptol, const int ext, const double skycut, const int pixcut, const bool verbose, const int Ncheck, int nthreads);
 RcppExport SEXP _ProFound_water_cpp(SEXP imageSEXP, SEXP nxSEXP, SEXP nySEXP, SEXP abstolSEXP, SEXP reltolSEXP, SEXP cliptolSEXP, SEXP extSEXP, SEXP skycutSEXP, SEXP pixcutSEXP, SEXP verboseSEXP, SEXP NcheckSEXP, SEXP nthreadsSEXP) {
@@ -323,6 +351,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_profoundPolyFlux", (DL_FUNC) &_ProFound_profoundPolyFlux, 5},
     {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 19},
     {"_ProFound_profoundSegimFlux", (DL_FUNC) &_ProFound_profoundSegimFlux, 3},
+    {"_ProFound_vec_this_in_vec_that", (DL_FUNC) &_ProFound_vec_this_in_vec_that, 4},
+    {"_ProFound_mat_this_in_vec_that", (DL_FUNC) &_ProFound_mat_this_in_vec_that, 4},
     {"_ProFound_water_cpp", (DL_FUNC) &_ProFound_water_cpp, 12},
     {"_ProFound_addmat", (DL_FUNC) &_ProFound_addmat, 4},
     {"_ProFound_order_cpp", (DL_FUNC) &_ProFound_order_cpp, 1},

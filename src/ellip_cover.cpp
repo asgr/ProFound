@@ -151,7 +151,6 @@ NumericMatrix profoundEllipWeight(NumericMatrix image,
           const double delta_y = j - cy_loc;
           if (std::abs(delta_y) < rad_plus) {
             // Rcout << wt[k] << "\n";
-            const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
             weight(i,j) += pixelCoverEllip(delta_x, delta_y, rad_loc, semi_min, cos_ang, sin_ang, depth);
           }
         }

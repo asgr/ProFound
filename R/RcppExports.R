@@ -60,6 +60,14 @@ profoundSegimFlux <- function(image, segim, nthreads = 1L) {
     .Call(`_ProFound_profoundSegimFlux`, image, segim, nthreads)
 }
 
+.vec_this_in_vec_that <- function(vec_this, vec_that, invert = FALSE, nthreads = 1L) {
+    .Call(`_ProFound_vec_this_in_vec_that`, vec_this, vec_that, invert, nthreads)
+}
+
+.mat_this_in_vec_that <- function(mat_this, vec_that, invert = FALSE, nthreads = 1L) {
+    .Call(`_ProFound_mat_this_in_vec_that`, mat_this, vec_that, invert, nthreads)
+}
+
 water_cpp <- function(image = 0L, nx = 1L, ny = 1L, abstol = 1, reltol = 0, cliptol = 1000000, ext = 1L, skycut = 0, pixcut = 1L, verbose = FALSE, Ncheck = 1000000L, nthreads = 1L) {
     .Call(`_ProFound_water_cpp`, image, nx, ny, abstol, reltol, cliptol, ext, skycut, pixcut, verbose, Ncheck, nthreads)
 }

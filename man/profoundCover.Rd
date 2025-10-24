@@ -93,7 +93,7 @@ For the Weight functions. Numeric matrix; the total number of contributing apert
 \code{profoundPolyCover} uses code provided on \url{https://wrfranklin.org/Research/Short_Notes/pnpoly.html} by W. Randolph Franklin.
 }
 \author{
-Aaron Robotham
+Aaron Robotham and Rodrigo Tobar
 }
 \seealso{
 \code{\link{profoundAperPhot}}, \code{\link{profoundEllipseSeg}}
