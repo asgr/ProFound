@@ -22,7 +22,7 @@ double profoundBoxFlux(NumericMatrix image, double cx, double cy, double size, i
   
   #ifdef _OPENMP
     // Parallelize the main loop
-  #pragma omp parallel for schedule(static) num_threads(nthreads)
+  #pragma omp parallel for collapse(2) schedule(static) num_threads(nthreads)
   #endif
   for (int i = start_row; i <= end_row; ++i) {
     for (int j = start_col; j <= end_col; ++j) {

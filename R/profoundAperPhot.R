@@ -140,7 +140,7 @@ profoundAperPhot = function(image=NULL, segim=NULL, app_diam=1, mask=NULL, keyva
     }
     
     if(!is.null(tar$xcen) & !is.null(tar$ycen) & is.null(tar$segID)){
-      tar$segID = segim[as.matrix(tar[,c('xcen', 'ycen')])]
+      tar$segID = segim[as.matrix(ceiling(tar[,c('xcen', 'ycen')]))]
     }
     
     if(any(tar$segID == 0L)){
