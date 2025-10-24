@@ -156,6 +156,15 @@ poly_y = c(1.482, 4.677, 8.059, 4.977, 9.149, 2.647, 0.016, 2.798, 2.535)
 output = matrix(profoundPolyCover(temp[,1], temp[,2], poly_x, poly_y, depth=4),10,10)
 magimage(output)
 polygon(temp,border='red')
+
+#Weight map:
+set.seed(666)
+magimage(profoundAperWeight(image$imDat, runif(100,0,356), runif(100,0,356),
+  runif(100,1,20)))
+
+set.seed(666) 
+magimage(profoundEllipWeight(image$imDat, runif(100,0,356), runif(100,0,356),
+  runif(100,1,20), runif(100,0,180), runif(100,0,1)))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
