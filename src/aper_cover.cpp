@@ -20,13 +20,14 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
     return 1.0;
   }
   
-  double quarter = 0.25 / (1 << (depth - 1)); // (1 << (depth - 1)) is equivalent to pow(2, depth - 1), but faster
+  // small movements first hence 0.5 / (1 << depth), or we might stop too soon
+  double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
   double coverage = 0.0;
   
-  double delta_x_min  = delta_x - quarter;
-  double delta_x_plus = delta_x + quarter;
-  double delta_y_min  = delta_y - quarter;
-  double delta_y_plus = delta_y + quarter;
+  double delta_x_min  = delta_x - shift;
+  double delta_x_plus = delta_x + shift;
+  double delta_y_min  = delta_y - shift;
+  double delta_y_plus = delta_y + shift;
   
   double deltax1_2 = delta_x_min * delta_x_min;
   double deltax2_2 = delta_x_plus * delta_x_plus;
@@ -48,7 +49,7 @@ NumericVector profoundAperCover(NumericVector x,
                                 double cx,
                                 double cy,
                                 double rad,
-                                int depth = 4,
+                                int depth = 3,
                                 int nthreads = 1) {
   
   const int n = x.size();
@@ -88,17 +89,17 @@ NumericVector profoundAperCover(NumericVector x,
 }
 
 // [[Rcpp::export]]
-NumericMatrix profoundAperWeight(NumericMatrix image,
-                                 NumericVector cx,
+NumericMatrix profoundAperWeight(NumericVector cx,
                                  NumericVector cy,
                                  NumericVector rad,
-                                 int depth = 4,
+                                 int dimx = 100,
+                                 int dimy = 100,
+                                 NumericVector wt = NumericVector::create(1),
+                                 int depth = 3,
                                  int nthreads = 1) {
-  int nrow = image.nrow();
-  int ncol = image.ncol();
   
   int n = cx.size();
-  NumericMatrix weight(nrow, ncol);
+  NumericMatrix weight(dimx, dimy);
   
   if(cy.size() != n){
     stop("Length of cx not equal to cy!");
@@ -110,6 +111,14 @@ NumericMatrix profoundAperWeight(NumericMatrix image,
   
   if(rad.size() != n){
     stop("Length of cx not equal to rad!");
+  }
+  
+  if(wt.size() == 1){
+    wt = NumericVector(n, wt[0]);
+  }
+  
+  if(wt.size() != n){
+    stop("Length of cx not equal to wt!");
   }
   
 #ifdef _OPENMP
@@ -132,9 +141,9 @@ NumericMatrix profoundAperWeight(NumericMatrix image,
     const double rad_max_2 = rad_plus * rad_plus;
     
     int start_row = std::max(0.0, floor(cx_loc - rad_plus));
-    int end_row = std::min(nrow - 1.0, ceil(cx_loc + rad_plus));
+    int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
     int start_col = std::max(0.0, floor(cy_loc - rad_plus));
-    int end_col = std::min(ncol - 1.0, ceil(cy_loc + rad_plus));
+    int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
     
     for (int i = start_row; i <= end_row; ++i) {
       for (int j = start_col; j <= end_col; ++j) {
@@ -144,24 +153,13 @@ NumericMatrix profoundAperWeight(NumericMatrix image,
           if (std::abs(delta_y) < rad_plus) {
             // Rcout << wt[k] << "\n";
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
-            weight(i,j) += pixelCoverAper(delta_x, delta_y, delta_2,
+            weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
                    rad_2, rad_min_2, rad_max_2, depth);
           }
         }
       }
     }
   }
-  
-  // We don't want to reduce increase weight when below 1
-  // for (int i = 0; i < nrow; ++i) {
-  //   for (int j = 0; j < ncol; ++j) {
-  //     if (weight(i, j) > 0 && weight(i, j) < 1) {
-  //       weight(i, j) = 1;
-  //     }
-  //   }
-  // }
-  // this is done Flux code side now to be safe
-  
   return weight;
 }
 
@@ -171,11 +169,12 @@ NumericVector profoundAperFlux(
                         NumericVector cx,
                         NumericVector cy,
                         NumericVector rad,
+                        NumericVector wt = NumericVector::create(1),
                         bool deblend = false,
-                        int depth = 4,
+                        int depth = 3,
                         int nthreads = 1) {
-  int nrow = image.nrow();
-  int ncol = image.ncol();
+  int dimx = image.nrow();
+  int dimy = image.ncol();
   
   int n = cx.size();
   NumericVector result(n);
@@ -192,10 +191,18 @@ NumericVector profoundAperFlux(
     stop("Length of cx not equal to rad!");
   }
   
+  if(wt.size() == 1){
+    wt = NumericVector(n, wt[0]);
+  }
+  
+  if(wt.size() != n){
+    stop("Length of cx not equal to wt!");
+  }
+  
   NumericMatrix weight;
   
   if(deblend){
-    weight = profoundAperWeight(image, cx, cy, rad, depth, nthreads);
+    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, depth, nthreads);
   }
   
   #ifdef _OPENMP
@@ -218,9 +225,9 @@ NumericVector profoundAperFlux(
     const double rad_max_2 = rad_plus * rad_plus;
     
     int start_row = std::max(0.0, floor(cx_loc - rad_plus));
-    int end_row = std::min(nrow - 1.0, ceil(cx_loc + rad_plus));
+    int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
     int start_col = std::max(0.0, floor(cy_loc - rad_plus));
-    int end_col = std::min(ncol - 1.0, ceil(cy_loc + rad_plus));
+    int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
     
     double sum = 0.0;
     
@@ -233,12 +240,10 @@ NumericVector profoundAperFlux(
             if (std::abs(delta_y) < rad_plus) {
               const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
               if(deblend){
-                if(weight(i,j) > 1){
-                  sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2,
-                               rad_2, rad_min_2, rad_max_2, depth)/weight(i,j);
-                }else{
-                  sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2,
-                               rad_2, rad_min_2, rad_max_2, depth);
+                if(weight(i,j) > 0){
+                  double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
+                                                  rad_2, rad_min_2, rad_max_2, depth);
+                  sum += image(i, j)*(PC_temp * PC_temp)*wt[k]/weight(i,j);
                 }
               }else{
                 sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2,

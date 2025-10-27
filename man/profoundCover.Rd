@@ -1,4 +1,5 @@
 \name{profoundCover}
+\alias{profoundCover}
 \alias{profoundAperCover}
 \alias{profoundEllipCover}
 \alias{profoundPolyCover}
@@ -16,19 +17,21 @@ Fraction of Pixels in Shapes
 Calculates the fraction of pixels inside an aperture, ellipse or polygon using recursive descent in Rcpp.
 }
 \usage{
-profoundAperCover(x, y, cx, cy, rad, depth = 4L, nthreads = 1L)
-profoundEllipCover(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 4L, nthreads = 1L)
-profoundPolyCover(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L)
+profoundAperCover(x, y, cx, cy, rad, depth = 3L, nthreads = 1L)
+profoundEllipCover(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 3L, nthreads = 1L)
+profoundPolyCover(x, y, poly_x, poly_y, depth = 3L, nthreads = 1L)
 
-profoundAperFlux(image, cx, cy, rad, deblend = FALSE, depth = 4L, nthreads = 1L)
+profoundAperFlux(image, cx, cy, rad, wt = as.numeric(c(1)), deblend = FALSE, depth = 3L,
+  nthreads = 1L)
 profoundEllipFlux(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
-  deblend = FALSE, depth = 4L, nthreads = 1L)
-profoundPolyFlux(image, poly_x, poly_y, depth = 4L, nthreads = 1L)
+  wt = as.numeric(c(1)), deblend = FALSE, depth = 3L, nthreads = 1L)
+profoundPolyFlux(image, poly_x, poly_y, depth = 3L, nthreads = 1L)
 profoundSegimFlux(image, segim, nthreads = 1L)
 
-profoundAperWeight(image, cx, cy, rad, depth = 4, nthreads = 1)
-profoundEllipWeight(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
-  depth = 4, nthreads = 1)
+profoundAperWeight(cx, cy, rad, dimx = 100L, dimy = 100L, wt = as.numeric(c(1)),
+  depth = 3, nthreads = 1)
+profoundEllipWeight(cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
+  dimx = 100L, dimy = 100L, wt = as.numeric(c(1)), depth = 3, nthreads = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -59,6 +62,15 @@ Numeric scalar; orientation of the semi-major axis in degrees. This has the conv
   \item{axrat}{
 Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded between 0 - 1). Scalar for 'Cover' functions and vector for 'Flux' and 'Weight' functions (in these cases, if length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}).
 }
+  \item{wt}{
+Numeric scalar/vector; the per aperture / ellipse weight to apply when computing the weight map and/or fluxes. If length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}.
+}
+  \item{dimx}{
+Integer scalar; the number of pixels in the x-dimension for the resulting weight map.
+}
+  \item{dimy}{
+Integer scalar; the number of pixels in the y-dimension for the resulting weight map.
+}
   \item{poly_x}{
 Numeric vector; x vertices of polygon. This need not be closing, so 4 points define square not 5.
 }
@@ -69,14 +81,14 @@ Numeric vector; y vertices of polygon (must be same length as \option{poly_x}). 
 Logical; should an internal weight map (made via the associated Weight functions) be used to normalise the flux across competing apertures/ellipses. This allows for basic deblending of flux.  
 }
   \item{depth}{
-Integer scalar; the recursion depth to use. Depth 4 is a good trade off of accuracy and speed (see Examples).
+Integer scalar; the recursion depth to use. Depth 3 (default) is a good trade off of accuracy and speed (see Examples), with 4 probably being as high as you would want to set it for a typical ues-case.
 }
   \item{nthreads}{
 Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.
 }
 }
 \details{
-Re the recursion \option{depth}, higher numbers are more accurate, where you probably do not want to set it below 3. Above 5 will suffer notable slow-down. 4 is usually about the performance versus accuracy sweet spot.
+Re the recursion \option{depth}, higher numbers are more accurate, where you probably do not want to set it below 3 (the default). Above 5 will suffer notable slow-down. 4 is usually about the performance versus accuracy sweet spot. Note SExtractor uses simple over-sampling instead, where the default is a factor 5. Since 2^3 = 8 and 2^2 = 4, this is more like \option{depth} = 2 (2.32 to be precise).
 
 These functions are written in performant Rcpp, and can be built against OpenMP where available (setting \option{nthreads} higher than 1 if appropriate).
 }
@@ -105,15 +117,15 @@ library(plotrix)
 temp = expand.grid(1:10 - 0.5, 1:10 - 0.5)
 
 output = matrix(profoundAperCover(temp[,1], temp[,2], 5, 5, 3, depth=4), 10, 10)
-magimage(output, magmap=FALSE)
+magimage(output, magmap=FALSE, zlim=c(0,1))
 draw.circle(5, 5, radius=3.2, border='red')
 
 output = matrix(profoundAperCover(temp[,1], temp[,2], 3.2, 3.2, 1.8, depth=4), 10, 10)
-magimage(output, magmap=FALSE)
+magimage(output, magmap=FALSE, zlim=c(0,1))
 draw.circle(3.2, 3.2, radius=1.8, border='red')
 
 output = matrix(profoundAperCover(temp[,1], temp[,2], 7.5, 7.5, 5.8, depth=4), 10, 10)
-magimage(output, magmap=FALSE)
+magimage(output, magmap=FALSE, zlim=c(0,1))
 draw.circle(7.5, 7.5, radius=5.8, border='red')
 
 #Testing accuracy:
@@ -128,11 +140,11 @@ pix_grid = expand.grid(seq(-0.5,1.5,by=1), seq(-0.5,1.5,by=1))
 test = {}
 for(i in 1:dim(ap_grid)[1]){
   test = c(test, sum(profoundAperCover(pix_grid[,1], pix_grid[,2], ap_grid[i,1],
-  ap_grid[i,2], ap_rad, depth=4))/ap_area)
+  ap_grid[i,2], ap_rad, depth=3))/ap_area)
 }
 
-#with depth 4 we do not do worse than 3.5\% accuracy:
-magimage(matrix(test,101,101), magmap=F)
+#with depth 3 we do not do worse than 6.5\% accuracy:
+magimage(matrix(test,101,101), magmap=FALSE, zlim=c(0.9,1.1))
 maghist(test)
 }
 
@@ -140,12 +152,12 @@ maghist(test)
 
 output = matrix(profoundEllipCover(temp[,1], temp[,2], 5, 5, 4.5, 30, 0.5, depth=4),
   10, 10)
-magimage(output)
+magimage(output, magmap=FALSE, zlim=c(0,1))
 draw.ellipse(5, 5, 4.5, 4.5*0.5, 30+90, border='red') # +90 because different ang def
 
 output = matrix(profoundEllipCover(temp[,1], temp[,2], 4.2, 5.1, 2.5, 110, 0.8, depth=4),
   10, 10)
-magimage(output)
+magimage(output, magmap=FALSE, zlim=c(0,1))
 draw.ellipse(4.2, 5.1, 2.5, 2.5*0.8, 110+90, border='red') # +90 because different ang def
 
 #poly example:
@@ -154,17 +166,51 @@ poly_x = c(0.958, 3.296, 1.583, 5.940, 8.969, 9.886, 5.701, 3.575, 2.964)
 poly_y = c(1.482, 4.677, 8.059, 4.977, 9.149, 2.647, 0.016, 2.798, 2.535)
 
 output = matrix(profoundPolyCover(temp[,1], temp[,2], poly_x, poly_y, depth=4),10,10)
-magimage(output)
+magimage(output, magmap=FALSE, zlim=c(0,1))
 polygon(temp,border='red')
 
 #Weight map:
 set.seed(666)
-magimage(profoundAperWeight(image$imDat, runif(100,0,356), runif(100,0,356),
-  runif(100,1,20)))
+ran_x = runif(20,0,100)
+ran_y = runif(20,0,100)
+ran_rad = runif(20,3,20)
 
-set.seed(666) 
-magimage(profoundEllipWeight(image$imDat, runif(100,0,356), runif(100,0,356),
-  runif(100,1,20), runif(100,0,180), runif(100,0,1)))
+magimage(profoundAperWeight(ran_x, ran_y, ran_rad), magmap=FALSE)
+for(i in seq_along(ran_x)){
+  draw.circle(ran_x[i], ran_y[i], ran_rad[i],, border='red')
+}
+
+ran_ang = runif(20,0,180)
+ran_axrat = runif(20,0,1)
+
+magimage(profoundEllipWeight(ran_x, ran_y, ran_rad, ran_ang, ran_axrat), magmap=FALSE)
+for(i in seq_along(ran_x)){
+  draw.ellipse(ran_x[i], ran_y[i], ran_rad[i], ran_rad[i]*ran_axrat[i], ran_ang[i]+90,
+  border='red')
+}
+
+\dontrun{
+#Some elliptical photometry:
+
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+                                     package="ProFound"), header=FALSE)
+
+profound = profoundProFound(image, verbose=TRUE, plot=TRUE)
+ellip_ref = profound$segstats[,c("xcen", "ycen", "R100",  "ang", "axrat")]
+magimage(profoundEllipWeight(ellip_ref$xcen, ellip_ref$ycen, ellip_ref$R100,
+  ellip_ref$ang, ellip_ref$axrat, 356, 356), magmap=FALSE, add=T,
+  col=c(NA, hsv(1, s=(0:1000)/1000, alpha=0.5)))
+  
+ellip_flux_deblend =  profoundEllipFlux(image, ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=TRUE)
+ellip_flux_noblend =  profoundEllipFlux(image, ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=FALSE)
+  
+magplot(profound$segstats$flux, profound$segstats$flux/ellip_flux_deblend, log='xy',
+  xlab='ProFound [Flux]', ylab='ProFound / Ellip [Flux]', ylim=c(0.1,10))
+points(profound$segstats$flux, profound$segstats$flux/ellip_flux_noblend, col='red')
+legend('topleft', legend=c('Deblend','No Deblend'), col=c('black', 'red'), pch=1)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

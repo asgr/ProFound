@@ -16,39 +16,39 @@
     invisible(.Call(`_ProFound_interpolateLinearGrid`, xseq, yseq, tempmat_sky, output))
 }
 
-profoundAperCover <- function(x, y, cx, cy, rad, depth = 4L, nthreads = 1L) {
+profoundAperCover <- function(x, y, cx, cy, rad, depth = 3L, nthreads = 1L) {
     .Call(`_ProFound_profoundAperCover`, x, y, cx, cy, rad, depth, nthreads)
 }
 
-profoundAperWeight <- function(image, cx, cy, rad, depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundAperWeight`, image, cx, cy, rad, depth, nthreads)
+profoundAperWeight <- function(cx, cy, rad, dimx = 100L, dimy = 100L, wt = as.numeric( c(1)), depth = 3L, nthreads = 1L) {
+    .Call(`_ProFound_profoundAperWeight`, cx, cy, rad, dimx, dimy, wt, depth, nthreads)
 }
 
-profoundAperFlux <- function(image, cx, cy, rad, deblend = FALSE, depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundAperFlux`, image, cx, cy, rad, deblend, depth, nthreads)
+profoundAperFlux <- function(image, cx, cy, rad, wt = as.numeric( c(1)), deblend = FALSE, depth = 3L, nthreads = 1L) {
+    .Call(`_ProFound_profoundAperFlux`, image, cx, cy, rad, wt, deblend, depth, nthreads)
 }
 
 .dilate_cpp <- function(segim, kern, expand = 0L, nthreads = 1L) {
     .Call(`_ProFound_dilate_cpp`, segim, kern, expand, nthreads)
 }
 
-profoundEllipCover <- function(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 4L, nthreads = 1L) {
+profoundEllipCover <- function(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 3L, nthreads = 1L) {
     .Call(`_ProFound_profoundEllipCover`, x, y, cx, cy, rad, ang, axrat, depth, nthreads)
 }
 
-profoundEllipWeight <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundEllipWeight`, image, cx, cy, rad, ang, axrat, depth, nthreads)
+profoundEllipWeight <- function(cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), dimx = 100L, dimy = 100L, wt = as.numeric( c(1)), depth = 3L, nthreads = 1L) {
+    .Call(`_ProFound_profoundEllipWeight`, cx, cy, rad, ang, axrat, dimx, dimy, wt, depth, nthreads)
 }
 
-profoundEllipFlux <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), deblend = FALSE, depth = 4L, nthreads = 1L) {
-    .Call(`_ProFound_profoundEllipFlux`, image, cx, cy, rad, ang, axrat, deblend, depth, nthreads)
+profoundEllipFlux <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), wt = as.numeric( c(1)), deblend = FALSE, depth = 3L, nthreads = 1L) {
+    .Call(`_ProFound_profoundEllipFlux`, image, cx, cy, rad, ang, axrat, wt, deblend, depth, nthreads)
 }
 
-profoundPolyCover <- function(x, y, poly_x, poly_y, depth = 4L, nthreads = 1L) {
+profoundPolyCover <- function(x, y, poly_x, poly_y, depth = 3L, nthreads = 1L) {
     .Call(`_ProFound_profoundPolyCover`, x, y, poly_x, poly_y, depth, nthreads)
 }
 
-profoundPolyFlux <- function(image, poly_x, poly_y, depth = 4L, nthreads = 1L) {
+profoundPolyFlux <- function(image, poly_x, poly_y, depth = 3L, nthreads = 1L) {
     .Call(`_ProFound_profoundPolyFlux`, image, poly_x, poly_y, depth, nthreads)
 }
 

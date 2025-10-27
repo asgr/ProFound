@@ -52,7 +52,7 @@ NumericVector profoundPolyCover(NumericVector x,
                                 NumericVector y,
                                 NumericVector poly_x,
                                 NumericVector poly_y,
-                                int depth = 4,
+                                int depth = 3,
                                 int nthreads = 1) {
   
   const int n = x.size();
@@ -87,7 +87,7 @@ NumericVector profoundPolyCover(NumericVector x,
 double profoundPolyFlux(NumericMatrix image,
                         NumericVector poly_x,
                         NumericVector poly_y,
-                        int depth = 4,
+                        int depth = 3,
                         int nthreads = 1) {
   int nrow = image.nrow();
   int ncol = image.ncol();
