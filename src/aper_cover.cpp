@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // Recursive function to determine fractional pixel coverage
 double pixelCoverAper(double delta_x, double delta_y, double delta_2,
-                     double rad_2, double rad_min_2, double rad_max_2, int depth) {
+                     double rad_2, double rad_min_2, double rad_max_2, int depth, NumericVector shift) {
   if (depth == 0) {
     return delta_2 <= rad_2 ? 1.0 : 0.0;
   }
@@ -20,24 +20,26 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
     return 1.0;
   }
   
+  double shift_loc = shift[depth - 2];
+  
   // small movements first hence 0.5 / (1 << depth), or we might stop too soon
-  double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
+  // double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
   double coverage = 0.0;
   
-  double delta_x_min  = delta_x - shift;
-  double delta_x_plus = delta_x + shift;
-  double delta_y_min  = delta_y - shift;
-  double delta_y_plus = delta_y + shift;
+  double delta_x_min  = delta_x - shift_loc;
+  double delta_x_plus = delta_x + shift_loc;
+  double delta_y_min  = delta_y - shift_loc;
+  double delta_y_plus = delta_y + shift_loc;
   
   double deltax1_2 = delta_x_min * delta_x_min;
   double deltax2_2 = delta_x_plus * delta_x_plus;
   double deltay1_2 = delta_y_min * delta_y_min;
   double deltay2_2 = delta_y_plus * delta_y_plus;
   
-  coverage += pixelCoverAper(delta_x_min, delta_y_min, deltax1_2 + deltay1_2, rad_2, rad_min_2, rad_max_2, depth - 1);
-  coverage += pixelCoverAper(delta_x_min, delta_y_plus, deltax1_2 + deltay2_2, rad_2, rad_min_2, rad_max_2, depth - 1);
-  coverage += pixelCoverAper(delta_x_plus, delta_y_min, deltax2_2 + deltay1_2, rad_2, rad_min_2, rad_max_2, depth - 1);
-  coverage += pixelCoverAper(delta_x_plus, delta_y_plus, deltax2_2 + deltay2_2, rad_2, rad_min_2, rad_max_2, depth - 1);
+  coverage += pixelCoverAper(delta_x_min, delta_y_min, deltax1_2 + deltay1_2, rad_2, rad_min_2, rad_max_2, depth - 1, shift);
+  coverage += pixelCoverAper(delta_x_min, delta_y_plus, deltax1_2 + deltay2_2, rad_2, rad_min_2, rad_max_2, depth - 1, shift);
+  coverage += pixelCoverAper(delta_x_plus, delta_y_min, deltax2_2 + deltay1_2, rad_2, rad_min_2, rad_max_2, depth - 1, shift);
+  coverage += pixelCoverAper(delta_x_plus, delta_y_plus, deltax2_2 + deltay2_2, rad_2, rad_min_2, rad_max_2, depth - 1, shift);
   
   return coverage / 4.0;
 }
@@ -64,6 +66,12 @@ NumericVector profoundAperCover(NumericVector x,
   }
   const double rad_max_2 = rad_plus * rad_plus;
   
+  NumericVector shift(depth - 1);
+  for (int i = 0; i < depth - 1; ++i) {
+    shift[i] = pow(2.0, -(i + 1));
+  }
+  
+  
   #ifdef _OPENMP
     // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
   #pragma omp parallel for schedule(dynamic, 10) if(n > 100) num_threads(nthreads)
@@ -76,7 +84,7 @@ NumericVector profoundAperCover(NumericVector x,
       if (std::abs(delta_y) < rad_plus) {
         const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
         result[i] = pixelCoverAper(delta_x, delta_y, delta_2,
-                                   rad_2, rad_min_2, rad_max_2, depth);
+                                   rad_2, rad_min_2, rad_max_2, depth, shift);
       } else {
         result[i] = 0.0;
       }
@@ -121,6 +129,11 @@ NumericMatrix profoundAperWeight(NumericVector cx,
     stop("Length of cx not equal to wt!");
   }
   
+  NumericVector shift(depth - 1);
+  for(int i = 0; i < depth; ++i){
+    shift[i] = pow(2, -i);
+  }
+  
 #ifdef _OPENMP
   // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
 #pragma omp parallel for schedule(static) num_threads(nthreads)
@@ -154,7 +167,7 @@ NumericMatrix profoundAperWeight(NumericVector cx,
             // Rcout << wt[k] << "\n";
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
             weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
-                   rad_2, rad_min_2, rad_max_2, depth);
+                   rad_2, rad_min_2, rad_max_2, depth, shift);
           }
         }
       }
@@ -199,8 +212,12 @@ NumericVector profoundAperFlux(
     stop("Length of cx not equal to wt!");
   }
   
-  NumericMatrix weight;
+  NumericVector shift(depth - 1);
+  for(int i = 0; i < depth; ++i){
+    shift[i] = pow(2, -i);
+  }
   
+  NumericMatrix weight;
   if(deblend){
     weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, depth, nthreads);
   }
@@ -242,12 +259,12 @@ NumericVector profoundAperFlux(
               if(deblend){
                 if(weight(i,j) > 0){
                   double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
-                                                  rad_2, rad_min_2, rad_max_2, depth);
+                                                  rad_2, rad_min_2, rad_max_2, depth, shift);
                   sum += image(i, j)*(PC_temp * PC_temp)*wt[k]/weight(i,j);
                 }
               }else{
                 sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2,
-                             rad_2, rad_min_2, rad_max_2, depth);
+                             rad_2, rad_min_2, rad_max_2, depth, shift);
               }
             }
           }
