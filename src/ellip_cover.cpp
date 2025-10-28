@@ -105,6 +105,7 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
                                   int dimx = 100,
                                   int dimy = 100,
                                   NumericVector wt = NumericVector::create(1),
+                                  double rad_pow = 0,
                                   int depth = 3,
                                   int nthreads = 1) {
   
@@ -191,10 +192,21 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
           const double delta_y = j - cy_loc;
           if (std::abs(delta_y) < rad_plus) {
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
-            if(delta_2 < semi_min_min * semi_min_min){
-              weight(i,j) += wt[k];
-            }else if(delta_2 < rad_plus * rad_plus){
-              weight(i,j) += wt[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+            if(rad_pow == 0){
+              if(delta_2 < semi_min_min * semi_min_min){
+                weight(i,j) += wt[k];
+              }else if(delta_2 < rad_plus * rad_plus){
+                weight(i,j) += wt[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+              }
+            }else{
+              double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
+              double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
+              double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
+              if(delta_2 < semi_min_min * semi_min_min){
+                weight(i,j) += wt[k] * pow(mod_delta_2 + 1, rad_pow/2);
+              }else if(delta_2 < rad_plus * rad_plus){
+                weight(i,j) += wt[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth) * pow(mod_delta_2 + 1, rad_pow/2);
+              }
             }
           }
         }
@@ -212,6 +224,7 @@ NumericVector profoundEllipFlux(NumericMatrix image,
                          NumericVector ang = NumericVector::create(0),
                          NumericVector axrat = NumericVector::create(1),
                          NumericVector wt = NumericVector::create(1),
+                         double rad_pow = 0,
                          bool deblend = false,
                          int depth = 3,
                          int nthreads = 1) {
@@ -260,7 +273,7 @@ NumericVector profoundEllipFlux(NumericMatrix image,
   NumericMatrix weight;
   
   if(deblend){
-    weight = profoundEllipWeight(cx, cy, rad, ang, axrat, dimx, dimy, wt, depth, nthreads);
+    weight = profoundEllipWeight(cx, cy, rad, ang, axrat, dimx, dimy, wt, rad_pow, depth, nthreads);
   }
   
   #ifdef _OPENMP
@@ -311,11 +324,23 @@ NumericVector profoundEllipFlux(NumericMatrix image,
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
             if(deblend){
               if(weight(i,j) > 0){
-                if(delta_2 < semi_min_min * semi_min_min){
-                  sum += image(i, j) * wt[k] / weight(i,j);
-                }else if(delta_2 < rad_plus * rad_plus){
-                  double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
-                  sum += image(i, j) * (PC_temp * PC_temp) * wt[k] / weight(i,j);
+                if(rad_pow == 0){
+                  if(delta_2 < semi_min_min * semi_min_min){
+                    sum += image(i, j) * wt[k] / weight(i,j);
+                  }else if(delta_2 < rad_plus * rad_plus){
+                    double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt[k] / weight(i,j);
+                  }
+                }else{
+                  double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
+                  double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
+                  double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
+                  if(delta_2 < semi_min_min * semi_min_min){
+                    sum += image(i, j) * wt[k]  * pow(mod_delta_2 + 1, rad_pow/2) / weight(i,j);
+                  }else if(delta_2 < rad_plus * rad_plus){
+                    double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt[k]  * pow(mod_delta_2 + 1, rad_pow/2) / weight(i,j);
+                  }
                 }
               }
             }else{

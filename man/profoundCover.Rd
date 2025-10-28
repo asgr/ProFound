@@ -21,17 +21,17 @@ profoundAperCover(x, y, cx, cy, rad, depth = 3L, nthreads = 1L)
 profoundEllipCover(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 3L, nthreads = 1L)
 profoundPolyCover(x, y, poly_x, poly_y, depth = 3L, nthreads = 1L)
 
-profoundAperFlux(image, cx, cy, rad, wt = as.numeric(c(1)), deblend = FALSE, depth = 3L,
-  nthreads = 1L)
+profoundAperFlux(image, cx, cy, rad, wt = as.numeric(c(1)), rad_pow = 0, deblend = FALSE,
+  depth = 3L, nthreads = 1L)
 profoundEllipFlux(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
-  wt = as.numeric(c(1)), deblend = FALSE, depth = 3L, nthreads = 1L)
+  wt = as.numeric(c(1)), rad_pow = 0, deblend = FALSE, depth = 3L, nthreads = 1L)
 profoundPolyFlux(image, poly_x, poly_y, depth = 3L, nthreads = 1L)
 profoundSegimFlux(image, segim, nthreads = 1L)
 
 profoundAperWeight(cx, cy, rad, dimx = 100L, dimy = 100L, wt = as.numeric(c(1)),
-  depth = 3, nthreads = 1)
+  rad_pow = 0, depth = 3, nthreads = 1)
 profoundEllipWeight(cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
-  dimx = 100L, dimy = 100L, wt = as.numeric(c(1)), depth = 3, nthreads = 1)
+  dimx = 100L, dimy = 100L, wt = as.numeric(c(1)), rad_pow = 0, depth = 3, nthreads = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -64,6 +64,9 @@ Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded be
 }
   \item{wt}{
 Numeric scalar/vector; the per aperture / ellipse weight to apply when computing the weight map and/or fluxes. If length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}.
+}
+  \item{rad_pow}{
+Numeric scalar; radial power scaling to apply to the weights. Setting to 0 means the weight response is flat throughout the aperture / ellipse, setting to negative values means pixels further out along the effective radius (modified in the ellipse case) will have less weight. Almost certainly if you use this it should be negative values, and the range -2 to -0.5 seems to work reasonably in practice.
 }
   \item{dimx}{
 Integer scalar; the number of pixels in the x-dimension for the resulting weight map.
@@ -189,6 +192,14 @@ for(i in seq_along(ran_x)){
   border='red')
 }
 
+#Apply some rad_pow. This will bias flux towards smaller isophotal contour sources.
+magimage(profoundEllipWeight(ran_x, ran_y, ran_rad, ran_ang, ran_axrat, rad_pow=-1),
+  magmap=TRUE)
+for(i in seq_along(ran_x)){
+  draw.ellipse(ran_x[i], ran_y[i], ran_rad[i], ran_rad[i]*ran_axrat[i], ran_ang[i]+90,
+  border='red')
+}
+
 \dontrun{
 #Some elliptical photometry:
 
@@ -197,19 +208,25 @@ image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 
 profound = profoundProFound(image, verbose=TRUE, plot=TRUE)
 ellip_ref = profound$segstats[,c("xcen", "ycen", "R100",  "ang", "axrat")]
+
+#with rad_pow=-1 you can see the deblend solution that will be used for splitting flux:
 magimage(profoundEllipWeight(ellip_ref$xcen, ellip_ref$ycen, ellip_ref$R100,
-  ellip_ref$ang, ellip_ref$axrat, 356, 356), magmap=FALSE, add=T,
+  ellip_ref$ang, ellip_ref$axrat, 356, 356, rad_pow=-1), magmap=TRUE, add=TRUE,
   col=c(NA, hsv(1, s=(0:1000)/1000, alpha=0.5)))
   
-ellip_flux_deblend =  profoundEllipFlux(image, ellip_ref$xcen, ellip_ref$ycen,
-  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=TRUE)
 ellip_flux_noblend =  profoundEllipFlux(image, ellip_ref$xcen, ellip_ref$ycen,
   ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=FALSE)
+ellip_flux_deblend_pow0 =  profoundEllipFlux(image, ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=TRUE, rad_pow=0)
+ellip_flux_deblend_pow1 =  profoundEllipFlux(image, ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=TRUE, rad_pow=-1)
   
-magplot(profound$segstats$flux, profound$segstats$flux/ellip_flux_deblend, log='xy',
+magplot(profound$segstats$flux, profound$segstats$flux/ellip_flux_noblend, log='xy',
   xlab='ProFound [Flux]', ylab='ProFound / Ellip [Flux]', ylim=c(0.1,10))
-points(profound$segstats$flux, profound$segstats$flux/ellip_flux_noblend, col='red')
-legend('topleft', legend=c('Deblend','No Deblend'), col=c('black', 'red'), pch=1)
+points(profound$segstats$flux, profound$segstats$flux/ellip_flux_deblend_pow0, col='red')
+points(profound$segstats$flux, profound$segstats$flux/ellip_flux_deblend_pow1, col='blue')
+legend('topleft', legend=c('No Deblend', 'Deblend Pow = 0', 'Deblend Pow = -1'),
+  col=c('black', 'red', 'blue'), pch=1)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

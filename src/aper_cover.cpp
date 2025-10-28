@@ -21,6 +21,8 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
   }
   
   // small movements first hence 0.5 / (1 << depth), or we might stop too soon
+  // not clear why to me, but much faster to use this bit shift than to pre-compute and index into result
+  // don't edit this!
   double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
   double coverage = 0.0;
   
@@ -95,6 +97,7 @@ NumericMatrix profoundAperWeight(NumericVector cx,
                                  int dimx = 100,
                                  int dimy = 100,
                                  NumericVector wt = NumericVector::create(1),
+                                 double rad_pow = 0,
                                  int depth = 3,
                                  int nthreads = 1) {
   
@@ -153,8 +156,13 @@ NumericMatrix profoundAperWeight(NumericVector cx,
           if (std::abs(delta_y) < rad_plus) {
             // Rcout << wt[k] << "\n";
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
-            weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
-                   rad_2, rad_min_2, rad_max_2, depth);
+            if(rad_pow == 0){
+              weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
+                     rad_2, rad_min_2, rad_max_2, depth);
+            }else{
+              weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
+                     rad_2, rad_min_2, rad_max_2, depth) * pow(delta_2 + 1, rad_pow/2);
+            }
           }
         }
       }
@@ -170,6 +178,7 @@ NumericVector profoundAperFlux(
                         NumericVector cy,
                         NumericVector rad,
                         NumericVector wt = NumericVector::create(1),
+                        double rad_pow = 0,
                         bool deblend = false,
                         int depth = 3,
                         int nthreads = 1) {
@@ -202,7 +211,7 @@ NumericVector profoundAperFlux(
   NumericMatrix weight;
   
   if(deblend){
-    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, depth, nthreads);
+    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_pow, depth, nthreads);
   }
   
   #ifdef _OPENMP
@@ -241,13 +250,18 @@ NumericVector profoundAperFlux(
               const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
               if(deblend){
                 if(weight(i,j) > 0){
+                  // need the rad_pow scaling stuff here!!!
                   double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
                                                   rad_2, rad_min_2, rad_max_2, depth);
-                  sum += image(i, j)*(PC_temp * PC_temp)*wt[k]/weight(i,j);
+                  if(rad_pow == 0){
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt[k] / weight(i,j);
+                  }else{
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt[k]  * pow(delta_2 + 1, rad_pow/2) / weight(i,j);
+                  }
                 }
               }else{
-                sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2,
-                             rad_2, rad_min_2, rad_max_2, depth);
+                sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2, rad_2,
+                             rad_min_2, rad_max_2, depth);
               }
             }
           }
