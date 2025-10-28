@@ -9,8 +9,8 @@ using namespace Rcpp;
 double in_ellip(double delta_x, double delta_y, double semi_maj, double semi_min, double cos_ang, double sin_ang) {
   // Rotate the point by the negative of the ellipse's rotation angle
   
-  double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / semi_min;
-  double mod_y = (-delta_x * sin_ang + delta_y * cos_ang) / semi_maj;
+  const double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / semi_min;
+  const double mod_y = (-delta_x * sin_ang + delta_y * cos_ang) / semi_maj;
   
   
   // Check if the point is inside the ellipse
@@ -27,13 +27,13 @@ double pixelCoverEllip(double delta_x, double delta_y, double x_term, double y_t
 
   }
   
-  double quarter = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
+  const double quarter = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
   double coverage = 0.0;
   
-  double delta_x_min  = delta_x - quarter;
-  double delta_x_plus = delta_x + quarter;
-  double delta_y_min  = delta_y - quarter;
-  double delta_y_plus = delta_y + quarter;
+  const double delta_x_min  = delta_x - quarter;
+  const double delta_x_plus = delta_x + quarter;
+  const double delta_y_min  = delta_y - quarter;
+  const double delta_y_plus = delta_y + quarter;
   
   coverage += pixelCoverEllip(delta_x_min, delta_y_min, x_term, y_term, xy_term, depth - 1);
   coverage += pixelCoverEllip(delta_x_min, delta_y_plus, x_term, y_term, xy_term, depth - 1);
@@ -49,7 +49,7 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
   int n = x.size();
   NumericVector result(n);
   
-  double semi_min = rad * axrat;
+  const double semi_min = rad * axrat;
   double semi_min_min = semi_min - 0.7071068;
   if(semi_min_min < 0){
     semi_min_min = 0;
@@ -57,17 +57,17 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
   const double rad_plus = rad + 0.7071068;
   
   ang = ang*3.141593/180;
-  double cos_ang = std::cos(ang);
-  double sin_ang = std::sin(ang);
+  const double cos_ang = std::cos(ang);
+  const double sin_ang = std::sin(ang);
   
-  double inv_semi_minor2 = 1 / (semi_min * semi_min);
-  double inv_semi_major2 = 1 / (rad * rad);
-  double sin_ang2 = sin_ang * sin_ang;
-  double cos_ang2 = cos_ang * cos_ang;
+  const double inv_semi_minor2 = 1 / (semi_min * semi_min);
+  const double inv_semi_major2 = 1 / (rad * rad);
+  const double sin_ang2 = sin_ang * sin_ang;
+  const double cos_ang2 = cos_ang * cos_ang;
   
-  double x_term = cos_ang2 * inv_semi_minor2 + sin_ang2 * inv_semi_major2;
-  double y_term = sin_ang2 * inv_semi_minor2 + cos_ang2 * inv_semi_major2;
-  double xy_term = 2 * sin_ang * cos_ang * (inv_semi_minor2 - inv_semi_major2);
+  const double x_term = cos_ang2 * inv_semi_minor2 + sin_ang2 * inv_semi_major2;
+  const double y_term = sin_ang2 * inv_semi_minor2 + cos_ang2 * inv_semi_major2;
+  const double xy_term = 2 * sin_ang * cos_ang * (inv_semi_minor2 - inv_semi_major2);
   
   #ifdef _OPENMP
     // Parallelize the main loop. Use 'if' to avoid overhead for tiny n.
@@ -154,11 +154,11 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
 #endif
   for (int k = 0; k < n; ++k) {
     
-    double cx_loc = cx[k] - 0.5;
-    double cy_loc = cy[k] - 0.5;
-    double rad_loc = rad[k];
-    double ang_loc = ang[k];
-    double axrat_loc = axrat[k];
+    const double cx_loc = cx[k] - 0.5;
+    const double cy_loc = cy[k] - 0.5;
+    const double rad_loc = rad[k];
+    const double ang_loc = ang[k] * 3.141593 / 180;
+    const double axrat_loc = axrat[k];
     
     const double semi_min = rad_loc * axrat_loc;
     double semi_min_min = semi_min - 0.7071068;
@@ -166,24 +166,23 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
       semi_min_min = 0;
     }
     const double rad_plus = rad_loc + 0.7071068;
-    
-    ang_loc = ang_loc*3.141593/180;
+
     const double cos_ang = std::cos(ang_loc);
     const double sin_ang = std::sin(ang_loc);
     
-    double inv_semi_minor2 = 1 / (semi_min * semi_min);
-    double inv_semi_major2 = 1 / (rad_loc * rad_loc);
-    double sin_ang2 = sin_ang * sin_ang;
-    double cos_ang2 = cos_ang * cos_ang;
+    const double inv_semi_minor2 = 1 / (semi_min * semi_min);
+    const double inv_semi_major2 = 1 / (rad_loc * rad_loc);
+    const double sin_ang2 = sin_ang * sin_ang;
+    const double cos_ang2 = cos_ang * cos_ang;
     
-    double x_term = cos_ang2 * inv_semi_minor2 + sin_ang2 * inv_semi_major2;
-    double y_term = sin_ang2 * inv_semi_minor2 + cos_ang2 * inv_semi_major2;
-    double xy_term = 2 * sin_ang * cos_ang * (inv_semi_minor2 - inv_semi_major2);
+    const double x_term = cos_ang2 * inv_semi_minor2 + sin_ang2 * inv_semi_major2;
+    const double y_term = sin_ang2 * inv_semi_minor2 + cos_ang2 * inv_semi_major2;
+    const double xy_term = 2 * sin_ang * cos_ang * (inv_semi_minor2 - inv_semi_major2);
     
-    int start_row = std::max(0.0, floor(cx_loc - rad_plus));
-    int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
-    int start_col = std::max(0.0, floor(cy_loc - rad_plus));
-    int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
+    const int start_row = std::max(0.0, floor(cx_loc - rad_plus));
+    const int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
+    const int start_col = std::max(0.0, floor(cy_loc - rad_plus));
+    const int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
     
     for (int i = start_row; i <= end_row; ++i) {
       for (int j = start_col; j <= end_col; ++j) {
@@ -199,9 +198,9 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
                 weight(i,j) += wt[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
               }
             }else{
-              double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
-              double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
-              double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
+              const double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
+              const double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
+              const double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
               if(delta_2 < semi_min_min * semi_min_min){
                 weight(i,j) += wt[k] * pow(mod_delta_2 + 1, rad_pow/2);
               }else if(delta_2 < rad_plus * rad_plus){
@@ -282,11 +281,11 @@ NumericVector profoundEllipFlux(NumericMatrix image,
   #endif
   for (int k = 0; k < n; ++k) {
     
-    double cx_loc = cx[k] - 0.5;
-    double cy_loc = cy[k] - 0.5;
-    double rad_loc = rad[k];
-    double ang_loc = ang[k];
-    double axrat_loc = axrat[k];
+    const double cx_loc = cx[k] - 0.5;
+    const double cy_loc = cy[k] - 0.5;
+    const double rad_loc = rad[k];
+    const double ang_loc = ang[k] * 3.141593 / 180;
+    const double axrat_loc = axrat[k];
     
     const double semi_min = rad_loc * axrat_loc;
     double semi_min_min = semi_min - 0.7071068;
@@ -295,23 +294,22 @@ NumericVector profoundEllipFlux(NumericMatrix image,
     }
     const double rad_plus = rad_loc + 0.7071068;
     
-    ang_loc = ang_loc*3.141593/180;
     const double cos_ang = std::cos(ang_loc);
     const double sin_ang = std::sin(ang_loc);
     
-    double inv_semi_minor2 = 1 / (semi_min * semi_min);
-    double inv_semi_major2 = 1 / (rad_loc * rad_loc);
-    double sin_ang2 = sin_ang * sin_ang;
-    double cos_ang2 = cos_ang * cos_ang;
+    const double inv_semi_minor2 = 1 / (semi_min * semi_min);
+    const double inv_semi_major2 = 1 / (rad_loc * rad_loc);
+    const double sin_ang2 = sin_ang * sin_ang;
+    const double cos_ang2 = cos_ang * cos_ang;
     
-    double x_term = cos_ang2 * inv_semi_minor2 + sin_ang2 * inv_semi_major2;
-    double y_term = sin_ang2 * inv_semi_minor2 + cos_ang2 * inv_semi_major2;
-    double xy_term = 2 * sin_ang * cos_ang * (inv_semi_minor2 - inv_semi_major2);
+    const double x_term = cos_ang2 * inv_semi_minor2 + sin_ang2 * inv_semi_major2;
+    const double y_term = sin_ang2 * inv_semi_minor2 + cos_ang2 * inv_semi_major2;
+    const double xy_term = 2 * sin_ang * cos_ang * (inv_semi_minor2 - inv_semi_major2);
     
-    int start_row = std::max(0.0, floor(cx_loc - rad_plus));
-    int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
-    int start_col = std::max(0.0, floor(cy_loc - rad_plus));
-    int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
+    const int start_row = std::max(0.0, floor(cx_loc - rad_plus));
+    const int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
+    const int start_col = std::max(0.0, floor(cy_loc - rad_plus));
+    const int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
     
     double sum = 0.0;
     
@@ -328,17 +326,17 @@ NumericVector profoundEllipFlux(NumericMatrix image,
                   if(delta_2 < semi_min_min * semi_min_min){
                     sum += image(i, j) * wt[k] / weight(i,j);
                   }else if(delta_2 < rad_plus * rad_plus){
-                    double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+                    const double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
                     sum += image(i, j) * (PC_temp * PC_temp) * wt[k] / weight(i,j);
                   }
                 }else{
-                  double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
-                  double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
-                  double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
+                  const double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
+                  const double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
+                  const double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
                   if(delta_2 < semi_min_min * semi_min_min){
                     sum += image(i, j) * wt[k]  * pow(mod_delta_2 + 1, rad_pow/2) / weight(i,j);
                   }else if(delta_2 < rad_plus * rad_plus){
-                    double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+                    const double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
                     sum += image(i, j) * (PC_temp * PC_temp) * wt[k]  * pow(mod_delta_2 + 1, rad_pow/2) / weight(i,j);
                   }
                 }

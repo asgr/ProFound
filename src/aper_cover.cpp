@@ -23,18 +23,18 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
   // small movements first hence 0.5 / (1 << depth), or we might stop too soon
   // not clear why to me, but much faster to use this bit shift than to pre-compute and index into result
   // don't edit this!
-  double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
+  const double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
   double coverage = 0.0;
   
-  double delta_x_min  = delta_x - shift;
-  double delta_x_plus = delta_x + shift;
-  double delta_y_min  = delta_y - shift;
-  double delta_y_plus = delta_y + shift;
+  const double delta_x_min  = delta_x - shift;
+  const double delta_x_plus = delta_x + shift;
+  const double delta_y_min  = delta_y - shift;
+  const double delta_y_plus = delta_y + shift;
   
-  double deltax1_2 = delta_x_min * delta_x_min;
-  double deltax2_2 = delta_x_plus * delta_x_plus;
-  double deltay1_2 = delta_y_min * delta_y_min;
-  double deltay2_2 = delta_y_plus * delta_y_plus;
+  const double deltax1_2 = delta_x_min * delta_x_min;
+  const double deltax2_2 = delta_x_plus * delta_x_plus;
+  const double deltay1_2 = delta_y_min * delta_y_min;
+  const double deltay2_2 = delta_y_plus * delta_y_plus;
   
   coverage += pixelCoverAper(delta_x_min, delta_y_min, deltax1_2 + deltay1_2, rad_2, rad_min_2, rad_max_2, depth - 1);
   coverage += pixelCoverAper(delta_x_min, delta_y_plus, deltax1_2 + deltay2_2, rad_2, rad_min_2, rad_max_2, depth - 1);
@@ -143,10 +143,10 @@ NumericMatrix profoundAperWeight(NumericVector cx,
     }
     const double rad_max_2 = rad_plus * rad_plus;
     
-    int start_row = std::max(0.0, floor(cx_loc - rad_plus));
-    int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
-    int start_col = std::max(0.0, floor(cy_loc - rad_plus));
-    int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
+    const int start_row = std::max(0.0, floor(cx_loc - rad_plus));
+    const int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
+    const int start_col = std::max(0.0, floor(cy_loc - rad_plus));
+    const int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
     
     for (int i = start_row; i <= end_row; ++i) {
       for (int j = start_col; j <= end_col; ++j) {
@@ -220,9 +220,9 @@ NumericVector profoundAperFlux(
   #endif
   for (int k = 0; k < n; ++k) {
   
-    double cx_loc = cx[k] - 0.5;
-    double cy_loc = cy[k] - 0.5;
-    double rad_loc = rad[k];
+    const double cx_loc = cx[k] - 0.5;
+    const double cy_loc = cy[k] - 0.5;
+    const double rad_loc = rad[k];
     
     const double rad_2 = rad_loc * rad_loc;
     const double rad_min = rad_loc - 0.7071068;   // sqrt(0.5)
@@ -233,10 +233,10 @@ NumericVector profoundAperFlux(
     }
     const double rad_max_2 = rad_plus * rad_plus;
     
-    int start_row = std::max(0.0, floor(cx_loc - rad_plus));
-    int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
-    int start_col = std::max(0.0, floor(cy_loc - rad_plus));
-    int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
+    const int start_row = std::max(0.0, floor(cx_loc - rad_plus));
+    const int end_row = std::min(dimx - 1.0, ceil(cx_loc + rad_plus));
+    const int start_col = std::max(0.0, floor(cy_loc - rad_plus));
+    const int end_col = std::min(dimy - 1.0, ceil(cy_loc + rad_plus));
     
     double sum = 0.0;
     
@@ -251,7 +251,7 @@ NumericVector profoundAperFlux(
               if(deblend){
                 if(weight(i,j) > 0){
                   // need the rad_pow scaling stuff here!!!
-                  double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
+                  const double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
                                                   rad_2, rad_min_2, rad_max_2, depth);
                   if(rad_pow == 0){
                     sum += image(i, j) * (PC_temp * PC_temp) * wt[k] / weight(i,j);
