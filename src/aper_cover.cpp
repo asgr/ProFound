@@ -20,10 +20,11 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
     return 1.0;
   }
   
-  double shift_loc = shift[depth - 2];
+  double shift_loc = shift[depth - 1];
   
   // small movements first hence 0.5 / (1 << depth), or we might stop too soon
   // double shift = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
+  // Rcout << 0.5 / (1 << depth) << " " << shift_loc << "\n";
   double coverage = 0.0;
   
   double delta_x_min  = delta_x - shift_loc;
@@ -66,9 +67,10 @@ NumericVector profoundAperCover(NumericVector x,
   }
   const double rad_max_2 = rad_plus * rad_plus;
   
-  NumericVector shift(depth - 1);
-  for (int i = 0; i < depth - 1; ++i) {
-    shift[i] = pow(2.0, -(i + 1));
+  NumericVector shift(depth);
+  for (int i = 0; i < depth; ++i) {
+    shift[i] = pow(2.0, -(i + 2));
+    //Rcout << shift[i] << "\n";
   }
   
   
