@@ -97,7 +97,7 @@ NumericMatrix profoundAperWeight(NumericVector cx,
                                  int dimx = 100,
                                  int dimy = 100,
                                  NumericVector wt = NumericVector::create(1),
-                                 double rad_pow = 0,
+                                 NumericVector rad_re = NumericVector::create(0),
                                  int depth = 3,
                                  int nthreads = 1) {
   
@@ -116,11 +116,39 @@ NumericMatrix profoundAperWeight(NumericVector cx,
     stop("Length of cx not equal to rad!");
   }
   
-  if(wt.size() == 1){
-    wt = NumericVector(n, wt[0]);
+  if(rad_re.size() == 1){
+    rad_re = NumericVector(n, rad_re[0]);
   }
   
-  if(wt.size() != n){
+  if(rad_re.size() != n){
+    stop("Length of cx not equal to rad_re!");
+  }
+  
+  NumericVector rad_scale(n);
+  
+  for (int k = 0; k < n; ++k) {
+    rad_scale[k] = rad_re[k] / 1.678347;
+  }
+  
+  NumericVector wt_use = NumericVector(n);
+  
+  if(wt.size() == 1){
+    for (int k = 0; k < n; ++k) {
+      wt_use[k] = wt[0];
+    }
+  }else{
+    for (int k = 0; k < n; ++k) {
+      if(rad_re[k] > 0){
+        wt_use[k] = wt[k] / (rad_re[k] * rad_re[k]);
+      }
+      
+      if(wt_use[k] < 0){
+        wt_use[k] = 0;
+      }
+    }
+  }
+  
+  if(wt_use.size() != n){
     stop("Length of cx not equal to wt!");
   }
   
@@ -154,14 +182,13 @@ NumericMatrix profoundAperWeight(NumericVector cx,
         if (std::abs(delta_x) < rad_plus) {
           const double delta_y = j - cy_loc;
           if (std::abs(delta_y) < rad_plus) {
-            // Rcout << wt[k] << "\n";
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
-            if(rad_pow == 0){
-              weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
+            if(rad_re[k] == 0){
+              weight(i,j) += wt_use[k] * pixelCoverAper(delta_x, delta_y, delta_2,
                      rad_2, rad_min_2, rad_max_2, depth);
             }else{
-              weight(i,j) += wt[k] * pixelCoverAper(delta_x, delta_y, delta_2,
-                     rad_2, rad_min_2, rad_max_2, depth) * pow(delta_2 + 1, rad_pow/2);
+              weight(i,j) += wt_use[k] * pixelCoverAper(delta_x, delta_y, delta_2,
+                     rad_2, rad_min_2, rad_max_2, depth) * exp(-sqrt(delta_2) / rad_scale[k]);
             }
           }
         }
@@ -178,7 +205,7 @@ NumericVector profoundAperFlux(
                         NumericVector cy,
                         NumericVector rad,
                         NumericVector wt = NumericVector::create(1),
-                        double rad_pow = 0,
+                        NumericVector rad_re = NumericVector::create(0),
                         bool deblend = false,
                         int depth = 3,
                         int nthreads = 1) {
@@ -200,18 +227,46 @@ NumericVector profoundAperFlux(
     stop("Length of cx not equal to rad!");
   }
   
-  if(wt.size() == 1){
-    wt = NumericVector(n, wt[0]);
+  if(rad_re.size() == 1){
+    rad_re = NumericVector(n, rad_re[0]);
   }
   
-  if(wt.size() != n){
+  if(rad_re.size() != n){
+    stop("Length of cx not equal to rad_re!");
+  }
+  
+  NumericVector rad_scale(n);
+  
+  for (int k = 0; k < n; ++k) {
+    rad_scale[k] = rad_re[k] / 1.678347;
+  }
+  
+  NumericVector wt_use = NumericVector(n);
+  
+  if(wt.size() == 1){
+    for (int k = 0; k < n; ++k) {
+      wt_use[k] = wt[0];
+    }
+  }else{
+    for (int k = 0; k < n; ++k) {
+      if(rad_re[k] > 0){
+        wt_use[k] = wt[k] / (rad_re[k] * rad_re[k]);
+      }
+      
+      if(wt_use[k] < 0){
+        wt_use[k] = 0;
+      }
+    }
+  }
+  
+  if(wt_use.size() != n){
     stop("Length of cx not equal to wt!");
   }
   
   NumericMatrix weight;
   
   if(deblend){
-    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_pow, depth, nthreads);
+    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_re, depth, nthreads);
   }
   
   #ifdef _OPENMP
@@ -253,10 +308,10 @@ NumericVector profoundAperFlux(
                   // need the rad_pow scaling stuff here!!!
                   const double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
                                                   rad_2, rad_min_2, rad_max_2, depth);
-                  if(rad_pow == 0){
-                    sum += image(i, j) * (PC_temp * PC_temp) * wt[k] / weight(i,j);
+                  if(rad_re[k]== 0){
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] / weight(i,j);
                   }else{
-                    sum += image(i, j) * (PC_temp * PC_temp) * wt[k]  * pow(delta_2 + 1, rad_pow/2) / weight(i,j);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k]  * exp(-sqrt(delta_2) / rad_scale[k]) / weight(i,j);
                   }
                 }
               }else{

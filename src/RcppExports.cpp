@@ -54,8 +54,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundAperWeight
-NumericMatrix profoundAperWeight(NumericVector cx, NumericVector cy, NumericVector rad, int dimx, int dimy, NumericVector wt, double rad_pow, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundAperWeight(SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP dimxSEXP, SEXP dimySEXP, SEXP wtSEXP, SEXP rad_powSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericMatrix profoundAperWeight(NumericVector cx, NumericVector cy, NumericVector rad, int dimx, int dimy, NumericVector wt, NumericVector rad_re, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundAperWeight(SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP dimxSEXP, SEXP dimySEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -65,16 +65,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dimx(dimxSEXP);
     Rcpp::traits::input_parameter< int >::type dimy(dimySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< double >::type rad_pow(rad_powSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rad_re(rad_reSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_pow, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_re, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // profoundAperFlux
-NumericVector profoundAperFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector wt, double rad_pow, bool deblend, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundAperFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP wtSEXP, SEXP rad_powSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericVector profoundAperFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector wt, NumericVector rad_re, bool deblend, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundAperFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -83,11 +83,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type cy(cySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type rad(radSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< double >::type rad_pow(rad_powSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rad_re(rad_reSEXP);
     Rcpp::traits::input_parameter< bool >::type deblend(deblendSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundAperFlux(image, cx, cy, rad, wt, rad_pow, deblend, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundAperFlux(image, cx, cy, rad, wt, rad_re, deblend, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -125,8 +125,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundEllipWeight
-NumericMatrix profoundEllipWeight(NumericVector cx, NumericVector cy, NumericVector rad, NumericVector ang, NumericVector axrat, int dimx, int dimy, NumericVector wt, double rad_pow, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundEllipWeight(SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP dimxSEXP, SEXP dimySEXP, SEXP wtSEXP, SEXP rad_powSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericMatrix profoundEllipWeight(NumericVector cx, NumericVector cy, NumericVector rad, NumericVector ang, NumericVector axrat, int dimx, int dimy, NumericVector wt, NumericVector rad_re, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundEllipWeight(SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP dimxSEXP, SEXP dimySEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -138,16 +138,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type dimx(dimxSEXP);
     Rcpp::traits::input_parameter< int >::type dimy(dimySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< double >::type rad_pow(rad_powSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rad_re(rad_reSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundEllipWeight(cx, cy, rad, ang, axrat, dimx, dimy, wt, rad_pow, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundEllipWeight(cx, cy, rad, ang, axrat, dimx, dimy, wt, rad_re, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // profoundEllipFlux
-NumericVector profoundEllipFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector ang, NumericVector axrat, NumericVector wt, double rad_pow, bool deblend, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundEllipFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP wtSEXP, SEXP rad_powSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericVector profoundEllipFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector ang, NumericVector axrat, NumericVector wt, NumericVector rad_re, bool deblend, int depth, int nthreads);
+RcppExport SEXP _ProFound_profoundEllipFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -158,11 +158,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type ang(angSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type axrat(axratSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
-    Rcpp::traits::input_parameter< double >::type rad_pow(rad_powSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rad_re(rad_reSEXP);
     Rcpp::traits::input_parameter< bool >::type deblend(deblendSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundEllipFlux(image, cx, cy, rad, ang, axrat, wt, rad_pow, deblend, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundEllipFlux(image, cx, cy, rad, ang, axrat, wt, rad_re, deblend, depth, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
