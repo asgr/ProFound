@@ -21,19 +21,19 @@ profoundAperCover(x, y, cx, cy, rad, depth = 3L, nthreads = 1L)
 profoundEllipCover(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 3L, nthreads = 1L)
 profoundPolyCover(x, y, poly_x, poly_y, depth = 3L, nthreads = 1L)
 
-profoundAperFlux(image, cx, cy, rad, wt = as.numeric(c(1)), rad_re = as.numeric(c(1),
-  deblend = FALSE, depth = 3L, nthreads = 1L)
+profoundAperFlux(image, cx, cy, rad, wt = as.numeric(c(1)), rad_re = as.numeric(c(0)),
+  nser = as.numeric(c(1)), deblend = FALSE, depth = 3L, nthreads = 1L)
 profoundEllipFlux(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
-  wt = as.numeric(c(1)), rad_re = as.numeric(c(1), deblend = FALSE, depth = 3L,
-  nthreads = 1L)
+  wt = as.numeric(c(1)), rad_re = as.numeric(c(0)), nser = as.numeric(c(1)),
+  deblend = FALSE, depth = 3L, nthreads = 1L)
 profoundPolyFlux(image, poly_x, poly_y, depth = 3L, nthreads = 1L)
 profoundSegimFlux(image, segim, nthreads = 1L)
 
 profoundAperWeight(cx, cy, rad, dimx = 100L, dimy = 100L, wt = as.numeric(c(1)),
-  rad_re = as.numeric(c(1), depth = 3, nthreads = 1)
+  rad_re = as.numeric(c(0)), nser = as.numeric(c(1)), depth = 3, nthreads = 1)
 profoundEllipWeight(cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
-  dimx = 100L, dimy = 100L, wt = as.numeric(c(1)), rad_re = as.numeric(c(1), depth = 3,
-  nthreads = 1)
+  dimx = 100L, dimy = 100L, wt = as.numeric(c(1)), rad_re = as.numeric(c(0)),
+  nser = as.numeric(c(1)), depth = 3, nthreads = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -68,7 +68,10 @@ Numeric scalar; the semi-minor/semi-major axial ratio of the ellipse (bounded be
 Numeric scalar/vector; the per aperture / ellipse weight to apply when computing the weight map and/or fluxes. If length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}.
 }
   \item{rad_re}{
-Numeric scalar; the exponential Re scaling to apply to the weights. Setting to 0 means the weight response is flat throughout the aperture / ellipse. Setting to the true effective radius of the profile will create a more accurate deblend, but the minimum value should reflect the PSF FWHM (where Re = FWHM/2).
+Numeric scalar/vector; the half light radius (Re) to use for the weight profiles. Setting to 0 means the weight response is flat throughout the aperture / ellipse. Setting to the true effective radius of the profile will create a more accurate deblend, but the minimum value should reflect the PSF FWHM (where Re = FWHM/2). If length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}.
+}
+  \item{nser}{
+Numeric scalar/vector; the Sersic Index (n) light profile to use for the weights. A value of 0.5 creates a Gaussian profile, and tends to be appropriate for stars. A value of 1 creates an Exponential profile, and tends to be appropriate for late-type (disk) galaxies. Value of between 4-8 creates a very steep profile, and tends to be appropriate for early-type (elliptical) galaxies. In general assuming exponential (leaving as the default) works pretty well, unless you really know better. If length 1 then value is repeated for all entries, otherwise must be same length as \option{cx}.
 }
   \item{dimx}{
 Integer scalar; the number of pixels in the x-dimension for the resulting weight map.

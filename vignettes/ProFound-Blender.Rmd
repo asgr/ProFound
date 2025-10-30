@@ -1,0 +1,131 @@
+---
+title: "ProFound: It's All in the Blend"
+author: "Aaron Robotham"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ProFound: It's All in the Blend}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+library(ProFound)
+library(ProFit)
+library(RANN)
+library(magicaxis)
+```
+
+Over the years **ProFound** has developed a few distinct and competing approaches to source de-blending. The core **profoundProFound** function contains a few different options to achieve this (see the *deblendtype* argument options), but here we will use the "fit" mode that attempts to fit a simple profile to each blended object and use the approximate profile as a de-blending kernel. This has been present in **ProFoun** for many years, but is rarely used in practice (perhaps people just do not know the option is there?) In practice, as we shall see, it is often not much better than the watershed based de-blending scheme we use in the base function, even though the latter creates hard de-blending boundaries and does not share the flux of a pixel between segments. This seems surprising, but is a natural consequence of what the saddle point in flux usually represents.
+
+In late 2025 I developed a new elliptical aperture routine built in **Rcpp** that is extremely fast (faster than the equivalent SExtractor code) and can even be threaded with OpenMP. As well as offering proper circular and elliptical aperture photometry, it offers a few useful approaches for de-blending sources across hard pixel bouandaries, i.e. it can fractional distribute flux between an arbitrarily large number of sources that appear to overlap. Much like SExtractor, we can estimate the properties of the ellipses to use from the naive segment-based **profoundProFound** source extraction.
+
+First let us make. a mock image where we have a ground truth for some reasonable looking galaxies. To do this we will use **ProFit**, one of the core **ProTools* software packages that is used for generating and fitting 2D light profiles of many sources.
+
+```{r}
+ExamplePSF = profitMakePointSource()
+
+set.seed(1)
+model = list(
+  sersic = list(
+    xcen = runif(50, 100, 900),
+    ycen = runif(50, 100, 900),
+    mag = runif(50, 15, 20),
+    re = runif(50, 3, 10),
+    nser = runif(50, 1, 4),
+    ang = runif(50, 0, 180),
+    axrat = runif(50, 0.3, 1),
+    box = runif(50, -0.3, 0.3)
+  ),
+  pointsource = list(
+    xcen = runif(20, 100, 900),
+    ycen = runif(20, 100, 900),
+    mag = runif(20, 15, 20)
+  )
+)
+
+model_core = data.frame(xcen = c(model$sersic$xcen, model$pointsource$xcen),
+                        ycen = c(model$sersic$ycen, model$pointsource$ycen),
+                        mag = c(model$sersic$mag, model$pointsource$mag)
+                        )
+
+ExampleImage = profitMakeModel(modellist=model, psf=ExamplePSF, dim=c(1000,1000))$z
+
+ExampleImage = ExampleImage + rnorm(1e6, sd=1e-12)
+```
+
+First let us run a vanilla version of **profoundProFound** on this and see how we do:
+
+```{r, fig.width=8, fig.height=8}
+pro_out = profoundProFound(ExampleImage, deblend=TRUE, plot=TRUE)
+```
+
+Find the matching sources:
+
+```{r}
+pro_match = nn2(pro_out$segstats[,c("xcen", "ycen")], model_core[,c("xcen","ycen")],
+                searchtype='radius', radius=2)
+```
+
+```{r, fig.width=8}
+magplot(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"],
+        ylim=c(-0.2,0.2), xlab='True [mag]', ylab='ProFound - True [mag]')
+points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"],
+       col='red')
+legend('topleft', legend=c('Segment','De-blend'), col=c('black','red'), pch=1)
+```
+
+Now we will try the newer elliptical based routine in **ProFound**. Notice we still need various outputs from the standard run of **profoundProFound** to estimate a good de-blend solution. We could not supply the *rad_re* and the *wt*, but the solution would be much less good (try this yourself!).
+
+First, for fun, we ccan look at the weight map that is used internally with and without profile scaling:
+
+```{r, fig.width=8, fig.height=8}
+ellip_ref = pro_out$segstats[,c("flux", "xcen", "ycen", "R50", "R100",  "ang", "axrat")]
+
+magimage(ExampleImage) #for reference to see where profoundProFound is putting the apertures
+
+magimage(profoundEllipWeight(ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, dimx = 1000, dimy = 1000))
+
+magimage(profoundEllipWeight(ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, dimx = 1000, dimy = 1000, wt=ellip_ref$flux, rad_re=ellip_ref$R50))
+```
+
+```{r}
+ellip_flux_deblend =  profoundEllipFlux(ExampleImage, ellip_ref$xcen, ellip_ref$ycen,
+  ellip_ref$R100, ellip_ref$ang, ellip_ref$axrat, deblend=TRUE, wt=ellip_ref$flux, rad_re=ellip_ref$R50)
+ellip_mag_deblend = profoundFlux2Mag(ellip_flux_deblend)
+```
+
+Re the above routine, it is a very focussed Rcpp level function (basically all C code) that is highly optimised to do elliptical aperture photometry and de-blending. The original **profoundProFound** routine takes about 2-4 seconds to run even on multiple cores, whereas on a single core **profoundEllipFlux** takes about 0.1 seconds. It can also be run with full OpenMp threading if the **ProFound** package is built with OpenMP support (that is beyond the scope of this vignette, but there is a lot of information online about how to build **Rcpp** functions and packges with OpenMP threading).
+
+Now we can compare all three approaches to the ground truth:
+
+```{r, fig.width=8}
+magplot(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"],
+        ylim=c(-0.2,0.2), xlab='True [mag]', ylab='ProFound - True [mag]')
+points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"],
+       col='red')
+points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend[pro_match$nn.idx[,1]],
+       col='blue')
+legend('topleft', legend=c('Segment','Pro De-blend', 'Ellip De-blend'), col=c('black','red','blue'), pch=1)
+```
+
+Perhaps it is better to look at the 1D mag difference density directly:
+
+```{r, fig.width=8}
+magplot(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"]),
+        xlab='ProFound - True [mag]', ylab='PDF', xlim=c(-0.2,0.2), ylim=c(0,23))
+lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"]), col='red')
+lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend[pro_match$nn.idx[,1]]), col='blue')
+legend('topleft', legend=c('Segment','Pro De-blend', 'Ellip De-blend'), col=c('black','red','blue'), pch=1)
+```
+
+There is not a lot in it, but I would argue based on the above the newer Elliptical de-blending scheme does a little better than either the standard **profoundProFound** segment based scheme, or the 'fit' method of de-blending that is available within the function. So I guess that's the conclusion- use it if you want better de-blending.

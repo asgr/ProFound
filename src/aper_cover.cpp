@@ -98,6 +98,7 @@ NumericMatrix profoundAperWeight(NumericVector cx,
                                  int dimy = 100,
                                  NumericVector wt = NumericVector::create(1),
                                  NumericVector rad_re = NumericVector::create(0),
+                                 NumericVector nser = NumericVector::create(1),
                                  int depth = 3,
                                  int nthreads = 1) {
   
@@ -124,10 +125,17 @@ NumericMatrix profoundAperWeight(NumericVector cx,
     stop("Length of cx not equal to rad_re!");
   }
   
-  NumericVector rad_scale(n);
+  if(nser.size() == 1){
+    nser = NumericVector(n, nser[0]);
+  }
   
+  if(nser.size() != n){
+    stop("Length of cx not equal to nser!");
+  }
+  
+  NumericVector bn(n);
   for (int k = 0; k < n; ++k) {
-    rad_scale[k] = rad_re[k] / 1.678347;
+    bn[k] = 2*nser[k] - 1/3 + (4 / (405 * nser[k])); // use the bn approximation
   }
   
   NumericVector wt_use = NumericVector(n);
@@ -188,7 +196,7 @@ NumericMatrix profoundAperWeight(NumericVector cx,
                      rad_2, rad_min_2, rad_max_2, depth);
             }else{
               weight(i,j) += wt_use[k] * pixelCoverAper(delta_x, delta_y, delta_2,
-                     rad_2, rad_min_2, rad_max_2, depth) * exp(-sqrt(delta_2) / rad_scale[k]);
+                     rad_2, rad_min_2, rad_max_2, depth) * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k]));
             }
           }
         }
@@ -206,6 +214,7 @@ NumericVector profoundAperFlux(
                         NumericVector rad,
                         NumericVector wt = NumericVector::create(1),
                         NumericVector rad_re = NumericVector::create(0),
+                        NumericVector nser = NumericVector::create(1),
                         bool deblend = false,
                         int depth = 3,
                         int nthreads = 1) {
@@ -235,10 +244,9 @@ NumericVector profoundAperFlux(
     stop("Length of cx not equal to rad_re!");
   }
   
-  NumericVector rad_scale(n);
-  
+  NumericVector bn(n);
   for (int k = 0; k < n; ++k) {
-    rad_scale[k] = rad_re[k] / 1.678347;
+    bn[k] = 2*nser[k] - 1/3 + (4 / (405 * nser[k])); // use the bn approximation
   }
   
   NumericVector wt_use = NumericVector(n);
@@ -266,7 +274,7 @@ NumericVector profoundAperFlux(
   NumericMatrix weight;
   
   if(deblend){
-    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_re, depth, nthreads);
+    weight = profoundAperWeight(cx, cy, rad, dimx, dimy, wt, rad_re, nser, depth, nthreads);
   }
   
   #ifdef _OPENMP
@@ -311,7 +319,7 @@ NumericVector profoundAperFlux(
                   if(rad_re[k]== 0){
                     sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] / weight(i,j);
                   }else{
-                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k]  * exp(-sqrt(delta_2) / rad_scale[k]) / weight(i,j);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k]  * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k])) / weight(i,j);
                   }
                 }
               }else{
