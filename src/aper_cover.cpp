@@ -191,12 +191,12 @@ NumericMatrix profoundAperWeight(NumericVector cx,
           const double delta_y = j - cy_loc;
           if (std::abs(delta_y) < rad_plus) {
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
+            const double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
+                                                  rad_2, rad_min_2, rad_max_2, depth);
             if(rad_re[k] == 0){
-              weight(i,j) += wt_use[k] * pixelCoverAper(delta_x, delta_y, delta_2,
-                     rad_2, rad_min_2, rad_max_2, depth);
+              weight(i,j) += wt_use[k] * PC_temp;
             }else{
-              weight(i,j) += wt_use[k] * pixelCoverAper(delta_x, delta_y, delta_2,
-                     rad_2, rad_min_2, rad_max_2, depth) * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k]));
+              weight(i,j) += wt_use[k] * PC_temp * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k]));
             }
           }
         }
@@ -242,6 +242,14 @@ NumericVector profoundAperFlux(
   
   if(rad_re.size() != n){
     stop("Length of cx not equal to rad_re!");
+  }
+  
+  if(nser.size() == 1){
+    nser = NumericVector(n, nser[0]);
+  }
+  
+  if(nser.size() != n){
+    stop("Length of cx not equal to nser!");
   }
   
   NumericVector bn(n);
@@ -311,20 +319,19 @@ NumericVector profoundAperFlux(
             const double delta_y = j - cy_loc;
             if (std::abs(delta_y) < rad_plus) {
               const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
+              const double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
+                                                    rad_2, rad_min_2, rad_max_2, depth);
               if(deblend){
                 if(weight(i,j) > 0){
                   // need the rad_pow scaling stuff here!!!
-                  const double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
-                                                  rad_2, rad_min_2, rad_max_2, depth);
                   if(rad_re[k]== 0){
                     sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] / weight(i,j);
                   }else{
-                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k]  * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k])) / weight(i,j);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k])) / weight(i,j);
                   }
                 }
               }else{
-                sum += image(i, j)*pixelCoverAper(delta_x, delta_y, delta_2, rad_2,
-                             rad_min_2, rad_max_2, depth);
+                sum += image(i, j) * PC_temp;
               }
             }
           }
