@@ -29,7 +29,7 @@ In late 2025 I developed a new elliptical aperture routine built in **Rcpp** tha
 
 ## Resolved Data Example
 
-First let us make. a mock image where we have a ground truth for some reasonable looking galaxies. To do this we will use **ProFit**, one of the core **ProTools* software packages that is used for generating and fitting 2D light profiles of many sources.
+First let us make. a mock image where we have a ground truth for some reasonable looking galaxies. To do this we will use **ProFit**, one of the core \*\*ProTools\* software packages that is used for generating and fitting 2D light profiles of many sources.
 
 ```{r}
 ExamplePSF = profitMakePointSource()
@@ -76,7 +76,7 @@ pro_match = nn2(pro_out$segstats[,c("xcen", "ycen")], model_core[,c("xcen","ycen
                 searchtype='radius', radius=2)
 ```
 
-```{r, fig.width=8}
+```{r, fig.width=8, fig.height=6}
 magplot(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"],
         ylim=c(-0.2,0.2), xlab='True [mag]', ylab='ProFound - True [mag]')
 points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"],
@@ -110,7 +110,7 @@ Re the above routine, it is a very focussed Rcpp level function (basically all C
 
 Now we can compare all three approaches to the ground truth:
 
-```{r, fig.width=8}
+```{r, fig.width=8, fig.height=6}
 magplot(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"],
         ylim=c(-0.2,0.2), xlab='True [mag]', ylab='ProFound - True [mag]')
 points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"],
@@ -122,7 +122,7 @@ legend('topleft', legend=c('Segment','Pro De-blend', 'Ellip De-blend'), col=c('b
 
 Perhaps it is better to look at the 1D mag difference density directly:
 
-```{r, fig.width=8}
+```{r, fig.width=8, fig.height=6}
 magplot(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"]),
         xlab='ProFound - True [mag]', ylab='PDF', xlim=c(-0.2,0.2), ylim=c(0,23))
 lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"]), col='red')
@@ -162,7 +162,7 @@ points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,
 legend('topleft', legend=c('Ellip De-blend', 'Ellip De-blend Big'), col=c('blue','darkgreen'), pch=1)
 ```
 
-```{r, fig.width=8}
+```{r, fig.width=8, fig.height=6}
 magplot(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend[pro_match$nn.idx[,1]]),
         col='blue', xlab='ProFound - True [mag]', ylab='PDF', xlim=c(-0.2,0.2), ylim=c(0,23))
 lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend_big[pro_match$nn.idx[,1]]), col='darkgreen')
@@ -178,16 +178,22 @@ s250_im = Rfits_read_image(system.file("extdata", 'IRdata/s250_im.fits',
                                        package="ProFound"))
 s250_psf = Rfits_read_image(system.file("extdata",'IRdata/s250_psf.fits',
                                         package="ProFound"))$imDat
+s250_psf[s250_psf < 0.001] = 0
+s250_psf = s250_psf[41:61, 41:61]
 
-magzero_s250=11.68
+magzero_s250 = 11.68
 
-pro_s250=profoundProFound(s250_im, pixcut=1, skycut=2, ext=1, redosky=FALSE, iters=1,
+pro_s250 = profoundProFound(s250_im, pixcut=1, skycut=2.5, ext=1, redosky=FALSE, iters=1,
                           tolerance=0, sigma=0, magzero=magzero_s250)
-pro_s250$segstats=pro_s250$segstats[!is.na(pro_s250$segstats$mag),]
+pro_s250$segstats = pro_s250$segstats[!is.na(pro_s250$segstats$mag),]
 
-newmag=profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
-                         image=s250_im, psf=s250_psf, doProFound=TRUE, findextra=TRUE, verbose=TRUE, redosky=FALSE,
-                         magzero=magzero_s250)
+newmag = profoundFitMagPSF(RAcen=pro_s250$segstats$RAcen, Deccen=pro_s250$segstats$Deccen,
+                         image=s250_im, psf=s250_psf, doProFound=TRUE, findextra=TRUE,
+                         verbose=TRUE, redosky=FALSE, magzero=magzero_s250)
+```
+
+```{r, fig.width=8, fig.height=8}
+magimage(s250_im$imDat - newmag$finalmodel, qdiff=T)
 ```
 
 It is worth noting how similar a job we can do using the new **profoundAperFlux** function that makes use of profile based source de-blending.
@@ -195,8 +201,8 @@ It is worth noting how similar a job we can do using the new **profoundAperFlux*
 First we need to specifying some properties of the PSF:
 
 ```{r, fig.width=8, fig.height=8}
-R50 = 2 #Re in pixels
-R100 = 19 #Maximum radius to use for the apertures
+R50 = 1.7 #Re in pixels
+R100 = 5 #Maximum radius to use for the apertures
 
 magimage(s250_im$imDat, qdiff=TRUE)
 
@@ -208,9 +214,7 @@ magimage(profoundAperWeight(newmag$psfstats$xcen, newmag$psfstats$ycen,
 ```
 
 ```{r}
-#The above FitMagPSF fit suggests a sky pedestal should be added to the image:
-
-sky = sum(newmag$image - newmag$finalmodel)/(120^2)
+sky = sum(s250_im$imDat - newmag$finalmodel)/(120^2)
 
 newflux_db = profoundAperFlux(s250_im$imDat - sky, newmag$psfstats$xcen, newmag$psfstats$ycen,
   R100, deblend=TRUE)
@@ -227,6 +231,23 @@ newflux_wt = profoundAperFlux(s250_im$imDat - sky, newmag$psfstats$xcen, newmag$
 newmag_wt = profoundFlux2Mag(newflux_wt, magzero=magzero_s250)
 ```
 
-```{r}
-magplot(newmag$psfstats$mag, newmag$psfstats$mag - newmag_wt, xlim=c(11,18), ylim=c(-2,2))
+And now we can compare how it looks:
+
+```{r, fig.width=8, fig.height=6}
+magplot(newmag$psfstats$mag, newmag$psfstats$mag - newmag_wt, xlim=c(11,17), ylim=c(-2,2),
+        xlab='FitMagPSF [mag]', ylab='PSF - DB [mag]')
 ```
+
+We can even make a reasonable difference image using the weight map:
+
+```{r, fig.width=8, fig.height=8}
+magimage(s250_im$imDat, qdiff=TRUE)
+
+magimage(profoundAperWeight(newmag$psfstats$xcen, newmag$psfstats$ycen,
+  R100, dimx = 120, dimy = 120, rad_re=R50, nser=0.5, wt=newflux_wt))
+
+magimage(s250_im$imDat - profoundAperWeight(newmag$psfstats$xcen, newmag$psfstats$ycen,
+  R100, dimx = 120, dimy = 120, rad_re=R50, nser=0.5, wt=newflux_wt/3), qdiff=TRUE)
+```
+
+Where the new **profoundAperFlux** function could be advantageous is when you have a mixture of resolved and unresolved sources in your image. The pure PSF modelling **profoundFitMagPSF** cannot properly account for partially resolved sources, and in general they will be biased to having erroneously low flux.
