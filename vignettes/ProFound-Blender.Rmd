@@ -154,7 +154,7 @@ ellip_mag_deblend_big = profoundFlux2Mag(ellip_flux_deblend_big)
 
 Overall the performance of the larger apertures is very similar:
 
-```{r}
+```{r, fig.width=8, fig.height=6}
 magplot(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend[pro_match$nn.idx[,1]],
         xlim=c(15,21), ylim=c(-0.2,0.2), col='blue', xlab='ProFound - True [mag]', ylab='PDF')
 points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend_big[pro_match$nn.idx[,1]],
