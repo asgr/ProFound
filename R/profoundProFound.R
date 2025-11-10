@@ -340,7 +340,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
     #objects_redo = profoundMakeSegimDilate(segim=objects, mask=mask, size=redoskysize, shape=shape, sky=sky, verbose=verbose, plot=FALSE, stats=FALSE, rotstats=FALSE)$objects
     objects_redo = profoundDilate(segim=objects, size=redoskysize, shape=shape, nthreads=nthreads)
     if(!is.null(mask)){
-      objects_redo[mask!=0] = 0
+      objects_redo[mask!=0] = 0L
     }
     
     if(redosky){
