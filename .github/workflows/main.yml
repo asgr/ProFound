@@ -48,6 +48,7 @@ jobs:
           remotes::install_cran("rcmdcheck")
           remotes::install_github("asgr/Rwcs", ref="master")
           remotes::install_github("asgr/Rfits", ref="master")
+          remotes::install_github("ICRAR/ProFit", ref="master")
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
