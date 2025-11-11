@@ -44,6 +44,7 @@ jobs:
           install.packages('hdf5r')
           install.packages('knitr')
           install.packages('rmarkdown')
+          install.packages('imager')
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
           remotes::install_github("asgr/Rwcs", ref="master")
