@@ -44,12 +44,12 @@ jobs:
           install.packages('hdf5r')
           install.packages('knitr')
           install.packages('rmarkdown')
+          remotes::install_github("asgr/imager", ref="low-depend") #to make sure we have the easy to install one, not CRAN
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
           remotes::install_github("asgr/Rwcs", ref="master")
           remotes::install_github("asgr/Rfits", ref="master")
           remotes::install_github("ICRAR/ProFit", ref="master")
-          remotes::install_github("asgr/imager", ref="low-depend")
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
