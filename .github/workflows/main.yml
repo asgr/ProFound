@@ -50,6 +50,7 @@ jobs:
           install.packages('hdf5r')
           install.packages('knitr')
           install.packages('rmarkdown')
+          install.packages('igraph')
           remotes::install_github("asgr/imager", ref="low-depend") #to make sure we have the easy to install one, not CRAN
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
