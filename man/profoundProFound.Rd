@@ -389,11 +389,11 @@ profound = profoundProFound(image, magzero=30, verbose=TRUE, plot=TRUE)
 # You can check to see if the final objects mask is aggressive enough. Notice the halos
 # surrounding bright sources when just using the objects mask.
 
-temp=image$imDat
-temp[profound$objects>0]=0
+temp = image$imDat
+temp[profound$objects > 0] = 0
 magimage(temp)
-temp=image$imDat
-temp[profound$objects_redo>0]=0
+temp = image$imDat
+temp[profound$objects_redo > 0] = 0
 magimage(temp)
 
 magplot(profound$segstats[,c("R50","SB_N90")], log='x', grid=TRUE)

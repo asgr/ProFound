@@ -247,8 +247,8 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
         if(!is.null(mask)){
           imagescale[mask!=0] = 0
         }
-        segim[imagescale==0] = 0
-        objects[segim==0] = 0
+        segim[imagescale==0] = 0L
+        objects[segim==0] = 0L
         rm(imagescale)
       }
     }else{
@@ -274,7 +274,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       segim_orig = segim
       expand_segID = segstats[,'segID']
       SBlast = rep(Inf,length(expand_segID))
-      selseg = rep(0,length(expand_segID))
+      selseg = rep(0L,length(expand_segID))
       
       if(is.null(SBdilate)){
         SBdilate = Inf

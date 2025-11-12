@@ -11,7 +11,7 @@ vignette: >
 
 ## Introduction to ProFound Functions
 
-The **ProFound** source finding and image utilites suite covers the following functions:
+The **ProFound** source finding and image utilities suite covers the following functions:
 
 ### Very High Level
 
@@ -22,7 +22,7 @@ The **ProFound** source finding and image utilites suite covers the following fu
 - profoundMakeSegim: Watershed image segmentation
 - profoundMakeSkyGrid: Calculate smoothed (e.g. bicubic) sky maps
 - profoundSkyEst: Sky estimator using circular annuli (robust to bright central extended sources)
-
+- profoundAperPhot: Extract circular photometry using images with segmentation maps
 
 ### Mid Level
 
@@ -42,6 +42,8 @@ The **ProFound** source finding and image utilites suite covers the following fu
 - profoundSegimPlot: Image segmentation plots
 - profoundSegimStats: Image segmentation statistics (e.g. flux, apertures etc)
 - profoundSkyEstLoc: Local sky estimator using source clipping
+- profoundAperFlux: Extract circular aperture photometry directly
+- profoundEllipFlux: Extract circular aperture photometry directly
 
 ### Low Level
 
@@ -59,6 +61,8 @@ The **ProFound** source finding and image utilites suite covers the following fu
 - profoundMag2Mu: Convert from magnitude to central surface brightness
 - profoundMu2Mag: Convert from central surface brightness to magnitude
 - profoundSB2Flux: Convert from surface brightness to flux
+- profoundAperCover: Create circular aperture coverage maps
+- profoundEllipCover: Create elliptical aperture coverage maps
 
 ## Basic ProFound Usage
 
