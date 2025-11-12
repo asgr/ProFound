@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 evalglobal=FALSE
 ```
 
-```{r, eval=evalglobal}
+```{r}
 library(ProFound)
 library(ProFit)
 library(RANN)

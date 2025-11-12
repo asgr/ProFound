@@ -121,7 +121,6 @@ Aaron Robotham
 \code{\link{profoundEllipseSeg}}
 }
 \examples{
-\dontrun{
 image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
 package="ProFound"))$imDat
 
@@ -146,7 +145,6 @@ poly = data.frame(RA = c(352.2922, 352.2958, 352.2954, 352.2904, 352.2870, 352.2
        )
 
 mask_coord = profoundDrawMask(image, poly=poly, mode='apply', type='coord')
-}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
