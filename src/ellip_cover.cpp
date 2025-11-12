@@ -263,6 +263,7 @@ NumericVector profoundEllipFlux(NumericMatrix image,
                          NumericVector nser = NumericVector::create(1),
                          bool deblend = false,
                          int depth = 3,
+                         int iterations = 0,
                          int nthreads = 1) {
   int dimx = image.nrow();
   int dimy = image.ncol();
@@ -426,5 +427,12 @@ NumericVector profoundEllipFlux(NumericMatrix image,
     }
     result[k] = sum;
   }
-  return result;
+  
+  if(deblend == false || iterations == 0){
+    return result; 
+  }else{
+    result = profoundEllipFlux(image, cx, cy, rad, ang, axrat, result, rad_re,
+      nser, deblend, depth, iterations - 1, nthreads);
+    return result;
+  }
 }

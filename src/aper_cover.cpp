@@ -217,6 +217,7 @@ NumericVector profoundAperFlux(
                         NumericVector nser = NumericVector::create(1),
                         bool deblend = false,
                         int depth = 3,
+                        int iterations = 0,
                         int nthreads = 1) {
   int dimx = image.nrow();
   int dimy = image.ncol();
@@ -340,5 +341,11 @@ NumericVector profoundAperFlux(
     }
     result[k] = sum;
   }
-  return result;
+  
+  if(deblend == false || iterations == 0){
+    return result; 
+  }else{
+    result = profoundAperFlux(image, cx, cy, rad, result, rad_re, nser, deblend, depth, iterations - 1, nthreads);
+    return result;
+  }
 }

@@ -22,10 +22,10 @@ profoundEllipCover(x, y, cx, cy, rad, ang = 0, axrat = 1, depth = 3L, nthreads =
 profoundPolyCover(x, y, poly_x, poly_y, depth = 3L, nthreads = 1L)
 
 profoundAperFlux(image, cx, cy, rad, wt = as.numeric(c(1)), rad_re = as.numeric(c(0)),
-  nser = as.numeric(c(1)), deblend = FALSE, depth = 3L, nthreads = 1L)
+  nser = as.numeric(c(1)), deblend = FALSE, depth = 3L, iterations = 0L, nthreads = 1L)
 profoundEllipFlux(image, cx, cy, rad, ang = as.numeric(c(0)), axrat = as.numeric(c(1)),
   wt = as.numeric(c(1)), rad_re = as.numeric(c(0)), nser = as.numeric(c(1)),
-  deblend = FALSE, depth = 3L, nthreads = 1L)
+  deblend = FALSE, depth = 3L, iterations = 0L, nthreads = 1L)
 profoundPolyFlux(image, poly_x, poly_y, depth = 3L, nthreads = 1L)
 profoundSegimFlux(image, segim, nthreads = 1L)
 
@@ -90,6 +90,9 @@ Logical; should an internal weight map (made via the associated Weight functions
 }
   \item{depth}{
 Integer scalar; the recursion depth to use. Depth 3 (default) is a good trade off of accuracy and speed (see Examples), with 4 probably being as high as you would want to set it for a typical ues-case.
+}
+  \item{iterations}{
+Integer scalar; the number of additional cycles of photometry to run, where the input \option{wt} for each new iteration is the flux output of the previous one. Leaving as 0 mean the \option{wt} originally provided will be uses. Generally flux looks pretty well converged by \option{iterations} = 3.
 }
   \item{nthreads}{
 Integer scalar; the number of CPU threads to run on. Only valid if \code{ProFound} is built with OpenMP support.

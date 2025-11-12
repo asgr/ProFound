@@ -37,7 +37,7 @@ In late 2025 I developed a new elliptical aperture routine built in **Rcpp** tha
 First let us make. a mock image where we have a ground truth for some reasonable looking galaxies. To do this we will use **ProFit**, one of the core \*\*ProTools\* software packages that is used for generating and fitting 2D light profiles of many sources.
 
 ```{r, eval=evalglobal}
-ExamplePSF = profitMakePointSource()
+ExamplePSF = profitMakeGaussianPSF()
 
 set.seed(1)
 model = list(
@@ -117,7 +117,7 @@ Now we can compare all three approaches to the ground truth:
 
 ```{r, fig.width=8, fig.height=6, eval=evalglobal}
 magplot(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"],
-        ylim=c(-0.2,0.2), xlab='True [mag]', ylab='ProFound - True [mag]')
+        ylim=c(-0.2,0.2), xlab='True [mag]', ylab='True - ProFound [mag]')
 points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"],
        col='red')
 points(model_core[pro_match$nn.idx[,1] > 0,"mag"], model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend[pro_match$nn.idx[,1]],
@@ -129,7 +129,7 @@ Perhaps it is better to look at the 1D mag difference density directly:
 
 ```{r, fig.width=8, fig.height=6, eval=evalglobal}
 magplot(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag"]),
-        xlab='ProFound - True [mag]', ylab='PDF', xlim=c(-0.2,0.2), ylim=c(0,23))
+        xlab='True - ProFound[mag]', ylab='PDF', xlim=c(-0.2,0.2), ylim=c(0,23))
 lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - pro_out$segstats[pro_match$nn.idx[,1],"mag_db"]), col='red')
 lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend[pro_match$nn.idx[,1]]), col='blue')
 legend('topleft', legend=c('Segment','Pro De-blend', 'Ellip De-blend'), col=c('black','red','blue'), pch=1)
@@ -174,7 +174,9 @@ lines(density(model_core[pro_match$nn.idx[,1] > 0,"mag"] - ellip_mag_deblend_big
 legend('topleft', legend=c('Ellip De-blend', 'Ellip De-blend Big'), col=c('blue','darkgreen'), pch=1)
 ```
 
-## Unresolved Data Example
+## Unresolved Data Examples
+
+### FitMagPSF Example Data
 
 When fitting totally unresolved data, **ProFound** already comes with **profoundFitMagPSF**. This correctly deblends flux into objects using the known PSF of the image.
 
@@ -256,3 +258,78 @@ magimage(s250_im$imDat - profoundAperWeight(newmag$psfstats$xcen, newmag$psfstat
 ```
 
 Where the new **profoundAperFlux** function could be advantageous is when you have a mixture of resolved and unresolved sources in your image. The pure PSF modelling **profoundFitMagPSF** cannot properly account for partially resolved sources, and in general they will be biased to having erroneously low flux.
+
+### Mock Data
+
+Now we are going to create a crowded unresolved field that normally we would use **profoundFitMagPSF** on, but use our new aperture photometry and deblending code, where we how have a ground-truth to compare to.
+
+```{r, eval=evalglobal}
+set.seed(1)
+model = list(
+  pointsource = list(
+    xcen = runif(800, 10, 190),
+    ycen = runif(800, 10, 190),
+    mag = runif(800, 15, 20)
+  )
+)
+
+model_core = data.frame(xcen = model$pointsource$xcen,
+                        ycen = model$pointsource$ycen,
+                        mag = model$pointsource$mag
+                        )
+
+ExampleImage = profitMakeModel(modellist=model, psf=s250_psf, dim=c(200,200))$z
+
+ExampleImage = ExampleImage + rnorm(200^2, sd=1e-8)
+```
+
+Let's take a look:
+
+```{r, fig.width=8, fig.height=8, eval=evalglobal}
+magimage(ExampleImage)
+```
+
+Great, looks nice and confusing :-D
+
+We are going to assume a best case scenario that somehow we know where the sources are, and we will run **profoundFitMagPSF** and **profoundAperFlux** at these positions:
+
+```{r, eval=evalglobal}
+mag_FitMag = profoundFitMagPSF(xcen=model_core$xcen, ycen=model_core$ycen,
+               im_sigma=matrix(1e-8, 200, 200), image=ExampleImage, psf=s250_psf,
+               verbose=TRUE, redosky=FALSE)
+```
+
+Notice rad_re below is the approximate value for the PSF used in this work (so replace as appropriate). Our starting point for the weight map looks like this:
+
+```{r, fig.width=8, fig.height=8, eval=evalglobal}
+wtmap = profoundAperWeight(cx=model_core$xcen, cy=model_core$ycen, rad=5, rad_re=1.7,
+                           dimx=200, dimy=200)
+magimage(wtmap)
+```
+
+```{r, eval=evalglobal}
+flux_AperFlux = profoundAperFlux(ExampleImage, cx=model_core$xcen, cy=model_core$ycen,
+                                rad=5, rad_re=1.7, deblend=TRUE, iterations=5)
+mag_AperFlux = profoundFlux2Mag(flux_AperFlux)
+```
+
+How do they compare to the ground truth?
+
+```{r, fig.width=8, fig.height=6, eval=evalglobal}
+magplot(model_core$mag, model_core$mag - mag_FitMag$psfstats$mag, asp=1, xlim=c(15,20),
+        ylim=c(-2,2), xlab='True [mag]', ylab='True - Measure [mag]')
+points(model_core$mag, model_core$mag - mag_AperFlux, col='red')
+legend('topleft', legend=c('FitMagPDF', 'AperFlux'), col=c('black', 'red'), pch=1)
+```
+
+And as density plots:
+
+```{r, fig.width=8, fig.height=6, eval=evalglobal}
+magplot(density(model_core$mag - mag_FitMag$psfstats$mag, na.rm=TRUE), xlab='True - Measure [mag]', ylab='PDF', xlim=c(-2,2), ylim=c(0,1.3))
+lines(density(model_core$mag - mag_AperFlux, na.rm=TRUE), col='red')
+legend('topleft', legend=c('FitMagPDF', 'AperFlux'), col=c('black','red'), pch=1)
+```
+
+So a full **profoundFitMagPSF** produces better photometry (as we should expect), but we get fairly similar performance from **profoundAperFlux**. It is also *much* faster to run (about x10), so in certain use cases that might be th deciding factor. **profoundAperFlux** is also a very low level function (literally Rcpp code) so it lacks some of the friendly features we often expect, and it does not produce native error for the fluxes. For aperture errors you often do best throwing down random apertures in any case, based on the emptiest positions in the **profoundAperWeight** map.
+
+The example above was a bit artificial in that we pretended we knew the positions of the sources, but that's not too far from the truth in many cases. We often have very deep NIR data when we also have confused and unresolved FIT data, and the former is a very good starting point for the later.

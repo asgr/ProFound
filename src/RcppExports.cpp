@@ -74,8 +74,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundAperFlux
-NumericVector profoundAperFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector wt, NumericVector rad_re, NumericVector nser, bool deblend, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundAperFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP nserSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericVector profoundAperFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector wt, NumericVector rad_re, NumericVector nser, bool deblend, int depth, int iterations, int nthreads);
+RcppExport SEXP _ProFound_profoundAperFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP nserSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP iterationsSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,8 +88,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type nser(nserSEXP);
     Rcpp::traits::input_parameter< bool >::type deblend(deblendSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
+    Rcpp::traits::input_parameter< int >::type iterations(iterationsSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundAperFlux(image, cx, cy, rad, wt, rad_re, nser, deblend, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundAperFlux(image, cx, cy, rad, wt, rad_re, nser, deblend, depth, iterations, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -149,8 +150,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // profoundEllipFlux
-NumericVector profoundEllipFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector ang, NumericVector axrat, NumericVector wt, NumericVector rad_re, NumericVector nser, bool deblend, int depth, int nthreads);
-RcppExport SEXP _ProFound_profoundEllipFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP nserSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP nthreadsSEXP) {
+NumericVector profoundEllipFlux(NumericMatrix image, NumericVector cx, NumericVector cy, NumericVector rad, NumericVector ang, NumericVector axrat, NumericVector wt, NumericVector rad_re, NumericVector nser, bool deblend, int depth, int iterations, int nthreads);
+RcppExport SEXP _ProFound_profoundEllipFlux(SEXP imageSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP radSEXP, SEXP angSEXP, SEXP axratSEXP, SEXP wtSEXP, SEXP rad_reSEXP, SEXP nserSEXP, SEXP deblendSEXP, SEXP depthSEXP, SEXP iterationsSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -165,8 +166,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type nser(nserSEXP);
     Rcpp::traits::input_parameter< bool >::type deblend(deblendSEXP);
     Rcpp::traits::input_parameter< int >::type depth(depthSEXP);
+    Rcpp::traits::input_parameter< int >::type iterations(iterationsSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(profoundEllipFlux(image, cx, cy, rad, ang, axrat, wt, rad_re, nser, deblend, depth, nthreads));
+    rcpp_result_gen = Rcpp::wrap(profoundEllipFlux(image, cx, cy, rad, ang, axrat, wt, rad_re, nser, deblend, depth, iterations, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -356,11 +358,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ProFound_interpolateLinearGrid", (DL_FUNC) &_ProFound_interpolateLinearGrid, 4},
     {"_ProFound_profoundAperCover", (DL_FUNC) &_ProFound_profoundAperCover, 7},
     {"_ProFound_profoundAperWeight", (DL_FUNC) &_ProFound_profoundAperWeight, 10},
-    {"_ProFound_profoundAperFlux", (DL_FUNC) &_ProFound_profoundAperFlux, 10},
+    {"_ProFound_profoundAperFlux", (DL_FUNC) &_ProFound_profoundAperFlux, 11},
     {"_ProFound_dilate_cpp", (DL_FUNC) &_ProFound_dilate_cpp, 4},
     {"_ProFound_profoundEllipCover", (DL_FUNC) &_ProFound_profoundEllipCover, 9},
     {"_ProFound_profoundEllipWeight", (DL_FUNC) &_ProFound_profoundEllipWeight, 12},
-    {"_ProFound_profoundEllipFlux", (DL_FUNC) &_ProFound_profoundEllipFlux, 12},
+    {"_ProFound_profoundEllipFlux", (DL_FUNC) &_ProFound_profoundEllipFlux, 13},
     {"_ProFound_profoundPolyCover", (DL_FUNC) &_ProFound_profoundPolyCover, 6},
     {"_ProFound_profoundPolyFlux", (DL_FUNC) &_ProFound_profoundPolyFlux, 5},
     {"_ProFound_Cadacs_MakeSkyGrid", (DL_FUNC) &_ProFound_Cadacs_MakeSkyGrid, 19},

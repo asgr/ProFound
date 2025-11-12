@@ -24,8 +24,8 @@ profoundAperWeight <- function(cx, cy, rad, dimx = 100L, dimy = 100L, wt = as.nu
     .Call(`_ProFound_profoundAperWeight`, cx, cy, rad, dimx, dimy, wt, rad_re, nser, depth, nthreads)
 }
 
-profoundAperFlux <- function(image, cx, cy, rad, wt = as.numeric( c(1)), rad_re = as.numeric( c(0)), nser = as.numeric( c(1)), deblend = FALSE, depth = 3L, nthreads = 1L) {
-    .Call(`_ProFound_profoundAperFlux`, image, cx, cy, rad, wt, rad_re, nser, deblend, depth, nthreads)
+profoundAperFlux <- function(image, cx, cy, rad, wt = as.numeric( c(1)), rad_re = as.numeric( c(0)), nser = as.numeric( c(1)), deblend = FALSE, depth = 3L, iterations = 0L, nthreads = 1L) {
+    .Call(`_ProFound_profoundAperFlux`, image, cx, cy, rad, wt, rad_re, nser, deblend, depth, iterations, nthreads)
 }
 
 .dilate_cpp <- function(segim, kern, expand = 0L, nthreads = 1L) {
@@ -40,8 +40,8 @@ profoundEllipWeight <- function(cx, cy, rad, ang = as.numeric( c(0)), axrat = as
     .Call(`_ProFound_profoundEllipWeight`, cx, cy, rad, ang, axrat, dimx, dimy, wt, rad_re, nser, depth, nthreads)
 }
 
-profoundEllipFlux <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), wt = as.numeric( c(1)), rad_re = as.numeric( c(0)), nser = as.numeric( c(1)), deblend = FALSE, depth = 3L, nthreads = 1L) {
-    .Call(`_ProFound_profoundEllipFlux`, image, cx, cy, rad, ang, axrat, wt, rad_re, nser, deblend, depth, nthreads)
+profoundEllipFlux <- function(image, cx, cy, rad, ang = as.numeric( c(0)), axrat = as.numeric( c(1)), wt = as.numeric( c(1)), rad_re = as.numeric( c(0)), nser = as.numeric( c(1)), deblend = FALSE, depth = 3L, iterations = 0L, nthreads = 1L) {
+    .Call(`_ProFound_profoundEllipFlux`, image, cx, cy, rad, ang, axrat, wt, rad_re, nser, deblend, depth, iterations, nthreads)
 }
 
 profoundPolyCover <- function(x, y, poly_x, poly_y, depth = 3L, nthreads = 1L) {
