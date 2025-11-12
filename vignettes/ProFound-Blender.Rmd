@@ -25,6 +25,7 @@ library(ProFound)
 library(ProFit)
 library(RANN)
 library(magicaxis)
+library(imager)
 ```
 
 Over the years **ProFound** has developed a few distinct and competing approaches to source de-blending. The core **profoundProFound** function contains a few different options to achieve this (see the *deblendtype* argument options), but here we will use the "fit" mode that attempts to fit a simple profile to each blended object and use the approximate profile as a de-blending kernel. This has been present in **ProFoun** for many years, but is rarely used in practice (perhaps people just do not know the option is there?) In practice, as we shall see, it is often not much better than the watershed based de-blending scheme we use in the base function, even though the latter creates hard de-blending boundaries and does not share the flux of a pixel between segments. This seems surprising, but is a natural consequence of what the saddle point in flux usually represents.
