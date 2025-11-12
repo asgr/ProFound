@@ -44,18 +44,20 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::rcmdcheck,
+            github::asgr/Rwcs@master,
+            github::asgr/Rfits@master,
+            github::ICRAR/ProFit@master,
+            any::hdf5r,
+            any::knitr,
+            any::rmarkdown,
+            any::imager
+
       - name: Install dependencies
         run: |
-          install.packages('remotes')
-          install.packages('hdf5r')
-          install.packages('knitr')
-          install.packages('rmarkdown')
-          install.packages('imager')
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
-          remotes::install_github("asgr/Rwcs", ref="master")
-          remotes::install_github("asgr/Rfits", ref="master")
-          remotes::install_github("ICRAR/ProFit", ref="master")
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
