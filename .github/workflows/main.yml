@@ -35,20 +35,7 @@ jobs:
         run: |
           brew update
           brew install --cask xquartz
-        
-      - name: Install X11 on Ubuntu
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            xorg \
-            xvfb \
-            libx11-dev \
-            libxext-dev \
-            libxrender-dev \
-            libxtst-dev \
-            libxi-dev
-            
+
       - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r@v2
@@ -57,19 +44,20 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::rcmdcheck,
+            github::asgr/Rwcs@master,
+            github::asgr/Rfits@master,
+            github::ICRAR/ProFit@master,
+            any::hdf5r,
+            any::knitr,
+            any::rmarkdown,
+            any::imager
+
       - name: Install dependencies
         run: |
-          install.packages('remotes')
-          install.packages('hdf5r')
-          install.packages('knitr')
-          install.packages('rmarkdown')
-          install.packages('igraph')
-          remotes::install_github("asgr/imager", ref="low-depend") #to make sure we have the easy to install one, not CRAN
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
-          remotes::install_github("asgr/Rwcs", ref="master")
-          remotes::install_github("asgr/Rfits", ref="master")
-          remotes::install_github("ICRAR/ProFit", ref="master")
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
