@@ -1,10 +1,13 @@
 .meanwt=function(x=NULL, wt=NULL){
-  if(is.null(wt) | length(wt)==1){
-    return(invisible(sum(x, na.rm=TRUE)/length(x)))
-  }else if(all(wt==wt[1], na.rm=TRUE)){
-    wt[]=1L
+  if(all(is.na(wt))){
+    return(mean(x, na.rm=TRUE))
   }
-  wt[wt<0]=0
+  if(is.null(wt) | length(wt)==1){
+    return(invisible(sum(x, na.rm=TRUE)/length(x[!is.na(x)])))
+  }else if(all(wt==wt[1], na.rm=TRUE)){
+    wt[] = 1
+  }
+  wt[wt < 0] = 0
   return(invisible(sum(x*wt, na.rm=TRUE)/sum(wt, na.rm=TRUE)))
 }
 
@@ -682,14 +685,16 @@ profoundSegimStats=function(image=NULL, segim=NULL, mask=NULL, sky=NULL, skyRMS=
     }
   }
   
+  Napp = NA
+  Rapp = NA
+  Aapp = NA
+  
   if(!is.na(app_diam)){
-    Rapp = (app_diam / 2 / pixscale)
-    Napp = ceiling(pi * Rapp^2)
-    Aapp = (pi * Rapp^2)
-  }else{
-    Napp = NA
-    Rapp = NA
-    Aapp = NA
+    if(app_diam > 0){
+      Rapp = (app_diam / 2 / pixscale)
+      Napp = ceiling(pi * Rapp^2)
+      Aapp = (pi * Rapp^2)
+    }
   }
   
   if(!is.null(sky)){

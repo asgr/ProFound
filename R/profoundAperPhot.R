@@ -1,4 +1,8 @@
 .fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='mean', depth=4){
+  if(all(is.na(flux))){
+    return(list(flux_app=NA, N_app=0, flux_min=NA))
+  }
+  
   if(is.na(xcen)){
     if(centype == 'wt' | centype == 'mean'){
       xcen = .meanwt(x, flux)
