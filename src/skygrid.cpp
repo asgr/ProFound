@@ -355,11 +355,11 @@ double Cadacs_mode(Rcpp::NumericVector x) {
   std::vector<double> myx (iiix, iiix+size);
   double min=std::numeric_limits<double>::max();
   double max=std::numeric_limits<double>::min();
-  int non_null_sample_count=0;
+  //int non_null_sample_count=0; not needed?
   for (int i=0;i<size;i++)
   {
     if (!std::isnan(myx[i])) {
-      non_null_sample_count++;
+      //non_null_sample_count++;
       min = std::min(min,myx[i]);
       max = std::max(max,myx[i]);
     }

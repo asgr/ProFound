@@ -1,6 +1,6 @@
 .fluxcalcapp = function(x=NULL, y=NULL, flux=NULL, xcen=NA, ycen=NA, rad_app=NULL, centype='mean', depth=4){
   if(all(is.na(flux))){
-    return(list(flux_app=NA, N_app=0, flux_min=NA))
+    return(list(flux_app=NA_real_, N_app=0, flux_min=NA_real_))
   }
   
   if(is.na(xcen)){
