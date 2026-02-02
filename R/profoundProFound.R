@@ -343,7 +343,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
       objects_redo[mask!=0] = 0L
     }
     
-    if(redosky){
+    if(redosky & any(mask == 0L)){
       if(redoskysize %% 2 == 0){redoskysize=redoskysize+1}
       if(verbose){message(paste('Doing final aggressive dilation -',round(proc.time()[3]-timestart,3),'sec'))}
       
