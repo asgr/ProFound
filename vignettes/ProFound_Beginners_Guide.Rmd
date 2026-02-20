@@ -1,0 +1,262 @@
+---
+title: "ProFound: Beginner's Guide"
+author: "ProFound Package"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ProFound: Beginner's Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = TRUE,
+  fig.width = 7,
+  fig.height = 7
+)
+```
+
+## What is ProFound?
+
+ProFound is an R package designed to **automatically detect and extract astronomical objects from images**. If you have an image (like a telescope observation), ProFound can:
+
+- Find all the stars, galaxies, or other objects in the image
+- Determine their locations and sizes
+- Measure their brightness
+- Separate overlapping objects
+- Create a catalogue you can analyse further
+
+Think of it as a "find all the things in this picture" tool, with sophisticated algorithms to handle real astronomical data.
+
+## When Would You Use ProFound?
+
+Typical use cases:
+
+- **Photometry**: Measuring the brightness of stars or galaxies
+- **Source catalogues**: Creating a list of all objects detected in a survey
+- **Image analysis**: Understanding what's in your astronomical images
+- **Pre-processing**: Preparing data before further analysis (like spectroscopy)
+
+## The Main Function: `profoundProFound()`
+
+The core of ProFound is the `profoundProFound()` function. Most of the time, this is the only function you need to know about.
+
+### Basic Usage
+
+The simplest form requires just an image:
+
+```{r eval=FALSE}
+library(ProFound)
+
+# Run ProFound on an image
+result <- profoundProFound(image = my_image)
+```
+
+That's it! ProFound will:
+1. Estimate the background sky level
+2. Find connected regions above a threshold
+3. Clean up the detections
+4. Measure properties of each object
+5. Return a list with all the results
+
+### What Do You Need to Input?
+
+**The image:**
+- Must be a 2D matrix or array of pixel values
+- Typically read from a FITS file (use `Rfits_read_image()` from the `Rfits` package)
+- Can be from any telescope or camera
+
+```{r eval=FALSE}
+library(Rfits)
+
+# Read a FITS file
+fits_data <- Rfits_read_image("my_observation.fits")
+
+# Run ProFound
+result <- profoundProFound(image = image)
+```
+
+### Key Output: The Catalog
+
+The most useful output is `result$segstats`, a data frame containing detected objects and various useful properties, including:
+
+- `segID`: Unique ID for each object
+- `x`, `y`: Centre position (in pixels)
+- `N100`: Number of pixels in the object
+- `flux`: Total brightness (in ADU or counts)
+- `mag`: Magnitude (if `magzero` is set properly this will be in AB mag)
+- `R50`: Size of the object (radius containg 50% of the flux)
+
+```{r eval=FALSE}
+# View the catalog
+head(result$segstats)
+
+# Access specific objects
+bright_objects = result$cat[result$cat$segstats$flux > 1000, ]
+```
+
+## Common Parameters Explained
+
+ProFound has many parameters, but most have sensible defaults. Here are the ones you might adjust:
+
+### `skycut` and `pixcut`
+
+These control how aggressively ProFound detects objects:
+
+- **`skycut`** (default: 1.5): Detected objects must be this many times the sky noise above the background
+- **`pixcut`** (default: 3): Minimum number of connected pixels to count as an object
+
+*Lower values* = more detections (including fainter objects and noise)  
+*Higher values* = fewer detections (only brightest objects)
+
+```{r eval=FALSE}
+# Detect fainter objects
+result_faint <- profoundProFound(image, skycut = 1, pixcut = 2)
+
+# Detect only bright objects
+result_bright <- profoundProFound(image, skycut = 3, pixcut = 5)
+```
+
+### `magzero`
+
+By default, ProFound reports brightness in raw counts (ADU). To convert to magnitudes:
+
+```{r eval=FALSE}
+# Tell ProFound the AB magnitude of a reference zero point
+result <- profoundProFound(image, magzero = 25)  # Example: 25 mag zero point
+# Now result$cat$segstats will be in AB magnitudes
+```
+
+### `mask`
+
+If certain parts of your image are bad (cosmic rays, detector artifacts), provide a mask:
+
+```{r eval=FALSE}
+# Create a mask: TRUE for good pixels, FALSE for bad pixels
+bad_pixels <- image$imDat < -100  # Example: very negative pixels are bad
+
+result <- profoundProFound(image, mask = bad_pixels)
+# ProFound will ignore bad pixels
+```
+
+### `gain` and `pixscale`
+
+For more accurate measurements:
+
+```{r eval=FALSE}
+# Tell ProFound the AB magnitude of a reference zero point
+# gain: electrons per ADU (from your detector specs)
+# pixscale: arcseconds per pixel (from your telescope/camera)
+result <- profoundProFound(image, magzero = 25, gain = 2.5, pixscale = 0.5)
+```
+
+## A Complete Example
+
+```{r}
+library(ProFound)
+library(Rfits)
+
+# 1. Read your image
+image = Rfits_read_image(system.file("extdata", 'VIKING/mystery_VIKING_Z.fits',
+  package="ProFound"))
+
+# 2. Create a simple mask (remove obvious bad pixels)
+mask <- image$imDat < -10  # Ignore very negative pixels
+
+# 3. Run ProFound with sensible settings for detecting galaxies
+result <- profoundProFound(
+  image = image,
+  mask = mask,
+  skycut = 1.5,      # Moderate sensitivity
+  pixcut = 3,        # Require at least 3 connected pixels
+  magzero = 26,      # Convert to magnitudes
+  pixscale = 0.3,    # Pixel scale in arcsec
+  plot = TRUE        # Show diagnostic plots
+)
+
+# 4. Examine the results
+cat_objects <- result$segstats
+
+# How many objects did we detect?
+nrow(cat_objects)
+
+# What's the brightest object? (Usually the first object with segID=1, but not always)
+brightest <- cat_objects[which.max(cat_objects$flux), ]
+
+# Plot a histogram of magnitudes
+hist(cat_objects$mag, breaks = 50, 
+     main = "Magnitude Distribution",
+     xlab = "Magnitude")
+```
+
+Often the only bit people want to save is the *segstats* catalogue:
+
+```{r eval=FALSE}
+# Export the catalog
+write.csv(cat_objects, "/path/to/use/detected_objects.csv", row.names = FALSE)
+```
+
+## Understanding the Segmentation Image
+
+ProFound also returns `result$segim`, a "segmentation image":
+
+- Each pixel is labelled with the ID of the object it belongs to
+- Value 0 = background (no object)
+- Value 1, 2, 3, ... = different detected objects
+
+```{r}
+# How many unique objects were detected?
+length(unique(as.integer(result$segim))) - 1L
+
+# Which will be the same as
+dim(result$segstats)
+
+# Visualize it
+magimage(result$segim, col = rainbow(max(result$segim)))
+```
+
+## Troubleshooting
+
+### Too many detections (too much noise)?
+
+Increase `skycut` or `pixcut`:
+
+```{r}
+profoundProFound(image, skycut = 2.5, pixcut = 5, plot = TRUE)
+```
+
+### Missing faint objects?
+
+Decrease `skycut` or `pixcut`:
+
+```{r}
+profoundProFound(image, skycut = 0.5, pixcut = 2, plot = TRUE)
+```
+
+### Objects merged together?
+
+Lower de-blending tolerance:
+
+```{r}
+profoundProFound(image, tolerance = 1, plot = TRUE)
+```
+
+### Wrong background estimate?
+
+Try a different sky estimation method:
+
+```{r}
+profoundProFound(image, skytype = "mean", plot = TRUE)
+```
+
+## Next Steps
+
+- Check `?profoundProFound` for the full parameter list
+- Look at other vignettes for advanced topics (de-blending, photometry, etc.)
+- Run `profoundProFound(..., plot = TRUE)` to see diagnostic plots
+- Get advanced plots with plot method run on `profoundProFound` output, i.e. `plot(result)`
+
+Good luck with your analysis!
