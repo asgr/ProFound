@@ -229,18 +229,25 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
             const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
             if(rad_re[k] == 0){
               if(delta_2 < semi_min_min * semi_min_min){
+                #pragma omp atomic
                 weight(i,j) += wt_use[k];
               }else if(delta_2 < rad_plus * rad_plus){
-                weight(i,j) += wt_use[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+                double cover = wt_use[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
+                #pragma omp atomic
+                weight(i,j) += cover;
               }
             }else{
               const double mod_x = (delta_x * cos_ang + delta_y * sin_ang) / axrat_loc;
               const double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
               const double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
               if(delta_2 < semi_min_min * semi_min_min){
-                weight(i,j) += wt_use[k] * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k]));
+                double cover = wt_use[k] * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k]));
+                #pragma omp atomic
+                weight(i,j) += cover;
               }else if(delta_2 < rad_plus * rad_plus){
-                weight(i,j) += wt_use[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth) * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k]));
+                double cover = wt_use[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth) * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k]));
+                #pragma omp atomic
+                weight(i,j) += cover;
               }
             }
           }
