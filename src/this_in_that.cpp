@@ -12,10 +12,6 @@ LogicalVector vec_this_in_vec_that(IntegerVector vec_this, IntegerVector vec_tha
   LogicalVector ref_ID(max(vec_that) + 1, false);
   LogicalVector result(vec_this.size(), invert);
   
-  #ifdef _OPENMP
-    // Parallelize the main loop
-  #pragma omp parallel for schedule(static) num_threads(nthreads)
-  #endif
   for (int i = 0; i < vec_that.size(); ++i) {
     if (!IntegerVector::is_na(vec_that[i])) {
       ref_ID[vec_that[i]] = true;
@@ -53,9 +49,6 @@ LogicalMatrix mat_this_in_vec_that(IntegerMatrix mat_this, IntegerVector vec_tha
   LogicalMatrix result(mat_this.nrow(), mat_this.ncol());
   
   // Populate the reference vector
-  #ifdef _OPENMP
-  #pragma omp parallel for schedule(static) num_threads(nthreads)
-  #endif
   for (int i = 0; i < vec_that.size(); ++i) {
     if (!IntegerVector::is_na(vec_that[i])) {
       ref_ID[vec_that[i]] = true;

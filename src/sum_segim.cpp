@@ -14,18 +14,36 @@ NumericVector profoundSegimFlux(NumericMatrix image, NumericMatrix segim, int nt
   NumericVector fluxes(max_seg, 0.0);
   
   #ifdef _OPENMP
-    // Parallelize the main loop
-  #pragma omp parallel for schedule(static) num_threads(nthreads)
-  #endif
+  #pragma omp parallel num_threads(nthreads)
+  {
+    // Thread-local copy to avoid data races on shared fluxes
+    NumericVector local_fluxes(max_seg, 0.0);
+    #pragma omp for schedule(static)
+    for (int i = 0; i < nrow; ++i) {
+      for (int j = 0; j < ncol; ++j) {
+        if(segim(i, j) > 0){
+          if(!NumericMatrix::is_na(image(i, j))){
+            local_fluxes[segim(i, j) - 1] += image(i, j);
+          }
+        }
+      }
+    }
+    #pragma omp critical
+    for (int k = 0; k < max_seg; ++k) {
+      fluxes[k] += local_fluxes[k];
+    }
+  }
+  #else
   for (int i = 0; i < nrow; ++i) {
     for (int j = 0; j < ncol; ++j) {
       if(segim(i, j) > 0){
         if(!NumericMatrix::is_na(image(i, j))){
-          fluxes(segim(i, j) - 1) += image(i, j); 
+          fluxes[segim(i, j) - 1] += image(i, j);
         }
       }
     }
   }
+  #endif
   
   return fluxes;
 }

@@ -233,28 +233,25 @@ Rcpp::NumericVector Cadacs_FindSkyCellValues(
   
   // Rcpp::Rcout << skyN << "\n";
   
-  Rcpp::NumericVector vec(skyN);
-  int k=0;
+  std::vector<double> vec;
+  vec.reserve(skyN);
   for (int j = sscol; j <= eecol; j++) {
     int ii=(j-1)*nrow+(ssrow-1);
     for (int i = ssrow; i <= eerow; i++,ii++) {
-      //Rcpp::Rcout << i << "\n";
-      //Rcpp::Rcout << ii << "\n";
       if ((iiobjects!=NULL)) {
         if (iiobjects[ii]==0 && (iimask==NULL || iimask[ii]==0)) {
-          vec[k++] = iiimage[ii];
+          vec.push_back(iiimage[ii]);
         }
       } else if (iimask!=NULL) {
         if (iimask[ii]==0) {
-          vec[k++] = iiimage[ii];
+          vec.push_back(iiimage[ii]);
         }
       } else {
-        vec[k++] = iiimage[ii];
+        vec.push_back(iiimage[ii]);
       }
     }
   }
-  // Rcpp::Rcout << vec[k-1] << k << " FINE!\n";
-  return vec;
+  return Rcpp::NumericVector(vec.begin(), vec.end());
 }
 
 //==================================================================================
