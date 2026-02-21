@@ -34,7 +34,7 @@ The **ProFound** source finding and image utilities suite covers the following f
 - profoundMakeSegimPropagate: Propagate segmentation map segments over adjacent sky pixels
 - profoundMakeSigma: Make a Sigma Map
 - profoundMakeSkyMap: Calculate coarse sky maps
-- profoundMakeStack: Create a stacked image
+- propaneStackFlatInVar (ProPane): Create an inverse-variance weighted stacked image
 - profoundPixelCorrelation: Calculate pixel-to-pixel correlation and 2D image FFT
 - profoundSegimGroup: Find the IDs of groups of touching segments
 - profoundSegimMerge: Optimally merge segmentation maps

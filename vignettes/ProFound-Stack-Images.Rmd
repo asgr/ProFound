@@ -37,9 +37,9 @@ If you have many images of the same area (even in different bands) a photometric
 
 To convince yourself consider you have 8 exposures with sky RMS equal to 16 originally: 4 you combine, so the sky RMS becomes $\frac{1}{\sqrt{\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}}}=\frac{1}{\sqrt{\frac{4}{16^2}}}=8$. Now later on you want to combine the 5 images you have. Clearly the optimal weighting you can possibly get will be $\frac{1}{\sqrt{\frac{8}{16^2}}}=\frac{8}{\sqrt{2}}=5.65$ (the direct stack of the original 8 images). With our already stacked image added to our 4 others we can achieve the same S/N by weighting our stacks by the inverse variance: $\frac{1}{\sqrt{\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{16^2}+\frac{1}{8^2}}}=\frac{1}{\sqrt{\frac{4}{16^2}+\frac{1}{8^2}}}=\frac{1}{\sqrt{\frac{8}{16^2}}}=\frac{8}{\sqrt{2}}=5.65$.
 
-**ProFound** comes with a handy function that does all the weight-watching for us called **profoundMakeStack**. In this vignette we will make a simulated image (with a trivially predictable improvement in S/N) and check to see that our stacking behaves as expected.
+**ProPane** comes with a handy function that does all the weight-watching for us called **propaneStackFlatInVar**. In this vignette we will make a simulated image (with a trivially predictable improvement in S/N) and check to see that our stacking behaves as expected.
 
-First we generate a random image with 200 stars and 200 extended sources. The value used roughly correspoond to the source densities and magnitude distributions you might expect to find in a Z-band VIKING frame (this was used to derive the image statistics).
+First we generate a random image with 200 stars and 200 extended sources. The value used roughly correspond to the source densities and magnitude distributions you might expect to find in a Z-band VIKING frame (this was used to derive the image statistics).
 
 ```{r, eval=evalglobal}
 set.seed(666)
