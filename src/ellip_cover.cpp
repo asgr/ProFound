@@ -85,11 +85,7 @@ NumericVector profoundEllipCover(NumericVector x, NumericVector y, double cx, do
         }else if(delta_2 < rad_plus * rad_plus){
           result[i] = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
         }
-      } else {
-        result[i] = 0.0;
       }
-    } else {
-      result[i] = 0.0;
     }
   }
   

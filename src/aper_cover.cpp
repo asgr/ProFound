@@ -79,11 +79,7 @@ NumericVector profoundAperCover(NumericVector x,
         const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
         result[i] = pixelCoverAper(delta_x, delta_y, delta_2,
                                    rad_2, rad_min_2, rad_max_2, depth);
-      } else {
-        result[i] = 0.0;
       }
-    } else {
-      result[i] = 0.0;
     }
   }
   
