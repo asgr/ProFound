@@ -11,12 +11,12 @@ Depends: R (>= 3.1), Rfits (>= 1.8.0), magicaxis (>= 2.0.8), Rcpp (>= 1.0.2)
 Imports: data.table, celestial (>= 1.4.1), foreach, matrixStats, doParallel
 Suggests: ProFit, knitr, rmarkdown, EBImage, imager, LaplacesDemon, Rfast, Rfast2, fastmatch, snow, doSNOW, bigmemory, mvtnorm, Rwcs, Highlander (>= 0.1.7), ProPane, plotrix, RANN
 Remotes:
-  asgr/cmaeshpc,
-  asgr/Highlander,
-  asgr/imager,
-  asgr/LaplacesDemon,,
-  ICRAR/ProFit,
-  asgr/Rfits,
+  asgr/cmaeshpc
+  asgr/Highlander
+  asgr/imager
+  asgr/LaplacesDemon
+  ICRAR/ProFit
+  asgr/Rfits
   asgr/Rwcs
 VignetteBuilder: knitr
 LinkingTo: Rcpp
