@@ -159,7 +159,7 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
   
   NumericVector bn(n);
   for (int k = 0; k < n; ++k) {
-    bn[k] = 2*nser[k] - 1/3 + (4 / (405 * nser[k])); // use the bn approximation
+    bn[k] = 2.0*nser[k] - 1.0/3.0 + (4.0 / (405.0 * nser[k])); // use the bn approximation
   }
   
   NumericVector wt_use = NumericVector(n);
@@ -317,7 +317,7 @@ NumericVector profoundEllipFlux(NumericMatrix image,
   
   NumericVector bn(n);
   for (int k = 0; k < n; ++k) {
-    bn[k] = 2*nser[k] - 1/3 + (4 / (405 * nser[k])); // use the bn approximation
+    bn[k] = 2.0*nser[k] - 1.0/3.0 + (4.0 / (405.0 * nser[k])); // use the bn approximation
   }
   
   NumericVector wt_use = NumericVector(n);
