@@ -306,11 +306,24 @@ void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix
   int ncol=tempmat_sky.ncol();
   int nrow=tempmat_sky.nrow();
 
+  // Precompute y-bracket indices for all output columns (independent of row i)
+  std::vector<int> top_indices(myynpts, -1), bottom_indices(myynpts, -1);
+  for (int j = 1; j <= myynpts; j++) {
+    double y = -0.5+j;
+    for (int jj = 1; jj < ncol; jj++) {
+      if (myy[jj-1] <= y && myy[jj] >= y) {
+        top_indices[j-1] = jj-1;
+        bottom_indices[j-1] = jj;
+        break;
+      }
+    }
+  }
+
   // For each vertical row
   for (int i = 1; i <= myxnpts; i++) {
     // For a spline to interpolate vertically along the elements of the row
     double x = -0.5+i;
-    // find the left and right index ibnto xseq
+    // find the left and right index into xseq
     int left_index = -1;
     int right_index = -1;
     for (int ii = 1; ii < nrow; ii++) {
@@ -321,34 +334,28 @@ void interpolateLinearGrid(NumericVector xseq, NumericVector yseq, NumericMatrix
       }
     }
 
-    //Rcpp::Rcout << "x="<<x<<" xindex="<<left_index<<" "<<right_index<<"\n";
-    //Rcpp::Rcout << "x="<<x<<" xleft="<<myx[left_index]<<" "<<myx[right_index]<<"\n";
-    int top_index = -1;
-    int bottom_index = -1;
-    for (int j = 1; j <= myynpts; j++) {
-      double y = -0.5+j;
-      for (int jj = 1; jj < ncol; jj++) {
-        if (myy[jj-1] <= y && myy[jj] >= y) {
-          top_index = jj-1;
-          bottom_index = jj;
-          // p1...p2
-          // .     .
-          // .     .
-          // p3...p4
-          double p1 = tempmat_sky(left_index,top_index);
-          double p2 = tempmat_sky(right_index,top_index);
-          double p3 = tempmat_sky(left_index,bottom_index);
-          double p4 = tempmat_sky(right_index,bottom_index);
+    if (left_index < 0) continue;
+    const double xlambda = (x-myx[left_index])/(myx[right_index]-myx[left_index]);
 
-          double xlambda = (x-myx[left_index])/(myx[right_index]-myx[left_index]);
-          double ylambda = (y-myy[top_index])/(myy[bottom_index]-myy[top_index]);
-          double ztop = p1 * (1.0-xlambda) + p2 * xlambda;
-          double zbottom = p3 * (1.0-xlambda) + p4 * xlambda;
-          output(i-1,j-1) = ztop * (1.0-ylambda) +zbottom * ylambda;
-          //Rcpp::Rcout << "y="<<y<<" yindex="<<top_index<<" "<<bottom_index<<" "<<p1<<" "<<p2<<" "<<p3<<" "<<p4<<" result="<<output(i-1,j-1)<<"\n";
-          break;
-        }
-      }
+    for (int j = 1; j <= myynpts; j++) {
+      int top_index = top_indices[j-1];
+      int bottom_index = bottom_indices[j-1];
+      if (top_index < 0) continue;
+
+      // p1...p2
+      // .     .
+      // .     .
+      // p3...p4
+      double p1 = tempmat_sky(left_index,top_index);
+      double p2 = tempmat_sky(right_index,top_index);
+      double p3 = tempmat_sky(left_index,bottom_index);
+      double p4 = tempmat_sky(right_index,bottom_index);
+
+      double y = -0.5+j;
+      double ylambda = (y-myy[top_index])/(myy[bottom_index]-myy[top_index]);
+      double ztop = p1 * (1.0-xlambda) + p2 * xlambda;
+      double zbottom = p3 * (1.0-xlambda) + p4 * xlambda;
+      output(i-1,j-1) = ztop * (1.0-ylambda) +zbottom * ylambda;
     }
   }
 }

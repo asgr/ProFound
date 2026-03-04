@@ -79,11 +79,7 @@ NumericVector profoundAperCover(NumericVector x,
         const double delta_2 = (delta_x * delta_x) + (delta_y * delta_y);
         result[i] = pixelCoverAper(delta_x, delta_y, delta_2,
                                    rad_2, rad_min_2, rad_max_2, depth);
-      } else {
-        result[i] = 0.0;
       }
-    } else {
-      result[i] = 0.0;
     }
   }
   
@@ -194,9 +190,13 @@ NumericMatrix profoundAperWeight(NumericVector cx,
             const double PC_temp = pixelCoverAper(delta_x, delta_y, delta_2,
                                                   rad_2, rad_min_2, rad_max_2, depth);
             if(rad_re[k] == 0){
-              weight(i,j) += wt_use[k] * PC_temp;
+              double cover = wt_use[k] * PC_temp;
+              #pragma omp atomic
+              weight(i,j) += cover;
             }else{
-              weight(i,j) += wt_use[k] * PC_temp * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k]));
+              double cover = wt_use[k] * PC_temp * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k]));
+              #pragma omp atomic
+              weight(i,j) += cover;
             }
           }
         }
