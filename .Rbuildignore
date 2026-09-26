@@ -7,3 +7,6 @@ rsconnect
 #extdata/MultiBand
 #vignettes/ProFound-MultiBand-Stack.Rmd
 #vignettes/ProFound-Complex-Fit.Rmd
+^build$
+^\.DS_Store$
+^\*\.tar\.gz$

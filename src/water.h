@@ -50,11 +50,19 @@ std::vector<std::size_t> get_sorted_indices(const double *image, std::size_t siz
         }
     };
 
-    // Take positions of pixels above the skycut. We estimate that ~10%
-    // of the pixels will meet the condition and try to reserve that much memory
-    // at once
+    // Take positions of pixels above the skycut. Counting first lets us size
+    // the vector exactly: the previous fixed size/10 guess is wrong for low
+    // skycuts and the vector was left to grow (a ~2x transient allocation on
+    // large, dense images). The extra scan is cheap relative to the sort.
+    std::size_t count = 0;
+    for (std::size_t i = 0; i < size; ++i) {
+        if (image[i] > skycut) {
+            ++count;
+        }
+    }
+
     std::vector<pix_idx> valid_pixels;
-    valid_pixels.reserve(size / 10.);
+    valid_pixels.reserve(count);
     for (std::size_t i = 0; i < size; ++i) {
         if (image[i] > skycut) {
             valid_pixels.push_back({image[i], i});
@@ -85,25 +93,6 @@ std::vector<int> tabulate(const int *segments, std::size_t n, int max)
     return counts;
 }
 
-static inline
-void apply_pixcut(int *segments, std::size_t size, double pixcut)
-{
-    if (pixcut <= 1) {
-        return;
-    }
-    auto max = *std::max_element(segments, segments + size);
-    if (max < 0) {
-        return;
-    }
-    std::vector<int> segment_count = tabulate(segments, size, max);
-    for (std::size_t i = 0; i != size; i++) {
-        int segment = segments[i];
-        if (segment >= 0 && segment_count[segment] < pixcut) {
-            segments[i] = NO_SEGMENT;
-        }
-    }
-}
-
 /**
  * The watershedding problem. Inputs are an image with certain width and height
  * and some tolerance values.
@@ -118,7 +107,8 @@ struct Problem {
         abstol(abstol), reltol(reltol), cliptol(cliptol)
     {
         std::fill(segments, segments + size, NO_SEGMENT);
-        merger_candidates.reserve(ext * ext * 4 - 1);
+        const std::size_t nneigh = 2 * (std::size_t)ext + 1;
+        merger_candidates.reserve(nneigh * nneigh - 1);
     }
 
     const double *image;
@@ -129,45 +119,97 @@ struct Problem {
     std::vector<std::size_t> relevant_indices {};
     std::vector<int> merger_candidates {};
     std::vector<int> seg_max_i {};
+    // Union-find over segment ids. Merging two segments is an O(1) (amortised)
+    // parent update; ids stored in `segments` may then be non-canonical and are
+    // resolved with find_segment() when read. This replaces the previous
+    // "relabel every pixel of the segment" loop, which made dense watersheds
+    // quadratic in the number of pixels.
+    std::vector<int> seg_parent {};
     const double abstol;
     const double reltol;
     const double cliptol;
     unsigned int segment_id = 0;
 
+    int find_segment(int segment)
+    {
+        // path halving
+        while (seg_parent[segment] != segment) {
+            segment = seg_parent[segment] = seg_parent[seg_parent[segment]];
+        }
+        return segment;
+    }
+
+    void union_segments(int child, int parent)
+    {
+        seg_parent[find_segment(child)] = find_segment(parent);
+    }
+
     bool within_merge_tolerance(int segment, double central_pixel) const
     {
         double pixel = image[relevant_indices[seg_max_i[segment]]];
-        return central_pixel > cliptol ||
-               pixel - central_pixel < abstol * std::pow(pixel / central_pixel, reltol);
+        if (central_pixel > cliptol) {
+            return true;
+        }
+        // reltol==0 is the default; pow(x, 0) is exactly 1, so skip it.
+        if (reltol == 0.0) {
+            return pixel - central_pixel < abstol;
+        }
+        return pixel - central_pixel < abstol * std::pow(pixel / central_pixel, reltol);
+    }
+
+    void apply_pixcut(double pixcut)
+    {
+        if (pixcut <= 1) {
+            return;
+        }
+        // Canonicalise ids first so that the tabulation is by final segment
+        int max_id = -1;
+        for (std::size_t i = 0; i != size; i++) {
+            int segment = segments[i];
+            if (segment != NO_SEGMENT) {
+                segment = segments[i] = find_segment(segment);
+                if (segment > max_id) {
+                    max_id = segment;
+                }
+            }
+        }
+        if (max_id < 0) {
+            return;
+        }
+        std::vector<int> segment_count = tabulate(segments, size, max_id);
+        for (std::size_t i = 0; i != size; i++) {
+            int segment = segments[i];
+            if (segment >= 0 && segment_count[segment] < pixcut) {
+                segments[i] = NO_SEGMENT;
+            }
+        }
     }
 };
 
 static inline
-void merge_segments(Problem &p, int i, double central_pixel)
+void merge_segments(Problem &p, double central_pixel)
 {
-    // are there at least two unique segments flagged?
-    std::set<int> mergers(p.merger_candidates.begin(), p.merger_candidates.end());
-    if (mergers.size() < 2) {
+    // are there at least two unique segments flagged? Sorting a small vector
+    // in place is much cheaper than building a std::set (which allocates a
+    // node per element).
+    auto &candidates = p.merger_candidates;
+    std::sort(candidates.begin(), candidates.end());
+    const auto unique_end = std::unique(candidates.begin(), candidates.end());
+    const std::size_t n_unique = static_cast<std::size_t>(unique_end - candidates.begin());
+    if (n_unique < 2) {
         return;
     }
 
     // first element (brightest) will be what is merged into the rest, if they
     // pass the test
-    auto it = mergers.begin();
-    auto lowest_segment = *it;
-    for (it++; it != mergers.end(); it++) {
-        auto segment = *it;
+    auto lowest_segment = candidates[0];
+    for (std::size_t m = 1; m < n_unique; m++) {
+        auto segment = candidates[m];
         if (!p.within_merge_tolerance(segment, central_pixel)) {
             continue;
         }
-        // loop round segments that have been allocated already
-        // if pixel is flagged for merging, set to lowest segment value (brightest peak flux segment)
-        for (int n = p.seg_max_i[segment]; n <= i; ++n) {
-            auto merge_idx = p.relevant_indices[n];
-            if (p.segments[merge_idx] == segment) {
-                p.segments[merge_idx] = lowest_segment;
-            }
-        }
+        // point the merged segment at the brightest peak flux segment
+        p.union_segments(segment, lowest_segment);
     }
 }
 
@@ -206,6 +248,7 @@ void watershed_cetered_at(Problem &p, int i, int ext)
             if (segment == NO_SEGMENT) {
                 continue;
             }
+            segment = p.find_segment(segment);
             p.merger_candidates.push_back(segment);
 
             // do we actually need to perform merging later?
@@ -226,13 +269,15 @@ void watershed_cetered_at(Problem &p, int i, int ext)
     }
 
     if (merge && p.abstol > 0) {
-        merge_segments(p, i, center_pixel);
+        merge_segments(p, center_pixel);
     }
 
     // if nothing has a segment value in the surrounding pixels then create a new segment seed
     if (p.segments[center_idx] == NO_SEGMENT) {
-        p.segments[center_idx] = p.segment_id++;
+        p.segments[center_idx] = p.segment_id;
         p.seg_max_i.push_back(i);
+        p.seg_parent.push_back(p.segment_id);
+        p.segment_id++;
     }
 }
 
@@ -254,8 +299,15 @@ void watershed(
         watershed_cetered_at(p, i, ext);
     }
 
-    // Final cut by pixel count cut and add 1 to segment image (so first segment is 1 and not 0)
-    apply_pixcut(p.segments, p.size, pixcut);
+    // Final cut by pixel count cut; canonicalise the segment ids that were
+    // lazily left pointing at merged-away segments.
+    for (std::size_t i = 0; i != p.size; i++) {
+        int segment = p.segments[i];
+        if (segment != NO_SEGMENT) {
+            p.segments[i] = p.find_segment(segment);
+        }
+    }
+    p.apply_pixcut(pixcut);
 }
 
 }  // namespace profound

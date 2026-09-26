@@ -44,6 +44,17 @@ double pixelCoverAper(double delta_x, double delta_y, double delta_2,
   return coverage / 4.0;
 }
 
+// Radial weight exp(-bn * (r/rad_re)^(1/nser)). nser==1 is by far the most
+// common case (a pure exponential profile) and pow(y, 1) == y exactly, so we
+// can skip the expensive pow call there; inv_nser is 1.0/nser.
+static inline double radialWeight(double delta_2, double bn_k, double rad_re_k,
+                                  double inv_nser_k, bool nser_is_one) {
+  if (nser_is_one) {
+    return std::exp(-bn_k * (std::sqrt(delta_2) / rad_re_k));
+  }
+  return std::exp(-bn_k * std::pow(std::sqrt(delta_2) / rad_re_k, inv_nser_k));
+}
+
 
 // [[Rcpp::export]]
 NumericVector profoundAperCover(NumericVector x,
@@ -194,7 +205,7 @@ NumericMatrix profoundAperWeight(NumericVector cx,
               #pragma omp atomic
               weight(i,j) += cover;
             }else{
-              double cover = wt_use[k] * PC_temp * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k]));
+              double cover = wt_use[k] * PC_temp * radialWeight(delta_2, bn[k], rad_re[k], 1.0/nser[k], nser[k] == 1.0);
               #pragma omp atomic
               weight(i,j) += cover;
             }
@@ -328,7 +339,7 @@ NumericVector profoundAperFlux(
                   if(rad_re[k]== 0){
                     sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] / weight(i,j);
                   }else{
-                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] * exp(-bn[k]*pow(sqrt(delta_2) / rad_re[k], 1/nser[k])) / weight(i,j);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] * radialWeight(delta_2, bn[k], rad_re[k], 1.0/nser[k], nser[k] == 1.0) / weight(i,j);
                   }
                 }
               }else{

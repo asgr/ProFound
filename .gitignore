@@ -42,3 +42,6 @@ src/*.o
 
 # .DS_Store stuff
 .DS*
+
+# Local reference builds used to regenerate the golden digests
+build/

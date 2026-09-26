@@ -523,34 +523,55 @@ namespace gte
         }
 
         // Support for evaluation.
+        // The samples are uniformly spaced, so the containing interval can be
+        // estimated directly instead of scanning from zero. The two while
+        // loops enforce exactly the same invariant as the original linear
+        // scan (largest index with x >= xNode[index], clamped to the last
+        // interval), so the result is unchanged but O(1) in the usual case.
         void XLookup(Real x, int& xIndex, Real& dx) const
         {
-            for (xIndex = 0; xIndex + 1 < mXBound; ++xIndex)
+            int ix = static_cast<int>((x - mXMin) / mXSpacing);
+            if (ix < 0)
             {
-                if (x < mXMin + mXSpacing * (xIndex + 1))
-                {
-                    dx = x - (mXMin + mXSpacing * xIndex);
-                    return;
-                }
+                ix = 0;
             }
-
-            --xIndex;
-            dx = x - (mXMin + mXSpacing * xIndex);
+            else if (ix > mXBound - 2)
+            {
+                ix = mXBound - 2;
+            }
+            while (ix > 0 && x < mXMin + mXSpacing * ix)
+            {
+                --ix;
+            }
+            while (ix < mXBound - 2 && x >= mXMin + mXSpacing * (ix + 1))
+            {
+                ++ix;
+            }
+            xIndex = ix;
+            dx = x - (mXMin + mXSpacing * ix);
         }
 
         void YLookup(Real y, int& yIndex, Real& dy) const
         {
-            for (yIndex = 0; yIndex + 1 < mYBound; ++yIndex)
+            int iy = static_cast<int>((y - mYMin) / mYSpacing);
+            if (iy < 0)
             {
-                if (y < mYMin + mYSpacing * (yIndex + 1))
-                {
-                    dy = y - (mYMin + mYSpacing * yIndex);
-                    return;
-                }
+                iy = 0;
             }
-
-            yIndex--;
-            dy = y - (mYMin + mYSpacing * yIndex);
+            else if (iy > mYBound - 2)
+            {
+                iy = mYBound - 2;
+            }
+            while (iy > 0 && y < mYMin + mYSpacing * iy)
+            {
+                --iy;
+            }
+            while (iy < mYBound - 2 && y >= mYMin + mYSpacing * (iy + 1))
+            {
+                ++iy;
+            }
+            yIndex = iy;
+            dy = y - (mYMin + mYSpacing * iy);
         }
 
         int mXBound, mYBound, mQuantity;
