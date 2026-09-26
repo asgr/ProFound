@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
     branches: [main, master]
+  schedule:
+    - cron: '50 23 * * 0'   # 23:50 UTC every Sunday
+  workflow_dispatch:       # allow manual runs
 
 name: R-CMD-check
 
