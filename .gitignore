@@ -42,4 +42,10 @@ src/*.o
 
 # .DS_Store stuff
 .DS*
+<<<<<<< HEAD
 .positai
+=======
+
+# Local reference builds used to regenerate the golden digests
+build/
+>>>>>>> ac5964555591726367db90002fc8b02e470ebba7

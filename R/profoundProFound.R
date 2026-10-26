@@ -305,7 +305,7 @@ profoundProFound=function(image=NULL, segim=NULL, objects=NULL, mask=NULL, skycu
           if('fastmatch' %in% .packages()){ #dilate segments that pass tests
             selpix = which(fastmatch::fmatch(segim_new, expand_segID, nomatch = 0L) > 0) 
           }else{
-            selpix = which(segim_new %in% expand_segID)
+            selpix = which(.mat_this_in_vec_that(segim_new, as.integer(expand_segID)))
           }
           segim[selpix] = segim_new[selpix]
         }

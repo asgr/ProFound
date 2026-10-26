@@ -1,4 +1,6 @@
 #include <Rcpp.h>
+#include <algorithm>
+#include <limits>
 #ifdef _OPENMP
   #include <omp.h>
 #endif
@@ -17,7 +19,35 @@ double in_ellip(double delta_x, double delta_y, double semi_maj, double semi_min
   return (mod_x * mod_x) + (mod_y * mod_y) <= 1.0 ? 1.0 : 0.0;
 }
 
-// Recursive function to determine fractional pixel coverage
+// Minimal value of the positive definite quadratic Q(dx,dy) = x_term*dx^2 +
+// y_term*dy^2 + xy_term*dx*dy over the box [xm,xp] x [ym,yp]. Q is convex with
+// its unconstrained minimum (value 0) at the origin, so the minimum is either 0
+// (origin inside the box) or lies on one of the four edges.
+static inline double quadMinOnBox(double x_term, double y_term, double xy_term,
+                                  double xm, double xp, double ym, double yp) {
+  if (xm <= 0.0 && xp >= 0.0 && ym <= 0.0 && yp >= 0.0) {
+    return 0.0;
+  }
+  double qmin = std::numeric_limits<double>::max();
+  const double xs[2] = {xm, xp};
+  for (int t = 0; t < 2; ++t) {
+    const double x0 = xs[t];
+    double ystar = -xy_term * x0 / (2.0 * y_term);
+    if (ystar < ym) ystar = ym; else if (ystar > yp) ystar = yp;
+    const double q = x_term * x0 * x0 + y_term * ystar * ystar + xy_term * x0 * ystar;
+    if (q < qmin) qmin = q;
+  }
+  const double ys[2] = {ym, yp};
+  for (int t = 0; t < 2; ++t) {
+    const double y0 = ys[t];
+    double xstar = -xy_term * y0 / (2.0 * x_term);
+    if (xstar < xm) xstar = xm; else if (xstar > xp) xstar = xp;
+    const double q = x_term * xstar * xstar + y_term * y0 * y0 + xy_term * xstar * y0;
+    if (q < qmin) qmin = q;
+  }
+  return qmin;
+}
+
 double pixelCoverEllip(double delta_x, double delta_y, double x_term, double y_term,
                       double xy_term, int depth) {
   if (depth == 0) {
@@ -27,6 +57,33 @@ double pixelCoverEllip(double delta_x, double delta_y, double x_term, double y_t
 
   }
   
+  // All the sub-samples explored below this node lie within +/-span of
+  // (delta_x, delta_y). The quadratic Q(dx,dy) = x_term*dx^2 + y_term*dy^2 +
+  // xy_term*dx*dy is positive definite (it defines the ellipse), so its
+  // maximum over that square is attained at one of the four corners. If even
+  // the largest corner value is <= 1 then every sub-sample is inside the
+  // ellipse and the exact coverage is 1 (the recursion would sum 4^depth ones
+  // and divide back down to 1). This is a pure shortcut: it never changes the
+  // returned value.
+  if (depth >= 2) {
+    const double span = 0.5 - 0.5 / (1 << depth);
+    const double xm = delta_x - span, xp = delta_x + span;
+    const double ym = delta_y - span, yp = delta_y + span;
+    const double q1 = x_term * (xm * xm) + y_term * (ym * ym) + xy_term * xm * ym;
+    const double q2 = x_term * (xm * xm) + y_term * (yp * yp) + xy_term * xm * yp;
+    const double q3 = x_term * (xp * xp) + y_term * (ym * ym) + xy_term * xp * ym;
+    const double q4 = x_term * (xp * xp) + y_term * (yp * yp) + xy_term * xp * yp;
+    const double qmax = std::max(std::max(q1, q2), std::max(q3, q4));
+    if (qmax <= 1.0) {
+      return 1.0;
+    }
+    // Conversely, if even the smallest value on the box is > 1 then every
+    // sub-sample is outside the ellipse and the exact coverage is 0.
+    if (quadMinOnBox(x_term, y_term, xy_term, xm, xp, ym, yp) > 1.0) {
+      return 0.0;
+    }
+  }
+
   const double quarter = 0.5 / (1 << depth); // (1 << depth) is equivalent to pow(2, depth), but faster
   double coverage = 0.0;
   
@@ -41,6 +98,16 @@ double pixelCoverEllip(double delta_x, double delta_y, double x_term, double y_t
   coverage += pixelCoverEllip(delta_x_plus, delta_y_plus, x_term, y_term, xy_term, depth - 1);
   
   return coverage / 4.0;
+}
+
+// Radial weight exp(-bn * (r/rad_re)^(1/nser)). nser==1 is the common case and
+// pow(y, 1) == y exactly, so the expensive pow call is skipped there.
+static inline double radialWeight(double delta_2, double bn_k, double rad_re_k,
+                                  double inv_nser_k, bool nser_is_one) {
+  if (nser_is_one) {
+    return std::exp(-bn_k * (std::sqrt(delta_2) / rad_re_k));
+  }
+  return std::exp(-bn_k * std::pow(std::sqrt(delta_2) / rad_re_k, inv_nser_k));
 }
 
 // [[Rcpp::export]]
@@ -237,11 +304,11 @@ NumericMatrix profoundEllipWeight(NumericVector cx,
               const double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
               const double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
               if(delta_2 < semi_min_min * semi_min_min){
-                double cover = wt_use[k] * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k]));
+                double cover = wt_use[k] * radialWeight(mod_delta_2, bn[k], rad_re[k], 1.0/nser[k], nser[k] == 1.0);
                 #pragma omp atomic
                 weight(i,j) += cover;
               }else if(delta_2 < rad_plus * rad_plus){
-                double cover = wt_use[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth) * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k]));
+                double cover = wt_use[k] * pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth) * radialWeight(mod_delta_2, bn[k], rad_re[k], 1.0/nser[k], nser[k] == 1.0);
                 #pragma omp atomic
                 weight(i,j) += cover;
               }
@@ -410,10 +477,10 @@ NumericVector profoundEllipFlux(NumericMatrix image,
                   const double mod_y = (-delta_x * sin_ang + delta_y * cos_ang);
                   const double mod_delta_2 = (mod_x * mod_x) + (mod_y * mod_y);
                   if(delta_2 < semi_min_min * semi_min_min){
-                    sum += image(i, j) * wt_use[k] * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k])) / weight(i,j);
+                    sum += image(i, j) * wt_use[k] * radialWeight(mod_delta_2, bn[k], rad_re[k], 1.0/nser[k], nser[k] == 1.0) / weight(i,j);
                   }else if(delta_2 < rad_plus * rad_plus){
                     const double PC_temp = pixelCoverEllip(delta_x, delta_y, x_term, y_term, xy_term, depth);
-                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] * exp(-bn[k]*pow(sqrt(mod_delta_2) / rad_re[k], 1/nser[k])) / weight(i,j);
+                    sum += image(i, j) * (PC_temp * PC_temp) * wt_use[k] * radialWeight(mod_delta_2, bn[k], rad_re[k], 1.0/nser[k], nser[k] == 1.0) / weight(i,j);
                   }
                 }
               }
