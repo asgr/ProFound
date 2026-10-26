@@ -42,3 +42,4 @@ src/*.o
 
 # .DS_Store stuff
 .DS*
+.positai

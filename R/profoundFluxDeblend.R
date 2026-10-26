@@ -26,6 +26,7 @@ profoundFluxDeblend=function(image=NULL, segim=NULL, segstats=NULL, groupim=NULL
     if(is.null(segstats)){segstats=profound$segstats}
     if(is.null(groupim)){groupim=profound$group$groupim}
     if(is.null(groupsegID)){groupsegID=profound$group$groupsegID}
+    if(missing(sky)){sky=profound$sky}
     if(missing(magzero)){magzero=profound$magzero}
   }
   
