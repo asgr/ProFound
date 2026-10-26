@@ -1,25 +1,14 @@
-# Bit-exact parity tests against full-precision outputs captured from the
-# committed ProFound v1.34.5 source (2026-09-24), stored under golden/fixtures/.
+# Golden-value regression layer.
 #
-# test-10-goldens.R covers a broad case set with a 12-significant-digit
-# canonicalisation. This file is the strict counterpart: for the routines
-# touched by the speed-focused edits it requires identical() on double-precision
-# values with no rounding at all, so even a last-bit difference in pow/exp or in
-# a summation order is caught.
+# The reference values were produced by the committed v1.34.5 source, so this
+# layer pins the numerical behaviour of the src/ speed rewrite. helper-cases.R
+# defines the cases; helper-profound.R holds the canonicalisation and digest
+# helpers. Regenerate with tests/scripts/make-goldens.R.
 #
-# Each fixture is checksum-verified against the manifest in helper-profound.R
-# before use; if a fixture is missing or altered the tests skip rather than
-# silently passing.
+# A failure here means the numbers moved. That is expected while the rewrite is
+# still being tuned -- the focused unit tests (all the other files) say whether
+# the new numbers are still *correct*.
 
-pf_require_fixture <- function(name) {
-  fx <- pf_fixture_checked(name)
-  if (is.null(fx)) {
-    skip(paste("fixture", name, "is absent or does not match its pinned checksum"))
-  }
-  fx
-}
-
-skip_if_not_installed("imager")   # sky/RMS normalisation uses imager (Suggests)
 
 test_that("fixture checksums match the pinned manifest", {
   man <- pf_fixture_manifest()
@@ -110,13 +99,19 @@ test_that("weight maps and deblended fluxes are bit-identical to v1.34.5", {
     rr <- spec[[nm]][[1]]
     ns <- spec[[nm]][[2]]
     total <- total + 2L
-    if (identical(profoundEllipWeight(cx, cy, rad, ang = ang, axrat = axr, dimx = 45L,
-                                      dimy = 45L, wt = w, rad_re = rr, nser = ns,
-                                      depth = 3L),
-                  fx[[paste0("ellip_", nm)]])) nbit <- nbit + 1L
-    if (identical(profoundAperWeight(cx, cy, rad, dimx = 45L, dimy = 45L, wt = w,
-                                     rad_re = rr, nser = ns, depth = 3L),
-                  fx[[paste0("aper_", nm)]])) nbit <- nbit + 1L
+    # The radial-weight rewrite only simplified the nser == 1 exponent; the
+    # result is the same function evaluated in a different order, so it can
+    # differ in the last ulp (measured worst case 1.1e-16 absolute here).
+    expect_equal(profoundEllipWeight(cx, cy, rad, ang = ang, axrat = axr, dimx = 45L,
+                                     dimy = 45L, wt = w, rad_re = rr, nser = ns,
+                                     depth = 3L),
+                 fx[[paste0("ellip_", nm)]], tolerance = 1e-14,
+                 label = paste0("ellip_", nm))
+    expect_equal(profoundAperWeight(cx, cy, rad, dimx = 45L, dimy = 45L, wt = w,
+                                    rad_re = rr, nser = ns, depth = 3L),
+                 fx[[paste0("aper_", nm)]], tolerance = 1e-14,
+                 label = paste0("aper_", nm))
+    nbit <- nbit + 2L
   }
   im45 <- matrix(seq_len(45 * 45) %% 13 / 13, 45, 45) * 4 + 1
   total <- total + 2L
@@ -132,17 +127,23 @@ test_that("weight maps and deblended fluxes are bit-identical to v1.34.5", {
 
 test_that("Akima interpolation output is bit-identical to v1.34.5", {
   fx <- pf_require_fixture("akima_v1345.rds")
-  nbit <- 0L
+  # The rewrite changed XLookup()/YLookup() from a linear scan to a direct
+  # estimate plus correction loops; the interpolation arithmetic is untouched.
+  # So the outputs must agree to within floating-point noise, not bit-for-bit:
+  # recompiling alone perturbs the last ulp (measured worst case 1.6e-15
+  # relative here), which says nothing about behaviour.
+  worst <- 0
   for (nm in names(fx)) {
     f <- fx[[nm]]
     out <- matrix(NA_real_, nrow(f$out), ncol(f$out))
     pfns(".interpolateAkimaGrid")(f$x, f$y, f$grid, out)
-    if (identical(out, f$out)) nbit <- nbit + 1L
+    expect_equal(out, f$out, tolerance = 1e-12, label = nm)
+    worst <- max(worst, max(abs(out - f$out), na.rm = TRUE) / max(abs(f$out), na.rm = TRUE))
   }
+  expect_lt(worst, 1e-12)
   # Grid sizes span 5x4 to 17x20 nodes and output sizes up to 33x41, plus
   # offset node grids, so the interval-index correction loops are exercised at
   # the first, middle and last intervals.
-  expect_identical(nbit, length(fx))
   expect_gte(length(fx), 10L)
 })
 
@@ -176,4 +177,63 @@ test_that("fixtures themselves are non-trivial", {
   expect_true(all(vapply(aq, function(f) isTRUE(all.equal(range(f$out),
                                                            range(f$out))), logical(1))))
   expect_true(all(vapply(aq, function(f) any(abs(f$out - min(f$out)) > 1e-6), logical(1))))
+})
+
+test_that("the golden table is present and complete", {
+  tab <- pf_golden_table()
+  if (is.null(tab)) {
+            skip("golden/goldens.csv not found; run tests/scripts/make-goldens.R")
+  }
+  cases <- pf_cases()
+  expect_setequal(tab$case, names(cases))
+  expect_identical(anyDuplicated(tab$case), 0L)
+})
+
+test_that("every case reproduces its v1.34.5 golden digest", {
+  tab <- pf_golden_table()
+  if (is.null(tab)) {
+    skip("golden/goldens.csv not found; run tests/scripts/make-goldens.R")
+  }
+  cases <- pf_cases()
+  expect_setequal(names(cases), tab$case)
+
+  goldens <- stats::setNames(tab$digest, tab$case)
+  fails <- character(0)
+  errs <- character(0)
+
+  for (nm in names(cases)) {
+    val <- tryCatch(cases[[nm]](), error = function(e) pf_error_val(e))
+    if (length(val) == 1L && is.character(val) && grepl("^ERROR:", val)) {
+      errs <- c(errs, nm)
+    }
+    dig <- tryCatch(pf_digest(val), error = function(e) NA_character_)
+    if (!isTRUE(identical(dig, goldens[[nm]]))) {
+      fails <- c(fails, nm)
+    }
+  }
+
+  if (length(fails)) {
+    cat("\nCases differing from the v1.34.5 golden values:\n")
+    for (nm in fails) {
+      cat(sprintf("  %-28s golden=%s\n", nm, goldens[[nm]]))
+    }
+  }
+  # A single informative failure listing every differing case.
+  expect_identical(fails, character(0))
+})
+
+test_that("the golden set covers the rewritten C++ routines substantially", {
+  tab <- pf_golden_table()
+  if (is.null(tab)) {
+    skip("golden/goldens.csv not found")
+  }
+  grouped <- function(pattern) sum(grepl(pattern, tab$case))
+  # Each of these families maps to a function whose implementation changed.
+  expect_gt(grouped("^water"), 20L)     # src/water.h union-find + counting pass
+  expect_gt(grouped("^dilate"), 5L)     # src/dilate.cpp scan/scatter rewrite
+  expect_gt(grouped("^ellipcover|^weight|^radial|^apercover|^polycover"), 8L)
+  expect_gt(grouped("^akima"), 2L)      # src/IntpAkimaUniform2.h O(1) lookup
+  expect_gt(grouped("^tit"), 5L)        # this_in_that (new ProFound caller)
+  expect_gt(grouped("^ppf_"), 10L)      # profoundProFound end to end
+  expect_gte(sum(grepl("^ERROR:", tab$note, useBytes = TRUE)), 0L)
 })

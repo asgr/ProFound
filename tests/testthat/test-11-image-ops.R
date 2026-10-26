@@ -1,3 +1,8 @@
+# Image manipulation helpers: smoothing, differences, gradients, sigma maps and
+# resampling. (The imager wrappers are also exercised from test-sky.R, where
+# they feed the sky estimator.)
+
+
 test_that("profoundMakeSigma combines noise sources in quadrature", {
   image = matrix(100, 11, 11)
 

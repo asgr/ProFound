@@ -1,9 +1,10 @@
-# End-to-end tests for profoundProFound(), the package's main entry point, and
-# for the sub-routines it calls internally. Numeric regressions are covered by
-# test-10-goldens.R; this file asserts structural guarantees and
-# self-consistency, which stay valid if behaviour is ever intentionally changed.
+# The end-to-end pipeline: profoundProFound() and its plot method.
+#
+# These are the highest-level tests in the suite. They assert the output
+# contract (which elements exist, and their shapes), that photometry is
+# internally consistent (segstats vs re-measuring the same segim), and that the
+# documented options actually change what they claim to.
 
-skip_if_not_installed("imager")   # sky/RMS normalisation uses imager (Suggests)
 
 test_that("profoundProFound returns a complete, internally consistent result", {
   img <- pf_make_img(64L)
@@ -68,26 +69,6 @@ test_that("a user supplied segim is used verbatim", {
   expect_identical(r$Nseg, nrow(r$segstats))
 })
 
-test_that("profoundProFound's own segmentation is stable across option paths", {
-  # profoundMakeSegim() is called internally with an already sky-subtracted and
-  # smoothed image, so it cannot be reproduced from the raw input. What must
-  # hold is that the default path and the ProFound-old watershed path agree
-  # modulo id numbering, and that segim_orig is the pre-dilation image.
-  img <- pf_make_img(64L)
-  a <- suppressMessages(profoundProFound(image = img, skycut = 1.5, pixcut = 3,
-                                          tolerance = 4, ext = 2, iters = 0, size = 5,
-                                          box = c(20, 20), grid = c(20, 20), plot = FALSE,
-                                          stats = TRUE, verbose = FALSE, nthreads = 1L))
-  b <- suppressMessages(profoundProFound(image = img, skycut = 1.5, pixcut = 3,
-                                          tolerance = 4, ext = 2, iters = 0, size = 5,
-                                          box = c(20, 20), grid = c(20, 20), plot = FALSE,
-                                          stats = TRUE, verbose = FALSE, watershed = "ProFound-old",
-                                          nthreads = 1L))
-  expect_identical(pf_labels(a$segim), pf_labels(b$segim))
-  # With no dilation iterations the two segment images are identical.
-  expect_identical(a$segim, a$segim_orig)
-})
-
 test_that("dilation only grows segments and never shrinks them", {
   img <- pf_make_img(64L)
   prev <- NULL
@@ -117,10 +98,18 @@ test_that("profoundProFound fluxes agree with re-measuring its own segim", {
   expect_gt(tot_direct, 0)
   expect_equal(tot_cpp, sum(img[r$segim > 0]), tolerance = 1e-8)
 
-  # The sky map is finite and smooth.
+  # The sky map is finite. skyRMS is interpolated onto the pixel grid by
+  # profoundMakeSkyGrid(), and the Akima bicubic used there can overshoot a
+  # little below zero between grid nodes, so a handful of cells are slightly
+  # negative (they must still be non-zero, since skyRMS is used as a divisor).
   expect_true(all(is.finite(r$sky)))
   expect_true(all(is.finite(r$skyRMS)))
-  expect_true(all(r$skyRMS > 0))
+  expect_true(all(r$skyRMS != 0))
+  # The map tracks the data: it is larger where the image is brighter rather
+  # than being a constant. (Individual cells can be negative, hence the ranks.)
+  gr <- seq_len(nrow(img))
+  bright <- img > stats::median(img)
+  expect_gt(median(r$skyRMS[bright]), median(r$skyRMS[!bright]))
 })
 
 test_that("profoundProFound keeps its documented inputs independent", {
@@ -307,4 +296,177 @@ test_that("plot.profound is defined and runs on a null device", {
   # An unrecognised hist type is rejected.
   expect_error(plot(r, hist = "bogus"), "hist type")
   expect_no_error(suppressWarnings(plot(r)))
+})
+
+test_that("profoundProFound returns a complete profound object", {
+  set.seed(2201)
+  image = makeTestImage(dim = c(101, 101), sources = data.frame(
+    xcen = c(30, 70, 50), ycen = c(50, 50, 25), flux = c(3000, 3000, 1500), sigma = c(2, 2, 3)))
+
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50)
+
+  expect_s3_class(pro, 'profound')
+  expect_named(pro, c('segim', 'segim_orig', 'objects', 'objects_redo', 'sky', 'skyRMS',
+                      'image', 'mask', 'segstats', 'Nseg', 'near', 'group', 'groupstats',
+                      'haralick', 'keyvalues', 'SBlim', 'magzero', 'dim', 'pixscale',
+                      'imarea', 'skyLL', 'skyChiSq', 'skyChiSqMap', 'gain', 'call', 'date',
+                      'time', 'ProFound.version', 'R.version'))
+
+  expect_identical(dim(pro$segim), dim(image))
+  expect_identical(dim(pro$sky), dim(image))
+  expect_identical(dim(pro$segim), dim(pro$image))
+  expect_equal(pro$Nseg, 3)
+  expect_equal(nrow(pro$segstats), 3)
+  expect_equal(sort(pro$segstats$xcen), c(30, 50, 70), tolerance = 1)
+  expect_equal(range(pro$sky), c(100, 100), tolerance = 0.5)
+  expect_equal(mean(pro$skyRMS), 5, tolerance = 0.5)
+  expect_true(pro$time > 0)
+})
+
+test_that("profoundProFound finds the sources it was given", {
+  set.seed(2202)
+  image = makeTestImage(dim = c(101, 101), sources = data.frame(
+    xcen = c(25, 75), ycen = c(30, 70), flux = c(5000, 5000), sigma = c(2, 2)))
+
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50)
+
+  expect_equal(pro$Nseg, 2)
+  expect_equal(sort(pro$segstats$xcen), c(25, 75), tolerance = 1)
+  expect_equal(sort(pro$segstats$ycen), c(30, 70), tolerance = 1)
+  # Recovered flux is close to the truth but isophotally truncated
+  expect_equal(sort(pro$segstats$flux), c(5000, 5000), tolerance = 0.2)
+})
+
+test_that("profoundProFound segim_orig lies inside segim", {
+  set.seed(2203)
+  image = makeTestImage()
+
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50)
+
+  expect_true(all(pro$segim[pro$segim_orig > 0] == pro$segim_orig[pro$segim_orig > 0]))
+  expect_true(all(tabulate(pro$segim) >= tabulate(pro$segim_orig)))
+  expect_identical(pro$objects, (pro$segim > 0) * 1L)
+})
+
+test_that("profoundProFound honour a user supplied segim", {
+  set.seed(2204)
+  image = makeTestImage()
+  segim = matrix(0L, 101, 101)
+  segim[20:30, 20:30] = 1L
+
+  pro = runProFound(image, segim = segim, static_photom = TRUE,
+                           sky = 100, skyRMS = 5)
+
+  expect_equal(pro$segstats$segID, 1L)
+  expect_equal(pro$segstats$N100, 121L)
+  # Static photometry is measured on exactly the supplied map
+  expect_equal(pro$segim, segim)
+})
+
+test_that("profoundProFound group statistics describe touching segments", {
+  set.seed(2206)
+  # A close pair that the watershed splits but that share a footprint
+  image = makeTestImage(dim = c(101, 101), sources = data.frame(
+    xcen = c(45, 55), ycen = c(50, 50), flux = c(4000, 3000), sigma = c(3, 3)))
+
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50,
+                           tolerance = 1, groupstats = TRUE, nearstats = TRUE)
+
+  expect_equal(pro$Nseg, 2)
+  expect_named(pro$group, c('groupim', 'groupsegID'))
+  expect_equal(nrow(pro$group$groupsegID), 1)
+  expect_equal(pro$group$groupsegID$Ngroup, 2)
+  expect_equal(length(unlist(pro$group$groupsegID$segID)), 2)
+  expect_true(is.data.frame(pro$groupstats))
+  expect_true(is.data.frame(pro$near))
+})
+
+test_that("profoundProFound boundstats adds boundary columns", {
+  set.seed(2207)
+  image = makeTestImage()
+  # Put a bright source half off the edge of the image
+  image[1:15, 1:15] = image[1:15, 1:15] + 300
+
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50, boundstats = TRUE)
+
+  expect_true(all(c('Nborder', 'flag_border', 'edge_frac', 'Nedge') %in% names(pro$segstats)))
+  expect_true(any(pro$segstats$flag_border > 0))
+})
+
+test_that("profoundProFound keepim = FALSE drops the image", {
+  set.seed(2208)
+  image = makeTestImage()
+
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50, keepim = FALSE)
+
+  expect_null(pro$image)
+  expect_equal(pro$Nseg, 2)
+})
+
+test_that("profoundProFound respects a mask and NA pixels", {
+  set.seed(2209)
+  image = makeTestImage(dim = c(101, 101), sources = data.frame(
+    xcen = c(25, 75), ycen = c(50, 50), flux = c(4000, 4000), sigma = c(2, 2)))
+
+  image_masked = image
+  image_masked[1:30, ] = NA
+
+  pro = runProFound(image_masked, skycut = 2, box = 50, grid = 50)
+
+  expect_equal(pro$Nseg, 1)
+  expect_equal(pro$segstats$xcen, 75, tolerance = 1)
+  expect_true(all(is.finite(pro$segstats$flux)))
+})
+
+test_that("profoundProFound rejects bad input", {
+  expect_error(profoundProFound(), "Missing image")
+  expect_error(profoundProFound(image = 'junk'), "only Rfits_image FITS inputs are allowed")
+})
+
+test_that("plot.profound draws without error", {
+  set.seed(2210)
+  image = makeTestImage()
+  pro = runProFound(image, skycut = 2, box = 50, grid = 50)
+
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off())
+
+  expect_invisible(plot(pro))
+})
+
+test_that("profoundProFound runs on a real FITS image", {
+  skip_if_not_installed('Rfits')
+
+  image = Rfits::Rfits_read_image(
+    system.file("extdata", 'VIKING/mystery_VIKING_Z.fits', package = "ProFound"))
+
+  pro = runProFound(image, skycut = 3, box = 100, grid = 100)
+
+  expect_s3_class(pro, 'profound')
+  expect_gt(pro$Nseg, 10)
+  expect_true(all(c('RAcen', 'Deccen', 'R50', 'axrat') %in% names(pro$segstats)))
+  # The WCS comes through from the FITS header
+  expect_true(all(pro$segstats$RAcen > 0 & pro$segstats$RAcen < 360))
+  expect_true(pro$magzero == 0)
+})
+
+
+test_that("profoundProFound's own segmentation is stable across option paths", {
+  # profoundMakeSegim() is called internally with an already sky-subtracted and
+  # smoothed image, so it cannot be reproduced from the raw input. What must
+  # hold is that the default path and the ProFound-old watershed path agree
+  # modulo id numbering, and that segim_orig is the pre-dilation image.
+  img <- pf_make_img(64L)
+  a <- suppressMessages(profoundProFound(image = img, skycut = 1.5, pixcut = 3,
+                                          tolerance = 4, ext = 2, iters = 0, size = 5,
+                                          box = c(20, 20), grid = c(20, 20), plot = FALSE,
+                                          stats = TRUE, verbose = FALSE, nthreads = 1L))
+  b <- suppressMessages(profoundProFound(image = img, skycut = 1.5, pixcut = 3,
+                                          tolerance = 4, ext = 2, iters = 0, size = 5,
+                                          box = c(20, 20), grid = c(20, 20), plot = FALSE,
+                                          stats = TRUE, verbose = FALSE, watershed = "ProFound-old",
+                                          nthreads = 1L))
+  expect_identical(pf_labels(a$segim), pf_labels(b$segim))
+  # With no dilation iterations the two segment images are identical.
+  expect_identical(a$segim, a$segim_orig)
 })

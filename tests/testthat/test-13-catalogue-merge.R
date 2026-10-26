@@ -1,3 +1,6 @@
+# Catalogue merging: profoundCatMerge / profoundAutoMerge.
+
+
 test_that("profoundCatMerge replaces a merged group with the group photometry", {
   pro = makeGroupedProFound()
 
@@ -68,3 +71,11 @@ test_that("profoundImBlur smooths and profoundImDiff is the residual", {
   expect_true(all(grad >= 0))
 })
 
+test_that("profoundAutoMerge and profoundCatMerge run on real segstats", {
+  img <- pf_make_img(64L)
+  a <- profoundMakeSegim(image = img, skycut = 1.5, pixcut = 3, plot = FALSE, stats = TRUE,
+                         verbose = FALSE)
+  am <- suppressWarnings(profoundAutoMerge(segim = a$segim, segstats = a$segstats))
+  expect_true(is.list(am) || is.data.frame(am))
+  expect_identical(dim(am$segim %||% a$segim), dim(img))
+})

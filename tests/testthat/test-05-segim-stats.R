@@ -1,3 +1,81 @@
+# profoundSegimStats: per-segment photometry, geometry and error propagation.
+#
+# Two complementary angles. The "counts add up" blocks run on a real
+# watershed segmentation and assert conservation identities. The geometry
+# blocks use hand-built segment shapes so the expected flux, centroid,
+# variance and axis ratio can be written down exactly.
+
+
+test_that("profoundSegimStats computes counts and fluxes exactly", {
+  img <- pf_make_img(64L)
+  seg <- pf_water(img)
+  ids <- sort(unique(as.vector(seg)))
+  ids <- ids[ids > 0]
+
+  ss <- profoundSegimStats(image = img, segim = seg, sky = 0, skyRMS = 1)
+
+  expect_identical(nrow(ss), length(ids))
+  expect_setequal(ss$segID, ids)
+
+  # N100 is the pixel count and flux the pixel sum of each segment.
+  expect_identical(as.integer(ss$N100[match(ids, ss$segID)]),
+                   as.integer(vapply(ids, function(i) sum(seg == i), integer(1))))
+  expect_equal(ss$flux[match(ids, ss$segID)],
+               vapply(ids, function(i) sum(img[seg == i]), numeric(1)), tolerance = 1e-9)
+  expect_equal(sum(ss$flux), sum(img[seg > 0]), tolerance = 1e-9)
+  expect_equal(sum(ss$N100), sum(seg > 0))
+
+  # Magnitudes follow from fluxes.
+  expect_equal(ss$mag, -2.5 * log10(ss$flux), tolerance = 1e-9)
+
+  # Growth curve ordering is monotone by construction.
+  expect_true(all(ss$N50 <= ss$N90))
+  expect_true(all(ss$N90 <= ss$N100))
+  expect_true(all(ss$R50 <= ss$R90))
+  expect_true(all(ss$R90 <= ss$R100))
+
+  # Centroids lie inside the image, and cenfrac is a fraction.
+  expect_true(all(ss$xcen > 0 & ss$xcen <= nrow(img)))
+  expect_true(all(ss$ycen > 0 & ss$ycen <= ncol(img)))
+  expect_true(all(ss$cenfrac >= 0 & ss$cenfrac <= 1))
+
+  # uniqueID is a per-source identifier; distinct segments get distinct ids.
+  expect_equal(length(unique(ss$uniqueID)), nrow(ss))
+})
+
+test_that("profoundSegimStats honours sortcol, decreasing, and sky", {
+  img <- pf_make_img(64L)
+  seg <- pf_water(img)
+  a <- profoundSegimStats(image = img, segim = seg, sky = 0, skyRMS = 1,
+                          sortcol = "segID", decreasing = FALSE)
+  b <- profoundSegimStats(image = img, segim = seg, sky = 0, skyRMS = 1,
+                          sortcol = "segID", decreasing = TRUE)
+  expect_identical(a$segID, sort(a$segID))
+  expect_identical(b$segID, sort(a$segID, decreasing = TRUE))
+
+  f <- profoundSegimStats(image = img, segim = seg, sky = 0, skyRMS = 1,
+                          sortcol = "flux", decreasing = TRUE)
+  expect_identical(f$flux[1], max(a$flux))
+  expect_true(all(diff(f$flux) <= 0))
+
+  # A constant sky subtracts sky * N100 from each segment flux.
+  skyv <- 2
+  s2 <- profoundSegimStats(image = img, segim = seg, sky = skyv, skyRMS = 1)
+  expect_equal(s2$flux, a$flux - skyv * a$N100, tolerance = 1e-9)
+
+  # rotstats / boundstats do not change the core photometry.
+  sr <- profoundSegimStats(image = img, segim = seg, sky = 0, skyRMS = 1,
+                           rotstats = TRUE, boundstats = TRUE)
+  expect_equal(sum(sr$flux), sum(a$flux), tolerance = 1e-9)
+  expect_equal(names(sr), names(a))
+})
+
+test_that("profoundSegimStats requires an image", {
+  expect_error(profoundSegimStats(image = NULL, segim = matrix(1L, 4, 4)))
+  # A NULL segim yields an empty result rather than an error.
+  expect_identical(nrow(profoundSegimStats(image = pf_make_img(16L), segim = NULL)), 0L)
+})
+
 test_that("profoundSegimStats recovers the flux and geometry of a uniform square", {
   image = matrix(0, 51, 51)
   image[11:20, 11:20] = 10

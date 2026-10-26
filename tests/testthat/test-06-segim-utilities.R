@@ -1,3 +1,9 @@
+# Segmentation map post-processing: grouping, adjacency, borders, relabelling
+# (Keep / Zap), merging, comparison, masked-fraction and masking.
+#
+# profoundSegimGroup()/SegimNear() define what "touching" means, which is what
+# the deblender and the grouped photometry depend on.
+
 test_that("profoundSegimGroup groups touching segments and keeps isolated ones apart", {
   segim = makeTestSegim()
 
@@ -273,4 +279,131 @@ test_that("profoundSegimExtend adds new segments above the existing maximum", {
 
   expect_equal(max(extended), 2)
   expect_true(all(extended[segim > 0] == segim[segim > 0]))
+})
+
+test_that("profoundSegimEdge strips interiors, leaving only the skin", {
+  # profoundSegimEdge() blanks pixels whose value equals a 3x3 boxblur of the
+  # segim, i.e. pixels wholly surrounded by their own segment. The return is
+  # therefore the original segim with only boundary pixels left non-zero.
+  img <- pf_make_img(64L)
+  seg <- pf_water(img)
+  e <- profoundSegimEdge(segim = seg)
+  expect_identical(dim(e), dim(seg))
+  expect_true(all(e[seg == 0] == 0))          # background stays zero
+  expect_true(all((e != 0) <= (seg != 0)))    # survivors are a subset
+
+  # A large solid disc keeps only its rim: the deep interior is removed and the
+  # rim is roughly the perimeter.
+  disc <- matrix(0L, 61, 61)
+  g <- expand.grid(x = seq_len(61), y = seq_len(61))
+  disc[as.matrix(g[(g$x - 31)^2 + (g$y - 31)^2 <= 20^2, ])] <- 1L
+  ed <- profoundSegimEdge(segim = disc)
+  expect_equal(sum(ed != 0), round(2 * pi * 20), tolerance = 12)
+  expect_gt(sum(disc != 0) - sum(ed != 0), 500) # a lot of interior was removed
+  expect_identical(ed[31, 31], 0L)              # the very centre is gone
+
+  # fill is a scalar that replaces the zeroed positions.
+  ef <- suppressWarnings(profoundSegimEdge(segim = disc, fill = 9L))
+  expect_true(all(ef[disc == 0] == 9L))
+})
+
+test_that("profoundSegimNear finds adjacent segments", {
+  # The implementation looks offset pixels away along each axis, so directly
+  # touching segments (no gap) are reported as neighbours.
+  seg <- matrix(0L, 21, 21)
+  seg[1:6, 1:6] <- 1L
+  seg[1:6, 7:12] <- 2L      # touching 1
+  seg[16:20, 16:20] <- 3L   # isolated
+  n1 <- profoundSegimNear(segim = seg, offset = 1)
+  expect_true(is.data.frame(n1))
+  expect_true(all(c("segID", "nearID", "Nnear") %in% names(n1)))
+  neigh <- function(id) unlist(n1$nearID[match(id, n1$segID)])
+  expect_equal(neigh(1), 2)
+  expect_equal(neigh(2), 1)
+  expect_length(neigh(3), 0)
+  expect_identical(n1$Nnear[match(3, n1$segID)], 0L)
+  expect_identical(n1$Nnear[match(1, n1$segID)], 1L)
+})
+
+test_that("profoundSegimGroup links touching segments", {
+  seg <- matrix(0L, 21, 21)
+  seg[1:6, 1:6] <- 1L
+  seg[1:6, 7:12] <- 2L      # directly touching 1, so one group
+  seg[16:20, 16:20] <- 3L    # isolated, so its own group
+  g <- profoundSegimGroup(segim = seg)
+  expect_true(all(c("groupim", "groupsegID") %in% names(g)))
+  expect_identical(dim(g$groupim), dim(seg))
+  expect_true(all((g$groupim > 0) == (seg > 0)))
+
+  # groupsegID$segID is a list column holding the integer member ids.
+  k <- g$groupsegID
+  members <- lapply(k$segID, as.integer)
+  expect_equal(sort(unlist(members)), c(1L, 2L, 3L))
+  grp <- function(id) which(vapply(members, function(v) id %in% v, logical(1)))
+  expect_identical(grp(1), grp(2))
+  expect_false(identical(grp(3), grp(1)))
+  expect_equal(k$Ngroup, vapply(members, length, integer(1)))
+  expect_equal(k$Npix, vapply(members, function(v) sum(seg %in% v), numeric(1)))
+})
+
+test_that("profoundSegimMerge unions two label images", {
+  img <- pf_make_img(32L)
+  base <- matrix(0L, 32, 32)
+  base[1:8, 1:8] <- 1L
+  base[20:28, 20:28] <- 2L
+  add <- matrix(0L, 32, 32)
+  add[1:10, 5:12] <- 1L      # overlaps base segment 1
+  add[15:19, 15:19] <- 2L    # disjoint
+  m <- suppressWarnings(profoundSegimMerge(image = img, segim_base = base,
+                                            segim_add = add, sky = 0))
+  segout <- if (is.list(m) && !is.null(m$segim)) m$segim else m
+  expect_identical(dim(segout), dim(base))
+  # added labels are shifted above max(base) so ids cannot collide
+  expect_true(all(segout[add != 0] > 0))
+  expect_true(any(segout > max(base)))
+})
+
+test_that("profoundMergeSegID groups overlapping id sets and ZapSegID removes them", {
+  # MergeSegID takes a LIST of id vectors and merges any group sharing an id.
+  mg <- profoundMergeSegID(segID_merge = list(c(1L, 2L), c(2L, 3L), c(9L)))
+  expect_true(is.list(mg))
+  flat <- sort(unlist(mg))
+  expect_equal(flat, c(1, 2, 3, 9))
+  expect_equal(length(mg), 2L)                    # {1,2,3} merged, {9} kept
+  grp_of <- function(id) which(vapply(mg, function(v) id %in% v, logical(1)))
+  expect_identical(grp_of(1), grp_of(2))
+  expect_identical(grp_of(2), grp_of(3))
+  expect_false(grp_of(9) == grp_of(1))
+
+  # A list with no duplicates is returned unchanged, as is a bare vector.
+  expect_identical(profoundMergeSegID(segID_merge = list(1:2, 3:4)), list(1:2, 3:4))
+  expect_identical(profoundMergeSegID(segID_merge = 1:4), 1:4)
+
+  # ZapSegID drops the groups that contain any of the supplied ids.
+  whole <- list(1:6)
+  expect_identical(profoundZapSegID(segID = 1:6, segID_merge = whole), list())
+  expect_identical(profoundZapSegID(segID = 2L, segID_merge = list(c(1L, 2L), 9L)), list(9L))
+})
+
+test_that("profoundShareFlux redistributes flux by the share matrix", {
+  img <- pf_make_img(64L)
+  seg <- pf_water(img)
+  ss <- profoundSegimStats(image = img, segim = seg, sky = 0, skyRMS = 1)
+  k <- nrow(ss)
+  sm <- diag(k)
+  colnames(sm) <- as.character(ss$segID)
+  # An identity share matrix returns the input fluxes.
+  out <- profoundShareFlux(segstats = ss, sharemat = sm)
+  expect_equal(out$flux, ss$flux, tolerance = 1e-9)
+
+  sm2 <- matrix(1 / k, k, k)
+  colnames(sm2) <- as.character(ss$segID)
+  out2 <- profoundShareFlux(segstats = ss, sharemat = sm2)
+  # Every output row receives the same total flux, so fluxes are equal and sum
+  # to the input total.
+  expect_equal(length(unique(round(out2$flux, 9))), 1)
+  expect_equal(sum(out2$flux), sum(ss$flux), tolerance = 1e-8)
+
+  expect_error(profoundShareFlux(segstats = ss, sharemat = matrix(1, 2, 2)),
+               "not compatible")
 })

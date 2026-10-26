@@ -97,3 +97,90 @@ pf_random_segim <- function(n, seed) {
   }
   out
 }
+
+# ---------------------------------------------------------------------------
+# Coverage-recursion oracles for src/ellip_cover.cpp and src/aper_cover.cpp.
+# The speed edits added a quadratic bounding-box shortcut to the ellipse
+# recursion, so these transcribe the *unsimplified* recursion and the code is
+# checked against the algorithm it is meant to implement.
+# ---------------------------------------------------------------------------
+
+# Direct transcription of pixelCoverEllip() with no shortcut.
+ref_cover_ellip <- function(dx, dy, xt, yt, xyt, depth) {
+  if (depth == 0) {
+    return(if (xt * dx * dx + yt * dy * dy + xyt * dx * dy <= 1) 1 else 0)
+  }
+  q <- 0.5 / 2^depth
+  (ref_cover_ellip(dx - q, dy - q, xt, yt, xyt, depth - 1) +
+     ref_cover_ellip(dx - q, dy + q, xt, yt, xyt, depth - 1) +
+     ref_cover_ellip(dx + q, dy - q, xt, yt, xyt, depth - 1) +
+     ref_cover_ellip(dx + q, dy + q, xt, yt, xyt, depth - 1)) / 4
+}
+
+ref_ellip_terms <- function(rad, ang, axrat) {
+  a <- ang * 3.141593 / 180
+  ca <- cos(a)
+  sa <- sin(a)
+  semi_min <- rad * axrat
+  imn <- 1 / (semi_min * semi_min)
+  imj <- 1 / (rad * rad)
+  list(xt = ca * ca * imn + sa * sa * imj,
+       yt = sa * sa * imn + ca * ca * imj,
+       xyt = 2 * sa * ca * (imn - imj),
+       semi_min = semi_min)
+}
+
+# profoundEllipCover() applies the recursion only to pixels in the annulus
+# between (semi_min - sqrt(0.5)) and (rad + sqrt(0.5)); reproduce that gating.
+ref_ellip_cover <- function(x, y, cx, cy, rad, ang, axrat, depth) {
+  d <- ref_ellip_terms(rad, ang, axrat)
+  sm2 <- d$semi_min - 0.7071068
+  if (sm2 < 0) sm2 <- 0
+  rp <- rad + 0.7071068
+  vapply(seq_along(x), function(i) {
+    dx <- x[i] - cx
+    dy <- y[i] - cy
+    if (!(abs(dx) < rp && abs(dy) < rp)) return(0)
+    d2 <- dx * dx + dy * dy
+    if (d2 < sm2 * sm2) return(1)
+    if (d2 < rp * rp) return(ref_cover_ellip(dx, dy, d$xt, d$yt, d$xyt, depth))
+    0
+  }, numeric(1))
+}
+
+# Direct transcription of pixelCoverAper() with no shortcut.
+ref_cover_aper <- function(dx, dy, d2, rad_2, rmin_2, rmax_2, depth) {
+  if (depth == 0) return(if (d2 <= rad_2) 1 else 0)
+  if (d2 > rmax_2) return(0)
+  if (d2 <= rmin_2) return(1)
+  q <- 0.5 / 2^depth
+  (ref_cover_aper(dx - q, dy - q, (dx - q)^2 + (dy - q)^2, rad_2, rmin_2, rmax_2, depth - 1) +
+     ref_cover_aper(dx - q, dy + q, (dx - q)^2 + (dy + q)^2, rad_2, rmin_2, rmax_2, depth - 1) +
+     ref_cover_aper(dx + q, dy - q, (dx + q)^2 + (dy - q)^2, rad_2, rmin_2, rmax_2, depth - 1) +
+     ref_cover_aper(dx + q, dy + q, (dx + q)^2 + (dy + q)^2, rad_2, rmin_2, rmax_2, depth - 1)) / 4
+}
+
+ref_aper_cover <- function(x, y, cx, cy, rad, depth) {
+  rmin <- rad - 0.7071068
+  rmin_2 <- if (rmin > 0) rmin^2 else -1
+  rp <- rad + 0.7071068
+  vapply(seq_along(x), function(i) {
+    dx <- x[i] - cx
+    dy <- y[i] - cy
+    if (!(abs(dx) < rp && abs(dy) < rp)) return(0)
+    ref_cover_aper(dx, dy, dx * dx + dy * dy, rad * rad, rmin_2, rp * rp, depth)
+  }, numeric(1))
+}
+
+# Akima grid interpolation wrappers (src/akima.cpp), used by
+# test-03-interpolation.R.
+pf_akima <- function(x, y, grid, nxout, nyout) {
+  out <- matrix(NA_real_, nxout, nyout)
+  pfns(".interpolateAkimaGrid")(x, y, grid, out)
+  out
+}
+
+# Values of the interpolant at the node positions of a half-integer node grid.
+pf_node_cells <- function(nx, ny) {
+  list(qx = seq_len(nx), qy = seq_len(ny))   # x = -0.5 + i  =>  i = 1..nx
+}

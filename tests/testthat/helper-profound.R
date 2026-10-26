@@ -1,11 +1,15 @@
-# Helpers shared by every ProFound test file.
+# Helpers for the golden-value regression layer (test-90-goldens.R).
 #
 # The suite has two layers:
-#   1. Focused unit tests that assert mathematical properties and invariants.
-#   2. A golden-value regression layer (see helper-cases.R and
-#      golden/goldens.csv) whose reference values were produced by the
-#      committed ProFound v1.34.5 (2026-09-24) source, so it pins the speed
-#      focused C++ edits in src/ to the pre-edit numerical behaviour.
+#   1. Focused unit tests asserting mathematical properties and invariants.
+#      They use the fixtures in helper-images.R, which are built to have
+#      *interpretable* known answers (a source of flux F at position P).
+#   2. The golden-value layer, whose reference numbers were produced by the
+#      committed ProFound v1.34.5 source. It pins the numerical behaviour of the
+#      speed-focused C++ edits in src/, and needs inputs that are reproducible
+#      bit-for-bit rather than interpretable - hence the separate pf_make_*()
+#      fixtures below. The two families are deliberately not interchangeable:
+#      changing a pf_make_*() input invalidates every golden digest.
 
 pf_seed <- 4242L
 
@@ -160,10 +164,18 @@ pf_canon <- function(x) {
   x
 }
 
+# serialize(version = 2) embeds the *writing* R version in its 14-byte header
+# (bytes 8:10), so a raw md5 of the stream changes whenever R is upgraded even
+# though the value is identical. The header version is blanked before hashing so
+# a digest depends only on the canonical value, not on the R that produced it.
 pf_digest <- function(x) {
+  raw <- serialize(pf_canon(x), connection = NULL, version = 2)
+  if (length(raw) >= 14L) {
+    raw[8:10] <- as.raw(c(0L, 0L, 0L))
+  }
   tmp <- tempfile()
   on.exit(unlink(tmp), add = TRUE)
-  writeBin(serialize(pf_canon(x), connection = NULL, version = 2), tmp)
+  writeBin(raw, tmp)
   unname(tools::md5sum(tmp))
 }
 
@@ -233,4 +245,14 @@ pf_fixture_checked <- function(name) {
     return(NULL)
   }
   readRDS(path)
+}
+
+# Returns a fixture or skips, so a missing or tampered fixture can never pass
+# silently. Used by the bit-exact parity tests in test-90-goldens.R.
+pf_require_fixture <- function(name) {
+  fx <- pf_fixture_checked(name)
+  if (is.null(fx)) {
+    skip(paste("fixture", name, "is absent or does not match its pinned checksum"))
+  }
+  fx
 }

@@ -1,8 +1,5 @@
-# Tests for src/this_in_that.cpp and its R wrapper this_in_that(). The
-# non-fastmatch branch of profoundProFound() was switched from %in% to
-# .mat_this_in_vec_that(), so this routine's exact semantics matter.
+# this_in_that() / %fin% / %nin% set membership (src/this_in_that.cpp).
 
-skip_if_not_installed("imager")   # sky/RMS normalisation uses imager (Suggests)
 
 test_that("this_in_that agrees with base R %in% on valid input", {
   set.seed(pf_seed + 61L)
@@ -91,7 +88,9 @@ test_that("degenerate `that` vectors error rather than silently misbehave", {
   # max() of these is negative or NA, so the C++ lookup table would need a
   # negative length and Rcpp raises. Identical in v1.34.5 and the current tree.
   a <- as.integer(c(1, 2, 3))
-  expect_error(this_in_that(a, integer(0)), "negative length vectors")
+  # An empty `that` reaches max() with no candidates, which R reports as
+  # "missing argument to max".
+  expect_error(this_in_that(a, integer(0)), "missing argument to max")
   expect_error(this_in_that(a, NA_integer_), "negative length vectors")
   expect_error(this_in_that(a, c(3L, NA_integer_)), "negative length vectors")
   expect_error(this_in_that(a, -5L), "negative length vectors")

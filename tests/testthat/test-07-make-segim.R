@@ -1,3 +1,10 @@
+# Segmentation construction: profoundMakeSegim / Expand / Dilate / Propagate.
+#
+# These build the maps that everything downstream consumes, so the tests check
+# detection positions and counts against images with known sources, plus the
+# growth invariants (growing never removes a core pixel).
+
+
 test_that("profoundMakeSegim finds the expected number of sources at the right places", {
   set.seed(4493)
   image = makeTestImage(dim = c(101, 101), sources = data.frame(
@@ -219,4 +226,45 @@ test_that("profoundMakeSegimPropagate assigns every pixel to a seed", {
   expect_named(propagated, c('propim', 'propim_sky'))
   expect_equal(max(propagated$propim), max(seg$segim))
   expect_true(all(propagated$propim_sky[seg$segim > 0] == 0))
+})
+
+test_that("profoundMakeSegim is deterministic and self-consistent", {
+  img <- pf_make_img(64L)
+  a <- profoundMakeSegim(image = img, skycut = 1.5, pixcut = 3, tolerance = 4, ext = 2,
+                         sigma = 1, smooth = TRUE, plot = FALSE, stats = TRUE,
+                         verbose = FALSE, watershed = "ProFound", nthreads = 1L)
+  b <- suppressMessages(profoundMakeSegim(image = img, skycut = 1.5, pixcut = 3,
+                                          tolerance = 4, ext = 2, sigma = 1, smooth = TRUE,
+                                          plot = FALSE, stats = TRUE, verbose = FALSE,
+                                          watershed = "ProFound", nthreads = 1L))
+  expect_identical(pf_labels(a$segim), pf_labels(b$segim))
+  expect_identical(storage.mode(a$segim), "integer")
+  expect_identical(dim(a$segim), dim(img))
+  expect_true(all(c("objects", "segstats", "keyvalues", "call") %in% names(a)))
+  expect_identical(as.integer(a$objects), as.integer(a$segim > 0))
+  expect_equal(nrow(a$segstats), length(unique(as.vector(a$segim)[as.vector(a$segim) > 0])))
+
+  # An image with nothing positive cannot segment at all.
+  c0 <- profoundMakeSegim(image = -abs(img), skycut = 1.5, plot = FALSE, stats = TRUE,
+                          verbose = FALSE)
+  expect_true(all(c0$segim == 0))
+  expect_error(profoundMakeSegim(image = img, watershed = "notreal"))
+})
+
+test_that("profoundMakeSegimExpand and Dilate are monotone supersets", {
+  img <- pf_make_img(64L)
+  seg <- pf_water(img)
+  dd <- suppressWarnings(profoundMakeSegimDilate(image = img, segim = seg, size = 5,
+                                                  shape = "disc", expand = "all", sky = 0,
+                                                  skyRMS = 1, verbose = FALSE, plot = FALSE,
+                                                  stats = TRUE, rotstats = TRUE))
+  expect_true(all((dd$segim > 0)[seg > 0]))         # growth never removes pixels
+  expect_identical(dim(dd$segim), dim(seg))
+
+  ex <- suppressWarnings(profoundMakeSegimExpand(image = img, segim = seg, skycut = 1.5,
+                                                  expandsigma = 5, expand = "all", sky = 0,
+                                                  skyRMS = 1, verbose = FALSE, plot = FALSE,
+                                                  stats = TRUE))
+  expect_identical(dim(ex$segim), dim(seg))
+  expect_true(all((ex$segim > 0)[seg > 0]))
 })

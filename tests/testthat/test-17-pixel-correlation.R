@@ -1,3 +1,8 @@
+# Pixel-to-pixel correlation, covariance and the FFT sky split. These quantify
+# how much the sky noise is spatially correlated, which is what the flux error
+# rescaling depends on.
+
+
 test_that("profoundPixelCorrelation returns a correlation table and FFT", {
   set.seed(306)
   image = makeTestImage(dim = c(101, 101))

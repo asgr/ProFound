@@ -1,24 +1,5 @@
-# Tests for src/IntpAkimaUniform2.h, where XLookup()/YLookup() were changed from
-# a linear scan to a direct estimate plus correction loops. An off-by-one in the
-# interval index would show up immediately as a failure to reproduce values at
-# nodes and to integrate linear and quadratic fields exactly.
-#
-# The output convention of .interpolateAkimaGrid() (see src/akima.cpp) is that
-# output cell (i, j) is evaluated at x = -0.5 + i, y = -0.5 + j, so a node grid
-# running over half-integers aligns exactly with output cells.
+# Grid interpolation (src/akima.cpp) and image resampling.
 
-pf_akima <- function(x, y, grid, nxout, nyout) {
-  out <- matrix(NA_real_, nxout, nyout)
-  pfns(".interpolateAkimaGrid")(x, y, grid, out)
-  out
-}
-
-# Values of the interpolant at the node positions of a half-integer node grid.
-pf_node_cells <- function(nx, ny) {
-  list(qx = seq_len(nx), qy = seq_len(ny))   # x = -0.5 + i  =>  i = 1..nx
-}
-
-skip_if_not_installed("imager")   # sky/RMS normalisation uses imager (Suggests)
 
 test_that("Akima reproduces its own nodes on a half-integer grid", {
   set.seed(pf_seed + 5L)

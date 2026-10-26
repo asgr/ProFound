@@ -80,22 +80,55 @@ devtools::load_all(); testthat::test_dir("tests/testthat")
 devtools::test()
 ```
 
-* Suite is ~580 expectations across 14 files and runs in about 30 seconds.
+* Suite is ~1200 expectations across 18 files and runs in about 35 seconds.
   Keep it fast: prefer small synthetic images (<= 200x200) over the bundled
   FITS files, and never ship a test that takes seconds.
-* `tests/testthat/helper-images.R` holds the shared fixtures. Use and extend
-  these rather than growing ad-hoc images inside test files:
-  * `makeTestImage()` — flat sky + Gaussian noise + Gaussian sources, with
-    positions in ProFound coordinates.
-  * `addTestSources()` — stamp PSF-shaped point sources with known fluxes.
-  * `makeTestSegim()` — a 21x21 map with a touching pair (1, 2) and two
-    isolated segments (3, 4).
-  * `makeTestPSF()`, `makeTwoHills()`, `makeGroupedProFound()`,
-    `runProFound()` (quiet `profoundProFound`).
-  * `test-flux-deblend.R` keeps its own `makeDeblendCase()` (a blended pair
-    plus an isolated source) and `makeDeblendTriple()` (a three segment group),
-    because the deblend needs blends with a specific flux ordering. Both feed
-    `runDeblend()`, which is the single call the assertions vary.
+* Files are numbered so that read order matches dependency order, with the
+  regression layer parked at the end:
+
+  | file | covers |
+  |------|--------|
+  | `test-01-watershed.R` | `water_cpp`, `.dilate_cpp`, `profoundDilate` |
+  | `test-02-coverage.R` | `*Cover` / `*Weight` / `*Flux` C++ primitives |
+  | `test-03-interpolation.R` | `.interpolateAkimaGrid`, `profoundResample` |
+  | `test-04-this-in-that.R` | `this_in_that`, `%fin%`, `%nin%` |
+  | `test-05-segim-stats.R` | `profoundSegimStats` |
+  | `test-06-segim-utilities.R` | Group / Near / Edge / Keep / Zap / Merge / Compare / masks |
+  | `test-07-make-segim.R` | `profoundMakeSegim*`, `SegimPropagate` |
+  | `test-08-sky.R` | every sky estimator, `GainEst`, imager wrappers |
+  | `test-09-aper-phot.R` | `profoundAperPhot`, `AperRan`, mask/ellipse helpers |
+  | `test-10-utility.R` | unit conversions only |
+  | `test-11-image-ops.R` | blur / diff / grad, `MakeSigma` |
+  | `test-12-profound-profound.R` | the end-to-end pipeline, `plot.profound` |
+  | `test-13-catalogue-merge.R` | `CatMerge`, `AutoMerge` |
+  | `test-14-flux-deblend.R` | `profoundFluxDeblend` |
+  | `test-15-fit-mag-psf.R` | `profoundFitMagPSF` |
+  | `test-16-multiband.R` | `profoundMultiBand` |
+  | `test-17-pixel-correlation.R` | `PixelCorrelation`, `CovMat`, `SkySplitFFT` |
+  | `test-90-goldens.R` | golden digests + bit-exact fixtures (regression layer) |
+
+* Two fixture families exist and they are **not** interchangeable:
+  * `helper-images.R` — `makeTestImage()`, `addTestSources()`,
+    `makeTestSegim()`, `makeTestPSF()`, `makeGroupedProFound()`,
+    `runProFound()`. Built to have *interpretable* answers (a source of flux F
+    at position P), so assertions can be written against the truth.
+  * `helper-profound.R` — `pf_make_img()`, `pf_make_twin()`,
+    `pf_make_sparse()`, `pf_seed`, `pfns()`, plus the digest helpers. Feeds the
+    golden layer, so its inputs must be reproducible bit-for-bit; changing any
+    of them invalidates every golden digest.
+* `helper-references.R` holds the independent oracles: `dilate_reference()`
+  (a transcription of the pre-rewrite C++ loop), `ref_*_cover()` (the
+  unsimplified coverage recursions), `pf_water()` / `pf_dilate()` / `pf_akima()`
+  wrappers, and `pf_labels()`. Put shared reference implementations here, never
+  in a test file — a definition sitting in a test file's header silently breaks
+  `R CMD check` while passing interactively off a stale global.
+* Two "how does the map behave" angles coexist by design: conservation
+  identities on a real watershed segmentation, and exact values on hand-built
+  geometry. Prefer adding to the latter when a quantity can be written down.
+* `test-14-flux-deblend.R` keeps its own `makeDeblendCase()` (blended pair plus
+  an isolated source) and `makeDeblendTriple()` (three segment group), because
+  the deblend needs blends with a specific flux ordering. Both feed
+  `runDeblend()`, the single call the assertions vary.
 * Attach a meaning to `expect_equal()`: assert a recovered flux against the
   flux that was put in, an area against `pi * r^2`, a perimeter against the
   known boundary, `mag` against `profoundFlux2Mag(flux)`. Prefer `expect_equal`
@@ -199,6 +232,18 @@ Match the surrounding code, which is **not** the tidyverse:
    returned a data.frame".
 3. `R CMD build --no-build-vignettes` then
    `R CMD check --no-manual --no-vignettes --no-build-vignettes <tarball>`.
-   There are pre-existing warnings (vignettes not built, a `profoundMultiBand`
-   codoc mismatch); `checking tests ... OK` is what matters. Delete the tarball
+   There are pre-existing warnings (vignettes not built). Delete the tarball
    and `.Rcheck` directory afterwards.
+4. The whole suite must pass, including `test-90-goldens.R`. It did not
+   historically: `pf_digest()` hashed `serialize(version = 2)` unsanitised, so
+   the *writer R version* in the stream header (bytes 8:10) changed every
+   digest on an R upgrade, and the table could never match on a different R
+   than it was built with. `pf_digest()` now blanks those bytes, so a digest
+   depends only on the canonical value. If the table is regenerated, keep the
+   caveats at the bottom of `golden/README.txt` — the script rewrites the file
+   and drops them.
+   Two related traps: a helper defined in a test file's *header* passes
+   interactively off a stale global but fails under check (keep shared
+   reference code in `helper-references.R`), and `identical()` on doubles is
+   too strict for code whose arithmetic was merely reassociated — those cases
+   differ in the last ulp, so use a tolerance.

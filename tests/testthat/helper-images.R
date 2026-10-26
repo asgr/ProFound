@@ -1,6 +1,10 @@
-# Helpers shared across test files. Objects defined here are available to all
-# tests without needing source().
-
+# Shared fixtures for the functional (non-golden) tests.
+#
+# These build small synthetic images and segmentations with *known* answers, so
+# assertions can be written against the truth rather than against the code's own
+# output. The golden layer uses helper-profound.R / helper-cases.R instead, since
+# its inputs must be reproducible bit-for-bit rather than interpretable.
+#
 # Synthetic image with a flat sky, Gaussian noise and a handful of Gaussian
 # "sources". Positions are given in ProFound image coordinates, i.e. the centre
 # of the first pixel is (0.5, 0.5), so a source at (30, 50) peaks in the pixel
@@ -76,16 +80,6 @@ addTestSources = function(image, xcen, ycen, flux, psf){
   }
 
   image
-}
-
-# A pair of smooth Gaussian hills. Flat-topped islands are not used for the
-# watershed tests because the way ties are resolved on a plateau makes for
-# brittle assertions.
-makeTwoHills = function(dim = c(41, 41), xcen = c(12, 30), ycen = c(12, 30), sigma = 3){
-  grid = expand.grid(1:dim[1] - 0.5, 1:dim[2] - 0.5)
-  image = exp(-((grid[,1] - xcen[1])^2 + (grid[,2] - ycen[1])^2) / (2 * sigma^2)) +
-    exp(-((grid[,1] - xcen[2])^2 + (grid[,2] - ycen[2])^2) / (2 * sigma^2))
-  matrix(image, dim[1], dim[2])
 }
 
 # A blended pair, run through ProFound with group statistics, giving a real
